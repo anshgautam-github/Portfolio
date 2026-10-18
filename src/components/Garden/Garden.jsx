@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import { World, Critters } from "./Scenery.jsx";
 import "./garden.css";
+import { perf } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -179,7 +180,7 @@ export default function Garden() {
       const tick = (_, dt) => {
         if (!visible || document.hidden) return;
         acc += dt;
-        if (acc < 32) return; // idle sway at ~30fps; growth tweens still render every frame
+        if (acc < (perf.frameMs ? 66 : 32)) return; // idle sway at ~30fps; growth tweens still render every frame
         time += acc / 1000;
         acc = 0;
         renderAll();

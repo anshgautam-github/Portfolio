@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import "./toolkit.css";
-import { capDpr } from "../../lib/perf.js";
+import { capDpr, skipFrame } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -473,6 +473,7 @@ export default function Toolkit() {
     const loop = (now) => {
       if (!running) return;
       raf = requestAnimationFrame(loop);
+      if (skipFrame(now, last)) return;
       const dt = Math.min((now - last) / 1000, 0.033); last = now;
       step(dt); draw();
     };

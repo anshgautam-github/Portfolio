@@ -14,7 +14,7 @@ import { createCore } from "./coreGL.js";
 import { createShatter } from "./shatter.js";
 import { createPortal } from "./portal.js";
 import "./journey.css";
-import { capDpr, START_SCALE, IS_MOBILE } from "../../lib/perf.js";
+import { capDpr, START_SCALE, IS_MOBILE, perf } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -47,8 +47,8 @@ export default function Journey() {
       // Heavy CPU texture generation + shader compiles used to run in one long task right at page load.
       // Now: wait until the page is idle after load, then do it in small slices so scrolling/painting never stalls.
       const steps = [
-        () => { gl.activeTexture(gl.TEXTURE0); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); texture(gl, makeWorld(3072, 1536), 0); },
-        () => { gl.activeTexture(gl.TEXTURE0); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); texture(gl, makeRegion(3584, 2688), 1); },
+        () => { gl.activeTexture(gl.TEXTURE0); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); texture(gl, IS_MOBILE ? makeWorld(1536, 768) : makeWorld(3072, 1536), 0); },
+        () => { gl.activeTexture(gl.TEXTURE0); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); texture(gl, IS_MOBILE ? makeRegion(2048, 1536) : makeRegion(3584, 2688), 1); },
         () => { earth = createEarth(gl); },
         () => { terrain = createTerrain(gl); },
         () => { city = createCity(gl); },
@@ -58,9 +58,9 @@ export default function Journey() {
       let si = 0;
       const init = () => {
         if (dead) return;
-        if (si < steps.length) { steps[si++](); idleId = setTimeout(init, 90); }
+        if (si < steps.length) { steps[si++](); idleId = setTimeout(init, IS_MOBILE ? 260 : 90); }
       };
-      const start = () => { idleId = setTimeout(init, 1200); };
+      const start = () => { idleId = setTimeout(init, IS_MOBILE ? 3000 : 1200); };
       if (document.readyState === "complete") start(); else window.addEventListener("load", start, { once: true });
     }
 
@@ -96,6 +96,7 @@ export default function Journey() {
 
     let target = 0, cur = 0, active = false, last = 0, frames = 0, slow = 0, acc = 0, lastP = -1, tick = 0;
     const T0 = performance.now();
+    let jacc = 0;
 
     const setT = (prog) => {
       const v0 = prog * TOT;
@@ -143,6 +144,10 @@ export default function Journey() {
         if (irisT <= 0) portal.reset();
         return;
       }
+      // phones: cap the heavy WebGL + HUD redraw at ~30 fps (dt is accumulated so the easing speed stays correct)
+      jacc += dt;
+      if (perf.frameMs && jacc < perf.frameMs - 2) return;
+      dt = jacc; jacc = 0;
       const now = performance.now();
       const k = 1 - Math.pow(0.0001, dt / 1000);
       cur += (target - cur) * Math.min(1, k * 0.9);
@@ -169,9 +174,9 @@ export default function Journey() {
       // adaptive resolution
       if (last) {
         acc += now - last; frames++;
-        if (frames >= 40) {
+        if (frames >= (IS_MOBILE ? 20 : 40)) {
           const avg = acc / frames;
-          if (!navigator.webdriver && avg > 26 && scale > 0.5) { scale = Math.max(0.5, scale - 0.12); size(); }
+          if (!navigator.webdriver && avg > (perf.frameMs ? perf.frameMs + 7 : 26) && scale > 0.45) { scale = Math.max(0.45, scale - 0.12); size(); }
           acc = 0; frames = 0;
         }
       }

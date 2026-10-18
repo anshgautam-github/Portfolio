@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { createWarpEngine } from "./warpEngine.js";
 import WarpProjects from "./WarpProjects.jsx";
+import { perf } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -145,7 +146,7 @@ export default function Warp({
 
     /* one ticker drives everything */
     const flag = { on: false }; // true while the section is sliding in (cheap: half frame rate)
-    let fr = 0;
+    let fr = 0, wacc = 0;
     const tick = (time, deltaMs) => {
       if (!active) return;
       lime.x += (lime.tx - lime.x) * 0.22;
@@ -154,7 +155,10 @@ export default function Warp({
         limeRef.current.style.transform = `translate3d(${lime.x - 11}px, ${lime.y - 11}px, 0)`;
       }
       if (flag.on && fr++ % 2) return;
-      engine.render(deltaMs / 1000, time);
+      wacc += deltaMs;
+      if (perf.frameMs && wacc < perf.frameMs - 2) return;
+      engine.render(wacc / 1000, time);
+      wacc = 0;
     };
     gsap.ticker.add(tick);
 

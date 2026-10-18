@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createScene } from "./scene.js";
 import "./collab.css";
+import { skipFrame } from "../../lib/perf.js";
 
 const EMAIL = "hello@yourname.dev"; // <- put your real address here
 
@@ -39,6 +40,7 @@ export default function Collab() {
       if (!alive) return;
       raf = requestAnimationFrame(loop);
       if (!vis || !sc) return;
+      if (skipFrame(now, last)) return;
       const dt = (now - last) / 1000; last = now;
       sc.frame(dt, holding.current);
       const p = Math.min(1, sc.st.shown), pct = Math.round(p * 100);

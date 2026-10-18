@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import "./picked.css";
-import { capDpr } from "../../lib/perf.js";
+import { capDpr, skipFrame } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -321,6 +321,7 @@ export default function Picked() {
     const loop = (now) => {
       if (!running) return;
       raf = requestAnimationFrame(loop);
+      if (skipFrame(now, last)) return;
       const dt = Math.min(now - last, 50) / 1000; last = now;
       t += dt;
       for (let i = ripples.length - 1; i >= 0; i--) { const r = ripples[i]; r.r += dt * 520; r.a -= dt * 0.55; if (r.a <= 0) ripples.splice(i, 1); }

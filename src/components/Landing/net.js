@@ -1,4 +1,4 @@
-import { capDpr } from "../../lib/perf.js";
+import { capDpr, skipFrame } from "../../lib/perf.js";
 /* A small living neural network drawn on a canvas: signals travel layer to layer, nodes light up and ring when a signal
    arrives, the pointer excites and tugs nearby nodes, a click fires a wave from the input layer. Runs only while started. */
 const LAYERS = [3, 5, 6, 5, 2];
@@ -103,6 +103,7 @@ export function createNet(canvas) {
   const loop = (now) => {
     if (!running) return;
     raf = requestAnimationFrame(loop);
+    if (skipFrame(now, last)) return;
     const dt = Math.min((now - last) / 1000, 0.05); last = now;
     step(dt); draw();
   };

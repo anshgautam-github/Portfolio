@@ -1,4 +1,4 @@
-import { capDpr } from "../../lib/perf.js";
+import { capDpr, IS_MOBILE } from "../../lib/perf.js";
 /**
  * warpEngine — canvas renderer for the "Innovate with Purpose" scroll piece.
  *
@@ -208,7 +208,7 @@ export function createWarpEngine(canvas, S) {
   let lastY = typeof window !== "undefined" ? window.scrollY : 0;
 
   /* ---- streaks ---- */
-  const N = 900;
+  const N = IS_MOBILE ? 360 : 900;
   const streaks = [];
   for (let i = 0; i < N; i++) {
     const s = { u: (i + 0.5) / N, a: i * 2.399963 + (Math.random() - 0.5) * 0.12 };

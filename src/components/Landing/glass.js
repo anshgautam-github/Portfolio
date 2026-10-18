@@ -9,7 +9,7 @@
  * Everything lives in two tiny programs: `flow` (updates the field) and `scene` (draws to screen).
  */
 import { MASK_W, MASK_H, STROKE, PEN_SPEED, buildHeightField, buildWriteMap } from "./helloPath.js";
-import { capDpr } from "../../lib/perf.js";
+import { capDpr, skipFrame, IS_MOBILE } from "../../lib/perf.js";
 
 const VERT = `#version 300 es
 precision highp float;
@@ -565,7 +565,7 @@ export function createGlassScene(canvas, opts = {}) {
   let frameAvg = 16, slowFrames = 0, frameCount = 0;
 
   let qualityDirty = false;
-  let renderScale = 1, paused = false;
+  let renderScale = IS_MOBILE ? 0.8 : 1, paused = false;
   let sky = null;
   const allocSky = () => {
     const sw = Math.max(96, Math.round(W / 4)), sh = Math.max(64, Math.round(H / 4));
@@ -580,7 +580,7 @@ export function createGlassScene(canvas, opts = {}) {
   let introT0 = -1;
 
   const allocFlow = () => {
-    const fw = 512;
+    const fw = IS_MOBILE ? 320 : 512;
     const fh = Math.max(96, Math.round(fw / aspect));
     for (const t of [flowA, flowB]) if (t) { gl.deleteTexture(t.tex); gl.deleteFramebuffer(t.fbo); }
     flowA = makeTarget(gl, fw, fh, encoded);
@@ -636,6 +636,7 @@ export function createGlassScene(canvas, opts = {}) {
     if (destroyed) return;
     raf = requestAnimationFrame(frame);
     if (!visible || paused) { last = now; return; }
+    if (skipFrame(now, last)) return;
     const dt = opts.fixedDt || Math.min(0.05, Math.max(0.001, (now - last) / 1000));
     last = now;
     if (opts.maxFrames && frameCount >= opts.maxFrames) return;
@@ -790,7 +791,7 @@ export function createGlassScene(canvas, opts = {}) {
     setDark(v) { darkTarget = v ? 1 : 0; },
     /** 0 = full quality, 1 = reduced resolution, 2 = frozen (keeps showing the last frame) */
     setLoad(m) {
-      const rs = m === 1 ? 0.55 : 1;
+      const rs = m === 1 ? 0.55 : IS_MOBILE ? 0.8 : 1;
       if (rs !== renderScale) { renderScale = rs; qualityDirty = true; }
       paused = m === 2;
     },
