@@ -1,0 +1,14 @@
+.tk-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.tk-dots { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.14) 1px, transparent 1.4px); background-size: 34px 34px;
+  -webkit-mask-image: radial-gradient(75% 70% at 50% 55%, #000 25%, transparent 100%); mask-image: radial-gradient(75% 70% at 50% 55%, #000 25%, transparent 100%); }
+.tk-spot { --mx: 50%; --my: 55%; position: absolute; inset: 0; background: radial-gradient(34vmax 34vmax at var(--mx) var(--my), rgba(215,255,59,.10), rgba(236,220,106,.04) 45%, transparent 70%); }
+.tk-play { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tk-hint { position: absolute; left: 50%; bottom: 3.2vh; translate: -50% 0; z-index: 5; pointer-events: none; font: 500 clamp(10px, .85vw, 13px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: rgba(245,232,225,.5); }
+
+.tk-radar { position: absolute; left: 50%; top: 57%; width: min(82vh, 110vw); aspect-ratio: 1; translate: -50% -50%; overflow: visible; }
+.tk-r-ax { font: 600 19px/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .22em; text-transform: uppercase; fill: rgba(215,255,59,.62); }
+.tk-r-lvl { font: 500 14px/1 "JetBrains Mono", ui-monospace, monospace; fill: rgba(245,232,225,.4); }
+.tk-hud { position: absolute; top: 3.2vh; z-index: 2; font: 500 clamp(10px, .85vw, 13px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; color: rgba(215,255,59,.6); }
+.tk-hud--l { left: 2vw; }
+.tk-hud--r { right: 2vw; color: rgba(245,232,225,.4); }
+@media (max-width: 767px) { .tk-r-ax { font-size: 24px; } .tk-hud--r { display: none; } }

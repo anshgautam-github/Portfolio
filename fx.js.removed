@@ -1,0 +1,161 @@
+/**
+ * Landing ambient FX: a light 2D canvas that sits above the WebGL sky and below the text.
+ * Drifting aurora blobs, sweeping light shafts, parallax bokeh + sparkles, pulse rings off the grid
+ * crosses and the odd shooting streak. Runs at reduced resolution, starts after the intro,
+ * pauses when offscreen / the card is shrinking.
+ */
+export function createLandingFx(root, canvas, grid) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return { setDark() {}, setLoad() {}, pointer() {}, destroy() {} };
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W = 0, H = 0, dpr = 1, raf = 0, dead = false, paused = false, visible = true, dark = 0, darkT = 0;
+  let px = 0.5, py = 0.5, sx = 0.5, sy = 0.5, last = 0, t0 = performance.now(), fade = 0;
+  const R = (a, b) => a + Math.random() * (b - a);
+
+  const LIGHT = [[255, 236, 205], [255, 214, 190], [190, 215, 255], [225, 205, 255]];
+  const DARK = [[90, 130, 255], [140, 90, 255], [60, 190, 230], [255, 120, 190]];
+  const blobs = Array.from({ length: 4 }, (_, i) => ({ i, ph: R(0, 6.28), sp: R(0.05, 0.1), ax: R(0.12, 0.3), ay: R(0.1, 0.22), r: R(0.3, 0.46), cx: [0.2, 0.8, 0.5, 0.35][i], cy: [0.3, 0.25, 0.85, 0.65][i] }));
+  const motes = Array.from({ length: 46 }, () => {
+    const spark = Math.random() < 0.35;
+    return { x: Math.random(), y: Math.random(), z: R(0.2, 1), r: spark ? R(1.2, 2.4) : R(6, 22), spark, ph: R(0, 6.28), sp: R(0.15, 0.5), vy: -R(0.004, 0.016), vx: R(-0.004, 0.004) };
+  });
+  const rings = [];
+  let crosses = [], nextRing = 2.2, streak = null, nextStreak = 4;
+
+  const size = () => {
+    const r = root.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 1.25) * 0.75;
+    W = Math.max(2, Math.round(r.width * dpr)); H = Math.max(2, Math.round(r.height * dpr));
+    canvas.width = W; canvas.height = H;
+    crosses = [];
+    [3.85, 34.65, 65.45, 96.25].forEach((x) => [33.7, 68.3].forEach((y) => crosses.push([x / 100, y / 100])));
+  };
+  size();
+  const ro = new ResizeObserver(size); ro.observe(root);
+  const io = new IntersectionObserver((e) => { visible = e[0].isIntersecting; }, { threshold: 0 });
+  io.observe(root);
+
+  const col = (i, a) => {
+    const l = LIGHT[i], d = DARK[i];
+    const m = (k) => Math.round(l[k] + (d[k] - l[k]) * dark);
+    return `rgba(${m(0)},${m(1)},${m(2)},${a})`;
+  };
+
+  function frame(now) {
+    if (dead) return;
+    raf = requestAnimationFrame(frame);
+    if (paused || !visible || document.hidden) { last = now; return; }
+    if (now - last < 30) return;           // ~30fps is plenty for ambient motion
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    const t = (now - t0) / 1000;
+    fade = Math.min(1, fade + dt * 0.5);
+    dark += (darkT - dark) * Math.min(1, dt * 4);
+    sx += (px - sx) * Math.min(1, dt * 2.5); sy += (py - sy) * Math.min(1, dt * 2.5);
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalAlpha = fade;
+
+    // aurora blobs
+    ctx.globalCompositeOperation = dark > 0.5 ? "lighter" : "source-over";
+    for (const b of blobs) {
+      const x = (b.cx + Math.sin(t * b.sp + b.ph) * b.ax + (sx - 0.5) * 0.06 * (b.i + 1)) * W;
+      const y = (b.cy + Math.cos(t * b.sp * 0.8 + b.ph) * b.ay + (sy - 0.5) * 0.05 * (b.i + 1)) * H;
+      const r = b.r * Math.max(W, H) * (1 + 0.08 * Math.sin(t * 0.3 + b.ph));
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      const a = dark > 0.5 ? 0.12 : 0.32;
+      g.addColorStop(0, col(b.i, a)); g.addColorStop(1, col(b.i, 0));
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+
+    // sweeping light shafts
+    ctx.save();
+    ctx.translate(W * 0.5, H * 0.5); ctx.rotate(-0.42);
+    ctx.globalCompositeOperation = "lighter";
+    for (let k = 0; k < 3; k++) {
+      const w = W * (0.07 + k * 0.035);
+      const x = (((t * (0.012 + k * 0.006) + k * 0.37) % 1.4) - 0.7) * W * 1.6;
+      const g = ctx.createLinearGradient(x - w, 0, x + w, 0);
+      const a = (dark > 0.5 ? 0.06 : 0.17) * (0.7 + 0.3 * Math.sin(t * 0.6 + k));
+      g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(0.5, `rgba(255,252,240,${a})`); g.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = g; ctx.fillRect(x - w, -H, w * 2, H * 2);
+    }
+    ctx.restore();
+
+    // pulse rings from grid crosses
+    if (t > nextRing && crosses.length) {
+      const c = crosses[(Math.random() * crosses.length) | 0];
+      rings.push({ x: c[0], y: c[1], t: 0 }); nextRing = t + R(1.2, 2.6);
+    }
+    ctx.globalCompositeOperation = "source-over";
+    ctx.lineWidth = Math.max(1, dpr);
+    for (let i = rings.length - 1; i >= 0; i--) {
+      const r = rings[i]; r.t += dt / 3.2;
+      if (r.t >= 1) { rings.splice(i, 1); continue; }
+      const e = 1 - Math.pow(1 - r.t, 2.2);
+      ctx.strokeStyle = dark > 0.5 ? `rgba(150,190,255,${0.35 * (1 - r.t)})` : `rgba(40,90,170,${0.26 * (1 - r.t)})`;
+      ctx.beginPath(); ctx.arc(r.x * W, r.y * H, e * Math.min(W, H) * 0.3, 0, 6.283); ctx.stroke();
+    }
+
+    // bokeh + sparkles with parallax
+    ctx.globalCompositeOperation = "lighter";
+    for (const m of motes) {
+      m.y += m.vy * dt * m.z * 3; m.x += m.vx * dt;
+      if (m.y < -0.05) { m.y = 1.05; m.x = Math.random(); }
+      if (m.x < -0.05) m.x = 1.05; else if (m.x > 1.05) m.x = -0.05;
+      const x = (m.x + (sx - 0.5) * -0.05 * m.z) * W + Math.sin(t * m.sp + m.ph) * 8 * dpr * m.z;
+      const y = (m.y + (sy - 0.5) * -0.04 * m.z) * H;
+      const tw = 0.5 + 0.5 * Math.sin(t * m.sp * 3 + m.ph);
+      if (m.spark) {
+        const s = m.r * dpr * (0.6 + tw);
+        ctx.fillStyle = `rgba(255,255,255,${0.35 + 0.5 * tw})`;
+        ctx.fillRect(x - s * 3, y - 0.5 * dpr, s * 6, dpr); ctx.fillRect(x - 0.5 * dpr, y - s * 3, dpr, s * 6);
+        ctx.beginPath(); ctx.arc(x, y, s, 0, 6.283); ctx.fill();
+      } else {
+        const r = m.r * dpr * (0.8 + 0.2 * tw) * (0.6 + m.z * 0.6);
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, col(m.ph > 3.1 ? 2 : 0, 0.0)); g.addColorStop(0.7, col(m.ph > 3.1 ? 2 : 1, dark > 0.5 ? 0.06 : 0.12)); g.addColorStop(1, "rgba(255,255,255,0.28)");
+        ctx.globalAlpha = fade * (0.35 + 0.4 * m.z);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
+        ctx.globalAlpha = fade;
+      }
+    }
+
+    // shooting streak
+    if (!streak && t > nextStreak) { streak = { x: R(0.1, 0.6), y: R(0.05, 0.3), t: 0, len: R(0.14, 0.24) }; nextStreak = t + R(5, 9); }
+    if (streak) {
+      streak.t += dt / 1.1;
+      if (streak.t >= 1) streak = null;
+      else {
+        const p = streak.t, hx = (streak.x + p * 0.35) * W, hy = (streak.y + p * 0.2) * H;
+        const tx = hx - streak.len * W * 0.86, ty = hy - streak.len * W * 0.5;
+        const g = ctx.createLinearGradient(tx, ty, hx, hy);
+        const a = Math.sin(p * Math.PI);
+        g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(1, `rgba(255,255,255,${0.85 * a})`);
+        ctx.strokeStyle = g; ctx.lineWidth = 1.6 * dpr; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(hx, hy); ctx.stroke();
+        ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.beginPath(); ctx.arc(hx, hy, 2 * dpr, 0, 6.283); ctx.fill();
+      }
+    }
+
+    // pointer halo
+    const hx = sx * W, hy = sy * H, hr = Math.min(W, H) * 0.28;
+    const hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
+    hg.addColorStop(0, `rgba(255,255,255,${dark > 0.5 ? 0.06 : 0.2})`); hg.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = hg; ctx.fillRect(hx - hr, hy - hr, hr * 2, hr * 2);
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+  }
+
+  if (reduce) {
+    // single static frame
+    const prev = paused; frame(performance.now() + 100); cancelAnimationFrame(raf); paused = prev;
+  } else {
+    // wait for the intro (typing + first stickers) before spending any frame time
+    const start = setTimeout(() => { last = performance.now(); raf = requestAnimationFrame(frame); }, 2200);
+    var startT = start;
+  }
+
+  return {
+    pointer(x, y) { const r = root.getBoundingClientRect(); px = x / r.width; py = y / r.height; },
+    setDark(v) { darkT = v ? 1 : 0; },
+    setLoad(m) { paused = m >= 1; },
+    destroy() { dead = true; clearTimeout(startT); cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); },
+  };
+}

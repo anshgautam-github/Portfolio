@@ -1,0 +1,2916 @@
+/* ==========================================================================
+   Teddy - bear dock (bottom-right) + retro "Teddy OS" window (left)
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- dock */
+.ted-dock,
+.ted-wrap {
+  --ted-gap: 18px;
+  --ted-h: min(500px, calc(100vh - 190px)); /* leaves room above the window for the bear to stand on it */
+}
+
+.ted-dock {
+  position: fixed;
+  right: clamp(8px, 2vw, 24px);
+  bottom: clamp(6px, 1.4vw, 14px);
+  z-index: 9999;
+  width: clamp(76px, 7.5vw, 104px);
+  animation: ted-enter 0.95s cubic-bezier(0.2, 1.35, 0.4, 1) 0.35s backwards;
+  transition: bottom 1.15s cubic-bezier(0.45, 0.05, 0.3, 1), right 1.15s cubic-bezier(0.45, 0.05, 0.3, 1),
+    width 1.15s ease, transform 1.15s cubic-bezier(0.45, 0.05, 0.3, 1);
+  --lx: 0;
+  --ly: 0;
+}
+
+.ted-bear-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.35));
+  transition: transform 0.28s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.ted-bear-btn:hover {
+  transform: translateY(-5px) scale(1.05);
+}
+.ted-bear-btn:active {
+  transform: translateY(0) scale(0.95);
+}
+.ted-bear-btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 4px;
+  border-radius: 24px;
+}
+.ted-bounce {
+  display: block;
+  animation: ted-bounce 0.6s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+.ted-ping {
+  position: absolute;
+  left: 50%;
+  bottom: 1%;
+  width: 64%;
+  height: 9%;
+  margin-left: -32%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 190, 70, 0.9);
+  pointer-events: none;
+  animation: ted-ping 2.6s ease-out infinite;
+}
+
+/* speech bubble */
+.ted-bubble {
+  position: absolute;
+  right: 2px;
+  bottom: calc(100% - 6px);
+  width: max-content;
+  max-width: min(250px, 70vw);
+  padding: 8px 12px;
+  border-radius: 14px 14px 4px 14px;
+  background: #fff6e4;
+  color: #3b2416;
+  font: 600 13px/1.3 "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28), 0 0 0 2px rgba(59, 36, 22, 0.08);
+  transform-origin: 90% 100%;
+  animation: ted-pop 0.45s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+  pointer-events: none;
+}
+.ted-bubble::after {
+  content: "";
+  position: absolute;
+  right: 26px;
+  bottom: -7px;
+  width: 14px;
+  height: 14px;
+  background: inherit;
+  transform: rotate(45deg);
+  border-radius: 0 0 4px 0;
+}
+
+/* hearts */
+.ted-hearts {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  pointer-events: none;
+}
+.ted-heart {
+  position: absolute;
+  color: #ff5d7a;
+  font-size: calc(20px * var(--s, 1));
+  text-shadow: 0 2px 8px rgba(255, 93, 122, 0.5);
+  animation: ted-heart 1.7s ease-out var(--d, 0s) both;
+}
+
+/* perched on the top edge of the window (the window is bottom-right, same side as the bear) */
+.ted-dock.is-open {
+  width: clamp(70px, 6.2vw, 86px);
+  right: calc(var(--ted-gap) + 22px);
+  bottom: calc(var(--ted-gap) + var(--ted-h) - 4px);
+}
+
+/* ---------------------------------------------------------------- bear */
+.ted-bear {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.ted-body {
+  transform-origin: 100px 226px;
+  animation: ted-breathe 3.8s ease-in-out infinite;
+}
+.ted-head {
+  transform-origin: 100px 140px;
+  transform: rotate(calc(var(--lx, 0) * 7deg)) translateX(calc(var(--lx, 0) * 2.5px));
+  transition: transform 0.3s ease-out;
+}
+.ted-look {
+  transform: translate(calc(var(--lx, 0) * 4.2px), calc(var(--ly, 0) * 3.6px));
+  transition: transform 0.12s linear;
+}
+.ted-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ted-blink 5s infinite;
+}
+.ted-open {
+  opacity: 0;
+}
+.is-talking .ted-open {
+  opacity: 1;
+  transform-box: fill-box;
+  transform-origin: center top;
+  animation: ted-talk 0.22s ease-in-out infinite alternate;
+}
+.is-talking .ted-smile {
+  opacity: 0;
+}
+
+.ted-arm-r {
+  transform-origin: 148px 134px;
+  transform: rotate(-4deg);
+  transition: transform 0.4s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.ted-arm-l {
+  transform-origin: 52px 134px;
+  transform: rotate(4deg);
+  transition: transform 0.4s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+
+/* walking (climbing up onto the window / back down) */
+.is-walk .ted-body {
+  animation: ted-trot 0.3s ease-in-out infinite alternate;
+}
+.is-walk .ted-foot-l {
+  animation: ted-step 0.3s ease-in-out infinite alternate;
+}
+.is-walk .ted-foot-r {
+  animation: ted-step 0.3s ease-in-out infinite alternate-reverse;
+}
+.is-walk .ted-arm-r {
+  animation: ted-swing 0.3s ease-in-out infinite alternate;
+}
+.is-walk .ted-arm-l {
+  animation: ted-swing 0.3s ease-in-out infinite alternate-reverse;
+}
+.is-walk .ted-head {
+  animation: ted-nod 0.3s ease-in-out infinite alternate;
+}
+/* waving */
+.is-wave .ted-arm-r {
+  animation: ted-raise 0.35s ease-out both, ted-wave 0.5s ease-in-out 0.35s infinite alternate;
+}
+.is-wave .ted-head {
+  animation: ted-nod 0.5s ease-in-out infinite alternate;
+}
+/* hugging */
+.is-hug .ted-arm-l {
+  transform: rotate(-64deg);
+}
+.is-hug .ted-arm-r {
+  transform: rotate(64deg);
+}
+.is-hug .ted-body {
+  animation: ted-squish 0.55s ease-in-out 3;
+}
+/* dancing */
+.is-dance .ted-body {
+  animation: ted-dance 0.42s ease-in-out infinite alternate;
+}
+.is-dance .ted-arm-r {
+  animation: ted-wave 0.42s ease-in-out infinite alternate;
+}
+.is-dance .ted-arm-l {
+  animation: ted-wave-l 0.42s ease-in-out infinite alternate;
+}
+/* thinking */
+.is-think .ted-head {
+  transform: rotate(-9deg) translateX(-3px);
+}
+
+/* ---------------------------------------------------------------- window shell */
+.ted-wrap {
+  --t: #ffb020;
+  --t2: #ffd77a;
+  --t3: #ff7a00;
+  --tg: rgba(255, 176, 32, 0.55);
+  --tg2: rgba(255, 122, 0, 0.28);
+  --tdim: rgba(255, 176, 32, 0.22);
+  --ink: #ece6da;
+
+  position: fixed;
+  right: var(--ted-gap);
+  bottom: var(--ted-gap);
+  height: var(--ted-h);
+  width: min(430px, calc(100vw - 2 * var(--ted-gap)));
+  z-index: 9998;
+  pointer-events: none;
+  will-change: transform;
+  transition: width 0.75s cubic-bezier(0.3, 0.9, 0.3, 1), height 0.75s cubic-bezier(0.3, 0.9, 0.3, 1);
+}
+.ted-wrap[data-theme="green"] {
+  --t: #5cff8a;
+  --t2: #b6ffca;
+  --t3: #19d65f;
+  --tg: rgba(92, 255, 138, 0.5);
+  --tg2: rgba(25, 214, 95, 0.24);
+  --tdim: rgba(92, 255, 138, 0.2);
+}
+.ted-wrap[data-theme="ice"] {
+  --t: #6cd8ff;
+  --t2: #c4eeff;
+  --t3: #3f8cff;
+  --tg: rgba(108, 216, 255, 0.5);
+  --tg2: rgba(63, 140, 255, 0.26);
+  --tdim: rgba(108, 216, 255, 0.2);
+}
+.ted-wrap[data-theme="rose"] {
+  --t: #ff6fae;
+  --t2: #ffc2dd;
+  --t3: #e0287a;
+  --tg: rgba(255, 111, 174, 0.5);
+  --tg2: rgba(224, 40, 122, 0.26);
+  --tdim: rgba(255, 111, 174, 0.2);
+}
+.ted-wrap.is-max {
+  width: calc(100vw - 2 * var(--ted-gap)); /* wider, same height, so the bear still fits on top */
+}
+.ted-wrap.is-dragging .ted-win {
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+.ted-win {
+  pointer-events: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2c2c2d, #1d1c1c 35%, #151414);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+  font: 12px/1.5 "JetBrains Mono", ui-monospace, Menlo, monospace;
+  transform-origin: 85% 100%;
+  animation: ted-open 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1) 0.5s both; /* waits for the bear to start climbing */
+}
+.ted-win.is-closing {
+  animation: ted-close 0.25s ease-in both;
+}
+.ted-win *,
+.ted-win *::before,
+.ted-win *::after {
+  box-sizing: border-box;
+}
+.ted-win button {
+  font-family: inherit;
+}
+.ted-spacer {
+  flex: 1;
+}
+
+/* title bar */
+.ted-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  flex: none;
+  padding: 0 6px 0 10px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  background: linear-gradient(180deg, #3b3b3c, #2a2a2b);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.55);
+  color: #d4cec2;
+}
+.ted-wrap.is-dragging .ted-titlebar {
+  cursor: grabbing;
+}
+.ted-grip {
+  width: 8px;
+  height: 16px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 1.1px, transparent 1.5px) 0 0 / 4px 5px;
+  opacity: 0.7;
+}
+.ted-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--t3);
+  box-shadow: 0 0 8px var(--tg);
+}
+.ted-title {
+  font-weight: 700;
+  font-size: 12px;
+  color: #efe9dc;
+  white-space: nowrap;
+}
+.ted-note-icon {
+  color: #7d776b;
+}
+.ted-tb-btn {
+  all: unset;
+  box-sizing: border-box;
+  height: 26px;
+  min-width: 26px;
+  padding: 0 6px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #bdb7ab;
+  font: 11px "JetBrains Mono", monospace;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, transform 0.25s;
+}
+.ted-tb-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.ted-tb-btn:focus-visible {
+  outline: 2px solid var(--t);
+}
+.ted-tb-btn.text {
+  color: var(--t);
+}
+.ted-tb-btn.close {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  width: 26px;
+  height: 26px;
+}
+.ted-tb-btn.close:hover {
+  background: #e0475b;
+  border-color: #e0475b;
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+/* tabs */
+.ted-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  flex: none;
+  padding: 6px 8px 0;
+  background: #1b1a1a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ted-tabs button {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  padding: 5px 11px 6px;
+  font: 11px "JetBrains Mono", monospace;
+  color: #8f897d;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, background 0.15s;
+}
+.ted-tabs button i {
+  font-style: normal;
+  opacity: 0.55;
+  margin-right: 4px;
+}
+.ted-tabs button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+.ted-tabs button.on {
+  color: var(--t);
+  background: rgba(0, 0, 0, 0.35);
+  border-bottom-color: var(--t);
+}
+.ted-tabs button.re {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+.ted-tabs button:focus-visible {
+  outline: 2px solid var(--t);
+}
+
+/* screen + CRT overlay */
+.ted-screen {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: radial-gradient(120% 55% at 50% 120%, var(--tg2), transparent 62%), #1a1918;
+}
+.ted-crt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1.3px) 0 0 / 22px 22px;
+}
+.ted-crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, 0.13) 3px),
+    radial-gradient(120% 100% at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.35));
+}
+.ted-pane {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+.ted-pane[hidden] {
+  display: none;
+}
+
+/* status bar */
+.ted-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: none;
+  height: 26px;
+  padding: 0 10px;
+  font-size: 10px;
+  color: #8c8678;
+  background: #1b1a1a;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.ted-status .live {
+  color: #7dff9e;
+}
+.ted-swatches {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+.ted-swatches button {
+  all: unset;
+  box-sizing: border-box;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--c);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.ted-swatches button:hover {
+  transform: scale(1.3);
+}
+.ted-swatches button.on {
+  border-color: #fff;
+}
+.ted-swatches button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- boot + splash */
+.ted-boot {
+  position: relative;
+  z-index: 1;
+  padding: 14px 14px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.ted-boot-dim {
+  color: #8c8678;
+}
+.ted-boot-hi {
+  color: #fff;
+  animation: ted-in 0.2s both;
+}
+.ted-bar-seg {
+  display: flex;
+  gap: 2px;
+  margin: 8px 0 16px;
+}
+.ted-bar-seg i {
+  flex: 1;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.ted-bar-seg i.on {
+  background: #19f58a;
+  border-color: transparent;
+  box-shadow: 0 0 9px rgba(25, 245, 138, 0.6);
+}
+.ted-bar-seg i.cur {
+  background: rgba(25, 245, 138, 0.4);
+}
+.ted-boot-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #a9a397;
+  animation: ted-in 0.2s both;
+}
+.ted-leader {
+  flex: 1;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.22);
+  transform: translateY(-3px);
+}
+.ted-boot-row b {
+  color: #fff;
+  font-weight: 500;
+}
+.ted-boot-row b.warm {
+  color: var(--t3);
+}
+.ted-boot-skip {
+  margin-top: 20px;
+  color: #bdb7ab;
+}
+.ted-boot-skip.dim {
+  color: #6f6a5f;
+}
+.ted-boot kbd {
+  font: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 0 6px;
+  color: #fff;
+}
+
+.ted-splash {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 26px;
+  cursor: pointer;
+  color: var(--t);
+}
+.ted-logo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 26px 8px;
+}
+.ted-globe {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: min(330px, 92%);
+  height: auto;
+  stroke: var(--t3);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 6px var(--tg2));
+  animation: ted-spin-in 0.9s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+.ted-logo-text {
+  position: relative;
+  font: 800 clamp(30px, 7vw, 44px) / 1 "Archivo", "Inter Tight", Arial, sans-serif;
+  font-stretch: 125%;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  color: var(--t2);
+  transform: skewX(-6deg);
+  text-shadow: 0 0 12px var(--tg), 0 0 40px var(--tg2);
+  animation: ted-flicker 4s infinite;
+}
+.ted-press {
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  color: var(--t);
+  text-shadow: 0 0 8px var(--tg2);
+}
+.ted-caret {
+  display: inline-block;
+  width: 10px;
+  height: 16px;
+  margin-left: 6px;
+  vertical-align: -3px;
+  background: var(--t);
+  animation: ted-blink-caret 1s steps(2) infinite;
+}
+.ted-splash:focus-visible {
+  outline: 2px dashed var(--t);
+  outline-offset: -8px;
+}
+
+/* ---------------------------------------------------------------- terminal */
+.ted-term {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.ted-term-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tdim) transparent;
+  cursor: text;
+}
+.ted-term-logo {
+  text-align: center;
+  font: 800 clamp(26px, 6vw, 36px) / 1 "Archivo", "Inter Tight", Arial, sans-serif;
+  font-stretch: 125%;
+  color: var(--t2);
+  text-shadow: 0 0 12px var(--tg), 0 0 36px var(--tg2);
+  letter-spacing: -0.01em;
+}
+.ted-term-sub {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.ted-term-sub span {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.ted-term-sub em {
+  font-style: normal;
+  color: #bdb7ab;
+  font-size: 11px;
+}
+.ted-term-intro {
+  margin: 12px 0 10px;
+  color: #d8d2c6;
+}
+.ted-term-intro u {
+  text-decoration-color: var(--t);
+  text-underline-offset: 3px;
+  color: #fff;
+}
+.ted-term-btns {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ted-btn {
+  font: 600 11.5px "JetBrains Mono", monospace;
+  padding: 6px 14px;
+  color: #fff;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 3px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
+}
+.ted-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+}
+.ted-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+}
+.ted-btn.solid {
+  background: var(--t);
+  border-color: var(--t);
+  color: #1a1000;
+  font-weight: 700;
+}
+.ted-btn.solid:hover {
+  background: var(--t2);
+}
+.ted-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.ted-l {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+  animation: ted-in 0.18s ease-out both;
+}
+.ted-l.in {
+  color: #fff;
+}
+.ted-l .p {
+  color: var(--t);
+}
+.ted-l.h {
+  color: var(--t);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 10.5px;
+  margin-top: 8px;
+}
+.ted-l.ok {
+  color: #7dff9e;
+}
+.ted-l.err {
+  color: #ff8383;
+}
+.ted-l.dim,
+.ted-l .dimtxt {
+  color: #8c8678;
+}
+.ted-l.strong {
+  color: #fff;
+  font-weight: 600;
+}
+.ted-l.help {
+  font-size: 12.5px;
+  color: #cfc9bd;
+}
+.ted-l a {
+  color: var(--t2);
+  text-underline-offset: 3px;
+}
+.ted-prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding-bottom: 14px;
+}
+.ted-prompt label {
+  color: var(--t);
+  white-space: nowrap;
+}
+.ted-prompt input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  font: inherit;
+  caret-color: var(--t);
+  caret-shape: block;
+}
+.ted-chips {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 7px 10px 8px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.22);
+}
+.ted-chips button {
+  font: 10.5px "JetBrains Mono", monospace;
+  padding: 3px 9px;
+  border-radius: 99px;
+  border: 1px solid var(--tdim);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--t2);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.ted-chips button:hover {
+  background: var(--t);
+  color: #1a1000;
+  transform: translateY(-2px);
+}
+.ted-chips button:focus-visible {
+  outline: 2px solid var(--t);
+}
+
+/* ---------------------------------------------------------------- stats */
+.ted-stats {
+  height: 100%;
+  overflow: auto;
+  padding: 10px 12px 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tdim) transparent;
+}
+.ted-stats {
+  display: flex;
+  flex-direction: column;
+}
+.ted-stats-grid {
+  margin-block: auto; /* centred when there is room, scrolls normally when there isn't */
+}
+.ted-stats-logo {
+  grid-column: 1 / -1;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 16px 0 2px;
+}
+.ted-stats-logo .ted-globe {
+  top: 0;
+  bottom: 22px;
+  height: 100%;
+  width: min(380px, 80%);
+}
+.ted-stats-logo .ted-logo-text {
+  font-size: clamp(24px, 5vw, 32px);
+}
+.ted-stats-logo .ted-press {
+  font-size: 9px;
+}
+.ted-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 10px;
+}
+@media (max-width: 520px) {
+  .ted-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ted-chart {
+  margin: 0;
+  min-width: 0;
+}
+.ted-chart figcaption {
+  display: flex;
+  justify-content: space-between;
+  font-style: italic;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  color: var(--t);
+  margin-bottom: 0;
+  text-shadow: 0 0 8px var(--tg2);
+}
+.ted-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  cursor: crosshair;
+  touch-action: none;
+}
+.ted-chart .grid {
+  stroke: var(--t);
+  opacity: 0.2;
+  stroke-dasharray: 2 3;
+}
+.ted-chart .ax {
+  fill: var(--t);
+  font-size: 7px;
+  opacity: 0.8;
+}
+.ted-chart .bar {
+  fill: var(--t);
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: ted-grow 0.65s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  transition: fill 0.12s;
+}
+.ted-chart .bar.hot {
+  fill: #fff;
+  filter: drop-shadow(0 0 4px var(--tg));
+}
+.ted-chart .cum {
+  fill: none;
+  stroke: #fff3d6;
+  stroke-width: 1.4;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: ted-draw 1.3s 0.3s ease-out forwards;
+}
+.ted-chart .dot {
+  fill: #fff3d6;
+  transition: r 0.12s;
+}
+.ted-chart .dot.hot {
+  fill: #fff;
+  stroke: var(--t);
+  stroke-width: 1.2;
+}
+.ted-chart .tip rect {
+  fill: var(--t);
+}
+.ted-chart .tip text {
+  fill: #1a1000;
+  font-size: 6.6px;
+  font-weight: 700;
+}
+.ted-chart .area {
+  fill: var(--tg2);
+  opacity: 0.55;
+}
+.ted-chart .ln {
+  fill: none;
+  stroke: var(--t);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.ted-chart .end {
+  fill: #fff;
+}
+.ted-chart .cross {
+  stroke: #fff;
+  opacity: 0.45;
+  stroke-dasharray: 2 2;
+}
+.ted-stats-note {
+  margin: 8px 0 0;
+  font-size: 9.5px;
+  color: #6f6a5f;
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------- notes */
+.ted-notes {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.ted-notes-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  color: #8c8678;
+  font-size: 10.5px;
+}
+.ted-notes-bar .ted-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+.ted-board {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0 12px 12px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+  touch-action: none;
+}
+.ted-notes-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #6f6a5f;
+}
+.ted-note {
+  position: absolute;
+  border-radius: 2px;
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+  transform: rotate(var(--r, 0deg));
+  transition: transform 0.22s cubic-bezier(0.3, 1.5, 0.5, 1), box-shadow 0.2s;
+  color: #3a2f12;
+}
+.ted-note:hover {
+  transform: rotate(calc(var(--r, 0deg) * 0.4));
+}
+.ted-note.lift {
+  transform: rotate(0deg) scale(1.07);
+  box-shadow: 0 20px 32px rgba(0, 0, 0, 0.5);
+}
+.ted-note.fresh {
+  animation: ted-note-pop 0.5s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+.ted-note.c-yellow { background: #f4e272; }
+.ted-note.c-pink { background: #f3a6c2; }
+.ted-note.c-orange { background: #f3b565; }
+.ted-note.c-purple { background: #c3aef0; }
+.ted-note.c-mint { background: #9be3c1; }
+.ted-note .tape {
+  position: relative;
+  height: 20px;
+  cursor: grab;
+  background: rgba(0, 0, 0, 0.08);
+  touch-action: none;
+}
+.ted-note.lift .tape {
+  cursor: grabbing;
+}
+.ted-note .tape::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 4px;
+  margin: -2px 0 0 -11px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.18);
+}
+.ted-note .x {
+  all: unset;
+  position: absolute;
+  right: 3px;
+  top: 0;
+  width: 18px;
+  height: 20px;
+  text-align: center;
+  font: 17px/20px Arial, sans-serif;
+  color: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+.ted-note:hover .x,
+.ted-note .x:focus-visible {
+  opacity: 1;
+}
+.ted-note .x:hover {
+  color: #c0182e;
+}
+.ted-note textarea {
+  display: block;
+  width: 100%;
+  height: calc(100% - 20px);
+  padding: 6px 10px 8px;
+  border: 0;
+  outline: 0;
+  resize: none;
+  background: transparent;
+  color: #3a2f12;
+  font: 500 var(--fs, 18px)/1.1 "Caveat", "Bradley Hand", "Segoe Script", cursive;
+  caret-color: #3a2f12;
+}
+.ted-note textarea::placeholder {
+  color: rgba(58, 47, 18, 0.45);
+}
+
+/* ---------------------------------------------------------------- small screens */
+@media (max-width: 640px) {
+  .ted-dock,
+  .ted-wrap {
+    --ted-gap: 8px;
+    --ted-h: calc(100vh - 130px);
+  }
+  .ted-dock.is-open {
+    width: 72px;
+    right: 20px;
+  }
+  .hide-s,
+  .ted-note-icon {
+    display: none;
+  }
+  .ted-notes-bar span {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- keyframes */
+@keyframes ted-enter {
+  from { transform: translateY(140%); }
+}
+@keyframes ted-bounce {
+  0% { transform: scale(1, 1); }
+  25% { transform: scale(1.14, 0.84); }
+  55% { transform: scale(0.92, 1.1) translateY(-18px); }
+  100% { transform: scale(1, 1); }
+}
+@keyframes ted-ping {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+@keyframes ted-pop {
+  from { transform: scale(0.4) translateY(10px); opacity: 0; }
+}
+@keyframes ted-heart {
+  0% { transform: translate(var(--dx, 0), 0) scale(0.4); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(calc(var(--dx, 0) * 1.8), -130px) scale(1.15); opacity: 0; }
+}
+@keyframes ted-breathe {
+  50% { transform: scale(1.015, 0.985); }
+}
+@keyframes ted-blink {
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.08); }
+}
+@keyframes ted-talk {
+  from { transform: scaleY(0.45); }
+  to { transform: scaleY(1); }
+}
+@keyframes ted-raise {
+  from { transform: rotate(-4deg); }
+  to { transform: rotate(-135deg); }
+}
+@keyframes ted-wave {
+  from { transform: rotate(-135deg); }
+  to { transform: rotate(-168deg); }
+}
+@keyframes ted-wave-l {
+  from { transform: rotate(135deg); }
+  to { transform: rotate(168deg); }
+}
+@keyframes ted-nod {
+  from { transform: rotate(-3deg); }
+  to { transform: rotate(4deg); }
+}
+@keyframes ted-trot {
+  from { transform: rotate(-4deg) translateY(0); }
+  to { transform: rotate(4deg) translateY(-5px); }
+}
+@keyframes ted-step {
+  from { transform: translateY(0); }
+  to { transform: translateY(-10px); }
+}
+@keyframes ted-swing {
+  from { transform: rotate(-26deg); }
+  to { transform: rotate(26deg); }
+}
+@keyframes ted-squish {
+  50% { transform: scale(1.06, 0.93); }
+}
+@keyframes ted-dance {
+  from { transform: rotate(-5deg) translateY(0); }
+  to { transform: rotate(5deg) translateY(-7px); }
+}
+@keyframes ted-open {
+  from { opacity: 0; transform: translateY(36px) scale(0.92); }
+}
+@keyframes ted-close {
+  to { opacity: 0; transform: translateY(36px) scale(0.94); }
+}
+@keyframes ted-in {
+  from { opacity: 0; transform: translateY(4px); }
+}
+@keyframes ted-flicker {
+  0%, 92%, 100% { opacity: 1; }
+  93% { opacity: 0.82; }
+  95% { opacity: 1; }
+  97% { opacity: 0.88; }
+}
+@keyframes ted-blink-caret {
+  50% { opacity: 0; }
+}
+@keyframes ted-spin-in {
+  from { opacity: 0; transform: scale(0.8); }
+}
+@keyframes ted-grow {
+  from { transform: scaleY(0); }
+}
+@keyframes ted-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes ted-note-pop {
+  from { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ted-dock,
+  .ted-body,
+  .ted-ping,
+  .ted-logo-text,
+  .ted-caret,
+  .ted-blink,
+  .is-wave .ted-head,
+  .is-walk .ted-body,
+  .is-walk .ted-foot-l,
+  .is-walk .ted-foot-r,
+  .is-walk .ted-arm-r,
+  .is-walk .ted-arm-l,
+  .is-dance .ted-body {
+    animation: none !important;
+  }
+  .ted-lcd,
+  .ted-desk,
+  .ted-pled,
+  .ted-win,
+  .ted-win.is-closing {
+    animation-duration: 0.01s !important;
+  }
+}
+
+
+/* ==========================================================================
+   The big vintage computer ("desk") - what Teddy OS opens into after booting
+   ========================================================================== */
+.ted-wrap.is-desk,
+.ted-dock.is-open.is-desk {
+  --ted-h: min(740px, calc(100vh - 190px));
+}
+.ted-wrap.is-desk {
+  width: min(calc(var(--ted-h) * 1.34), calc(100vw - 2 * var(--ted-gap)));
+}
+.ted-dock.is-open.is-desk {
+  width: clamp(84px, 7.4vw, 104px);
+  right: calc(var(--ted-gap) + 44px);
+}
+
+.ted-desk {
+  position: relative;
+  height: 100%;
+  pointer-events: auto;
+  filter: drop-shadow(0 34px 44px rgba(0, 0, 0, 0.5));
+  animation: ted-desk-in 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.05) both;
+}
+.ted-desk.is-closing {
+  animation: ted-desk-out 0.26s ease-in both;
+}
+.ted-desk *,
+.ted-desk *::before,
+.ted-desk *::after {
+  box-sizing: border-box;
+}
+.ted-desk button {
+  font-family: inherit;
+}
+
+/* --- plastic body --- */
+.ted-mon {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 clamp(10px, 2.4vw, 26px);
+  border-radius: 30px 30px 24px 24px;
+  background: linear-gradient(162deg, #403f3d 0%, #2a2928 40%, #1b1a19 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.16), inset 0 -4px 0 rgba(0, 0, 0, 0.55), inset 3px 0 0 rgba(255, 255, 255, 0.05),
+    inset -3px 0 0 rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.75);
+  color: #bdb7ab;
+  font: 12px/1.4 "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+.ted-mon-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  height: 42px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.ted-wrap.is-dragging .ted-mon-top {
+  cursor: grabbing;
+}
+.ted-mon-brand {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: #6c6860;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+.ted-mon-x {
+  all: unset;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #e4ded2;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  transition: background 0.15s, transform 0.25s, color 0.15s;
+}
+.ted-mon-x:hover {
+  background: #e0475b;
+  border-color: #e0475b;
+  color: #fff;
+  transform: rotate(90deg);
+}
+.ted-mon-x:active {
+  transform: rotate(90deg) scale(0.92);
+}
+.ted-mon-x:focus-visible,
+.ted-knob:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.ted-well {
+  flex: 1;
+  min-height: 0;
+  padding: 10px;
+  border-radius: 22px;
+  background: #090909;
+  box-shadow: inset 0 4px 14px #000, 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.ted-mon-bottom {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: none;
+  height: 64px;
+  padding: 0 8px;
+}
+.ted-mon-badge {
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  color: #3f3d3a;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.09);
+  white-space: nowrap;
+}
+.ted-slot {
+  margin-left: auto;
+  width: min(34%, 250px);
+  height: 16px;
+  border-radius: 5px;
+  background: #0b0a0a;
+  box-shadow: inset 0 3px 5px #000, 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.ted-pled {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6dff9b;
+  box-shadow: 0 0 8px #6dff9b, inset 0 0 2px #fff;
+  animation: ted-led 3s ease-in-out infinite;
+}
+.ted-knob {
+  all: unset;
+  box-sizing: border-box;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  background: radial-gradient(circle at 35% 30%, #fbf9f3 0%, #cfcabd 35%, #8f8a7e 100%);
+  box-shadow: 0 0 0 4px #141313, 0 0 0 5px rgba(255, 255, 255, 0.08), 0 5px 8px rgba(0, 0, 0, 0.6);
+  transition: transform 0.15s;
+}
+.ted-knob:hover {
+  transform: scale(1.05);
+}
+.ted-knob:active {
+  transform: scale(0.94);
+}
+
+/* --- the glass screen --- */
+.ted-lcd {
+  --sc-bg: #dcdcd4;
+  --sc-ink: #0d0d0d;
+  --sc-ink2: #3a3a36;
+  --sc-win: #f6f6f1;
+  --sc-line: #0d0d0d;
+  --sc-pr: #0d0d0d;
+  --sc-acc: #0d0d0d;
+  --sc-acc-ink: #ffffff;
+  --sc-dim: #6e6e68;
+  --sc-ok: #17783a;
+  --sc-err: #b3261e;
+  --sc-hot: #ee5a0c;
+  --sc-cum: #ee5a0c;
+  --sc-shadow: rgba(0, 0, 0, 0.4);
+  --sc-logo: 2px 2px 0 #fff, 4px 4px 0 #0d0d0d;
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 14px;
+  color: var(--sc-ink);
+  font-size: 14px;
+  background: radial-gradient(rgba(0, 0, 0, 0.16) 1px, transparent 1.2px) 0 0 / 4px 4px, var(--sc-bg);
+  animation: ted-crt-on 0.8s ease-out 0.3s both;
+}
+/* dark phosphor themes */
+.ted-lcd:not([data-theme="paper"]) {
+  --sc-bg: #141312;
+  --sc-ink: var(--t2);
+  --sc-ink2: #bdb7ab;
+  --sc-win: #1b1a19;
+  --sc-line: var(--t);
+  --sc-pr: var(--t);
+  --sc-acc: var(--t);
+  --sc-acc-ink: #1a1000;
+  --sc-dim: #8c8678;
+  --sc-ok: #7dff9e;
+  --sc-err: #ff8383;
+  --sc-hot: #ffffff;
+  --sc-cum: #fff3d6;
+  --sc-shadow: rgba(0, 0, 0, 0.6);
+  --sc-logo: 0 0 12px var(--tg), 0 0 36px var(--tg2);
+  background: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1.3px) 0 0 / 22px 22px,
+    radial-gradient(120% 55% at 50% 120%, var(--tg2), transparent 62%), var(--sc-bg);
+}
+.ted-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  border-radius: inherit;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, 0.07) 3px),
+    linear-gradient(125deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 32%),
+    radial-gradient(130% 110% at 50% 45%, transparent 62%, rgba(0, 0, 0, 0.32));
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.35);
+}
+
+/* --- menu bar --- */
+.ted-menubar {
+  position: relative;
+  z-index: 30;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--sc-win);
+  border-bottom: 2px solid var(--sc-line);
+  font-weight: 700;
+  font-size: 13px;
+}
+.ted-menu {
+  position: relative;
+}
+.ted-mb {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 2px;
+  cursor: pointer;
+  color: var(--sc-ink);
+  font: 700 13px "JetBrains Mono", monospace;
+}
+.ted-mb:hover,
+.ted-mb.open {
+  background: var(--sc-ink);
+  color: var(--sc-win);
+}
+.ted-mb:focus-visible {
+  outline: 2px dashed var(--sc-ink);
+  outline-offset: -2px;
+}
+.ted-mb.snd {
+  font-weight: 500;
+  font-size: 12px;
+}
+.ted-clock {
+  padding: 0 6px 0 10px;
+  font-weight: 700;
+}
+.ted-dd {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 220px;
+  padding: 3px 0;
+  background: var(--sc-win);
+  border: 2px solid var(--sc-line);
+  box-shadow: 5px 5px 0 var(--sc-shadow);
+  animation: ted-in 0.12s both;
+}
+.ted-dd hr {
+  margin: 3px 0;
+  border: 0;
+  border-top: 2px dotted var(--sc-line);
+  opacity: 0.55;
+}
+.ted-mi {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  padding: 5px 14px 5px 8px;
+  cursor: pointer;
+  font: 500 13px "JetBrains Mono", monospace;
+  color: var(--sc-ink);
+}
+.ted-mi b {
+  display: inline-block;
+  width: 16px;
+  font-weight: 700;
+}
+.ted-mi em {
+  font-style: normal;
+  opacity: 0.65;
+}
+.ted-mi:hover,
+.ted-mi:focus-visible {
+  background: var(--sc-ink);
+  color: var(--sc-win);
+}
+
+/* --- classic window --- */
+.ted-macwin {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin: clamp(8px, 1.6vw, 16px) clamp(10px, 2vw, 20px) clamp(10px, 2vw, 20px);
+  overflow: hidden;
+  background: var(--sc-win);
+  border: 2px solid var(--sc-line);
+  border-radius: 6px 6px 3px 3px;
+  box-shadow: 6px 6px 0 var(--sc-shadow);
+}
+.ted-macbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 30px;
+  padding: 0 8px;
+  background: var(--sc-win);
+  border-bottom: 2px solid var(--sc-line);
+}
+.ted-macbar .box {
+  all: unset;
+  box-sizing: border-box;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--sc-line);
+  background: var(--sc-win);
+  cursor: pointer;
+}
+.ted-macbar .box:hover {
+  background: var(--sc-ink);
+}
+.ted-macbar .box.zoom {
+  cursor: default;
+  background: linear-gradient(var(--sc-line), var(--sc-line)) 2px 2px / 6px 6px no-repeat, var(--sc-win);
+}
+.ted-macbar .stripes {
+  flex: 1;
+  height: 15px;
+  background: repeating-linear-gradient(0deg, var(--sc-line) 0 1.5px, transparent 1.5px 3.5px);
+}
+.ted-macbar .title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.ted-lcd .ted-dot {
+  width: 9px;
+  height: 9px;
+  background: var(--sc-ink);
+  box-shadow: none;
+}
+.ted-macbody {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/* tabs inside the classic window */
+.ted-lcd .ted-tabs {
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: var(--sc-win);
+  border-bottom: 2px solid var(--sc-line);
+}
+.ted-lcd .ted-tabs button {
+  padding: 3px 12px;
+  border: 1.5px solid var(--sc-line);
+  border-radius: 3px;
+  color: var(--sc-ink);
+  font: 600 12px "JetBrains Mono", monospace;
+  background: transparent;
+  margin: 0;
+}
+.ted-lcd .ted-tabs button:hover {
+  background: color-mix(in srgb, var(--sc-ink) 12%, transparent);
+  color: var(--sc-ink);
+}
+.ted-lcd .ted-tabs button.on {
+  background: var(--sc-ink);
+  color: var(--sc-win);
+  border-bottom-color: var(--sc-line);
+}
+.ted-lcd .ted-tabs button.re {
+  border-color: transparent;
+  font-weight: 400;
+  opacity: 0.65;
+  margin-bottom: 0;
+}
+.ted-lcd .ted-tabs button.re:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+.ted-lcd .ted-pane {
+  background: var(--sc-win);
+}
+
+/* status line */
+.ted-lcd .ted-status {
+  height: 30px;
+  padding: 0 12px;
+  font-size: 11px;
+  color: var(--sc-dim);
+  background: var(--sc-win);
+  border-top: 2px solid var(--sc-line);
+}
+.ted-lcd .ted-status .live {
+  color: var(--sc-ok);
+  font-weight: 700;
+}
+.ted-lcd .ted-swatches button {
+  border: 2px solid var(--sc-line);
+  width: 14px;
+  height: 14px;
+}
+.ted-lcd .ted-swatches button.on {
+  box-shadow: 0 0 0 2px var(--sc-win), 0 0 0 4px var(--sc-line);
+}
+
+/* classic scrollbars */
+.ted-lcd *::-webkit-scrollbar {
+  width: 15px;
+  height: 15px;
+}
+.ted-lcd *::-webkit-scrollbar-track {
+  background: repeating-linear-gradient(45deg, var(--sc-win) 0 2px, color-mix(in srgb, var(--sc-ink) 25%, var(--sc-win)) 2px 3px);
+  border-left: 2px solid var(--sc-line);
+}
+.ted-lcd *::-webkit-scrollbar-thumb {
+  background: var(--sc-win);
+  border: 2px solid var(--sc-line);
+}
+.ted-lcd * {
+  scrollbar-color: var(--sc-ink) var(--sc-win);
+}
+
+/* --- screens, re-skinned with the screen palette --- */
+.ted-lcd .ted-term-scroll {
+  padding: 18px 24px 8px;
+  color: var(--sc-ink);
+}
+.ted-lcd .ted-term-logo {
+  font-size: clamp(38px, 5.6vw, 66px);
+  color: var(--sc-ink);
+  text-shadow: var(--sc-logo);
+  letter-spacing: 0;
+}
+.ted-lcd .ted-term-sub span {
+  background: var(--sc-line);
+  opacity: 0.45;
+}
+.ted-lcd .ted-term-sub em {
+  color: var(--sc-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.ted-lcd .ted-term-intro {
+  margin: 20px 0 14px;
+  color: var(--sc-ink);
+}
+.ted-lcd .ted-term-intro u {
+  color: var(--sc-ink);
+  text-decoration-color: var(--sc-ink);
+}
+.ted-lcd .ted-btn {
+  padding: 9px 20px;
+  font-size: 13px;
+  color: var(--sc-ink);
+  background: var(--sc-win);
+  border: 2px solid var(--sc-ink);
+  border-radius: 3px;
+  box-shadow: 4px 4px 0 var(--sc-ink);
+}
+.ted-lcd .ted-btn:hover {
+  background: var(--sc-win);
+  box-shadow: 5px 5px 0 var(--sc-ink);
+}
+.ted-lcd .ted-btn:active {
+  box-shadow: 1px 1px 0 var(--sc-ink);
+}
+.ted-lcd .ted-btn.solid {
+  background: var(--sc-acc);
+  border-color: var(--sc-acc);
+  color: var(--sc-acc-ink);
+}
+.ted-lcd .ted-btn.solid:hover {
+  background: var(--sc-acc);
+}
+.ted-lcd .ted-term-btns {
+  margin-bottom: 18px;
+}
+.ted-lcd .ted-l {
+  line-height: 1.55;
+}
+.ted-lcd .ted-l.in {
+  color: var(--sc-ink);
+}
+.ted-lcd .ted-l .p,
+.ted-lcd .ted-prompt label {
+  color: var(--sc-pr);
+  font-weight: 700;
+}
+.ted-lcd .ted-l.h {
+  color: var(--sc-ink);
+  font-size: 12px;
+  font-weight: 700;
+  border-bottom: 2px solid var(--sc-ink);
+  display: inline-block;
+  padding-bottom: 1px;
+  margin-top: 12px;
+}
+.ted-lcd .ted-l.ok {
+  color: var(--sc-ok);
+}
+.ted-lcd .ted-l.err {
+  color: var(--sc-err);
+}
+.ted-lcd .ted-l.dim,
+.ted-lcd .ted-l .dimtxt {
+  color: var(--sc-dim);
+}
+.ted-lcd .ted-l.strong {
+  color: var(--sc-ink);
+}
+.ted-lcd .ted-l.help {
+  font-size: 13px;
+  color: var(--sc-ink2);
+}
+.ted-lcd .ted-l a {
+  color: var(--sc-ink);
+}
+.ted-lcd .ted-prompt input {
+  color: var(--sc-ink);
+  caret-color: var(--sc-ink);
+}
+.ted-lcd .ted-chips {
+  padding: 10px 16px 12px;
+  gap: 7px;
+  background: var(--sc-win);
+  border-top: 2px solid var(--sc-line);
+}
+.ted-lcd .ted-chips button {
+  font-size: 12px;
+  padding: 3px 12px;
+  color: var(--sc-ink);
+  background: transparent;
+  border: 1.5px solid var(--sc-ink);
+}
+.ted-lcd .ted-chips button:hover {
+  background: var(--sc-ink);
+  color: var(--sc-win);
+}
+
+.ted-lcd .ted-stats {
+  padding: 16px 22px 12px;
+}
+.ted-lcd .ted-stats-grid {
+  gap: 14px 22px;
+}
+.ted-lcd .ted-chart figcaption {
+  color: var(--sc-ink);
+  font-size: 12px;
+  text-shadow: none;
+  font-weight: 700;
+}
+.ted-lcd .ted-chart .grid {
+  stroke: var(--sc-ink);
+  opacity: 0.25;
+}
+.ted-lcd .ted-chart .ax {
+  fill: var(--sc-ink2);
+}
+.ted-lcd .ted-chart .bar {
+  fill: var(--sc-ink);
+}
+.ted-lcd .ted-chart .bar.hot {
+  fill: var(--sc-hot);
+  filter: none;
+}
+.ted-lcd .ted-chart .cum {
+  stroke: var(--sc-cum);
+  stroke-width: 1.8;
+}
+.ted-lcd .ted-chart .dot {
+  fill: var(--sc-cum);
+}
+.ted-lcd .ted-chart .dot.hot {
+  fill: var(--sc-win);
+  stroke: var(--sc-hot);
+}
+.ted-lcd .ted-chart .tip rect {
+  fill: var(--sc-ink);
+}
+.ted-lcd .ted-chart .tip text {
+  fill: var(--sc-win);
+}
+.ted-lcd .ted-chart .area {
+  fill: var(--sc-ink);
+  opacity: 0.09;
+}
+.ted-lcd .ted-chart .ln {
+  stroke: var(--sc-ink);
+  stroke-width: 1.7;
+}
+.ted-lcd .ted-chart .end {
+  fill: var(--sc-hot);
+}
+.ted-lcd .ted-chart .cross {
+  stroke: var(--sc-ink);
+}
+.ted-lcd .ted-stats-logo .ted-globe {
+  stroke: var(--sc-ink);
+  filter: none;
+  opacity: 0.6;
+}
+.ted-lcd .ted-stats-logo .ted-logo-text {
+  color: var(--sc-ink);
+  text-shadow: var(--sc-logo);
+  animation: none;
+  font-size: clamp(28px, 4.2vw, 46px);
+}
+.ted-lcd .ted-stats-logo .ted-press {
+  color: var(--sc-ink);
+  text-shadow: none;
+}
+.ted-lcd .ted-stats-logo .ted-caret {
+  background: var(--sc-ink);
+}
+.ted-lcd .ted-stats-note {
+  color: var(--sc-dim);
+  font-size: 11px;
+}
+
+.ted-lcd .ted-notes-bar {
+  padding: 12px 18px;
+  color: var(--sc-dim);
+  font-size: 12px;
+}
+.ted-lcd .ted-board {
+  margin: 0 18px 18px;
+  background: color-mix(in srgb, var(--sc-ink) 7%, transparent);
+  border: 2px dashed var(--sc-ink);
+  border-color: color-mix(in srgb, var(--sc-ink) 45%, transparent);
+}
+.ted-lcd .ted-notes-empty {
+  color: var(--sc-dim);
+}
+
+/* --- stickers + desk notes stuck onto the computer --- */
+.ted-stickers,
+.ted-deco {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.ted-desk .stk {
+  position: absolute;
+  display: block;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35));
+  transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.ted-desk .stk svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ted-desk .stk.game {
+  top: -4px;
+  left: 12%;
+  transform: rotate(-6deg);
+  font: 800 clamp(22px, 3.1vw, 34px) / 1 "Archivo", "Inter Tight", Arial, sans-serif;
+  font-stretch: 125%;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+.ted-desk .stk.game i {
+  font-style: inherit;
+  -webkit-text-stroke: 6px #fff;
+  paint-order: stroke fill;
+}
+.ted-desk .stk.y2k {
+  top: -6px;
+  right: 27%;
+  padding: 4px 16px 5px;
+  border-radius: 99px;
+  border: 3px solid #fff;
+  background: linear-gradient(135deg, #b46bff, #5b6bff);
+  color: #fff;
+  font: 800 italic clamp(13px, 1.7vw, 19px) / 1 "Archivo", Arial, sans-serif;
+  transform: rotate(4deg);
+}
+.ted-desk .stk.star {
+  width: clamp(40px, 5.4vw, 62px);
+  height: clamp(40px, 5.4vw, 62px);
+  top: 2px;
+  right: 1.5%;
+  transform: rotate(14deg);
+}
+.ted-desk .stk.smiley {
+  width: clamp(30px, 4.2vw, 48px);
+  height: clamp(30px, 4.2vw, 48px);
+  left: 1%;
+  top: 22%;
+}
+.ted-desk .stk.flower {
+  width: clamp(30px, 4vw, 46px);
+  height: clamp(30px, 4vw, 46px);
+  right: 0.8%;
+  top: 34%;
+  transform: rotate(-10deg);
+}
+.ted-desknote {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: clamp(74px, 9vw, 104px);
+  height: clamp(64px, 7.6vw, 90px);
+  padding: 6px;
+  text-align: center;
+  color: #3a2f12;
+  font: 500 clamp(15px, 1.7vw, 19px) / 1.05 "Caveat", "Bradley Hand", cursive;
+  border-radius: 2px;
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  transform: rotate(var(--r, 0deg));
+  transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.ted-desknote:hover {
+  transform: rotate(0deg) scale(1.08) translateY(-4px);
+}
+.ted-desknote.c-yellow { background: #f4e272; }
+.ted-desknote.c-pink { background: #f3a6c2; }
+.ted-desknote.c-orange { background: #f3b565; }
+.ted-desknote.c-purple { background: #c3aef0; }
+.ted-desknote.l1 { left: calc(-1 * clamp(26px, 3.4vw, 40px)); top: 8%; --r: -6deg; }
+.ted-desknote.l2 { left: calc(-1 * clamp(22px, 3vw, 36px)); top: 40%; --r: 5deg; }
+.ted-desknote.l3 { left: calc(-1 * clamp(26px, 3.4vw, 40px)); top: 68%; --r: -4deg; }
+.ted-desknote.b1 { bottom: -16px; left: 19%; --r: 4deg; }
+.ted-desknote.b2 { bottom: -18px; left: 36%; --r: -5deg; }
+
+@media (max-width: 1080px) {
+  .ted-desknote.l1,
+  .ted-desknote.l2,
+  .ted-desknote.l3 {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .ted-deco,
+  .ted-stickers .game,
+  .ted-stickers .y2k,
+  .ted-stickers .smiley,
+  .ted-stickers .flower {
+    display: none;
+  }
+  .ted-mon-bottom {
+    height: 44px;
+  }
+  .ted-slot,
+  .ted-mon-badge {
+    display: none;
+  }
+  .ted-knob {
+    margin-left: auto;
+    width: 28px;
+    height: 28px;
+  }
+  .ted-lcd {
+    font-size: 12px;
+  }
+  .ted-lcd .ted-term-scroll {
+    padding: 12px 12px 6px;
+  }
+  .ted-lcd .ted-stats {
+    padding: 10px 10px 8px;
+  }
+  .ted-lcd .ted-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .ted-lcd .ted-notes-bar span {
+    display: none;
+  }
+  .ted-dock.is-open.is-desk {
+    width: 64px;
+    right: 24px;
+  }
+  .ted-wrap.is-desk {
+    --ted-h: calc(100vh - 130px);
+  }
+  .ted-dock.is-open.is-desk {
+    --ted-h: calc(100vh - 130px);
+  }
+}
+
+@keyframes ted-desk-in {
+  from { opacity: 0; transform: translateY(40px) scale(0.9); }
+}
+@keyframes ted-desk-out {
+  60% { opacity: 1; transform: scale(1, 0.02); }
+  to { opacity: 0; transform: scale(0.02, 0.02); }
+}
+@keyframes ted-crt-on {
+  0% { transform: scale(1, 0.01); filter: brightness(6); }
+  35% { transform: scale(1, 0.01); filter: brightness(6); }
+  60% { transform: scale(1, 1.03); filter: brightness(2.2); }
+  100% { transform: scale(1, 1); filter: brightness(1); }
+}
+@keyframes ted-led {
+  50% { opacity: 0.55; }
+}
+
+
+/* ==========================================================================
+   Bulkier, smaller CRT + scared bear
+   ========================================================================== */
+.ted-wrap.is-desk,
+.ted-dock.is-open.is-desk {
+  --ted-h: min(560px, calc(100vh - 210px));
+}
+.ted-wrap.is-desk {
+  width: min(calc(var(--ted-h) * 1.3), calc(100vw - 2 * var(--ted-gap) - 16px));
+}
+.ted-dock.is-open.is-desk {
+  width: clamp(72px, 6vw, 88px);
+  right: calc(var(--ted-gap) + 52px);
+  bottom: calc(var(--ted-gap) + var(--ted-h) - 20px);
+}
+.ted-desk.is-closing {
+  animation: ted-desk-out 0.42s ease-in both;
+}
+
+.ted-mon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 30px;
+  bottom: 34px;
+  height: auto;
+  padding: 0 clamp(14px, 3.2vw, 34px);
+  border-radius: 40px 40px 30px 30px / 34px 34px 26px 26px;
+  background: radial-gradient(120% 80% at 30% 0%, #4a4846 0%, #2d2c2a 45%, #1a1918 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.2), inset 0 -8px 0 rgba(0, 0, 0, 0.55), inset 6px 0 8px rgba(255, 255, 255, 0.05),
+    inset -10px 0 14px rgba(0, 0, 0, 0.45), 0 0 0 1px #000;
+}
+.ted-mon-top {
+  height: 46px;
+}
+.ted-well {
+  padding: 12px;
+  border-radius: 34px / 30px;
+  background: #050505;
+  box-shadow: inset 0 6px 18px #000, inset 0 0 0 3px #131211, 0 0 0 5px #181716, 0 0 0 6px rgba(255, 255, 255, 0.1),
+    0 7px 0 3px rgba(0, 0, 0, 0.45);
+}
+.ted-well .ted-lcd {
+  border-radius: 26px / 22px;
+  overflow: hidden;
+}
+.ted-mon-bottom {
+  height: 58px;
+}
+
+/* sloping top case (Teddy stands on it) */
+.ted-top {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: 0;
+  height: 46px;
+  clip-path: polygon(6% 0, 94% 0, 100% 100%, 0 100%);
+  border-radius: 14px 14px 0 0;
+  background: linear-gradient(180deg, #6a6865 0%, #4a4846 55%, #353432 100%);
+}
+.ted-top::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 11px;
+  height: 12px;
+  background: repeating-linear-gradient(90deg, #0b0b0a 0 3px, transparent 3px 8px);
+  border-radius: 3px;
+  opacity: 0.85;
+}
+/* the big tube hump behind, peeking out on the right */
+.ted-rear {
+  position: absolute;
+  z-index: -1;
+  left: 14%;
+  right: -16px;
+  top: 22px;
+  bottom: 42px;
+  border-radius: 28px 46px 40px 26px;
+  background: linear-gradient(90deg, #232221, #121211);
+  box-shadow: inset -4px 0 0 rgba(255, 255, 255, 0.05);
+}
+.ted-rear::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  top: 22%;
+  bottom: 22%;
+  width: 6px;
+  background: repeating-linear-gradient(180deg, #000 0 3px, transparent 3px 9px);
+  border-radius: 3px;
+  opacity: 0.6;
+}
+/* swivel neck + foot */
+.ted-stand {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 56%;
+  height: 40px;
+  transform: translateX(-50%);
+}
+.ted-stand::before {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 12px;
+  height: 22px;
+  background: linear-gradient(180deg, #151413, #2e2d2b 60%, #1a1918);
+  clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%);
+}
+.ted-stand::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 17px;
+  border-radius: 10px 10px 8px 8px / 14px 14px 8px 8px;
+  background: linear-gradient(180deg, #5a5855 0%, #333231 45%, #141313 100%);
+  box-shadow: 0 3px 0 #000, inset 0 2px 0 rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 700px) {
+  .ted-wrap.is-desk,
+  .ted-dock.is-open.is-desk {
+    --ted-h: calc(100vh - 150px);
+  }
+  .ted-wrap.is-desk {
+    width: calc(100vw - 2 * var(--ted-gap) - 12px);
+  }
+  .ted-dock.is-open.is-desk {
+    width: 64px;
+    right: 28px;
+  }
+  .ted-rear {
+    right: -8px;
+  }
+  .ted-mon {
+    padding: 0 12px;
+  }
+}
+
+/* ---- scared bear ---- */
+.ted-sweat {
+  opacity: 0;
+}
+.is-scared .ted-sweat {
+  opacity: 1;
+  animation: ted-drip 0.5s ease-in infinite;
+}
+.is-scared .ted-blink {
+  animation: none;
+}
+.is-scared .ted-look {
+  transform: scale(1.45);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.is-scared .ted-smile {
+  opacity: 0;
+}
+.is-scared .ted-open {
+  opacity: 1;
+  transform-box: fill-box;
+  transform-origin: center top;
+  animation: ted-scream 0.12s ease-in-out infinite alternate;
+}
+.is-scared .ted-arm-l {
+  transform: rotate(150deg);
+}
+.is-scared .ted-arm-r {
+  transform: rotate(-150deg);
+}
+.is-scared .ted-head {
+  transform: rotate(0deg);
+  animation: ted-quiver 0.07s linear infinite alternate;
+}
+.is-scared .ted-body {
+  animation: ted-startle 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both, ted-quiver 0.07s linear 0.45s infinite alternate;
+}
+.is-scared .ted-foot-l {
+  animation: ted-step 0.11s ease-in-out infinite alternate;
+}
+.is-scared .ted-foot-r {
+  animation: ted-step 0.11s ease-in-out infinite alternate-reverse;
+}
+@keyframes ted-startle {
+  0% { transform: translateY(0) scale(1, 1); }
+  30% { transform: translateY(-26px) scale(0.92, 1.12); }
+  60% { transform: translateY(0) scale(1.1, 0.9); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes ted-quiver {
+  from { transform: translateX(-2.5px) rotate(-1.5deg); }
+  to { transform: translateX(2.5px) rotate(1.5deg); }
+}
+@keyframes ted-scream {
+  from { transform: scale(1, 0.9); }
+  to { transform: scale(1.2, 1.35); }
+}
+@keyframes ted-drip {
+  from { transform: translateY(-4px); }
+  to { transform: translateY(8px); }
+}
+@keyframes ted-desk-out {
+  0% { transform: translate(0, 0); }
+  8% { transform: translate(-6px, 2px); }
+  16% { transform: translate(6px, -2px); }
+  24% { transform: translate(-4px, 1px) scale(1); filter: brightness(1.6); }
+  55% { opacity: 1; transform: scale(1, 0.02); filter: brightness(5); }
+  to { opacity: 0; transform: scale(0.02, 0.02); }
+}
+
+/* keep the rear hump + bezel on screen */
+.ted-wrap.is-desk {
+  right: calc(var(--ted-gap) + 20px);
+  bottom: calc(var(--ted-gap) + 6px);
+}
+.ted-dock.is-open.is-desk {
+  right: calc(var(--ted-gap) + 72px);
+  bottom: calc(var(--ted-gap) + 6px + var(--ted-h) - 20px);
+}
+@media (max-width: 700px) {
+  .ted-wrap.is-desk { right: calc(var(--ted-gap) + 10px); }
+  .ted-dock.is-open.is-desk { right: 36px; }
+}
+
+
+/* boot / splash live inside the monitor now - and the monitor is smaller */
+.ted-wrap.is-desk,
+.ted-dock.is-open.is-desk {
+  --ted-h: min(460px, calc(100vh - 250px));
+}
+.ted-bootscreen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(120% 90% at 50% 40%, #1b1409, #0a0805);
+  color: var(--t2);
+  overflow: hidden;
+}
+.ted-bootscreen > * {
+  height: 100%;
+}
+
+/* final sizing: compact but with room for the terminal */
+.ted-wrap.is-desk,
+.ted-dock.is-open.is-desk {
+  --ted-h: min(520px, calc(100vh - 230px));
+}
+.ted-desk .ted-desknote.l1,
+.ted-desk .ted-desknote.l2,
+.ted-desk .ted-desknote.l3 {
+  margin-left: -34px;
+}
+.ted-mon-top { height: 38px; }
+.ted-mon-bottom { height: 50px; }
+
+
+/* blurred page behind the open assistant */
+.ted-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  opacity: 0;
+  background: rgba(20, 16, 10, 0.18);
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  transition: opacity 0.5s ease, backdrop-filter 0.5s ease, -webkit-backdrop-filter 0.5s ease;
+}
+.ted-backdrop.is-on {
+  opacity: 1;
+  -webkit-backdrop-filter: blur(9px) saturate(0.9);
+  backdrop-filter: blur(9px) saturate(0.9);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ted-backdrop { transition: none; }
+}
+
+.ted-patrol {
+  position: relative;
+  transform: translateX(var(--px, 0px));
+  transition: transform var(--pd, 0.6s) linear;
+}
+
+
+/* compact terminal inside the monitor: small header, no chip row, prompt always in view */
+.ted-lcd .ted-chips { display: none; }
+.ted-lcd .ted-term-scroll { padding: 10px 16px 8px; }
+.ted-lcd .ted-term-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.ted-lcd .ted-term-logo {
+  font-size: clamp(18px, 2.3vw, 24px);
+  text-align: left;
+  flex: none;
+}
+.ted-lcd .ted-term-sub {
+  flex: 1;
+  margin-top: 0;
+  gap: 8px;
+}
+.ted-lcd .ted-term-sub em { font-size: 10.5px; }
+.ted-lcd .ted-term-intro {
+  margin: 8px 0 6px;
+  font-size: 12px;
+}
+.ted-lcd .ted-term-btns {
+  margin-bottom: 8px;
+  gap: 6px;
+}
+.ted-lcd .ted-btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
+}
+
+
+/* a proper stride: bouncier, faster, with the feet clearly lifting */
+.is-walk .ted-body { animation: ted-trot2 0.26s ease-in-out infinite alternate; }
+.is-walk .ted-foot-l { animation: ted-step2 0.26s ease-in-out infinite alternate; }
+.is-walk .ted-foot-r { animation: ted-step2 0.26s ease-in-out infinite alternate-reverse; }
+.is-walk .ted-arm-r { animation: ted-swing 0.26s ease-in-out infinite alternate; }
+.is-walk .ted-arm-l { animation: ted-swing 0.26s ease-in-out infinite alternate-reverse; }
+@keyframes ted-trot2 {
+  from { transform: rotate(-6deg) translateY(2px); }
+  to { transform: rotate(6deg) translateY(-9px); }
+}
+@keyframes ted-step2 {
+  from { transform: translateY(2px) rotate(-8deg); }
+  to { transform: translateY(-16px) rotate(8deg); }
+}
+
+.ted-dock.is-gone{opacity:0;pointer-events:none;transition:opacity .4s}
+
+
+/* ==========================================================================
+   PANDA OS - glass skin
+   Same visual language as the landing page: deep navy, frosted glass, hairline construction grid, blue accent,
+   Archivo (wide) headings + JetBrains Mono labels. Everything below only re-skins; layout/behaviour is untouched.
+   ========================================================================== */
+.ted-wrap[data-theme="glass"] {
+  --t: #8fb2ff;
+  --t2: #e6eeff;
+  --t3: #4d7dff;
+  --tg: rgba(95, 140, 255, 0.6);
+  --tg2: rgba(77, 125, 255, 0.3);
+  --tdim: rgba(143, 178, 255, 0.22);
+}
+
+/* ---- the slab: frosted glass instead of beige plastic ---- */
+.ted-desk {
+  filter: none; /* a filter here would make the glass blur nothing */
+}
+.ted-desk .ted-mon {
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 38px;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.08) 34%, rgba(110, 150, 255, 0.12) 100%), rgba(12, 22, 48, 0.42);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  backdrop-filter: blur(28px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 0 50px rgba(120, 160, 255, 0.12),
+    0 44px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.4), 0 0 90px rgba(77, 125, 255, 0.22);
+  color: rgba(238, 243, 255, 0.8);
+}
+/* a soft specular sheen that slides across the glass every few seconds */
+.ted-desk .ted-mon::before {
+  content: "";
+  position: absolute;
+  inset: -30% -60%;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 43%, rgba(255, 255, 255, 0.13) 50%, transparent 57%);
+  animation: pos-sheen 9s ease-in-out infinite;
+}
+@keyframes pos-sheen {
+  0%, 52% { transform: translateX(-34%); }
+  100% { transform: translateX(34%); }
+}
+.ted-desk .ted-mon-brand {
+  color: rgba(238, 243, 255, 0.55);
+  text-shadow: none;
+  letter-spacing: 0.32em;
+}
+.ted-desk .ted-mon-x {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.ted-desk .ted-well {
+  padding: 10px;
+  border-radius: 30px;
+  background: rgba(4, 9, 24, 0.55);
+  box-shadow: inset 0 6px 22px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.ted-desk .ted-well .ted-lcd {
+  border-radius: 22px;
+}
+.ted-desk .ted-mon-badge {
+  color: rgba(238, 243, 255, 0.42);
+  text-shadow: none;
+}
+.ted-desk .ted-slot {
+  height: 12px;
+  border-radius: 99px;
+  background: rgba(3, 8, 22, 0.5);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.ted-desk .ted-pled {
+  background: #6ee7b0;
+  box-shadow: 0 0 10px #6ee7b0, inset 0 0 2px #fff;
+}
+.ted-desk .ted-knob {
+  position: relative;
+  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95), rgba(190, 210, 255, 0.72) 38%, rgba(77, 125, 255, 0.85) 100%);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1), 0 0 0 5px rgba(255, 255, 255, 0.16), 0 0 22px rgba(77, 125, 255, 0.7), 0 6px 12px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px #fff;
+}
+.ted-desk .ted-knob::before,
+.ted-desk .ted-knob::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  pointer-events: none;
+}
+.ted-desk .ted-knob::before { /* power glyph: ring ... */
+  width: 38%;
+  height: 38%;
+  translate: -50% -42%;
+  border: 2px solid rgba(12, 24, 62, 0.75);
+  border-top-color: transparent;
+  border-radius: 50%;
+}
+.ted-desk .ted-knob::after { /* ... and stem */
+  width: 2px;
+  height: 22%;
+  translate: -50% -88%;
+  background: rgba(12, 24, 62, 0.75);
+  border-radius: 2px;
+}
+
+/* the cap above the screen (the panda walks along it) + stand: clear glass, luminous vents */
+.ted-desk .ted-top {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0, rgba(255, 255, 255, 0.2) 2px, rgba(255, 255, 255, 0.08) 100%);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+}
+.ted-desk .ted-top::after {
+  top: 19px;
+  height: 3px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, rgba(190, 210, 255, 0.8) 0 3px, transparent 3px 9px);
+  filter: drop-shadow(0 0 6px rgba(120, 160, 255, 0.9));
+  opacity: 0.9;
+}
+.ted-desk .ted-rear {
+  display: none;
+}
+.ted-desk .ted-stand::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05));
+}
+.ted-desk .ted-stand::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.08));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.22), 0 10px 36px rgba(77, 125, 255, 0.5), 0 6px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* ---- the screen: navy glass with the landing's construction grid and a slow aurora ---- */
+.ted-lcd[data-theme="glass"] {
+  --sc-bg: #060b19;
+  --sc-ink: #eef3ff;
+  --sc-ink2: rgba(238, 243, 255, 0.74);
+  --sc-win: #0f1a38;
+  --sc-line: rgba(170, 198, 255, 0.4);
+  --sc-pr: #8fb2ff;
+  --sc-acc: #4d7dff;
+  --sc-acc-ink: #ffffff;
+  --sc-dim: rgba(220, 232, 255, 0.52);
+  --sc-ok: #6ee7b0;
+  --sc-err: #ff8f8f;
+  --sc-hot: #ffd36e;
+  --sc-cum: #ffffff;
+  --sc-shadow: rgba(0, 0, 0, 0.35);
+  --sc-logo: 0 0 18px rgba(95, 140, 255, 0.6), 0 0 48px rgba(77, 125, 255, 0.35);
+}
+.ted-desk .ted-lcd {
+  background: linear-gradient(rgba(170, 198, 255, 0.07) 1px, transparent 1px) 0 0 / 72px 72px, linear-gradient(90deg, rgba(170, 198, 255, 0.07) 1px, transparent 1px) 0 0 / 72px 72px,
+    radial-gradient(120% 55% at 50% 125%, var(--tg2), transparent 62%), var(--sc-bg);
+  animation: pos-wake 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s both;
+}
+@keyframes pos-wake {
+  from { opacity: 0; transform: scale(0.965); filter: brightness(2) blur(8px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.ted-desk .ted-lcd::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(38% 34% at 22% 24%, var(--tg), transparent 70%), radial-gradient(34% 32% at 82% 78%, rgba(160, 110, 255, 0.45), transparent 70%),
+    radial-gradient(30% 28% at 78% 18%, rgba(80, 210, 255, 0.32), transparent 70%);
+  opacity: 0.72;
+  animation: pos-aurora 16s ease-in-out infinite alternate;
+}
+@keyframes pos-aurora {
+  to { transform: translate3d(5%, -4%, 0) rotate(8deg) scale(1.1); }
+}
+.ted-desk .ted-glare {
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 30%), radial-gradient(130% 110% at 50% 45%, transparent 66%, rgba(0, 0, 0, 0.3));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 0 30px rgba(0, 0, 0, 0.3);
+}
+.ted-desk .ted-crt::after {
+  background: radial-gradient(120% 100% at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.3));
+}
+.ted-desk .ted-crt::before {
+  background: linear-gradient(rgba(170, 198, 255, 0.06) 1px, transparent 1px) 0 0 / 72px 72px, linear-gradient(90deg, rgba(170, 198, 255, 0.06) 1px, transparent 1px) 0 0 / 72px 72px;
+}
+.ted-desk .ted-screen {
+  background: transparent;
+}
+
+/* ---- menu bar ---- */
+.ted-desk .ted-menubar {
+  height: 38px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-weight: 500;
+}
+.ted-desk .ted-mb {
+  height: 26px;
+  border-radius: 9px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: background 0.15s;
+}
+.ted-desk .ted-mb:hover,
+.ted-desk .ted-mb.open {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--sc-ink);
+}
+.ted-desk .ted-mb:focus-visible {
+  outline: 1.5px solid rgba(255, 255, 255, 0.6);
+  outline-offset: -2px;
+}
+.ted-desk .ted-clock {
+  color: var(--sc-ink2);
+  font-weight: 500;
+}
+.ted-desk .ted-dd {
+  min-width: 230px;
+  padding: 6px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05)), rgba(14, 24, 52, 0.78);
+  -webkit-backdrop-filter: blur(26px) saturate(1.7);
+  backdrop-filter: blur(26px) saturate(1.7);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 26px 54px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.ted-desk .ted-dd hr {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  opacity: 1;
+}
+.ted-desk .ted-mi {
+  padding: 7px 12px 7px 8px;
+  border-radius: 10px;
+}
+.ted-desk .ted-mi:hover,
+.ted-desk .ted-mi:focus-visible {
+  background: rgba(255, 255, 255, 0.13);
+  color: var(--sc-ink);
+}
+
+/* ---- the window: a glass card ---- */
+.ted-desk .ted-macwin {
+  margin: clamp(8px, 1.6vw, 16px) clamp(10px, 2vw, 20px) clamp(10px, 2vw, 20px);
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.03) 60%), color-mix(in srgb, var(--sc-win) 55%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  backdrop-filter: blur(22px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 30px 60px rgba(0, 0, 0, 0.45);
+}
+.ted-desk .ted-macbar {
+  height: 36px;
+  padding: 0 14px;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ted-desk .ted-macbar .box {
+  width: 13px;
+  height: 13px;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffb3b3, #ff5f5f 60%, #d93a3a);
+  box-shadow: 0 0 10px rgba(255, 95, 95, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.ted-desk .ted-macbar .box:hover {
+  background: radial-gradient(circle at 35% 30%, #fff, #ff8a8a 60%, #e44);
+}
+.ted-desk .ted-macbar .box.zoom {
+  background: radial-gradient(circle at 35% 30%, #c9ffe6, #5ee0a0 60%, #25b574);
+  box-shadow: 0 0 10px rgba(94, 224, 160, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.ted-desk .ted-macbar .stripes {
+  background: none;
+}
+.ted-desk .ted-macbar .title {
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sc-ink2);
+}
+.ted-desk .ted-lcd .ted-dot {
+  background: #6ee7b0;
+  box-shadow: 0 0 10px #6ee7b0;
+}
+
+/* ---- tabs: glass pills ---- */
+.ted-desk .ted-lcd .ted-tabs {
+  gap: 8px;
+  padding: 10px 14px;
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ted-desk .ted-lcd .ted-tabs button {
+  padding: 5px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--sc-ink2);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.ted-desk .ted-lcd .ted-tabs button:hover {
+  background: rgba(255, 255, 255, 0.13);
+  color: var(--sc-ink);
+  transform: translateY(-1px);
+}
+.ted-desk .ted-lcd .ted-tabs button.on {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--sc-acc) 100%, #fff 14%), color-mix(in srgb, var(--sc-acc) 80%, #000));
+  border-color: rgba(255, 255, 255, 0.35);
+  color: var(--sc-acc-ink);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--sc-acc) 55%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.ted-desk .ted-lcd .ted-tabs button.re {
+  border-color: transparent;
+  background: transparent;
+}
+.ted-desk .ted-lcd .ted-pane {
+  background: transparent;
+}
+
+/* ---- status bar ---- */
+.ted-desk .ted-lcd .ted-status {
+  height: 32px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.04em;
+}
+.ted-desk .ted-lcd .ted-status .live {
+  text-shadow: 0 0 10px currentColor;
+}
+.ted-desk .ted-lcd .ted-swatches button {
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+}
+.ted-desk .ted-lcd .ted-swatches button.on {
+  box-shadow: 0 0 0 2px rgba(10, 18, 40, 0.9), 0 0 0 3.5px rgba(255, 255, 255, 0.8), 0 0 12px var(--c);
+}
+
+/* ---- scrollbars ---- */
+.ted-desk .ted-lcd *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.ted-desk .ted-lcd *::-webkit-scrollbar-track {
+  background: transparent;
+  border: 0;
+}
+.ted-desk .ted-lcd *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border: 0;
+  border-radius: 99px;
+}
+.ted-desk .ted-lcd * {
+  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+}
+
+/* ---- terminal + stats + notes ---- */
+.ted-desk .ted-lcd .ted-term-logo,
+.ted-desk .ted-lcd .ted-stats-logo .ted-logo-text {
+  background: linear-gradient(120deg, #fff 10%, var(--t) 55%, #c8a9ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 18px var(--tg2));
+}
+.ted-desk .ted-lcd .ted-btn {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 8px 20px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.ted-desk .ted-lcd .ted-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 14px 26px rgba(0, 0, 0, 0.35);
+}
+.ted-desk .ted-lcd .ted-btn:active {
+  transform: translateY(0);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.ted-desk .ted-lcd .ted-btn.solid {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--sc-acc) 100%, #fff 16%), color-mix(in srgb, var(--sc-acc) 78%, #000));
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--sc-acc-ink);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--sc-acc) 50%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.ted-desk .ted-lcd .ted-l.h {
+  border-bottom: 1px solid color-mix(in srgb, var(--sc-pr) 60%, transparent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.ted-desk .ted-lcd .ted-chips {
+  background: transparent;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ted-desk .ted-lcd .ted-chips button {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.ted-desk .ted-lcd .ted-chips button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--sc-ink);
+}
+.ted-desk .ted-lcd .ted-prompt input {
+  caret-color: var(--sc-pr);
+}
+.ted-desk .ted-lcd .ted-chart {
+  padding: 12px 14px 8px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.ted-desk .ted-lcd .ted-chart figcaption {
+  letter-spacing: 0.14em;
+}
+.ted-desk .ted-lcd .ted-chart .bar {
+  fill: var(--sc-acc);
+}
+.ted-desk .ted-lcd .ted-chart .grid {
+  stroke: #fff;
+  opacity: 0.12;
+}
+.ted-desk .ted-lcd .ted-chart .area {
+  fill: var(--sc-acc);
+  opacity: 0.18;
+}
+.ted-desk .ted-lcd .ted-chart .ln {
+  stroke: var(--sc-pr);
+}
+.ted-desk .ted-lcd .ted-chart .tip rect {
+  fill: #fff;
+}
+.ted-desk .ted-lcd .ted-chart .tip text {
+  fill: #0b1424;
+}
+.ted-desk .ted-lcd .ted-stats-logo .ted-globe {
+  stroke: var(--t);
+  opacity: 0.5;
+}
+.ted-desk .ted-lcd .ted-board {
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.25);
+}
+.ted-note {
+  border-radius: 6px;
+}
+
+/* ---- boot + splash in the same blue ---- */
+.ted-boot-dim { color: rgba(220, 232, 255, 0.5); }
+.ted-boot-row { color: rgba(220, 232, 255, 0.72); }
+.ted-bar-seg i { border-radius: 3px; }
+.ted-bar-seg i.on {
+  background: linear-gradient(180deg, #9cc0ff, #4d7dff);
+  box-shadow: 0 0 12px rgba(77, 125, 255, 0.75);
+}
+.ted-bar-seg i.cur { background: rgba(120, 160, 255, 0.45); }
+.ted-boot kbd { border-radius: 6px; background: rgba(255, 255, 255, 0.08); }
+.ted-logo-text {
+  background: linear-gradient(120deg, #fff 8%, var(--t) 52%, #c8a9ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 0 22px var(--tg));
+  text-shadow: none;
+}
+.ted-globe { stroke: var(--t); opacity: 0.8; }
+.ted-press { letter-spacing: 0.34em; font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+/* ---- stickers + desk notes: same family as the landing stickers ---- */
+.ted-desk .stk { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.4)); }
+.ted-desk .stk.y2k {
+  background: linear-gradient(135deg, #5b8cff, #8a5bff);
+  letter-spacing: 0.04em;
+}
+.ted-desknote {
+  border-radius: 8px;
+  background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 55%);
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.ted-desknote::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -7px;
+  width: 38px;
+  height: 14px;
+  translate: -50% 0;
+  rotate: -3deg;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 2px;
+}
+.ted-desknote.c-yellow { background-color: #f6e58a; }
+.ted-desknote.c-pink { background-color: #f4b3cc; }
+.ted-desknote.c-purple { background-color: #c8b6f4; }
+
+/* ---- dock: panda + speech bubble ---- */
+.ted-bear-btn { filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 18px rgba(143, 178, 255, 0.28)); }
+.ted-bear-btn:focus-visible { outline-color: #8fb2ff; }
+.ted-ping { border-color: rgba(143, 178, 255, 0.9); }
+.ted-bubble {
+  background: rgba(255, 255, 255, 0.78);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  backdrop-filter: blur(16px) saturate(1.6);
+  color: #0b1424;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 30px rgba(10, 20, 60, 0.35), inset 0 1px 0 #fff;
+  font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+}
+.ted-backdrop.is-on {
+  background: radial-gradient(80% 70% at 70% 80%, rgba(40, 70, 160, 0.32), rgba(4, 8, 20, 0.62));
+}
+@media (prefers-reduced-motion: reduce) {
+  .ted-desk .ted-mon::before,
+  .ted-desk .ted-lcd::before { animation: none; }
+}

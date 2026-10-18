@@ -1,0 +1,87 @@
+/**
+ * Landing ambient FX (line-art only): thin ink wireframe shapes and code glyphs that drift, spin and
+ * parallax with the pointer. No fills, glows or tints, so the sky/gradient/text stay exactly as they were.
+ */
+export function createLandingFx(root, canvas) {
+  const ctx = canvas.getContext("2d");
+  const noop = { setDark() {}, setLoad() {}, pointer() {}, destroy() {} };
+  if (!ctx) return noop;
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W = 0, H = 0, dpr = 1, raf = 0, dead = false, paused = false, visible = true, dark = false;
+  let px = 0.5, py = 0.5, sx = 0.5, sy = 0.5, mx = -1e4, my = -1e4, last = 0, fade = 0, timer = 0;
+  const R = (a, b) => a + Math.random() * (b - a);
+  const KINDS = ["ring", "cross", "tri", "square", "hex", "dots", "glyph", "glyph", "orbit"];
+  const GLYPHS = ["{ }", "</>", "01", "[ ]", "=>", "λ", "∑", "::"];
+  const items = Array.from({ length: 22 }, (_, i) => ({
+    k: KINDS[i % KINDS.length], x: Math.random(), y: Math.random(), z: R(0.35, 1),
+    s: R(10, 26), a: R(0, 6.28), w: R(-0.5, 0.5), vx: R(-0.006, 0.006), vy: R(-0.012, -0.003),
+    ph: R(0, 6.28), g: GLYPHS[(Math.random() * GLYPHS.length) | 0], ox: 0, oy: 0,
+  }));
+
+  const size = () => {
+    const r = root.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.max(2, Math.round(r.width * dpr)); H = Math.max(2, Math.round(r.height * dpr));
+    canvas.width = W; canvas.height = H;
+  };
+  size();
+  const ro = new ResizeObserver(size); ro.observe(root);
+  const io = new IntersectionObserver((e) => { visible = e[0].isIntersecting; }, { threshold: 0 });
+  io.observe(root);
+
+  function shape(it, x, y, s) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(it.a); ctx.beginPath();
+    switch (it.k) {
+      case "ring": ctx.arc(0, 0, s, 0, 6.283); ctx.moveTo(s * 1.9, 0); ctx.arc(0, 0, s * 1.9, 0, 1.4); break;
+      case "cross": ctx.moveTo(-s, 0); ctx.lineTo(s, 0); ctx.moveTo(0, -s); ctx.lineTo(0, s); break;
+      case "tri": ctx.moveTo(0, -s); ctx.lineTo(s * 0.9, s * 0.7); ctx.lineTo(-s * 0.9, s * 0.7); ctx.closePath(); break;
+      case "square": ctx.rect(-s * 0.7, -s * 0.7, s * 1.4, s * 1.4); break;
+      case "hex": for (let i = 0; i < 6; i++) { const a = (i / 6) * 6.283; ctx[i ? "lineTo" : "moveTo"](Math.cos(a) * s, Math.sin(a) * s); } ctx.closePath(); break;
+      case "dots": for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { ctx.moveTo(i * s * 0.6 + 1.2 * dpr, j * s * 0.6); ctx.arc(i * s * 0.6, j * s * 0.6, 1.2 * dpr, 0, 6.283); } break;
+      case "orbit": ctx.ellipse(0, 0, s * 1.5, s * 0.55, 0, 0, 6.283); ctx.moveTo(s * 0.25, 0); ctx.arc(0, 0, s * 0.25, 0, 6.283); break;
+      default: break;
+    }
+    if (it.k !== "glyph") ctx.stroke();
+    else { ctx.font = `${Math.round(s * 0.9)}px "JetBrains Mono", ui-monospace, Menlo, monospace`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(it.g, 0, 0); }
+    ctx.restore();
+  }
+
+  function frame(now) {
+    if (dead) return;
+    raf = requestAnimationFrame(frame);
+    if (paused || !visible || document.hidden) { last = now; return; }
+    if (now - last < 30) return;
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    fade = Math.min(1, fade + dt * 0.6);
+    sx += (px - sx) * Math.min(1, dt * 2.5); sy += (py - sy) * Math.min(1, dt * 2.5);
+    ctx.clearRect(0, 0, W, H);
+    const ink = dark ? "238,243,255" : "5,5,5";
+    ctx.lineWidth = Math.max(1, dpr); ctx.lineCap = "round";
+    for (const it of items) {
+      it.x += it.vx * dt; it.y += it.vy * dt; it.a += it.w * dt;
+      if (it.y < -0.08) { it.y = 1.08; it.x = Math.random(); }
+      if (it.x < -0.08) it.x = 1.08; else if (it.x > 1.08) it.x = -0.08;
+      let x = (it.x + (sx - 0.5) * -0.06 * it.z) * W + Math.sin(now / 1000 * 0.4 + it.ph) * 10 * dpr * it.z;
+      let y = (it.y + (sy - 0.5) * -0.05 * it.z) * H + Math.cos(now / 1000 * 0.35 + it.ph) * 8 * dpr * it.z;
+      // gently pushed away by the pointer
+      const dx = x - mx, dy = y - my, d2 = dx * dx + dy * dy, rr = 130 * dpr;
+      let tx = 0, ty = 0;
+      if (d2 < rr * rr && d2 > 1) { const d = Math.sqrt(d2), f = (1 - d / rr) * 46 * dpr; tx = (dx / d) * f; ty = (dy / d) * f; }
+      it.ox += (tx - it.ox) * Math.min(1, dt * 5); it.oy += (ty - it.oy) * Math.min(1, dt * 5);
+      const tw = 0.75 + 0.25 * Math.sin(now / 1000 * 0.9 + it.ph);
+      const a = fade * (0.16 + 0.2 * it.z) * tw;
+      ctx.strokeStyle = `rgba(${ink},${a})`; ctx.fillStyle = `rgba(${ink},${a * 1.2})`;
+      shape(it, x + it.ox, y + it.oy, it.s * dpr * (0.6 + it.z * 0.5));
+    }
+  }
+
+  if (reduce) { fade = 1; last = 0; frame(100); cancelAnimationFrame(raf); }
+  else timer = setTimeout(() => { last = performance.now(); raf = requestAnimationFrame(frame); }, 2200);
+
+  return {
+    pointer(x, y) { const r = root.getBoundingClientRect(); px = x / r.width; py = y / r.height; mx = x * dpr; my = y * dpr; },
+    setDark(v) { dark = !!v; },
+    setLoad(m) { paused = m >= 1; },
+    destroy() { dead = true; clearTimeout(timer); cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); },
+  };
+}

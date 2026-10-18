@@ -1,0 +1,80 @@
+.rv { --rv-blue: #3f72ee; --rv-ink: #0b1424; position: relative; width: 100%; }
+.rv-stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #c5dcf0;
+  color: var(--rv-ink);
+  font-family: "Archivo", "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+}
+.rv *, .rv *::before, .rv *::after { box-sizing: border-box; }
+.rv-mono { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; font-size: clamp(10px, .85vw, 14px); letter-spacing: .04em; font-weight: 500; }
+
+/* the landing screen lives in this card, which the scroll shrinks */
+.rv-card { position: absolute; inset: 0; z-index: 3; overflow: hidden; transform-origin: 50% 50%; will-change: transform; background: #c5dcf0; box-shadow: 0 40px 90px rgba(30,60,120,.30); }
+.rv-slot { position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; min-height: 0 !important; }
+
+/* sliding strips */
+.rv-strips { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; justify-content: center; gap: .06em; font-size: min(10.5vw, 19vh); line-height: .98; opacity: 0; pointer-events: none; }
+.rv-row { display: flex; width: max-content; white-space: nowrap; will-change: transform; }
+.rv-seg { display: inline-block; padding-right: .1em; text-transform: uppercase; }
+.rv-seg b { font-weight: 800; font-stretch: 125%; letter-spacing: -.02em; color: var(--rv-ink); opacity: .92; }
+.rv-seg em { font-family: "Gloock", Georgia, serif; font-style: normal; font-weight: 400; color: var(--rv-blue); letter-spacing: -.01em; }
+.rv-row[data-row="b"] .rv-seg b { color: transparent; -webkit-text-stroke: 2px var(--rv-ink); opacity: .75; }
+
+.rv-eyebrow { position: absolute; z-index: 2; top: 9vh; left: 50%; transform: translateX(-50%); opacity: 0; text-align: center; white-space: nowrap; }
+.rv-eyebrow::before { content: ""; display: block; width: 26px; height: 26px; margin: 0 auto 10px; border-radius: 8px; background: var(--rv-blue); box-shadow: 0 6px 18px rgba(63,114,238,.4); }
+
+/* signature (above the card, like it is written on the glass) */
+.rv-sig { position: absolute; z-index: 4; left: 50%; top: 50%; width: min(92vw, 160vh); height: min(82vh, 58vw); transform: translate(-50%, -50%); pointer-events: none; overflow: visible; }
+
+/* closing statement: editorial, left-aligned, sentence case, mixed sans + italic serif */
+.rv-statement { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 0 9vw; text-align: left; pointer-events: none; }
+.rv-badge { margin-bottom: 4.6vh; opacity: 0; display: inline-flex; align-items: center; gap: 14px; text-transform: uppercase; color: rgba(11,20,36,.7); }
+.rv-badge::before { content: ""; width: 38px; height: 1px; background: currentColor; }
+.rv-statement h2 { margin: 0; font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; font-weight: 500; letter-spacing: -.045em; font-size: min(5.6vw, 10.4vh); line-height: 1.02; color: #101828; }
+.rv-ln { display: block; white-space: nowrap; overflow: hidden; padding: .06em .08em .26em; margin-bottom: -.14em; }
+.rv-ln > span { display: block; will-change: transform; }
+.rv-w { display: inline-block; }
+.rv-ln:first-child > span > .rv-w:first-child::first-letter { text-transform: uppercase; }
+.rv-ln em, .rv-ln em.rv-w { position: relative; display: inline-block; font-family: "Newsreader", "Gloock", Georgia, serif; font-style: italic; font-weight: 400; font-size: 1.07em; letter-spacing: -.03em; color: #101828; }
+.rv-ul { position: absolute; left: -2%; bottom: -.05em; width: 104%; height: .22em; overflow: visible; pointer-events: none; }
+.rv-ul path { fill: none; stroke: #2f5fe0; stroke-width: 3px; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.rv-foot { position: absolute; left: 9vw; right: 9vw; bottom: 7vh; display: flex; align-items: center; gap: 22px; opacity: 0; color: rgba(11,20,36,.62); text-transform: uppercase; }
+.rv-foot b { display: inline-block; font-weight: 500; animation: rvNudge 1.6s ease-in-out infinite; }
+.rv-rule { flex: 1; height: 1px; background: rgba(11,20,36,.28); transform-origin: 0 50%; }
+@keyframes rvNudge { 50% { transform: translateY(4px); } }
+
+@media (max-width: 700px) {
+  .rv-statement { padding: 0 5vw; }
+  .rv-statement h2 { font-size: 5.6vw; }
+  .rv-foot { left: 5vw; right: 5vw; }
+  .rv-strips { font-size: 17vw; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rv-card { will-change: auto; }
+}
+
+/* paper behind the closing statement: warm off-white, fine grain, hairline grid with crosses (echoing the landing), a soft light that follows the pointer */
+.rv-glow { position: absolute; inset: 0; z-index: 0; opacity: 0; pointer-events: none; overflow: hidden; background: #f3f0e8; }
+.rv-glow i { position: absolute; inset: 0; display: block; }
+.rv-lines {
+  background-image: linear-gradient(90deg, rgba(11,20,36,.09) 1px, transparent 1px), linear-gradient(0deg, rgba(11,20,36,.09) 1px, transparent 1px);
+  background-size: 12.5vw 100%, 100% 16.6vh;
+  background-position: 9vw 0, 0 8vh;
+  -webkit-mask-image: radial-gradient(90% 80% at 50% 50%, #000 30%, transparent 100%); mask-image: radial-gradient(90% 80% at 50% 50%, #000 30%, transparent 100%);
+}
+.rv-grain {
+  opacity: .5; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .3  0 0 0 0 .22  0 0 0 .32 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
+}
+.rv-spot { --mx: 50%; --my: 50%; background: radial-gradient(34vmax 34vmax at var(--mx) var(--my), rgba(255,255,255,.75), rgba(255,250,238,.3) 45%, transparent 70%); }
+
+/* live neural network on the right half of the closing screen */
+.rv-net { position: absolute; right: 0; top: 0; width: 58%; height: 100%; display: block;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 34%); mask-image: linear-gradient(90deg, transparent 0, #000 34%); }
+@media (max-width: 900px) { .rv-net { width: 100%; opacity: .35; } }

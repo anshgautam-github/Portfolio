@@ -1,0 +1,365 @@
+/* Gooey little creature cursor. Native cursor hidden only on fine pointers (class added by JS). */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+html.has-cursor input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]),
+html.has-cursor textarea,
+html.has-cursor [contenteditable="true"] {
+  cursor: text !important;
+}
+.cur-canvas,
+.cur-goo,
+.cur-face,
+.cur-label,
+.cur-orbit,
+.cur-pulse {
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 2147483000;
+  will-change: transform;
+}
+.cur-canvas {
+  width: 100vw;
+  height: 100vh;
+  z-index: 2147482990;
+}
+.cur-wrap {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cur-wrap.cur-on {
+  opacity: 1;
+}
+.cur-wrap.cur-hide .cur-goo,
+.cur-wrap.cur-hide .cur-face,
+.cur-wrap.cur-hide .cur-orbit {
+  opacity: 0;
+}
+.cur-goo {
+  width: 300px;
+  height: 300px;
+  filter: url(#cur-goo);
+  transition: opacity 0.25s ease;
+}
+.cur-goo i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  background: #d7ff3b;
+  will-change: transform;
+}
+
+/* the face on the lead blob */
+.cur-face {
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  transition: opacity 0.25s ease;
+}
+.cur-face > div {
+  position: absolute;
+  inset: 0;
+}
+.cur-eye {
+  position: absolute;
+  top: 13px;
+  width: 11px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1.5px #111;
+  overflow: hidden;
+  transition: height 0.12s ease, border-radius 0.2s ease;
+}
+.cur-eye--l {
+  left: 8px;
+}
+.cur-eye--r {
+  right: 8px;
+}
+.cur-eye b {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: #111;
+}
+.cur-mouth {
+  position: absolute;
+  left: 50%;
+  top: 28px;
+  width: 10px;
+  height: 5px;
+  margin-left: -5px;
+  border: 2px solid #111;
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  transition: all 0.2s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.cur-blush {
+  position: absolute;
+  top: 25px;
+  width: 7px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ff6fa0;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.cur-blush--l {
+  left: 3px;
+}
+.cur-blush--r {
+  right: 3px;
+}
+.cur-z {
+  position: absolute;
+  right: -10px;
+  top: -8px;
+  font: 800 11px/1 "Archivo", sans-serif;
+  color: #d7ff3b;
+  text-shadow: 0 0 0 #111, 0 1px 0 #111, 1px 0 0 #111, -1px 0 0 #111;
+  opacity: 0;
+}
+
+/* moods */
+.cur-face.blink .cur-eye {
+  height: 2px;
+  margin-top: 6px;
+}
+.cur-face[data-mood="happy"] .cur-eye {
+  height: 7px;
+  margin-top: 3px;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 50%;
+  border: 2.5px solid #111;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  transform: none;
+}
+.cur-face[data-mood="happy"] .cur-eye b {
+  display: none;
+}
+.cur-face[data-mood="happy"] .cur-mouth {
+  width: 14px;
+  height: 8px;
+  margin-left: -7px;
+  background: #111;
+}
+.cur-face[data-mood="happy"] .cur-blush,
+.cur-face[data-mood="press"] .cur-blush {
+  opacity: 0.9;
+}
+.cur-face[data-mood="press"] .cur-eye {
+  height: 3px;
+  margin-top: 5px;
+}
+.cur-face[data-mood="press"] .cur-mouth {
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border: 2px solid #111;
+  border-radius: 50%;
+  top: 29px;
+}
+.cur-face[data-mood="wow"] .cur-eye {
+  width: 13px;
+  height: 15px;
+  top: 11px;
+}
+.cur-face[data-mood="wow"] .cur-mouth {
+  width: 9px;
+  height: 11px;
+  margin-left: -4.5px;
+  border: 2px solid #111;
+  border-radius: 50%;
+  background: #7a1d2e;
+  top: 27px;
+}
+.cur-face[data-mood="sleep"] .cur-eye {
+  height: 2px;
+  margin-top: 6px;
+}
+.cur-face[data-mood="sleep"] .cur-eye b {
+  display: none;
+}
+.cur-face[data-mood="sleep"] .cur-mouth {
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border: 2px solid #111;
+  border-radius: 50%;
+}
+.cur-face[data-mood="sleep"] .cur-z {
+  opacity: 1;
+  animation: cur-z 1.8s ease-in-out infinite;
+}
+@keyframes cur-z {
+  0% {
+    transform: translate(0, 6px) scale(0.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(8px, -14px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* stars that orbit when hovering something clickable */
+.cur-orbit {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cur-orbit.is-on {
+  opacity: 1;
+}
+.cur-orbit > span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  animation: cur-spin 2.2s linear infinite;
+}
+.cur-orbit > span:nth-child(2) {
+  animation-duration: 3.1s;
+  animation-direction: reverse;
+}
+.cur-orbit > span:nth-child(3) {
+  animation-duration: 4.4s;
+}
+.cur-orbit > span::after {
+  content: "\2726";
+  position: absolute;
+  left: 38px;
+  top: -9px;
+  font-size: 14px;
+  color: #d7ff3b;
+  text-shadow: 0 0 8px #d7ff3b;
+}
+.cur-orbit > span:nth-child(2)::after {
+  left: 50px;
+  font-size: 10px;
+  color: #ff8fb4;
+  text-shadow: 0 0 8px #ff8fb4;
+}
+.cur-orbit > span:nth-child(3)::after {
+  left: 44px;
+  font-size: 9px;
+  color: #7fe7ff;
+  text-shadow: 0 0 8px #7fe7ff;
+}
+@keyframes cur-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cur-label {
+  margin: 30px 0 0 -26px;
+  width: 52px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #111;
+  color: #d7ff3b;
+  border: 1.5px solid #d7ff3b;
+  font: 800 10px/1 "JetBrains Mono", "Archivo", monospace;
+  letter-spacing: 0.14em;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.cur-label.is-on {
+  opacity: 1;
+}
+.cur-pulse {
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  border: 3px solid #d7ff3b;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cur-canvas,
+  .cur-orbit {
+    display: none;
+  }
+}
+
+/* capture plate: a springy sticker frame that wraps small links / buttons */
+.cur-plate {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2147482995;
+  pointer-events: none;
+  opacity: 0;
+  border: 2px solid #d7ff3b;
+  box-shadow: 0 0 0 2px #111, 0 0 26px rgba(215, 255, 59, 0.38), inset 0 0 18px rgba(215, 255, 59, 0.16);
+  background: rgba(215, 255, 59, 0.1);
+  overflow: visible;
+  will-change: transform, width, height;
+}
+.cur-plate .shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+}
+.cur-plate .shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  left: -50%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  animation: cur-shine 1.4s ease-in-out infinite;
+}
+@keyframes cur-shine {
+  60%,
+  100% {
+    left: 130%;
+  }
+}
+.cur-plate i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: #d7ff3b;
+  box-shadow: 0 0 0 1.5px #111;
+  rotate: 45deg;
+  animation: cur-pop 1.2s ease-in-out infinite;
+}
+.cur-plate .c1 { left: -7px; top: -7px; }
+.cur-plate .c2 { right: -7px; top: -7px; animation-delay: 0.15s; }
+.cur-plate .c3 { right: -7px; bottom: -7px; animation-delay: 0.3s; }
+.cur-plate .c4 { left: -7px; bottom: -7px; animation-delay: 0.45s; }
+@keyframes cur-pop {
+  50% {
+    scale: 1.5;
+    rotate: 135deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cur-plate .shine::after,
+  .cur-plate i {
+    animation: none;
+  }
+}

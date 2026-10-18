@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  --color-lime: #d7ff3b;
+  --color-lime-deep: #d0fb22;
+  --color-ink: #272a1e;
+  --color-olive: #b7c944;
+  --font-display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --font-cond: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-serif: "Gloock", Georgia, serif;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  background: #101211;
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Safari: avoid hinted/rounded glyph metrics so vw-sized, tightly tracked text stays crisp */
+  text-rendering: geometricPrecision;
+  font-kerning: normal;
+  font-synthesis: none;
+  overflow-x: hidden;
+}
+
+/* Safari: keep GSAP-animated text on its own GPU layer so it doesn't re-rasterize blurry/distorted */
+[data-word],
+[data-letter],
+[data-nav],
+[data-fade] {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+/* ---- inverted-corner "flares" that blend a tab into the panel ---- */
+.tab-flare {
+  position: relative;
+  background: var(--color-ink);
+}
+.tab-flare::before,
+.tab-flare::after {
+  content: "";
+  position: absolute;
+  width: var(--r, 40px);
+  height: var(--r, 40px);
+  pointer-events: none;
+}
+/* top notch: tab sits above the panel */
+.flare-top::before {
+  left: calc(var(--r, 40px) * -1);
+  bottom: 0;
+  background: radial-gradient(circle at 0 0, transparent calc(var(--r, 40px) - 0.5px), var(--color-ink) var(--r, 40px));
+}
+.flare-top::after {
+  right: calc(var(--r, 40px) * -1);
+  bottom: 0;
+  background: radial-gradient(circle at 100% 0, transparent calc(var(--r, 40px) - 0.5px), var(--color-ink) var(--r, 40px));
+}
+/* bottom bridge: tab hangs below the panel */
+.flare-bottom::before {
+  left: calc(var(--r, 40px) * -1);
+  top: 0;
+  background: radial-gradient(circle at 0 100%, transparent calc(var(--r, 40px) - 0.5px), var(--color-ink) var(--r, 40px));
+}
+.flare-bottom::after {
+  right: calc(var(--r, 40px) * -1);
+  top: 0;
+  background: radial-gradient(circle at 100% 100%, transparent calc(var(--r, 40px) - 0.5px), var(--color-ink) var(--r, 40px));
+}
+
+.line-mask {
+  display: block;
+  overflow: hidden;
+  padding: 0.04em 0.06em 0.02em;
+  margin: -0.04em -0.06em -0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Socials fan: design grid (2000px) scaled per breakpoint */
+.socials-root {
+  --u: calc(100vw / 900);
+}
+@media (min-width: 640px) {
+  .socials-root {
+    --u: calc(100vw / 1300);
+  }
+}
+@media (min-width: 1024px) {
+  .socials-root {
+    --u: calc(100vw / 2000);
+  }
+}

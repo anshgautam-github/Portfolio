@@ -1,0 +1,72 @@
+.cb { --p: 0; position: relative; width: 100%; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; background: #02040a; color: #fff;
+  user-select: none; -webkit-user-select: none; touch-action: pan-y; cursor: pointer; isolation: isolate; font-family: "Archivo", "Inter Tight", "Helvetica Neue", Arial, sans-serif; }
+.cb-gl, .cb-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.cb-gl { z-index: 0; }
+.cb-cv { z-index: 1; pointer-events: none; }
+.cb-top { position: absolute; z-index: 3; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; align-items: flex-start; padding: 22px clamp(14px, 2vw, 30px); pointer-events: none; }
+.cb-chip { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; border-radius: 99px; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font: 500 12px/1 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: .08em; }
+.cb-chip i { width: 8px; height: 8px; border-radius: 50%; background: #6bf53f; box-shadow: 0 0 10px #6bf53f; }
+.cb-chip em { font-style: normal; font-weight: 800; font-size: 16px; color: #ffc45c; }
+.cb-meter { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 4px; }
+.cb-ruler { position: relative; width: min(30vw, 260px); height: 22px; overflow: hidden;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.4) 0 1px, transparent 1px 10px); -webkit-mask: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); mask: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); }
+.cb-tick { position: absolute; left: 50%; top: 0; width: 2px; height: 22px; margin-left: -1px; background: #ffc45c; box-shadow: 0 0 10px #ffc45c; will-change: transform; }
+.cb-sync { font: 500 11px/1 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: .14em; color: rgba(255,255,255,.7); }
+.cb-sync b { color: #fff; font-weight: 600; }
+
+/* the hold button, sitting right between the two hands */
+.cb-ring { position: absolute; z-index: 3; left: 50%; top: 50%; width: 140px; height: 140px; margin: -70px 0 0 -70px; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; transition: transform .25s, opacity .5s; outline: none; -webkit-tap-highlight-color: transparent; }
+.cb-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); overflow: visible; }
+.cb-trk { fill: rgba(255,255,255,.04); stroke: rgba(255,255,255,.28); stroke-width: 2; }
+.cb-arc { fill: none; stroke: #fff; stroke-width: 5; stroke-linecap: round; filter: drop-shadow(0 0 10px rgba(255,196,92,.9)); }
+.cb-core { position: absolute; left: 50%; top: 50%; width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%; background: radial-gradient(circle, #fff 0 22%, rgba(255,214,150,.9) 40%, rgba(255,150,70,0) 72%); animation: cbPulse 1.6s ease-in-out infinite; }
+.cb-lbl { position: absolute; left: calc(100% + 16px); top: 50%; transform: translateY(-50%); font: 800 clamp(16px, 1.5vw, 22px)/1.1 "Archivo", "Helvetica Neue", Arial, sans-serif; letter-spacing: .12em; white-space: nowrap; text-shadow: 0 2px 20px rgba(0,0,0,.6); }
+.cb-ring:focus-visible { box-shadow: 0 0 0 3px rgba(255,196,92,.8); border-radius: 50%; }
+.cb.is-holding .cb-ring { transform: scale(1.12); }
+.cb.is-holding .cb-core { animation-duration: .35s; }
+.cb.is-done .cb-ring { opacity: 0; pointer-events: none; transform: scale(1.8); }
+@keyframes cbPulse { 0%, 100% { transform: scale(.85); opacity: .8; } 50% { transform: scale(1.25); opacity: 1; } }
+
+.cb-hint { position: absolute; z-index: 3; left: 0; right: 0; bottom: clamp(26px, 6vh, 64px); margin: 0; text-align: center; font: 500 12px/1 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.9); text-shadow: 0 2px 14px rgba(0,0,0,.55); transition: opacity .5s; pointer-events: none; }
+.cb.is-holding .cb-hint { opacity: 0; }
+.cb.is-done .cb-hint { opacity: 0; }
+
+/* what appears once the hands lock */
+.cb-win { position: absolute; z-index: 4; left: 0; right: 0; bottom: clamp(24px, 7vh, 80px); text-align: center; pointer-events: none; }
+.cb-kicker, .cb-h span, .cb-cta { opacity: 0; transform: translateY(28px); filter: blur(10px); transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1), filter .8s; }
+.cb-kicker { font: 500 12px/1 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: .3em; color: #ffc45c; margin-bottom: 14px; text-shadow: 0 0 20px rgba(255,170,70,.7); }
+.cb-h { margin: 0; font: 800 clamp(34px, 6.2vw, 96px)/.98 "Archivo", "Inter Tight", "Helvetica Neue", Arial, sans-serif; font-stretch: 112%; letter-spacing: -.035em; text-transform: uppercase; text-shadow: 0 6px 40px rgba(0,0,0,.65); }
+.cb-h span { display: block; }
+.cb-h em { font-family: "Gloock", Georgia, serif; font-style: normal; font-weight: 400; text-transform: none; color: #ffd08c; letter-spacing: -.01em; }
+.cb-cta { display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: clamp(16px, 3vh, 30px); flex-wrap: wrap; }
+.cb.is-done .cb-kicker, .cb.is-done .cb-h span, .cb.is-done .cb-cta { opacity: 1; transform: none; filter: blur(0); }
+.cb.is-done .cb-kicker { transition-delay: .55s; }
+.cb.is-done .cb-h span:nth-child(1) { transition-delay: .72s; }
+.cb.is-done .cb-h span:nth-child(2) { transition-delay: .86s; }
+.cb.is-done .cb-cta { transition-delay: 1.15s; }
+.cb.is-done .cb-win { pointer-events: auto; }
+.cb-mail { display: inline-flex; align-items: center; gap: 12px; height: 56px; padding: 0 28px; border-radius: 99px; background: #fff; color: #0a1020; text-decoration: none; font: 800 16px/1 "Archivo", Arial, sans-serif; letter-spacing: .04em; text-transform: uppercase; box-shadow: 0 10px 50px rgba(255,190,100,.45); transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s; }
+.cb-mail:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 16px 70px rgba(255,190,100,.7); }
+.cb-mail b { font-size: 20px; transition: transform .3s; }
+.cb-mail:hover b { transform: translateX(5px); }
+.cb-again { height: 56px; padding: 0 22px; border-radius: 99px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.3); color: #fff; cursor: pointer; font: 600 13px/1 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.cb-again:hover { background: rgba(255,255,255,.2); }
+
+@media (max-width: 700px) {
+  .cb-lbl { left: 50%; top: calc(100% + 14px); transform: translateX(-50%); text-align: center; }
+  .cb-ruler { width: 34vw; }
+  .cb-chip--r { display: none; }
+}
+
+/* --- TAP HOLD button: frosted glass, bright and readable but light --- */
+.cb-ring { width: 132px; height: 132px; margin: -66px 0 0 -66px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, rgba(255,255,255,.34), rgba(255,255,255,.12) 70%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.55), inset 0 8px 18px rgba(255,255,255,.25), 0 12px 40px rgba(20,40,80,.28), 0 0 50px rgba(255,214,150,.35); backdrop-filter: blur(10px) saturate(1.3); -webkit-backdrop-filter: blur(10px) saturate(1.3); }
+.cb-ring svg { width: 100%; height: 100%; }
+.cb-trk { fill: none; stroke: rgba(255,255,255,.85); stroke-width: 2; }
+.cb-arc { stroke: #fff; stroke-width: 4; filter: drop-shadow(0 0 8px rgba(255,200,110,.95)); }
+.cb-core { width: 40px; height: 40px; margin: -20px 0 0 -20px; }
+.cb-lbl { left: calc(100% + 22px); padding: 0; background: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; color: #fff; letter-spacing: .16em; text-shadow: 0 1px 2px rgba(10,25,55,.65), 0 3px 18px rgba(10,25,55,.55); }
+.cb-hint { color: #fff; font-weight: 600; text-shadow: 0 1px 2px rgba(10,25,55,.7), 0 2px 16px rgba(10,25,55,.55); }
+.cb-ring::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.7); animation: cbPing 2.2s ease-out infinite; pointer-events: none; }
+.cb.is-holding .cb-ring::after { animation: none; opacity: 0; }
+@keyframes cbPing { 0% { transform: scale(.94); opacity: .8; } 100% { transform: scale(1.4); opacity: 0; } }

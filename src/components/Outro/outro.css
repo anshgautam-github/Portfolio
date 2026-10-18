@@ -1,0 +1,341 @@
+/* Closing CTA — "Want to see how I enable companies?" */
+.outro {
+  --serif: "Newsreader", "Tiempos Headline", "Times New Roman", Georgia, serif;
+  --ease: cubic-bezier(0.7, 0, 0.2, 1);
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 9vh 4vw 8vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: #121212;
+  color: #fff;
+  overflow: hidden;
+}
+
+/* soft spotlight that trails the pointer */
+.outro-spot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 70vmax;
+  height: 70vmax;
+  margin: -35vmax 0 0 -35vmax;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(120, 240, 90, 0.1), rgba(120, 240, 90, 0.035) 55%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, opacity;
+}
+
+/* ---------- headline ---------- */
+.outro-h {
+  margin: 0;
+  font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 500;
+  font-size: clamp(2.6rem, 8.8vw, 17rem);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+.outro-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+  white-space: nowrap;
+  /* mask for the rising characters (generous padding so descenders / glow aren't cut) */
+  overflow: hidden;
+  padding: 0.06em 0.1em 0.24em;
+  margin: -0.06em -0.1em -0.24em;
+}
+.outro.is-revealed .outro-line {
+  overflow: visible;
+}
+.outro-serif {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.04em;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- eye ---------- */
+.outro-eyewrap {
+  display: block;
+  flex: none;
+  width: 1.12em;
+  height: 0.6em;
+}
+.outro-eye {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform-origin: 50% 50%;
+}
+
+/* ---------- toggle ---------- */
+.outro-tgwrap {
+  display: block;
+  flex: none;
+  margin: 0 0.04em;
+}
+.outro-tg {
+  --on: 0;
+  position: relative;
+  display: block;
+  width: 2.02em;
+  height: 0.92em;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #2b2d2c;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.5s var(--ease), box-shadow 0.6s ease;
+  box-shadow: 0 0 0 0 rgba(120, 240, 90, 0);
+}
+.outro-tg:hover {
+  transform: scale(1.035);
+}
+.outro-tg:active {
+  transform: scale(0.97);
+}
+.outro-tg:focus-visible {
+  outline: 2px solid #b6f56e;
+  outline-offset: 0.06em;
+}
+.outro-tg-green {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: var(--on);
+  background: linear-gradient(100deg, #46e05c 0%, #86ec58 45%, #b3f470 100%);
+  background-size: 230% 100%;
+  box-shadow: 0 0 0.45em rgba(110, 240, 90, 0.35);
+  animation: outro-flow 5.5s ease-in-out infinite alternate;
+}
+/* film grain on the green, like the reference */
+.outro-tg-green::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0.4;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .9 0'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+}
+@keyframes outro-flow {
+  to {
+    background-position: 100% 0;
+  }
+}
+.outro-tg-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 0.025em solid rgba(160, 255, 120, 0.9);
+  opacity: 0;
+  pointer-events: none;
+}
+.outro-tg-knob {
+  position: absolute;
+  top: 0.06em;
+  left: 0.06em;
+  width: 0.8em;
+  height: 0.8em;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #444;
+  /* --on (0 → 1, animated by GSAP) drives the slide; the spring overshoot comes from the tween ease */
+  transform: translateX(calc(var(--on) * 1.1em));
+  box-shadow: 0 0.02em 0.1em rgba(0, 0, 0, 0.4);
+}
+.outro-tg-knob img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.05);
+  user-select: none;
+}
+/* no photo yet → neutral monogram (set outro.initials in content.js) */
+.outro-av {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 35% 28%, #9a9a9a, #2d2d2d 72%);
+}
+.outro-av::before {
+  content: attr(data-i);
+  font: 600 0.28em/1 "Inter Tight", Arial, sans-serif;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+
+/* ---------- sub copy ---------- */
+.outro-sub {
+  box-sizing: border-box;
+  max-width: min(40vw, 52rem);
+  min-width: min(88vw, 22rem);
+  margin: clamp(1.6rem, 2.5vw, 3.4rem) 0 0;
+  font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(0.9rem, 0.95vw, 1.5rem);
+  line-height: 1.55;
+  color: #b4b4b4;
+}
+
+/* ---------- button ---------- */
+.outro-btnwrap {
+  margin-top: clamp(1.8rem, 3vw, 4rem);
+}
+.outro-btn {
+  --h: 2.13em;
+  display: inline-flex;
+  align-items: center;
+  color: #fff;
+  text-decoration: none;
+  font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(1.35rem, 3.2vw, 3.8rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+.outro-btn:focus-visible {
+  outline: 2px solid #b6f56e;
+  outline-offset: 6px;
+  border-radius: 999px;
+}
+.outro-btn-pill,
+.outro-btn-circle {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--h);
+  overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  transition: transform 0.5s var(--ease);
+}
+.outro-btn-pill {
+  border-radius: 999px;
+  padding: 0 0.8em;
+}
+.outro-btn-circle {
+  width: var(--h);
+  border-radius: 50%;
+  margin-left: -1.5px;
+}
+.outro-btn:active .outro-btn-pill,
+.outro-btn:active .outro-btn-circle {
+  transform: scale(0.97);
+}
+/* white wipe that rises on hover */
+.outro-btn-fill {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: #fff;
+  transform: translateY(102%);
+  transition: transform 0.65s var(--ease);
+}
+.outro-btn:hover .outro-btn-fill,
+.outro-btn:focus-visible .outro-btn-fill {
+  transform: none;
+}
+.outro-btn-circle .outro-btn-fill {
+  transition-delay: 0.05s;
+}
+/* label rolls up, a dark copy takes its place */
+.outro-btn-label {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding: 0.04em 0;
+  line-height: 1.2;
+}
+.outro-btn-label > span {
+  display: block;
+  transition: transform 0.65s var(--ease);
+}
+.outro-btn-label > span:last-child {
+  position: absolute;
+  left: 0;
+  top: 0.04em;
+  transform: translateY(115%);
+  color: #121212;
+}
+.outro-btn:hover .outro-btn-label > span:first-child,
+.outro-btn:focus-visible .outro-btn-label > span:first-child {
+  transform: translateY(-115%);
+}
+.outro-btn:hover .outro-btn-label > span:last-child,
+.outro-btn:focus-visible .outro-btn-label > span:last-child {
+  transform: none;
+}
+/* arrow shoots out right, a dark one slides in from the left */
+.outro-btn-arrow {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transition: transform 0.65s var(--ease), color 0.4s ease;
+}
+.outro-btn-arrow svg {
+  width: 0.95em;
+  height: 0.95em;
+}
+.outro-btn-arrow--in {
+  transform: translateX(-130%);
+  color: #121212;
+}
+.outro-btn:hover .outro-btn-arrow:not(.outro-btn-arrow--in),
+.outro-btn:focus-visible .outro-btn-arrow:not(.outro-btn-arrow--in) {
+  transform: translateX(130%);
+}
+.outro-btn:hover .outro-btn-arrow--in,
+.outro-btn:focus-visible .outro-btn-arrow--in {
+  transform: none;
+  transition-delay: 0.08s;
+}
+
+/* ---------- small screens ---------- */
+@media (max-width: 640px) {
+  .outro {
+    padding: 12vh 5vw 10vh;
+  }
+  .outro-h {
+    font-size: 11.4vw;
+  }
+  .outro-sub {
+    max-width: 88vw;
+    font-size: 0.95rem;
+  }
+  .outro-btn {
+    font-size: 1.5rem;
+  }
+}
+@media (min-width: 641px) and (max-width: 1023px) {
+  .outro-h {
+    font-size: 9.6vw;
+  }
+  .outro-sub {
+    max-width: 70vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .outro-tg-green {
+    animation: none;
+  }
+}

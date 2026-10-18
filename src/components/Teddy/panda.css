@@ -1,0 +1,99 @@
+/* a small cute panda standing in the bottom-right corner, waving hello */
+.pnd-wrap { position: fixed; right: 0; bottom: 0; width: 0; height: 0; z-index: 9990; pointer-events: none; transition: opacity 0.35s ease; }
+.pnd-wrap.is-hidden { opacity: 0; visibility: hidden; transition: opacity 0.35s ease, visibility 0s 0.35s; }
+.pnd-btn { all: unset; position: fixed; right: 16px; bottom: 8px; width: 92px; cursor: pointer; pointer-events: auto; filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.28)); -webkit-tap-highlight-color: transparent; transition: transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1); }
+.pnd-btn:hover { transform: scale(1.08) rotate(-2deg); }
+.pnd-btn:focus-visible { outline: 3px solid #8db4ff; outline-offset: 4px; border-radius: 20px; }
+.pnd { display: block; width: 100%; height: auto; overflow: visible; }
+
+.pnd-bubble { position: absolute; right: calc(100% - 6px); top: 2px; padding: 8px 14px; border-radius: 16px 16px 4px 16px; background: #fff8ea; color: #3a2616; font: 700 13px/1.2 "Inter", system-ui, sans-serif; white-space: nowrap; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2); animation: pnd-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both, pnd-float 2.6s ease-in-out 0.5s infinite; transform-origin: 100% 100%; }
+.pnd-bubble::after { content: ""; position: absolute; right: -5px; bottom: 6px; border: 6px solid transparent; border-left-color: #fff8ea; border-right: 0; }
+@keyframes pnd-pop { from { opacity: 0; transform: scale(0.5); } }
+@keyframes pnd-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3px; } }
+
+/* idle life: gentle bob, blink, wave, head tilt */
+.pnd-body { transform-box: view-box; transform-origin: 60px 136px; animation: pnd-bob 2.4s ease-in-out infinite; }
+@keyframes pnd-bob { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.015, 0.985) translateY(-1.5px); } }
+.pnd-head { transform-box: view-box; transform-origin: 60px 78px; animation: pnd-tilt 5s ease-in-out infinite; }
+@keyframes pnd-tilt { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2.5deg); } }
+.pnd-btn.is-hov .pnd-eyes { transform-box: view-box; transform-origin: 60px 51px; animation: pnd-blink 3.4s infinite; }
+@keyframes pnd-blink { 0%, 88%, 96%, 100% { transform: scaleY(1); } 91%, 93% { transform: scaleY(0.06); } }
+.pnd-pup { transform: translate(calc(var(--lx, 0) * 2.2px), calc(var(--ly, 0) * 1.8px)); transition: transform 0.12s; }
+
+@media (max-width: 700px) { .pnd-btn { width: 70px; right: 10px; } .pnd-bubble { font-size: 11.5px; padding: 6px 11px; } }
+/* ---------------------------------------------------------------- routines (class a-<name> on the button) */
+.pnd-armL { transform: translate(32px, 84px) rotate(-6deg); }
+.pnd-armR { transform: translate(88px, 84px) rotate(6deg); }
+.pnd-armL, .pnd-armR { transform-origin: 0 0; }
+.pnd-turn { transform-box: view-box; transform-origin: 60px 80px; }
+.pnd-tail { opacity: 0; }
+.pnd-face { transition: none; }
+.pnd-btn.is-hov .pnd-armR { animation-duration: 0.5s !important; }
+
+/* wave (right / left) */
+.a-waveR .pnd-armR { animation: pnd-wR 0.8s ease-in-out infinite alternate; }
+.a-waveL .pnd-armL { animation: pnd-wL 0.8s ease-in-out infinite alternate; }
+@keyframes pnd-wR { from { transform: translate(88px, 84px) rotate(-120deg); } to { transform: translate(88px, 84px) rotate(-155deg); } }
+@keyframes pnd-wL { from { transform: translate(32px, 84px) rotate(120deg); } to { transform: translate(32px, 84px) rotate(155deg); } }
+.a-waveR .pnd-head, .a-waveL .pnd-head { animation-duration: 2.2s; }
+
+/* both hands up + hop */
+.a-cheer .pnd-armR { animation: pnd-cR 0.45s ease-in-out infinite alternate; }
+.a-cheer .pnd-armL { animation: pnd-cL 0.45s ease-in-out infinite alternate; }
+@keyframes pnd-cR { from { transform: translate(88px, 84px) rotate(-140deg); } to { transform: translate(88px, 84px) rotate(-168deg); } }
+@keyframes pnd-cL { from { transform: translate(32px, 84px) rotate(140deg); } to { transform: translate(32px, 84px) rotate(168deg); } }
+.a-cheer .pnd-body { animation: pnd-hop 0.9s ease-in-out infinite; }
+@keyframes pnd-hop { 0%, 100% { transform: translateY(0) scale(1.03, 0.97); } 50% { transform: translateY(-9px) scale(0.98, 1.03); } }
+
+/* clap */
+.a-clap .pnd-armR { animation: pnd-kR 0.28s ease-in-out infinite alternate; }
+.a-clap .pnd-armL { animation: pnd-kL 0.28s ease-in-out infinite alternate; }
+@keyframes pnd-kR { from { transform: translate(88px, 84px) rotate(112deg); } to { transform: translate(88px, 84px) rotate(86deg); } }
+@keyframes pnd-kL { from { transform: translate(32px, 84px) rotate(-112deg); } to { transform: translate(32px, 84px) rotate(-86deg); } }
+.a-clap .pnd-body { animation: pnd-hop 0.56s ease-in-out infinite; }
+
+/* big jump */
+.a-jump .pnd-armR { animation: pnd-jR 0.95s ease-in-out 2; }
+.a-jump .pnd-armL { animation: pnd-jL 0.95s ease-in-out 2; }
+@keyframes pnd-jR { 0%, 100% { transform: translate(88px, 84px) rotate(6deg); } 45% { transform: translate(88px, 84px) rotate(-150deg); } }
+@keyframes pnd-jL { 0%, 100% { transform: translate(32px, 84px) rotate(-6deg); } 45% { transform: translate(32px, 84px) rotate(150deg); } }
+.a-jump .pnd-body { animation: pnd-jump 0.95s cubic-bezier(.3,.1,.4,1) 2; }
+@keyframes pnd-jump { 0% { transform: scale(1.06, 0.92); } 20% { transform: translateY(0) scale(0.96, 1.06); } 50% { transform: translateY(-26px) scale(1, 1.02); } 80% { transform: translateY(0) scale(1.05, 0.94); } 100% { transform: scale(1); } }
+
+/* turn around to show his back, then back again */
+.a-turn .pnd-turn { animation: pnd-turn 4.4s ease-in-out 1; }
+.a-turn .pnd-face { animation: pnd-faceoff 4.4s step-end 1; }
+.a-turn .pnd-belly { animation: pnd-faceoff 4.4s step-end 1; }
+.a-turn .pnd-tail { animation: pnd-tailon 4.4s step-end 1; }
+.a-turn .pnd-head { animation: pnd-backlook 4.4s ease-in-out 1; }
+@keyframes pnd-turn { 0%, 100% { transform: scaleX(1); } 14% { transform: scaleX(0.04); } 28% { transform: scaleX(1); } 70% { transform: scaleX(1); } 80% { transform: scaleX(0.04); } 94% { transform: scaleX(1); } }
+@keyframes pnd-faceoff { 0%, 14.9% { opacity: 1; } 15%, 80.9% { opacity: 0; } 81%, 100% { opacity: 1; } }
+@keyframes pnd-tailon { 0%, 14.9% { opacity: 0; } 15%, 80.9% { opacity: 1; } 81%, 100% { opacity: 0; } }
+@keyframes pnd-backlook { 0%, 28% { transform: rotate(0); } 40% { transform: rotate(-8deg); } 55% { transform: rotate(8deg); } 68%, 100% { transform: rotate(0); } }
+
+/* looks around curiously */
+.a-look .pnd-head { animation: pnd-look 3.2s ease-in-out 1; }
+.a-look .pnd-pup { animation: pnd-lookpup 3.2s ease-in-out 1; }
+@keyframes pnd-look { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-9deg) translateX(-2px); } 55% { transform: rotate(9deg) translateX(2px); } 80% { transform: rotate(-3deg); } }
+@keyframes pnd-lookpup { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-3px, -1px); } 55% { transform: translate(3.2px, 0.5px); } 80% { transform: translate(0, 2px); } }
+
+/* little dance */
+.a-dance .pnd-body { animation: pnd-sway 0.6s ease-in-out infinite alternate; transform-origin: 60px 136px; }
+@keyframes pnd-sway { from { transform: rotate(-6deg) translateY(0); } to { transform: rotate(6deg) translateY(-4px); } }
+.a-dance .pnd-armR { animation: pnd-dR 0.6s ease-in-out infinite alternate; }
+.a-dance .pnd-armL { animation: pnd-dL 0.6s ease-in-out infinite alternate; }
+@keyframes pnd-dR { from { transform: translate(88px, 84px) rotate(-150deg); } to { transform: translate(88px, 84px) rotate(-20deg); } }
+@keyframes pnd-dL { from { transform: translate(32px, 84px) rotate(20deg); } to { transform: translate(32px, 84px) rotate(150deg); } }
+.a-dance .pnd-head { animation: pnd-tilt 0.6s ease-in-out infinite alternate; }
+
+/* big sleepy stretch */
+.a-stretch .pnd-armR { animation: pnd-sR 3.4s ease-in-out 1; }
+.a-stretch .pnd-armL { animation: pnd-sL 3.4s ease-in-out 1; }
+@keyframes pnd-sR { 0%, 100% { transform: translate(88px, 84px) rotate(6deg); } 25%, 75% { transform: translate(88px, 84px) rotate(-172deg); } }
+@keyframes pnd-sL { 0%, 100% { transform: translate(32px, 84px) rotate(-6deg); } 25%, 75% { transform: translate(32px, 84px) rotate(172deg); } }
+.a-stretch .pnd-body { animation: pnd-st 3.4s ease-in-out 1; }
+@keyframes pnd-st { 0%, 100% { transform: scale(1); } 30%, 70% { transform: scale(0.97, 1.06); } }
+.a-stretch .pnd-eyes { animation: pnd-sq 3.4s ease-in-out 1; }
+@keyframes pnd-sq { 0%, 100% { transform: scaleY(1); } 25%, 75% { transform: scaleY(0.08); } }
+
+@media (prefers-reduced-motion: reduce) { .pnd-body, .pnd-head, .pnd-eyes, .pnd-bubble, .pnd-turn, .pnd-armL, .pnd-armR { animation: none !important; } }
