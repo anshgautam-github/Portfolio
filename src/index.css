@@ -103,3 +103,45 @@ body,
     --u: calc(100vw / 2000);
   }
 }
+
+/* ------------------------------------------------------------------
+   Performance tier (class set by src/lib/perf.js)
+   Phones / tablets: no full-screen blend modes and no stacked backdrop blurs.
+   Both force the browser to re-composite whole sections on every scrolled frame.
+   ------------------------------------------------------------------ */
+html.is-mobile .rv-grain,
+html.is-mobile .pk-grain,
+html.is-mobile .sc-grain {
+  mix-blend-mode: normal;
+  opacity: 0.2;
+}
+html.is-mobile .outro-tg-green::after { mix-blend-mode: normal; opacity: 0.12; }
+
+html.is-mobile .gd-toggle,
+html.is-mobile .gd-snd {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html.is-mobile .ted-bubble {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+/* assistant window: keep ONE blur layer (the monitor) and flatten everything nested inside it */
+html.is-mobile .ted-backdrop.is-on {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: rgba(20, 16, 10, 0.42);
+}
+html.is-mobile .ted-desk .ted-mon {
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+html.is-mobile .ted-desk .ted-top,
+html.is-mobile .ted-desk .ted-stand::after,
+html.is-mobile .ted-desk .ted-menubar,
+html.is-mobile .ted-desk .ted-dd,
+html.is-mobile .ted-desk .ted-macwin,
+html.is-mobile .ted-desk .ted-lcd .ted-btn {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}

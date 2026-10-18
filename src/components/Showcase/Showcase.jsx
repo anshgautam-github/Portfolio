@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import "./showcase.css";
+import { capDpr } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -189,7 +190,7 @@ export default function Showcase() {
     const N = window.innerWidth < 700 ? 420 : 900;
     const P = Array.from({ length: N }, () => ({ x: 0, y: 0, px: 0, py: 0, life: 0, sp: 0, c: 0 }));
     const size = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = capDpr(1.5, 1.25);
       const r = cv.getBoundingClientRect();
       W = r.width; H = r.height;
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);

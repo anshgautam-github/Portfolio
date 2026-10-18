@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import "./picked.css";
+import { capDpr } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -277,7 +278,7 @@ export default function Picked() {
     const m = { x: -999, y: -999 };
     const ripples = [];
     const size = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = capDpr(1.5, 1.25);
       const r = cv.getBoundingClientRect();
       W = r.width; H = r.height;
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);

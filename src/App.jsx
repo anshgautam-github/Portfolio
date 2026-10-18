@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Reveal from "./components/Landing/Reveal.jsx";
 // import Hero from "./components/Hero/Hero.jsx"; // previous hero – still on disk, swap back here if you want it
@@ -15,7 +15,8 @@ import Contact from "./components/Contact/Contact.jsx";
 import Diary from "./components/Diary/Diary.jsx";
 import Outro from "./components/Outro/Outro.jsx";
 import Cursor from "./components/Cursor/Cursor.jsx";
-import Teddy from "./components/Teddy/Teddy.jsx";
+// the assistant is a fixed overlay (not part of the scroll layout), so it can load after the page is interactive
+const Teddy = lazy(() => import("./components/Teddy/Teddy.jsx"));
 
 export default function App() {
   // The pinned showcase + web fonts + images all change page height after first paint.
@@ -64,7 +65,9 @@ export default function App() {
       <Collab />
       <Contact />
       <Outro />
-      <Teddy />
+      <Suspense fallback={null}>
+        <Teddy />
+      </Suspense>
       <Cursor />
     </>
   );

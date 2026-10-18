@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import "./toolkit.css";
+import { capDpr } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -389,7 +390,7 @@ export default function Toolkit() {
     const items = [...sceneA.cards, ...sceneB.cards].map((d) => ({ d, label: d.name.replace(/\n/g, ""), x: 0, y: 0, vx: 0, vy: 0, r: 40, ph: Math.random() * 6.28, seeded: false }));
     const radius = () => Math.max(30, Math.min(W, H) * 0.052);
     const size = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = capDpr(1.5, 1.25);
       const r = cv.getBoundingClientRect();
       W = r.width; H = r.height;
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);

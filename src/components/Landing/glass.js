@@ -9,6 +9,7 @@
  * Everything lives in two tiny programs: `flow` (updates the field) and `scene` (draws to screen).
  */
 import { MASK_W, MASK_H, STROKE, PEN_SPEED, buildHeightField, buildWriteMap } from "./helloPath.js";
+import { capDpr } from "../../lib/perf.js";
 
 const VERT = `#version 300 es
 precision highp float;
@@ -554,7 +555,7 @@ export function createGlassScene(canvas, opts = {}) {
 
   /* ---- state ---- */
   const MAXD = 0.16;
-  let W = 0, H = 0, aspect = 1, dpr = 1, quality = Math.min(window.devicePixelRatio || 1, 2);
+  let W = 0, H = 0, aspect = 1, dpr = 1, quality = capDpr(2, 1.25);
   let flowA = null, flowB = null, encoded = false;
   let dark = 0, darkTarget = 0;
   let mouse = { x: 0, y: 0, tx: 0, ty: 0, has: false, inside: false, act: 0 };

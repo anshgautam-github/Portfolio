@@ -1,3 +1,4 @@
+import { capDpr } from "../../lib/perf.js";
 /**
  * warpEngine — canvas renderer for the "Innovate with Purpose" scroll piece.
  *
@@ -255,7 +256,7 @@ export function createWarpEngine(canvas, S) {
 
   function resize() {
     const r = canvas.getBoundingClientRect();
-    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    dpr = capDpr(1.5, 1.25);
     w = Math.max(1, r.width);
     h = Math.max(1, r.height);
     canvas.width = Math.round(w * dpr);

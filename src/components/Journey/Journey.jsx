@@ -14,6 +14,7 @@ import { createCore } from "./coreGL.js";
 import { createShatter } from "./shatter.js";
 import { createPortal } from "./portal.js";
 import "./journey.css";
+import { capDpr, START_SCALE, IS_MOBILE } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -75,13 +76,13 @@ export default function Journey() {
     let spin = 0, shT = 0, shCur = 0, snapped = false, SW = 0, SHh = 0;
     const coreCtx = coreC.getContext("2d");
     const hudCtx = hudC.getContext("2d");
-    let W = 0, H = 0, scale = 1, dpr = 1, hudDpr = 1, cw = 0, ch = 0;
+    let W = 0, H = 0, scale = START_SCALE, dpr = 1, hudDpr = 1, cw = 0, ch = 0;
     const size = () => {
       cw = pin.current.clientWidth; ch = pin.current.clientHeight;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = capDpr(2, 1.25);
       W = Math.round(cw * dpr * scale); H = Math.round(ch * dpr * scale);
       glc.width = W; glc.height = H;
-      hudDpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      hudDpr = capDpr(1.5, 1);
       hudC.width = Math.round(cw * hudDpr); hudC.height = Math.round(ch * hudDpr);
       const cs = 0.75;
       coreC.width = Math.round(cw * cs); coreC.height = Math.round(ch * cs);
@@ -150,7 +151,7 @@ export default function Journey() {
       if (Math.abs(irisT - irisCur) < 1e-4) irisCur = irisT;
       {
         const i = irisCur;
-        const nw = Math.round(cw * Math.min(dpr, 1.5)), nh = Math.round(ch * Math.min(dpr, 1.5));
+        const nw = Math.round(cw * Math.min(dpr, IS_MOBILE ? 1 : 1.5)), nh = Math.round(ch * Math.min(dpr, IS_MOBILE ? 1 : 1.5));
         if (irisEl.width !== nw || irisEl.height !== nh) { irisEl.width = pw = nw; irisEl.height = ph = nh; }
         const a = sm(0.55, 0.92, i), z = 1 + 0.5 * Math.pow(1 - sm(0.45, 1, i), 2);   // the planet fades up out of the light while flying in from close range
         pin.current.style.opacity = i >= 0.999 ? "1" : a.toFixed(3);
@@ -228,7 +229,7 @@ export default function Journey() {
           const u = Math.min(1, Math.max(0, (shCur - 0.1 - i * 0.035) / 0.55));
           const e = u * u * (3 - 2 * u);
           el.style.transform = `translate3d(${o[0] * e}px,${o[1] * e + 260 * e * e}px,0) rotate(${o[2] * e}deg) scale(${1 + 0.35 * e})`;
-          el.style.filter = e > 0.02 ? `blur(${(e * 9).toFixed(1)}px)` : "none";
+          if (!IS_MOBILE) el.style.filter = e > 0.02 ? `blur(${(e * 9).toFixed(1)}px)` : "none";
           el.style.opacity = String(1 - Math.pow(e, 1.3));
         });
         barEl().style.opacity = String(1 - Math.min(1, shCur / 0.12));
@@ -244,7 +245,7 @@ export default function Journey() {
         el.style.opacity = v;
         const into = 1 - sm(a, b, p), out = sm(c, d, p);
         el.style.transform = `translate3d(0,${into * 36 - out * 28}px,0)`;
-        el.style.filter = v < 0.98 ? `blur(${((1 - v) * 10).toFixed(1)}px)` : "none";
+        if (!IS_MOBILE) el.style.filter = v < 0.98 ? `blur(${((1 - v) * 10).toFixed(1)}px)` : "none";
       });
 
       // readouts (throttled)

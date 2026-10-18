@@ -1,6 +1,7 @@
 // "Hold to collaborate" — state machine + effects. The 3D world (landscape + hands) is drawn by gl3d.js on one canvas; sparks, petals,
 // shock rings and the flash are drawn here on a transparent 2D canvas on top.
 import { createGL3D } from "./gl3d.js";
+import { capDpr } from "../../lib/perf.js";
 const TAU = Math.PI * 2;
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -19,7 +20,7 @@ export function createScene(glCanvas, fxCanvas) {
 
   function resize() {
     const r = fxCanvas.getBoundingClientRect();
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = capDpr(2, 1.25);
     W = Math.max(2, Math.round(r.width * dpr)); H = Math.max(2, Math.round(r.height * dpr));
     fxCanvas.width = W; fxCanvas.height = H;
     S = Math.max(W / 1750, H / 1050);

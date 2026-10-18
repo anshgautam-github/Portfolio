@@ -1,3 +1,4 @@
+import { capDpr } from "../../lib/perf.js";
 /* A small living neural network drawn on a canvas: signals travel layer to layer, nodes light up and ring when a signal
    arrives, the pointer excites and tugs nearby nodes, a click fires a wave from the input layer. Runs only while started. */
 const LAYERS = [3, 5, 6, 5, 2];
@@ -24,7 +25,7 @@ export function createNet(canvas) {
     });
   };
   const size = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const dpr = capDpr(1.5, 1.25);
     const r = canvas.getBoundingClientRect();
     W = r.width; H = r.height;
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);

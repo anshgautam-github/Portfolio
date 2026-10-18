@@ -25,7 +25,7 @@ export function splitChars(el) {
         const c = document.createElement("span");
         c.dataset.ch = "1";
         c.setAttribute("aria-hidden", "true");
-        c.style.cssText = "display:inline-block;will-change:transform";
+        c.style.cssText = "display:inline-block";
         c.textContent = ch;
         word.appendChild(c);
       }
