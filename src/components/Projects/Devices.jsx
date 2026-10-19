@@ -1,5 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BuilderScreen, LoginScreen, TrackerScreen } from "./Screens.jsx";
+import { IS_MOBILE } from "../../lib/perf.js";
+
+// the laptop base is an extruded stack of outlines: 16 x 1px on desktop, 8 x 2px on phones (same thickness, half the layers)
+const SLABS = IS_MOBILE ? 8 : 16;
+const SLAB_STEP = 16 / SLABS;
 
 /* scales a fixed-size "design" stage to the width of its container */
 function Fit({ w, h, children }) {
@@ -80,8 +85,8 @@ export function Laptop({ image, screen }) {
         <div className="pj-mb-scene">
           {/* base: an extruded slab (stacked outlines, so the rounded corners have no gaps) */}
           <div className="pj-mb-base">
-            {Array.from({ length: 16 }, (_, k) => (
-              <div key={k} className="pj-mb-slab" style={{ transform: `translateZ(${-(k + 1)}px)`, background: `hsl(235 6% ${27 - k * 1.1}%)` }} />
+            {Array.from({ length: SLABS }, (_, k) => (
+              <div key={k} className="pj-mb-slab" style={{ transform: `translateZ(${-(k + 1) * SLAB_STEP}px)`, background: `hsl(235 6% ${27 - k * SLAB_STEP * 1.1}%)` }} />
             ))}
             <div className="pj-mb-deck">
               <div className="pj-mb-grill l" />

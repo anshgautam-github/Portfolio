@@ -262,7 +262,9 @@ export default function Warp({
           const st = s.querySelector("[data-stage]");
           const gh = s.querySelector("[data-ghost]");
           const dir = s.classList.contains("side-left") ? 1 : -1;
-          tl.fromTo(s, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: "none", ...nf }, T);
+          // 1% opacity a beat early: the browser paints + rasterises the heavy 3D device now, instead of in the middle of the reveal
+          tl.fromTo(s, { autoAlpha: 0 }, { autoAlpha: 0.01, duration: 0.05, ease: "none", ...nf }, Math.max(0.01, T - 1.4));
+          tl.fromTo(s, { autoAlpha: 0.01 }, { autoAlpha: 1, duration: 0.5, ease: "none", ...nf }, T);
           tl.fromTo(ts, { y: 44, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, stagger: 0.08, ease: "power3.out", ...nf }, T + 0.1);
           tl.fromTo(st, { x: dir * 140, scale: 0.94 }, { x: 0, scale: 1, duration: 1.1, ease: "power3.out", ...nf }, T);
           tl.fromTo(gh, { y: 140, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1.2, ease: "power3.out", ...nf }, T);

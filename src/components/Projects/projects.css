@@ -325,8 +325,6 @@
 .pj-mb-screen {
   width: 100%;
   height: 100%;
-  opacity: clamp(0, calc((var(--p, 1) - 0.5) * 3), 1);
-  filter: brightness(calc(0.45 + var(--p, 1) * 0.55));
 }
 .pj-mb-screen img,
 .pj-ph-screen img {
@@ -348,7 +346,6 @@
   width: 720px;
   height: 80px;
   background: radial-gradient(closest-side, rgba(0, 0, 0, 0.34), transparent);
-  filter: blur(8px);
   opacity: calc(0.35 + var(--p, 1) * 0.65);
   position: absolute;
   pointer-events: none;
@@ -442,7 +439,6 @@
   width: 520px;
   height: 60px;
   background: radial-gradient(closest-side, rgba(0, 0, 0, 0.3), transparent);
-  filter: blur(8px);
 }
 
 /* ===================================================================== built-in mock interfaces */
@@ -1108,3 +1104,7 @@
   .pj-w > span, .pj-tags li { transform: none; opacity: 1; transition: none; }
   .pj-bg i, .pj-orbit, .pj-chip, .pj-head::before, .pj-scroll span { animation: none; }
 }
+
+/* Keep the animated 3D layers on their own compositor layers with a fixed raster scale: otherwise the browser re-rasterises the
+   (large) laptop / phones every time the lid or tilt changes the projected scale, which is what stutters on phones. */
+.pj-mb-scene, .pj-mb-base, .pj-mb-lid, .pj-ph-scene, .pj-ph { will-change: transform; }

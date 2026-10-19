@@ -53,6 +53,10 @@ export default function Journey() {
         () => { terrain = createTerrain(gl); },
         () => { city = createCity(gl); },
         () => { core3d = createCore(gl); },
+        // the signature is sampled into svg space now (it used to freeze the first frame of the transition for hundreds of ms)
+        () => { portal.prewarm(document.querySelector(".rv-sig")); },
+        // one throw-away 4x4 draw so the driver compiles the Earth shader now, not in the middle of the transition
+        () => { if (earth) { gl.viewport(0, 0, 4, 4); earth.draw(4, 4, earthState(0, 0), 0); gl.viewport(0, 0, W, H); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT); } },
         () => { ready = !!(earth && terrain); if (!ready) setNoGL(true); },
       ];
       let si = 0;
@@ -97,6 +101,7 @@ export default function Journey() {
     let target = 0, cur = 0, active = false, last = 0, frames = 0, slow = 0, acc = 0, lastP = -1, tick = 0;
     const T0 = performance.now();
     let jacc = 0;
+    let sceneHidden = false;   // the Earth layer is at opacity 0 during the first half of the ink-to-planet transition: do not render it
 
     const setT = (prog) => {
       const v0 = prog * TOT;
@@ -159,6 +164,7 @@ export default function Journey() {
         const nw = Math.round(cw * Math.min(dpr, IS_MOBILE ? 1 : 1.5)), nh = Math.round(ch * Math.min(dpr, IS_MOBILE ? 1 : 1.5));
         if (irisEl.width !== nw || irisEl.height !== nh) { irisEl.width = pw = nw; irisEl.height = ph = nh; }
         const a = sm(0.55, 0.92, i), z = 1 + 0.5 * Math.pow(1 - sm(0.45, 1, i), 2);   // the planet fades up out of the light while flying in from close range
+        sceneHidden = a < 0.004;
         pin.current.style.opacity = i >= 0.999 ? "1" : a.toFixed(3);
         pin.current.style.transform = i >= 0.999 ? "none" : `scale(${z.toFixed(4)})`;
         irisEl.style.opacity = i <= 0.001 || i >= 0.999 ? "0" : "1";
@@ -187,7 +193,7 @@ export default function Journey() {
       const S = { p, earth: es, ter: ts, city, labels: CITY_LABELS };
 
       const shat = shCur > 0.0005;
-      if (!snapped) {
+      if (!snapped && !(sceneHidden && !shat)) {
         // WebGL
         if (ready) {
           const sE = showEarth(p), sT = showTerrain(p);

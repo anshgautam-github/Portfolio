@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { content } from "../../content.js";
 import CardArt from "../Socials/CardArt.jsx";
+import { IS_MOBILE } from "../../lib/perf.js";
 
 export default function Hero() {
   const root = useRef(null);
@@ -25,18 +26,27 @@ export default function Hero() {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         /* ---------- entrance ---------- */
-        gsap
+        // the giant wordmark is the heaviest thing to paint: promote each letter to its own layer up front, and start the
+        // entrance only once the font is loaded and a frame has painted, so the slide-up never competes with layout / font swap
+        const lt = q("[data-letter]");
+        gsap.set(lt, { yPercent: 115, force3D: true, willChange: "transform" });
+        const tl = gsap
           .timeline({
+            paused: true,
             defaults: { ease: "power4.out", force3D: true },
             // drop leftover transforms so Safari re-rasterizes the text crisp at rest
-            onComplete: () => gsap.set([q("[data-word]"), q("[data-letter]"), q("[data-nav]"), q("[data-fade]")], { clearProps: "transform,opacity,visibility" }),
+            onComplete: () => gsap.set([q("[data-word]"), q("[data-letter]"), q("[data-nav]"), q("[data-fade]")], { clearProps: "transform,opacity,visibility,willChange" }),
           })
           .from(q("[data-nav]"), { y: -16, autoAlpha: 0, duration: 0.8, stagger: 0.06 }, 0)
           .from(q("[data-word]"), { yPercent: 110, duration: 1, stagger: 0.035 }, 0.15)
-          .from(q("[data-letter]"), { yPercent: 115, duration: 1.1, stagger: 0.045 }, 0.45)
+          .to(lt, { yPercent: 0, duration: IS_MOBILE ? 1.25 : 1.1, stagger: 0.05, ease: IS_MOBILE ? "expo.out" : "power4.out", overwrite: "auto" }, IS_MOBILE ? 0.55 : 0.45)
           .from(q("[data-fade]"), { y: 18, autoAlpha: 0, duration: 0.8, stagger: 0.08 }, 0.7)
           .from(q("[data-tab]"), { xPercent: 100, duration: 0.9 }, 0.9)
           .from(pill.current, { scale: 0.6, autoAlpha: 0, duration: 0.7, ease: "back.out(2)" }, 1);
+        let go = true;
+        const start = () => { if (go) tl.play(); };
+        const fontsReady = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 900))]) : Promise.resolve();
+        fontsReady.then(() => requestAnimationFrame(() => requestAnimationFrame(start)));
 
         /* ---------- cursor: pill follows, images spawn along the path and fade away ---------- */
         const items = pool.current.filter(Boolean);
@@ -109,6 +119,7 @@ export default function Hero() {
         el.addEventListener("pointerleave", onLeave);
         window.addEventListener("resize", onResize);
         return () => {
+          go = false;
           el.removeEventListener("pointermove", onMove);
           el.removeEventListener("pointerleave", onLeave);
           window.removeEventListener("resize", onResize);

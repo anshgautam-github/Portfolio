@@ -268,7 +268,7 @@ void main(){
 
 function shader(gl, type, src) {
   const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  if (!gl.getExtension("KHR_parallel_shader_compile") && !gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
   return s;
 }
 
@@ -345,17 +345,34 @@ function placeHand(out, off, pose, t, yaw, pitch, roll, mz, sleeve, bbOut, bbOff
 }
 
 export function createGL3D(canvas) {
+  let vao;
   const gl = canvas.getContext("webgl2", { antialias: false, alpha: false, powerPreference: "high-performance" });
   if (!gl) return null;
   const pr = gl.createProgram();
   gl.attachShader(pr, shader(gl, gl.VERTEX_SHADER, VS)); gl.attachShader(pr, shader(gl, gl.FRAGMENT_SHADER, FS));
   gl.linkProgram(pr);
-  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
-  gl.useProgram(pr);
-  const U = (n) => gl.getUniformLocation(pr, n);
-  const u = { res: U("uRes"), time: U("uTime"), tension: U("uTension"), calm: U("uCalm"), p: U("uP"), hv: U("uHv"), cam: U("uCam"), mouse: U("uMouse"), dbg: U("uDbg"), c: U("uC"), cuff: U("uCuff"), dream: U("uDream"), hasTex: U("uHasTex"), tex: U("uTex"), bb: U("uBB") };
+  // Compile/link is the one big stall on phones (huge raymarching shader). With KHR_parallel_shader_compile it runs on a driver thread
+  // and we only touch the program once it reports done, so scrolling never blocks on it.
+  const par = gl.getExtension("KHR_parallel_shader_compile");
+  let ready = false, failed = false, u = null;
+  const finish = () => {
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+    gl.useProgram(pr);
+    const U = (n) => gl.getUniformLocation(pr, n);
+    u = { res: U("uRes"), time: U("uTime"), tension: U("uTension"), calm: U("uCalm"), p: U("uP"), hv: U("uHv"), cam: U("uCam"), mouse: U("uMouse"), dbg: U("uDbg"), c: U("uC"), cuff: U("uCuff"), dream: U("uDream"), hasTex: U("uHasTex"), tex: U("uTex"), bb: U("uBB") };
+    // one throw-away draw into a 4x4 viewport so any lazy driver work happens here, not on the first visible frame
+    gl.viewport(0, 0, 4, 4); gl.uniform2f(u.res, 4, 4); gl.bindVertexArray(vao); gl.drawArrays(gl.TRIANGLES, 0, 3);
+    ready = true;
+  };
+  const poll = () => {
+    if (ready) return true;
+    if (failed) return false;
+    if (par && !gl.getProgramParameter(pr, par.COMPLETION_STATUS_KHR)) return false;
+    try { finish(); } catch (e) { failed = true; console.warn("[collab] WebGL scene unavailable", e); return false; }
+    return true;
+  };
   const caps = new Float32Array(84 * 4), bb = new Float32Array(16), cuff = new Float32Array(16);
-  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+  vao = gl.createVertexArray(); gl.bindVertexArray(vao);
   // optional photo backdrop: drop a landscape photo at public/collab/scene.jpg and it replaces the procedural meadow
   let tex = null;
   try {
@@ -365,10 +382,13 @@ export function createGL3D(canvas) {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); tex = t; };
     im.src = "/collab/scene.jpg";
   } catch (e) { /* no photo: procedural scene */ }
+  if (!par) poll();
   return {
     gl,
+    ready: poll,
     // s: {t, p, tension, calm, hs(0..1 handshake), shake, jx, jy, mouse:[x,y], aspect}
     draw(w, h, s) {
+      if (!poll()) return;
       gl.viewport(0, 0, w, h);
       const a = w / h;
       const hv = Math.max(4.3, 7.6 / a);                       // visible world height at z = 0

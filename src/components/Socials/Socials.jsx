@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import { splitChars } from "../../lib/fx.js";
+import { IS_MOBILE } from "../../lib/perf.js";
 import CardArt from "./CardArt.jsx";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -90,9 +91,9 @@ export default function Socials() {
             rotation: 0,
             scale: 1 - dist * 0.045,
             autoAlpha: 0,
-            filter: "blur(14px)",
+            ...(IS_MOBILE ? {} : { filter: "blur(14px)" }),
           },
-          { x: 0, y: 0, rotation: c.rot, scale: 1, autoAlpha: 1, filter: "blur(0px)", duration: 1.35, immediateRender: true, clearProps: "filter" },
+          { x: 0, y: 0, rotation: c.rot, scale: 1, autoAlpha: 1, ...(IS_MOBILE ? {} : { filter: "blur(0px)", clearProps: "filter" }), duration: 1.35, immediateRender: true },
           dist * 0.09
         );
       });

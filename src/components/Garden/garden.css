@@ -559,3 +559,13 @@
 .gd-snd svg { width: 20px; height: 20px; }
 .gd[data-night="1"] .gd-snd { color: #eef0ff; background: linear-gradient(135deg, rgba(120,130,220,.3), rgba(40,46,110,.25)); border-color: rgba(190,200,255,.35); }
 @media (max-width: 767px) { .gd-snd { top: calc(64px + 48px); } }
+
+/* ---------- phones: drop the expensive, barely-visible stuff (mask/blur/filter layers animating every frame) ---------- */
+@media (max-width: 900px), (pointer: coarse) {
+  .gd-rays, .gd-shoot, .gd-balloon { display: none; }
+  .gd-grain { display: none; }
+  .gd-toggle, .gd-snd { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(255,255,255,.55); }
+  .gd-sun *, .gd-moon * { animation: none !important; }
+  .gd-pollen i:nth-child(n+7), .gd-fireflies i:nth-child(n+7) { display: none; }
+  .gd-birds > *:nth-child(n+3) { display: none; }
+}

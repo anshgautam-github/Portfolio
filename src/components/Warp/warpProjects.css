@@ -68,7 +68,7 @@
 /* v3: no plate / badges, visible numerals, glow + floor, calmer text backdrop */
 .wp-plate, .wp-chip { display: none; }
 .wp-glow { position: absolute; left: 50%; top: 50%; width: 120%; aspect-ratio: 1.3; transform: translate(-50%, -50%) scale(calc(.8 + var(--p, 1) * .2)); background: radial-gradient(closest-side, rgba(90,140,255,.42), rgba(60,100,240,.14) 55%, transparent 75%); opacity: var(--p, 1); animation: wpPulse 6s ease-in-out infinite; pointer-events: none; }
-.wp-floor { position: absolute; left: 50%; bottom: 3%; width: 78%; height: 9%; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(closest-side, rgba(140,180,255,.55), rgba(80,130,255,.15) 60%, transparent); filter: blur(8px); opacity: var(--p, 1); pointer-events: none; }
+.wp-floor { position: absolute; left: 50%; bottom: 3%; width: 78%; height: 9%; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(closest-side, rgba(140,180,255,.55), rgba(80,130,255,.15) 60%, transparent); opacity: var(--p, 1); pointer-events: none; }
 .wp-stage.phones .wp-floor { width: 50%; }
 @keyframes wpPulse { 0%,100% { opacity: calc(var(--p, 1) * .8); } 50% { opacity: var(--p, 1); } }
 .wp-device { width: min(100%, 98vh); }
@@ -94,3 +94,18 @@
 .wp-stage.phones .wp-ring { width: 80%; }
 .wp-stage.phones .wp-ring.r2 { width: 62%; }
 @media (prefers-reduced-motion: reduce) { .wp-orb, .wp-ring, .wp-glow { animation: none; } }
+
+/* ---- performance ---- */
+/* slides that are not on screen must not keep animating */
+.wp-slide[style*="visibility: hidden"] :is(.wp-glow, .wp-orb, .wp-ring, .wp-chip) { animation-play-state: paused; }
+/* these are all driven by --p / GSAP every frame: give them their own layers so a fade or move never repaints (and re-rasterises) their neighbours */
+.wp-slide, .wp-ghost, .wp-glow, .wp-floor, .wp-orb, .wp-ring { will-change: transform, opacity; }
+.pj-mb-glow, .pj-mb-shadow, .pj-ph-shadow { will-change: opacity; }
+/* phones / touch: drop everything that needs a per-frame GPU blur, mask or render surface on top of the live canvas */
+@media (max-width: 900px), (pointer: coarse) {
+  .wp-glow, .wp-orb, .wp-ring { animation: none; }
+  .wp-ring { display: none; }
+  .wp-tags li { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(28, 44, 96, .72); }
+  .wp-ghost { filter: none; }
+  .wp-text::before { background: radial-gradient(closest-side, rgba(3,5,12,.7) 50%, rgba(3,5,12,0)); }
+}
