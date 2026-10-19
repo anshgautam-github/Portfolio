@@ -109,3 +109,7 @@
   .wp-ghost { filter: none; }
   .wp-text::before { background: radial-gradient(closest-side, rgba(3,5,12,.7) 50%, rgba(3,5,12,0)); }
 }
+
+/* phones: cut the device subtree off from the slide's animated --p (see Warp.jsx); it rests in its final pose and is moved with transforms */
+html.is-mobile .wp-device { --p: 1; contain: layout style; }
+html.is-mobile .pj-mb-glow, html.is-mobile .pj-mb-shadow, html.is-mobile .pj-ph-shadow { will-change: auto; }

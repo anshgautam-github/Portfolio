@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { createWarpEngine } from "./warpEngine.js";
 import WarpProjects from "./WarpProjects.jsx";
+import { IS_MOBILE } from "../../lib/perf.js";
 import { perf } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -269,6 +270,17 @@ export default function Warp({
           tl.fromTo(st, { x: dir * 140, scale: 0.94 }, { x: 0, scale: 1, duration: 1.1, ease: "power3.out", ...nf }, T);
           tl.fromTo(gh, { y: 140, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1.2, ease: "power3.out", ...nf }, T);
           tl.fromTo(s, { "--p": 0 }, { "--p": 1, duration: 1.4, ease: "power2.out", ...nf }, T + 0.1);
+          if (IS_MOBILE) {
+            // phones: the device subtree is pinned to --p:1 in CSS (a changing inherited variable re-styles every one of its ~300 nodes
+            // each frame). The entrance is done with plain transforms on one or two elements instead, which never touch style/layout.
+            const dev = s.querySelector(".wp-device");
+            const lid = s.querySelector(".pj-mb-lid");
+            if (dev) tl.fromTo(dev, { y: 56, scale: 0.94, force3D: true }, { y: 0, scale: 1, duration: 1.3, ease: "power2.out", ...nf }, T + 0.1);
+            if (lid) {
+              gsap.set(lid, { x: 0, y: -3, z: -250, rotationX: -90, transformOrigin: "50% 100%", force3D: true });
+              tl.to(lid, { rotationX: 6, duration: 1.4, ease: "power2.out" }, T + 0.1);
+            }
+          }
           if (dots[i]) {
             tl.fromTo(dots[i], { "--on": 0 }, { "--on": 1, duration: 0.5, ease: "none", ...nf }, T + 0.1);
           }

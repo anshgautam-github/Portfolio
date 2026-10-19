@@ -30,7 +30,7 @@ function Fit({ w, h, children }) {
 function useTilt(ref) {
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || IS_MOBILE) return; // touch: no pointer tilt (each --tx/--ty write re-styles the whole device)
     const t = { x: 0, y: 0, h: 0 };
     const c = { x: 0, y: 0, h: 0 };
     let raf = 0;
