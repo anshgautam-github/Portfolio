@@ -189,15 +189,18 @@ export default function Warp({
 
         /* ---- ENTRY: as this section slides in under the white screen, a dark disc blooms out of the seam with a glowing rim,
            a hyperspace burst tears past, and the intro caption slams in. Scrubbed with the scroll. ---- */
-        const rim = q("[data-rim]")[0];
-        const b1 = q("[data-burst1]")[0];
-        const b2 = q("[data-burst2]")[0];
+        // phones skip the expanding clip-path disc, the 250vmax glowing rim and the two 120vmax masked spoke layers: each one forces a
+        // full-screen repaint (or a giant GPU layer) on every scroll frame. They get a plain cross-fade instead.
+        const rim = IS_MOBILE ? null : q("[data-rim]")[0];
+        const b1 = IS_MOBILE ? null : q("[data-burst1]")[0];
+        const b2 = IS_MOBILE ? null : q("[data-burst2]")[0];
         const R = () => Math.hypot(window.innerWidth, window.innerHeight) * 1.06;
         const enter = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: { trigger: wrap.current, start: "top bottom", end: "top top", scrub: 0.5, invalidateOnRefresh: true, onUpdate: (self) => (flag.on = self.progress > 0 && self.progress < 1), onLeave: () => (flag.on = false), onLeaveBack: () => (flag.on = false) },
         });
-        enter.fromTo(el, { clipPath: () => "circle(0px at 50% 0px)" }, { clipPath: () => `circle(${R()}px at 50% 0px)`, ease: "power2.in", duration: 1 }, 0);
+        if (IS_MOBILE) enter.fromTo(el, { autoAlpha: 0, y: 36, force3D: true }, { autoAlpha: 1, y: 0, ease: "power2.out", duration: 0.7 }, 0);
+        else enter.fromTo(el, { clipPath: () => "circle(0px at 50% 0px)" }, { clipPath: () => `circle(${R()}px at 50% 0px)`, ease: "power2.in", duration: 1 }, 0);
         if (rim) {
           enter.fromTo(rim, { scale: 0, autoAlpha: 1 }, { scale: () => R() / (1.28 * Math.max(window.innerWidth, window.innerHeight)), ease: "power2.in", duration: 1 }, 0);
           enter.to(rim, { autoAlpha: 0, duration: 0.18 }, 0.82);
@@ -220,7 +223,7 @@ export default function Warp({
 
         /* intro caption leaves as the blue floods the screen */
         const intro = q("[data-intro]")[0];
-        if (intro) tl.to(intro, { autoAlpha: 0, y: -46, filter: "blur(10px)", duration: 1.15, ease: "power2.inOut" }, 0.55);
+        if (intro) tl.to(intro, { autoAlpha: 0, y: -46, ...(IS_MOBILE ? {} : { filter: "blur(10px)" }), duration: 1.15, ease: "power2.inOut" }, 0.55);
 
         /* mid caption: lives on the blue while the cursor swallows the screen, with a counting percentage */
         const mid = q("[data-mid]")[0];
@@ -230,8 +233,8 @@ export default function Warp({
           const nf0 = { immediateRender: false };
           // pin the resting (hidden) state up front so nothing can flash before its cue, whatever the scroll jumps do
           gsap.set(mid, { autoAlpha: 1 });
-          gsap.set(ms, { y: 38, autoAlpha: 0, scale: 0.96, filter: "blur(14px)" });
-          tl.to(ms, { y: 0, autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 1.4, stagger: 0.18, ease: "power2.out" }, 2.0);
+          gsap.set(ms, { y: 38, autoAlpha: 0, scale: 0.96, ...(IS_MOBILE ? {} : { filter: "blur(14px)" }) });
+          tl.to(ms, { y: 0, autoAlpha: 1, scale: 1, ...(IS_MOBILE ? {} : { filter: "blur(0px)" }), duration: 1.4, stagger: 0.18, ease: "power2.out" }, 2.0);
           const c = { v: 0 };
           tl.to(c, { v: 100, duration: 2.5, ease: "none", onUpdate: () => {
             if (cnt) cnt.textContent = String(Math.round(c.v)).padStart(2, "0");

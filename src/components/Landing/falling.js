@@ -11,10 +11,11 @@
  * behind the glass lettering, so they show through (refracted) the "ansh" letters whenever they pass behind them.
  */
 import { STICKER_ORDER, STICKER_SCALE, stickerSvg } from "./stickers.js";
+import { IS_MOBILE } from "../../lib/perf.js";
 
 export const ATLAS_COLS = 4;          // 4 x 4 cells = up to 16 stickers
-export const ATLAS_CELL = 320;        // texels per cell
-const ART = 256;                      // sticker artwork size inside a cell (the rest is padding for the soft shadow)
+export const ATLAS_CELL = IS_MOBILE ? 200 : 320;   // texels per cell (phones draw stickers <=160px: a 2.5x smaller atlas to decode, upload and mip)
+const ART = IS_MOBILE ? 160 : 256;                      // sticker artwork size inside a cell (the rest is padding for the soft shadow)
 const QUAD = ATLAS_CELL / ART;        // sprite quad / artwork size
 
 /** which stickers pile up at the bottom (in order of arrival); everything else drifts down and vanishes */

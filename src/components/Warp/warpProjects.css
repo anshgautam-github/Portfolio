@@ -113,3 +113,8 @@
 /* phones: cut the device subtree off from the slide's animated --p (see Warp.jsx); it rests in its final pose and is moved with transforms */
 html.is-mobile .wp-device { --p: 1; contain: layout style; }
 html.is-mobile .pj-mb-glow, html.is-mobile .pj-mb-shadow, html.is-mobile .pj-ph-shadow { will-change: auto; }
+
+@media (max-width: 900px), (pointer: coarse) {
+  .wp-text h3, .wp-text p { text-shadow: none; }
+  .wp-ghost { -webkit-text-stroke-width: 1.5px; }
+}

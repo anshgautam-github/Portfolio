@@ -208,7 +208,7 @@ export function createWarpEngine(canvas, S) {
   let lastY = typeof window !== "undefined" ? window.scrollY : 0;
 
   /* ---- streaks ---- */
-  const N = IS_MOBILE ? 360 : 900;
+  const N = IS_MOBILE ? 220 : 900;
   const streaks = [];
   for (let i = 0; i < N; i++) {
     const s = { u: (i + 0.5) / N, a: i * 2.399963 + (Math.random() - 0.5) * 0.12 };
@@ -256,7 +256,7 @@ export function createWarpEngine(canvas, S) {
 
   function resize() {
     const r = canvas.getBoundingClientRect();
-    dpr = capDpr(1.5, 1.25);
+    dpr = capDpr(1.5, 1);
     w = Math.max(1, r.width);
     h = Math.max(1, r.height);
     canvas.width = Math.round(w * dpr);
@@ -370,7 +370,7 @@ export function createWarpEngine(canvas, S) {
 
       // extruded side — a stack of offset copies, lighter toward the back
       if (S.tilt > 0.01 && S.cs < 14) {
-        const L = 16;
+        const L = IS_MOBILE ? 6 : 16;
         const depth = sc * 0.075 * S.tilt;
         const ang = -2.35 + rot * 0.35;
         const dx = Math.cos(ang) * depth;

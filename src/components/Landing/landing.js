@@ -91,7 +91,8 @@ export function mountLanding(root, content = landingContent, options = {}) {
   const sprites = createFallingStickers({ startDelay: 0.9, stagger: 0.55, onImpact: tick });
   let glass = null;
   try { glass = createGlassScene(canvas, { ...(options.glass || {}), sprites }); } catch (e) { console.warn("[landing] glass failed:", e); }
-  if (!glass) canvas.style.background = "linear-gradient(135deg,#c5dcf0,#fdf3e1 55%,#c5dcf0)";
+  // shown while the WebGL scene is still being prepared (and as the fallback if it cannot start); the opaque canvas covers it once drawing begins
+  canvas.style.background = "linear-gradient(135deg,#c5dcf0,#fdf3e1 55%,#c5dcf0)";
 
   /* ---------- pointer ---------- */
   let lastX = 0, lastY = 0, lastT = 0, hasLast = false;

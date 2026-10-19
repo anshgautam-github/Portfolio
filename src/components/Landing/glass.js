@@ -459,19 +459,34 @@ function compile(gl, type, src) {
   }
   return sh;
 }
+// With KHR_parallel_shader_compile the driver compiles on its own thread: we start all programs, keep the page responsive, and only
+// touch a program (link status, uniforms) once `done()` says it has finished. Without the extension it behaves as before.
 function program(gl, fs) {
+  const par = gl.getExtension("KHR_parallel_shader_compile");
   const p = gl.createProgram();
-  gl.attachShader(p, compile(gl, gl.VERTEX_SHADER, VERT));
-  gl.attachShader(p, compile(gl, gl.FRAGMENT_SHADER, fs));
+  const vs = gl.createShader(gl.VERTEX_SHADER), fsh = gl.createShader(gl.FRAGMENT_SHADER);
+  gl.shaderSource(vs, VERT); gl.compileShader(vs);
+  gl.shaderSource(fsh, fs); gl.compileShader(fsh);
+  gl.attachShader(p, vs); gl.attachShader(p, fsh);
   gl.linkProgram(p);
-  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error("link: " + gl.getProgramInfoLog(p));
   const u = {};
-  const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
-  for (let i = 0; i < n; i++) {
-    const info = gl.getActiveUniform(p, i);
-    u[info.name.replace(/\[0\]$/, "")] = gl.getUniformLocation(p, info.name);
-  }
-  return { p, u };
+  let finished = false;
+  const finish = () => {
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error("link: " + gl.getProgramInfoLog(p) + gl.getShaderInfoLog(fsh));
+    const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < n; i++) {
+      const info = gl.getActiveUniform(p, i);
+      u[info.name.replace(/\[0\]$/, "")] = gl.getUniformLocation(p, info.name);
+    }
+    finished = true;
+  };
+  const prog = { p, u, done() {
+    if (finished) return true;
+    if (par && !gl.getProgramParameter(p, par.COMPLETION_STATUS_KHR)) return false;
+    finish(); return true;
+  } };
+  if (!par) finish();
+  return prog;
 }
 
 function makeTarget(gl, w, h, encoded) {
@@ -517,29 +532,40 @@ export function createGlassScene(canvas, opts = {}) {
   gl.getExtension("OES_texture_float_linear");
 
   /* ---- height map ---- */
-  const HSCALE = opts.heightScale || 2.25;
-  const hf = buildHeightField(HSCALE);
+  // The two lookup maps (letter height field + pen timeline) are CPU-heavy to build. They are made in separate tasks AFTER the first
+  // paint, so the page never freezes at start-up; the render loop simply waits until they (and the shaders) are ready.
+  // On phones the height field is ~4x smaller (the glyphs are only ~400px wide there, so it is still sharper than the screen).
+  const HSCALE = opts.heightScale || (IS_MOBILE ? 1.1 : 2.25);
+  let hf = { w: 1, h: 1 }, wm = { total: 1 }, writeSeconds = 1, mapsReady = false;
   const heightTex = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, heightTex);
-  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.R16F, hf.w, hf.h, 0, gl.RED, gl.FLOAT, hf.data);
-  gl.generateMipmap(gl.TEXTURE_2D);                      // mips are only used for the soft shadow
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  const wm = buildWriteMap();
+  const writeTex = gl.createTexture();
+  const buildHF = () => {
+    hf = buildHeightField(HSCALE);
+    gl.bindTexture(gl.TEXTURE_2D, heightTex);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R16F, hf.w, hf.h, 0, gl.RED, gl.FLOAT, hf.data);
+    gl.generateMipmap(gl.TEXTURE_2D);                      // mips are only used for the soft shadow
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  };
+  const buildWM = () => {
+    wm = buildWriteMap();
+    writeSeconds = (wm.total / PEN_SPEED) * 1.1;           // both pens move at PEN_SPEED, so the longer one sets the time
+    gl.bindTexture(gl.TEXTURE_2D, writeTex);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R16F, wm.w, wm.h, 0, gl.RED, gl.FLOAT, wm.data);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    mapsReady = true;
+  };
   // gentle ease-in / ease-out of the pen (blend of linear and smoothstep): starts softly, glides, settles softly
   const easeWrite = (p) => p + (p * p * (3 - 2 * p) - p) * 0.45;
-  const writeSeconds = (wm.total / PEN_SPEED) * 1.1;           // both pens move at PEN_SPEED, so the longer one sets the time
-  const writeTex = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, writeTex);
-  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.R16F, wm.w, wm.h, 0, gl.RED, gl.FLOAT, wm.data);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  let buildTimer = 0, buildRaf = 0;
+  buildRaf = requestAnimationFrame(() => { buildTimer = setTimeout(() => { buildHF(); buildTimer = setTimeout(buildWM, 16); }, 0); });
   // falling-sticker sprite atlas (drawn behind the glass inside the shader)
   const sprites = opts.sprites || null;
   const atlasTex = gl.createTexture();
@@ -580,7 +606,7 @@ export function createGlassScene(canvas, opts = {}) {
   let introT0 = -1;
 
   const allocFlow = () => {
-    const fw = IS_MOBILE ? 320 : 512;
+    const fw = IS_MOBILE ? 256 : 512;
     const fh = Math.max(96, Math.round(fw / aspect));
     for (const t of [flowA, flowB]) if (t) { gl.deleteTexture(t.tex); gl.deleteFramebuffer(t.fbo); }
     flowA = makeTarget(gl, fw, fh, encoded);
@@ -632,10 +658,18 @@ export function createGlassScene(canvas, opts = {}) {
 
   const drawTri = () => gl.drawArrays(gl.TRIANGLES, 0, 3);
 
+  let progFail = false;
+  const progsOk = () => {
+    if (progFail) return false;
+    try { const a = progBg.done(), b = progFlow.done(), c = progScene.done(); return a && b && c; }
+    catch (e) { progFail = true; console.warn("[landing] WebGL shader failed", e); return false; }
+  };
+
   const frame = (now) => {
     if (destroyed) return;
     raf = requestAnimationFrame(frame);
     if (!visible || paused) { last = now; return; }
+    if (!mapsReady || !progsOk()) { last = now; t0 = now; return; }
     if (skipFrame(now, last)) return;
     const dt = opts.fixedDt || Math.min(0.05, Math.max(0.001, (now - last) / 1000));
     last = now;
@@ -665,7 +699,7 @@ export function createGlassScene(canvas, opts = {}) {
     const simulate = opts.fixedDt ? true : tSec < activeUntil;
     gl.disable(gl.BLEND);
     /* --- 1) update the gel: a few fixed sub-steps of a damped spring + wave simulation --- */
-    const SUB = 3;
+    const SUB = IS_MOBILE ? 2 : 3;
     const sdt = dt / SUB;
     const fu = progFlow.u;
     const texelsPerUnit = flowB.h;                       // 1 unit = viewport height
@@ -798,6 +832,7 @@ export function createGlassScene(canvas, opts = {}) {
     destroy() {
       destroyed = true;
       cancelAnimationFrame(raf);
+      cancelAnimationFrame(buildRaf); clearTimeout(buildTimer);
       io.disconnect();
       ro.disconnect();
       canvas.removeEventListener("webglcontextlost", onLost);
