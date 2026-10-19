@@ -10,6 +10,7 @@
  */
 import { MASK_W, MASK_H, STROKE, PEN_SPEED, buildHeightField, buildWriteMap } from "./helloPath.js";
 import { capDpr, skipFrame, IS_MOBILE } from "../../lib/perf.js";
+import { loaderTask, isReleased } from "../../lib/loader.js";
 
 const VERT = `#version 300 es
 precision highp float;
@@ -526,6 +527,11 @@ export function createGlassScene(canvas, opts = {}) {
     return null;
   }
 
+  // the page-load overlay stays up until this scene has built its maps, compiled its shaders and drawn one warm frame
+  const doneTask = loaderTask();
+  let taskDone = false;
+  const finishTask = () => { taskDone = true; doneTask(); };
+
   // float render targets if we can, otherwise 8-bit encoded
   gl.getExtension("EXT_color_buffer_float");
   gl.getExtension("EXT_color_buffer_half_float");
@@ -662,7 +668,7 @@ export function createGlassScene(canvas, opts = {}) {
   const progsOk = () => {
     if (progFail) return false;
     try { const a = progBg.done(), b = progFlow.done(), c = progScene.done(); return a && b && c; }
-    catch (e) { progFail = true; console.warn("[landing] WebGL shader failed", e); return false; }
+    catch (e) { progFail = true; finishTask(); console.warn("[landing] WebGL shader failed", e); return false; }
   };
 
   const frame = (now) => {
@@ -670,6 +676,10 @@ export function createGlassScene(canvas, opts = {}) {
     raf = requestAnimationFrame(frame);
     if (!visible || paused) { last = now; return; }
     if (!mapsReady || !progsOk()) { last = now; t0 = now; return; }
+    // until the loader curtain opens: keep drawing (so everything gets warmed up) but hold the clock at zero, so the name is not
+    // written and no sticker falls behind the loader
+    const held = !isReleased() && !opts.fixedDt;
+    if (held) t0 = now;
     if (skipFrame(now, last)) return;
     const dt = opts.fixedDt || Math.min(0.05, Math.max(0.001, (now - last) / 1000));
     last = now;
@@ -734,7 +744,7 @@ export function createGlassScene(canvas, opts = {}) {
       const t = flowA; flowA = flowB; flowB = t;
     }
 
-    if (sprites) {
+    if (sprites && !held) {
       // advance the sticker layer (piled physics + drifting paths) every frame
       const cssH2 = canvas.clientHeight || 1, cssW2 = canvas.clientWidth || 1;
       sprites.step(opts.time != null ? opts.time : (now - t0) / 1000, cssW2, cssH2, mouse.x * cssH2, mouse.y * cssH2, mouse.act > 0.05 && mouse.has, dt);
@@ -810,6 +820,7 @@ export function createGlassScene(canvas, opts = {}) {
     gl.uniform1f(su.uEnc, encoded ? 1 : 0);
     gl.uniform1f(su.uMax, MAXD);
     drawTri();
+    if (!taskDone && (!sprites || (sprites.loaded && sprites.version === atlasVer))) finishTask();
   };
 
   const io = new IntersectionObserver((e) => { visible = e[0].isIntersecting; }, { threshold: 0 });
@@ -831,6 +842,7 @@ export function createGlassScene(canvas, opts = {}) {
     },
     destroy() {
       destroyed = true;
+      finishTask();
       cancelAnimationFrame(raf);
       cancelAnimationFrame(buildRaf); clearTimeout(buildTimer);
       io.disconnect();

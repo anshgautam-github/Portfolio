@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Loader from "./components/Loader/Loader.jsx";
 import Reveal from "./components/Landing/Reveal.jsx";
 // import Hero from "./components/Hero/Hero.jsx"; // previous hero – still on disk, swap back here if you want it
 import Warp from "./components/Warp/Warp.jsx";
@@ -52,6 +53,7 @@ export default function App() {
 
   return (
     <>
+      <Loader />
       <Reveal />
       <Journey />
       <Warp />
