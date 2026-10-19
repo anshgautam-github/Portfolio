@@ -12,3 +12,8 @@
 .tk-hud--l { left: 2vw; }
 .tk-hud--r { right: 2vw; color: rgba(245,232,225,.4); }
 @media (max-width: 767px) { .tk-r-ax { font-size: 24px; } .tk-hud--r { display: none; } }
+
+/* phones: flatten the section so scrolling through / back into it stays on the compositor */
+html.is-mobile .tk-dots { -webkit-mask-image: none; mask-image: none; opacity: .5; }
+html.is-mobile .tk-spot { background: radial-gradient(60vmax 60vmax at 50% 55%, rgba(215,255,59,.08), transparent 70%); }
+html.is-mobile .tk-radar { contain: paint; }

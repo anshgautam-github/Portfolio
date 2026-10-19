@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import "./toolkit.css";
-import { capDpr, skipFrame } from "../../lib/perf.js";
+import { capDpr, skipFrame, IS_MOBILE } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -95,11 +95,11 @@ function SkillRadar() {
 
       {/* rotating measuring ticks */}
       <g>
-        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="140s" repeatCount="indefinite" />
+        {!IS_MOBILE && <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="140s" repeatCount="indefinite" />}
         <circle r="478" stroke="rgba(245,232,225,.22)" strokeWidth="14" strokeDasharray="1.6 19.6" />
       </g>
       <g>
-        <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="90s" repeatCount="indefinite" />
+        {!IS_MOBILE && <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="90s" repeatCount="indefinite" />}
         <circle r="446" stroke="rgba(215,255,59,.22)" strokeWidth="1.2" strokeDasharray="3 9" />
       </g>
 
@@ -130,14 +130,14 @@ function SkillRadar() {
 
       {/* scanner */}
       <g>
-        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="9s" repeatCount="indefinite" />
+        {!IS_MOBILE && <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="9s" repeatCount="indefinite" />}
         <path d={`M0 0 L${sweepEnd[0].toFixed(1)} ${sweepEnd[1].toFixed(1)} A${R_MAX} ${R_MAX} 0 0 1 ${R_MAX} 0 Z`} fill="url(#tk-r-sweep)" />
         <line x1="0" y1="0" x2={R_MAX} y2="0" stroke="rgba(215,255,59,.55)" strokeWidth="1.6" />
       </g>
 
       {/* the skill shape */}
       <g>
-        <animateTransform attributeName="transform" type="scale" values="1;1.035;1" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" dur="6s" repeatCount="indefinite" />
+        {!IS_MOBILE && <animateTransform attributeName="transform" type="scale" values="1;1.035;1" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" dur="6s" repeatCount="indefinite" />}
         <polygon points={poly} fill="url(#tk-r-fill)" stroke="rgba(215,255,59,.7)" strokeWidth="2.2" strokeLinejoin="round" />
         {RADAR.map((a, i) => {
           const [x, y] = rpt(i, a.v * R_MAX);
@@ -213,7 +213,7 @@ export default function Toolkit() {
                 start: "top top",
                 end: () => "+=" + T * H * PER,
                 pin: true,
-                scrub: 0.3,
+                scrub: IS_MOBILE ? true : 0.3,
                 anticipatePin: 1,
                 onUpdate: (self) => {
                   if (picked.current && Math.abs(self.progress - lastP.current) > 0.003) closePick.current();
@@ -486,7 +486,7 @@ export default function Toolkit() {
       m.vx = (x - m.x) * 22; m.vy = (y - m.y) * 22;
       if (m.x < -900) { m.vx = m.vy = 0; }
       m.x = x; m.y = y;
-      sp.style.setProperty("--mx", (x / W) * 100 + "%"); sp.style.setProperty("--my", (y / H) * 100 + "%");
+      if (!IS_MOBILE) { sp.style.setProperty("--mx", (x / W) * 100 + "%"); } if (!IS_MOBILE) sp.style.setProperty("--my", (y / H) * 100 + "%");
     };
     const onDown = (e) => {
       if (e.target.closest?.("[data-card]")) return;
@@ -569,7 +569,7 @@ export default function Toolkit() {
                 "radial-gradient(75% 55% at 12% 22%, #a63f3b 0%, transparent 60%), radial-gradient(95% 50% at 70% 85%, #6d4cc7 0%, transparent 70%), linear-gradient(180deg, #ee6f4e 0%, #e98660 34%, #8a60d3 62%, #a384e6 100%)",
             }}
           />
-          <div className="absolute inset-0 opacity-[0.28] mix-blend-overlay" style={{ borderRadius: "var(--r)", backgroundImage: GRAIN }} />
+          {!IS_MOBILE && <div className="absolute inset-0 opacity-[0.28] mix-blend-overlay" style={{ borderRadius: "var(--r)", backgroundImage: GRAIN }} />}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="font-display font-extrabold text-[#fbf1ea]" style={{ fontSize: "calc(var(--c) * 0.42)", lineHeight: 0.8, letterSpacing: "-0.09em" }}>
               {mark}
