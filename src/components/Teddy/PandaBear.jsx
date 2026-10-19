@@ -1,7 +1,7 @@
 import { useId } from "react";
 
 /**
- * The monitor-top rabbit: the same character as the corner <Rabbit /> (cream body, long pink-lined ears),
+ * The monitor-top panda: the same character as the corner <Panda /> (white body, black ears / eye patches / arms / feet),
  * drawn on the same 200x232 grid as the old bear so every mood animation in teddy.css (.is-wave, .is-walk, .is-hug,
  * .is-dance, .is-think, .is-scared, .is-talking) keeps working unchanged. Pure SVG + CSS. Props:
  *   mood     "idle" | "wave" | "walk" | "hug" | "dance" | "think" | "scared"
@@ -18,11 +18,11 @@ export default function PandaBear({ mood = "idle", talking = false }) {
       <defs>
         <radialGradient id={w} cx="40%" cy="28%" r="85%">
           <stop offset="0" stopColor="#ffffff" />
-          <stop offset="1" stopColor="#ebe0d8" />
+          <stop offset="1" stopColor="#dde1e8" />
         </radialGradient>
-        <radialGradient id={k} cx="40%" cy="28%" r="85%">
-          <stop offset="0" stopColor="#ffffff" />
-          <stop offset="1" stopColor="#e6dad1" />
+        <radialGradient id={k} cx="35%" cy="30%" r="80%">
+          <stop offset="0" stopColor="#40424b" />
+          <stop offset="1" stopColor="#15151a" />
         </radialGradient>
       </defs>
 
@@ -32,21 +32,23 @@ export default function PandaBear({ mood = "idle", talking = false }) {
         {/* feet */}
         <g className="ted-foot-l">
           <ellipse cx="64" cy="206" rx="27" ry="19" fill={`url(#${k})`} />
-          <ellipse cx="64" cy="209" rx="12" ry="8.5" fill="#ffb4c3" opacity="0.5" />
+          <ellipse cx="64" cy="209" rx="12" ry="8.5" fill="#fff" opacity="0.14" />
         </g>
         <g className="ted-foot-r">
           <ellipse cx="136" cy="206" rx="27" ry="19" fill={`url(#${k})`} />
-          <ellipse cx="136" cy="209" rx="12" ry="8.5" fill="#ffb4c3" opacity="0.5" />
+          <ellipse cx="136" cy="209" rx="12" ry="8.5" fill="#fff" opacity="0.14" />
         </g>
 
         {/* torso */}
         <ellipse cx="100" cy="162" rx="57" ry="55" fill={`url(#${w})`} />
         <ellipse cx="100" cy="171" rx="36" ry="38" fill="#fff" opacity="0.9" />
+        {/* the black shoulder band */}
+        <path d="M46 142 Q100 118 154 142 Q150 164 100 157 Q50 164 46 142 Z" fill={`url(#${k})`} />
 
         {/* left arm (viewer's left) */}
         <g className="ted-arm-l">
           <ellipse cx="45" cy="160" rx="15" ry="30" transform="rotate(14 45 160)" fill={`url(#${k})`} />
-          <ellipse cx="42" cy="183" rx="7" ry="5" fill="#ffb4c3" opacity="0.4" />
+          <ellipse cx="42" cy="183" rx="7" ry="5" fill="#fff" opacity="0.12" />
         </g>
 
         {/* little blue bow (the landing page accent) */}
@@ -57,24 +59,28 @@ export default function PandaBear({ mood = "idle", talking = false }) {
 
         {/* head */}
         <g className="ted-head">
-          {/* long ears */}
-          <ellipse cx="72" cy="30" rx="19" ry="46" transform="rotate(-7 72 30)" fill={`url(#${k})`} />
-          <ellipse cx="128" cy="30" rx="19" ry="46" transform="rotate(7 128 30)" fill={`url(#${k})`} />
-          <ellipse cx="72" cy="34" rx="9" ry="31" transform="rotate(-7 72 34)" fill="#ffb4c3" />
-          <ellipse cx="128" cy="34" rx="9" ry="31" transform="rotate(7 128 34)" fill="#ffb4c3" />
+          <circle cx="50" cy="40" r="24" fill={`url(#${k})`} />
+          <circle cx="150" cy="40" r="24" fill={`url(#${k})`} />
+          <circle cx="51" cy="42" r="12" fill="#fff" opacity="0.09" />
+          <circle cx="149" cy="42" r="12" fill="#fff" opacity="0.09" />
 
-          <ellipse cx="100" cy="90" rx="64" ry="54" fill={`url(#${w})`} />
-          <circle cx="62" cy="106" r="11" fill="#ff9fb3" opacity="0.38" />
-          <circle cx="138" cy="106" r="11" fill="#ff9fb3" opacity="0.38" />
+          <circle cx="100" cy="86" r="63" fill={`url(#${w})`} />
+          <ellipse cx="100" cy="108" rx="31" ry="23" fill="#f1f3f7" />
 
-          {/* eyes: irises blink, pupils follow the pointer */}
-          <ellipse className="ted-blink" cx="72" cy="84" rx="9.4" ry="11" fill="#4a2f2a" />
-          <ellipse className="ted-blink" cx="128" cy="84" rx="9.4" ry="11" fill="#4a2f2a" />
+          {/* eye patches */}
+          <ellipse cx="68" cy="84" rx="16.5" ry="21" transform="rotate(22 68 84)" fill="#17171c" />
+          <ellipse cx="132" cy="84" rx="16.5" ry="21" transform="rotate(-22 132 84)" fill="#17171c" />
+          <circle cx="60" cy="106" r="8.5" fill="#ff8fa3" opacity="0.3" />
+          <circle cx="140" cy="106" r="8.5" fill="#ff8fa3" opacity="0.3" />
+
+          {/* eyes: whites blink, pupils follow the pointer */}
+          <ellipse className="ted-blink" cx="70" cy="82" rx="8.6" ry="9.8" fill="#fff" />
+          <ellipse className="ted-blink" cx="130" cy="82" rx="8.6" ry="9.8" fill="#fff" />
           <g className="ted-look">
-            <circle cx="72.6" cy="84.6" r="6.2" fill="#150d0d" />
-            <circle cx="127.4" cy="84.6" r="6.2" fill="#150d0d" />
-            <circle cx="75" cy="81.4" r="2.2" fill="#fff" />
-            <circle cx="129.8" cy="81.4" r="2.2" fill="#fff" />
+            <circle cx="70.6" cy="82.6" r="5.2" fill="#0b0b0e" />
+            <circle cx="129.4" cy="82.6" r="5.2" fill="#0b0b0e" />
+            <circle cx="72.6" cy="80.2" r="1.9" fill="#fff" />
+            <circle cx="131.4" cy="80.2" r="1.9" fill="#fff" />
           </g>
 
           {/* sweat drops (only visible when scared) */}
@@ -84,10 +90,9 @@ export default function PandaBear({ mood = "idle", talking = false }) {
           </g>
 
           {/* nose + mouth */}
-          <path d="M91 98 Q100 92 109 98 Q105 107 100 108 Q95 107 91 98 Z" fill="#ff8fa3" />
-          <ellipse cx="97" cy="97" rx="3" ry="1.5" fill="#fff" opacity="0.6" />
-          <rect x="94.5" y="115" width="11" height="9" rx="2.6" fill="#fff" stroke="#e1d3c9" strokeWidth="1" />
-          <g className="ted-smile" fill="none" stroke="#6a4a44" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <ellipse cx="100" cy="101" rx="10.5" ry="7.2" fill="#17171b" />
+          <ellipse cx="97" cy="98.6" rx="3.4" ry="1.8" fill="#fff" opacity="0.55" />
+          <g className="ted-smile" fill="none" stroke="#17171b" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M100 108 V114" />
             <path d="M100 114 Q91 124 81 116" />
             <path d="M100 114 Q109 124 119 116" />
@@ -101,7 +106,7 @@ export default function PandaBear({ mood = "idle", talking = false }) {
         {/* right arm (the waving one) */}
         <g className="ted-arm-r">
           <ellipse cx="155" cy="160" rx="15" ry="30" transform="rotate(-14 155 160)" fill={`url(#${k})`} />
-          <ellipse cx="158" cy="183" rx="7" ry="5" fill="#ffb4c3" opacity="0.4" />
+          <ellipse cx="158" cy="183" rx="7" ry="5" fill="#fff" opacity="0.12" />
         </g>
       </g>
     </svg>
