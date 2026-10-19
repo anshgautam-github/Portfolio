@@ -157,7 +157,7 @@ export default function Stats({ active, keysRef }) {
   const lastKeys = useRef(0);
 
   return (
-    <div className="ted-stats" key={active ? "on" : "off"}>
+    <div className="ted-stats" key={active ? "on" : "off"} data-lenis-prevent>
       <div className="ted-stats-grid">
         <Pareto title="SKILL LOAD" data={teddy.skillLoad} unit="%" />
         <Pareto title="PROJECT MIX" data={teddy.projectMix} unit="%" />

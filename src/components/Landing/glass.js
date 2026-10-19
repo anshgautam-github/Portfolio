@@ -541,7 +541,7 @@ export function createGlassScene(canvas, opts = {}) {
   // The two lookup maps (letter height field + pen timeline) are CPU-heavy to build. They are made in separate tasks AFTER the first
   // paint, so the page never freezes at start-up; the render loop simply waits until they (and the shaders) are ready.
   // On phones the height field is ~4x smaller (the glyphs are only ~400px wide there, so it is still sharper than the screen).
-  const HSCALE = opts.heightScale || (IS_MOBILE ? 1.1 : 2.25);
+  const HSCALE = opts.heightScale || (IS_MOBILE ? 0.9 : 2.25);
   let hf = { w: 1, h: 1 }, wm = { total: 1 }, writeSeconds = 1, mapsReady = false;
   const heightTex = gl.createTexture();
   const writeTex = gl.createTexture();
@@ -664,7 +664,7 @@ export function createGlassScene(canvas, opts = {}) {
 
   const drawTri = () => gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-  let progFail = false;
+  let progFail = false, warmFrames = 0;
   const progsOk = () => {
     if (progFail) return false;
     try { const a = progBg.done(), b = progFlow.done(), c = progScene.done(); return a && b && c; }
@@ -679,7 +679,12 @@ export function createGlassScene(canvas, opts = {}) {
     // until the loader curtain opens: keep drawing (so everything gets warmed up) but hold the clock at zero, so the name is not
     // written and no sticker falls behind the loader
     const held = !isReleased() && !opts.fixedDt;
-    if (held) t0 = now;
+    if (held) {
+      t0 = now;
+      // a few frames are enough to warm shaders / textures: after that the hidden scene must not compete with the loader animation
+      if (warmFrames >= 3 && taskDone) { last = now; return; }
+      warmFrames++;
+    }
     if (skipFrame(now, last)) return;
     const dt = opts.fixedDt || Math.min(0.05, Math.max(0.001, (now - last) / 1000));
     last = now;

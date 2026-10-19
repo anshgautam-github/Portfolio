@@ -145,3 +145,10 @@ html.is-mobile .ted-desk .ted-lcd .ted-btn {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+
+/* ---- Lenis smooth scroll (see src/lib/smooth.js) ---- */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-smooth iframe { pointer-events: none; }

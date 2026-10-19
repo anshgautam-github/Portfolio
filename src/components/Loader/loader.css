@@ -27,8 +27,8 @@ html.is-loading .ll, html.is-loading .ll * { animation-play-state: paused !impor
 
 /* ---- orbit ---- */
 .ld-orbit { position: relative; width: min(78vw, 400px); aspect-ratio: 1; display: grid; place-items: center; }
-.ld-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 10px rgba(110, 120, 255, .55)); }
-.ld-spin { transform-origin: 0 0; animation: ldSpin 14s linear infinite; }
+.ld-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; transform-origin: 50% 50%; will-change: transform; }
+.ld-spin { animation: ldSpin 14s linear infinite; }
 @keyframes ldSpin { to { transform: rotate(360deg); } }
 .ld-ring { position: absolute; border-radius: 50%; border: 1px dashed rgba(160, 190, 255, .32); will-change: transform; }
 .ld-ring.r1 { inset: 4%; animation: ldSpin 40s linear infinite; }

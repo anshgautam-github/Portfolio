@@ -2,6 +2,7 @@ import { createGlassScene } from "./glass.js";
 import { createFallingStickers } from "./falling.js";
 import { bigArrowSvg } from "./stickers.js";
 import { landingContent } from "./landingContent.js";
+import { smoothScrollTo } from "../../lib/smooth.js";
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const pad4 = (n) => String(Math.max(0, Math.round(n))).padStart(4, "0");
@@ -161,9 +162,9 @@ export function mountLanding(root, content = landingContent, options = {}) {
     if (on) tick(0.6);
   };
   const scrollTo = (target) => {
-    if (target === "next") { const w = root.closest(".pin-spacer") || root; window.scrollTo({ top: w.getBoundingClientRect().bottom + window.scrollY, behavior: "smooth" }); }
-    else if (target === "end") window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
-    else { const el = document.querySelector(target); if (el) el.scrollIntoView({ behavior: "smooth" }); }
+    if (target === "next") { const w = root.closest(".pin-spacer") || root; smoothScrollTo(w.getBoundingClientRect().bottom + window.scrollY); }
+    else if (target === "end") smoothScrollTo(document.documentElement.scrollHeight);
+    else smoothScrollTo(target);
   };
   const onClick = (e) => {
     const b = e.target.closest("button");

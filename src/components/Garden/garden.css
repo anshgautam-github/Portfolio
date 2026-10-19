@@ -569,3 +569,19 @@
   .gd-pollen i:nth-child(n+7), .gd-fireflies i:nth-child(n+7) { display: none; }
   .gd-birds > *:nth-child(n+3) { display: none; }
 }
+
+/* ---------- phones: stop the garden from re-drawing dozens of animated layers every scroll frame ----------
+   Measured on a throttled phone profile: the animated critters / birds / pollen / fireflies (SVG wing flaps repaint on the main thread, and
+   every glowing dot is its own layer) plus the turbulence filters on the front line-art made this section ~4-5x heavier than the rest of the page.
+   Clouds, the windmill, sun/moon and the watering interaction stay; the extras are dropped on touch devices. */
+html.is-mobile .gd-pollen,
+html.is-mobile .gd-fireflies,
+html.is-mobile .gd-critters,
+html.is-mobile .gd-rays,
+html.is-mobile .gd-shoot,
+html.is-mobile .gd-balloon,
+html.is-mobile .gd-grain { display: none !important; }
+html.is-mobile .gd-flock:nth-child(n+2) { display: none !important; }
+html.is-mobile .gd-bird-svg,
+html.is-mobile .gd-b { animation: none !important; }
+html.is-mobile .gd svg [filter] { filter: none !important; }

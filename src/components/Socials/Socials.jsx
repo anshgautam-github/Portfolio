@@ -13,7 +13,8 @@ const u = (n) => `calc(var(--u) * ${n})`;
 const CARD_W = 400;
 const CARD_H = 700;
 
-const SHADOW = "0 30px 50px -28px rgba(20,20,10,0.35)";
+// phones: a much smaller blur radius (big blurred shadows on 7 overlapping cards are expensive to paint and composite)
+const SHADOW = IS_MOBILE ? "0 12px 18px -14px rgba(20,20,10,0.35)" : "0 30px 50px -28px rgba(20,20,10,0.35)";
 const SHADOW_HOVER = "0 60px 80px -30px rgba(20,20,10,0.55)";
 
 function CameraIcon() {
@@ -293,7 +294,7 @@ export default function Socials() {
           >
             <div
               data-inner
-              className="absolute inset-0 overflow-hidden bg-[#ddd] will-change-transform"
+              className={"absolute inset-0 overflow-hidden bg-[#ddd]" + (IS_MOBILE ? "" : " will-change-transform")}
               style={{ borderRadius: u(64 * c.s) }}
             >
             {/* Safari: overflow+radius is ignored for transformed/blended children, so clip in a child (keeps the box-shadow on data-inner intact) */}
@@ -303,11 +304,11 @@ export default function Socials() {
                 borderRadius: u(64 * c.s),
                 clipPath: `inset(0 round ${u(64 * c.s)})`,
                 WebkitClipPath: `inset(0 round ${u(64 * c.s)})`,
-                WebkitMaskImage: "-webkit-radial-gradient(white, black)",
-                isolation: "isolate",
+                // the mask / isolation pair is a Safari workaround that forces an offscreen render surface per card: clip-path alone is enough on phones
+                ...(IS_MOBILE ? {} : { WebkitMaskImage: "-webkit-radial-gradient(white, black)", isolation: "isolate" }),
               }}
             >
-            <div data-art className="absolute inset-0 will-change-transform" style={{ borderRadius: u(64 * c.s) }}>
+            <div data-art className={"absolute inset-0" + (IS_MOBILE ? "" : " will-change-transform")} style={{ borderRadius: u(64 * c.s) }}>
               {c.image ? <img src={c.image} alt="" className="h-full w-full object-cover" /> : <CardArt pattern={c.pattern} palette={c.palette} />}
             </div>
 

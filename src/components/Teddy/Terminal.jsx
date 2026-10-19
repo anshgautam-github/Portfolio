@@ -1,4 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { smoothScrollTo } from "../../lib/smooth.js";
 import { teddy } from "./teddyContent.js";
 
 let uid = 0;
@@ -215,11 +216,11 @@ const Terminal = forwardRef(function Terminal({ active, api }, ref) {
         }
 
         case "top":
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          smoothScrollTo(0);
           out(L("dim", "scrolling to the top..."));
           break;
         case "bottom":
-          window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
+          smoothScrollTo(document.documentElement.scrollHeight);
           out(L("dim", "scrolling to the bottom..."));
           break;
 
@@ -353,7 +354,7 @@ const Terminal = forwardRef(function Terminal({ active, api }, ref) {
 
   return (
     <div className="ted-term" onClick={() => inputRef.current?.focus({ preventScroll: true })}>
-      <div className="ted-term-scroll" ref={scroller}>
+      <div className="ted-term-scroll" ref={scroller} data-lenis-prevent>
         <div className="ted-term-head">
           <div className="ted-term-logo">PANDA OS</div>
           <div className="ted-term-sub">

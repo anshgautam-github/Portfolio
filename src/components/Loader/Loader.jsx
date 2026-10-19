@@ -39,9 +39,11 @@ export default function Loader() {
   useEffect(() => {
     const p = curve.current, g = glow.current;
     const len = p.getTotalLength();
+    const N = 240, table = [];
+    for (let i = 0; i <= N; i++) table.push(p.getPointAtLength((len * i) / N));
     [p, g].forEach((e) => { e.style.strokeDasharray = `${len} ${len + 4}`; e.style.strokeDashoffset = String(len); });
     const t0 = performance.now();
-    let shown = 0, raf = 0, leaving = false, step = -1, doneAt = 0;
+    let shown = 0, raf = 0, leaving = false, step = -1, doneAt = 0, lastPct = -1;
     const loop = (now) => {
       const el = now - t0;
       const ready = el >= MIN && pendingTasks() === 0;
@@ -55,10 +57,11 @@ export default function Loader() {
       // the glow is a short bright segment that rides on the head of the curve
       g.style.strokeDasharray = `${len * 0.06} ${len * 2}`;
       g.style.strokeDashoffset = String(-(len * shown - len * 0.06));
-      const pt = p.getPointAtLength(Math.max(0.01, len * shown));
-      if (pen.current) { pen.current.setAttribute("cx", pt.x); pen.current.setAttribute("cy", pt.y); }
+      const fi = Math.max(0, Math.min(N - 1, shown * N)), i0 = Math.floor(fi), f = fi - i0;
+      const a = table[i0], b2 = table[i0 + 1];
+      if (pen.current) { pen.current.setAttribute("cx", (a.x + (b2.x - a.x) * f).toFixed(1)); pen.current.setAttribute("cy", (a.y + (b2.y - a.y) * f).toFixed(1)); }
       const pct = Math.round(shown * 100);
-      if (num.current) num.current.textContent = String(pct).padStart(3, "0");
+      if (pct !== lastPct && num.current) { lastPct = pct; num.current.textContent = String(pct).padStart(3, "0"); }
       if (bar.current) bar.current.style.transform = `scaleX(${shown})`;
       const si = Math.min(STEPS.length - 1, Math.floor(shown * STEPS.length));
       if (si !== step && cap.current) { step = si; cap.current.textContent = STEPS[si]; }
@@ -97,13 +100,13 @@ export default function Loader() {
               <b style={{ transform: `translateX(${s.r}px)`, width: s.s, height: s.s, background: s.c, marginLeft: -s.s / 2, marginTop: -s.s / 2 }} />
             </span>
           ))}
-          <svg className="ld-svg" viewBox="-200 -200 400 400">
+          <svg className="ld-svg ld-spin" viewBox="-200 -200 400 400">
             <defs>
               <linearGradient id="ldInk" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0" stopColor="#4f7dff" /><stop offset=".5" stopColor="#8b5cff" /><stop offset="1" stopColor="#ff6b8b" />
               </linearGradient>
             </defs>
-            <g fill="none" strokeLinecap="round" strokeLinejoin="round" className="ld-spin">
+            <g fill="none" strokeLinecap="round" strokeLinejoin="round">
               <path ref={curve} d={d} stroke="url(#ldInk)" strokeWidth="2.2" />
               <path ref={glow} d={d} stroke="#fff" strokeWidth="5" opacity=".9" />
             </g>
