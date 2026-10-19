@@ -118,3 +118,28 @@ html.is-mobile .pj-mb-glow, html.is-mobile .pj-mb-shadow, html.is-mobile .pj-ph-
   .wp-text h3, .wp-text p { text-shadow: none; }
   .wp-ghost { -webkit-text-stroke-width: 1.5px; }
 }
+
+/* ---- phones: flatten the 3D mock-ups ----
+   The laptop / phones are CSS-3D models made of ~25 separately composited layers each (extrusion slabs, lid edges, 70 keys, phone edges).
+   Moving that many big layers every scroll frame is what makes phones stutter, so on touch screens each device is reduced to the few layers
+   that carry the look: the deck, the lid (back + screen), and each phone's body + screen. The keyboard becomes one grid-paint on the deck. */
+html.is-mobile .pj-mb-slab,
+html.is-mobile .pj-mb-keys,
+html.is-mobile .pj-mb-grill,
+html.is-mobile .pj-mb-edge,
+html.is-mobile .pj-ph-edge { display: none; }
+html.is-mobile .pj-mb-deck {
+  background-image:
+    linear-gradient(90deg, #26272d 5px, transparent 5px),
+    linear-gradient(0deg, #26272d 5px, transparent 5px),
+    linear-gradient(180deg, #3a3b42 0%, #2a2b31 55%, #232429 100%);
+  background-size: 44px 39px, 44px 39px, 100% 100%;
+  background-position: 104px 28px, 104px 28px, 0 0;
+  background-repeat: repeat, repeat, no-repeat;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 2px 0 rgba(255, 255, 255, 0.18), 0 10px 0 -2px #1a1b1f;
+}
+html.is-mobile .pj-mb-pad { z-index: 1; }
+/* the giant outlined numeral: a plain stroke is much cheaper to paint than a clipped gradient */
+html.is-mobile .wp-ghost { background: none; -webkit-background-clip: border-box; background-clip: border-box; -webkit-text-stroke: 1.5px rgba(160, 200, 255, .5); }
+/* gradient-clipped text forces an offscreen mask pass: use a flat colour */
+html.is-mobile .wp-text h3 .acc { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: #9dc0ff; }

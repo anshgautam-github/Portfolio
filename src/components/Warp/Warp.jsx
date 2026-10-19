@@ -157,7 +157,9 @@ export default function Warp({
       }
       if (flag.on && fr++ % 2) return;
       wacc += deltaMs;
-      if (perf.frameMs && wacc < perf.frameMs - 2) return;
+      // phones: the streak canvas sits under heavy DOM layers, so every canvas update costs a re-composite: run it at ~20fps there
+      const cap = IS_MOBILE ? 48 : perf.frameMs;
+      if (cap && wacc < cap - 2) return;
       engine.render(wacc / 1000, time);
       wacc = 0;
     };
