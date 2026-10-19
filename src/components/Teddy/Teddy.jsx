@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import PandaBear from "./PandaBear.jsx";
-import Panda from "./Panda.jsx";
+import Rabbit from "./Rabbit.jsx";
 import TeddyPanel from "./TeddyPanel.jsx";
 import { sfx } from "./sound.js";
 import { teddy } from "./teddyContent.js";
@@ -247,7 +247,7 @@ export default function Teddy() {
       {mounted && <div className={`ted-backdrop${open ? " is-on" : ""}`} aria-hidden="true" />}
       {mounted && <TeddyPanel open={open} onClose={closePanel} onReact={onPanelReact} onDrag={travel} onMode={onMode} />}
 
-      <Panda hidden={showBear} onOpen={openPanel} />
+      <Rabbit hidden={showBear} onOpen={openPanel} />
       <div ref={dock} className={`ted-dock${!showBear ? " is-gone" : ""}${open ? " is-open" : ""}${open && desk ? " is-desk" : ""}`}>
         <div ref={patrol} className="ted-patrol">
         {bubble && (
