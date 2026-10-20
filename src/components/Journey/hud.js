@@ -1,7 +1,7 @@
-import { earthProj, terrainProj, sm } from "./camera.js";
+import { earthProj, terrainProj, sm, altitudeKm } from "./camera.js";
 import { PLACES } from "./coast.js";
 
-const MONO = "'JetBrains Mono', ui-monospace, Menlo, monospace";
+const MONO = "'Archivo', 'Inter Tight', Arial, sans-serif";   // same wide display face as the big titles
 const NET = ["chennai", "blr", "hyd", "bom", "del", "cal", "cok"];
 const GOLD = "255,196,92";
 const CY = "120,220,255";
@@ -22,7 +22,8 @@ function ring(ctx, x, y, r, a, col = CY, lw = 1) {
   ctx.stroke();
 }
 function label(ctx, txt, x, y, a, o = {}) {
-  ctx.font = `${o.size || 11}px ${MONO}`;
+  ctx.font = `800 ${(o.size || 11) * 0.86}px ${MONO}`;
+  try { ctx.fontStretch = "expanded"; } catch (e) { /* older browsers */ }
   ctx.textAlign = o.align || "left";
   ctx.textBaseline = "middle";
   if (o.bg) {
@@ -168,11 +169,51 @@ function globeNet(ctx, W, H, e, t, u, fade) {
   ctx.restore();
 }
 
+
+// A vertical altitude ruler on the right edge. Its ticks rise as you descend (log scale), so scrolling reads as falling toward the ground.
+function ruler(ctx, W, H, S, u) {
+  const { p } = S;
+  const a = 1 - sm(0.76, 0.82, p);
+  if (a < 0.01) return;
+  const mob = W < 700;
+  const alt = p < 0.44 ? altitudeKm(p, S.ter) : S.city && S.city.eye ? Math.max(0.03, S.city.eye()[1] / 1000) : 0.1;
+  const la = Math.log10(alt), K = (mob ? 105 : 140) * u, x = W - (mob ? 24 : 40) * u, cy = H * (mob ? 0.66 : 0.5), lim = H * (mob ? 0.2 : 0.36);
+  ctx.save();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = `rgba(255,255,255,${0.18 * a})`;
+  ctx.beginPath(); ctx.moveTo(x, cy - lim); ctx.lineTo(x, cy + lim); ctx.stroke();
+  for (let d = Math.floor(la - 3); d <= Math.ceil(la + 3); d++) {
+    for (const m of [1, 2, 5]) {
+      const lt = d + Math.log10(m);
+      const y = cy + (la - lt) * K;
+      const dist = Math.abs(y - cy);
+      if (dist > lim) continue;
+      const e = 1 - sm(0.35, 1, dist / lim);
+      const major = m === 1;
+      ctx.strokeStyle = `rgba(255,255,255,${(major ? 0.75 : 0.35) * a * e})`;
+      ctx.beginPath(); ctx.moveTo(x - (major ? 16 : 8) * u, y); ctx.lineTo(x, y); ctx.stroke();
+      if (major) {
+        const v = Math.pow(10, d);
+        label(ctx, v >= 1 ? v.toLocaleString("en-US") + " KM" : Math.round(v * 1000) + " M", x - 22 * u, y, a * e * 0.85, { size: (mob ? 8.5 : 9.5) * u, align: "right" });
+      }
+    }
+  }
+  // the marker: where you are right now
+  ctx.fillStyle = `rgba(${GOLD},${a})`;
+  ctx.beginPath(); ctx.moveTo(x + 4 * u, cy); ctx.lineTo(x + 15 * u, cy - 6 * u); ctx.lineTo(x + 15 * u, cy + 6 * u); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = `rgba(${GOLD},${0.9 * a})`;
+  ctx.beginPath(); ctx.moveTo(x - 20 * u, cy); ctx.lineTo(x + 4 * u, cy); ctx.stroke();
+  label(ctx, "ALTITUDE", x - (mob ? 16 : 0) * u, cy - lim - 14 * u, a * 0.7, { size: (mob ? 8.5 : 9.5) * u, align: "center" });
+  ctx.restore();
+}
+
 export function drawHUD(ctx, W, H, S, t) {
   ctx.clearRect(0, 0, W, H);
   const { p, earth, ter } = S;
   const u = Math.max(0.75, Math.min(1.6, H / 900));
   const pad = 22 * u;
+
+  ruler(ctx, W, H, S, u);
 
   // frame brackets in the corners (always)
   const fa = 0.55 * (1 - sm(0.8, 0.86, p) * 0.6);

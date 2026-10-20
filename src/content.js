@@ -176,13 +176,15 @@ export const content = {
   journey: {
     label: "Where I build from",
     length: 11.7, // scroll length in viewport heights
+    // The story is told by the stage text itself: `body` is written word by word as you scroll (`write` = [from, to] in flight progress),
+    // *word* = highlighted. `range` = [fades in from, fully in, starts fading, gone].
     stages: [
-      { tag: "01 / ORBIT", title: ["THE", "PLANET"], pos: "tl", body: "Eight billion people, one pale blue dot. Scroll - I'll show you where I build from.", cap: "35,786 km · geostationary", range: [-0.1, -0.05, 0.1, 0.16] },
-      { tag: "02 / COUNTRY", title: ["INDIA"], pos: "bl", body: "A billion stories on one subcontinent. We're heading for the south-east coast.", cap: "20.59°N · 78.96°E", range: [0.14, 0.19, 0.25, 0.3] },
-      { tag: "03 / CITY", title: ["CHENNAI"], pos: "bl", body: "The coastal capital of Tamil Nadu - filter coffee, the Marina, and a very serious tech scene.", cap: "13.0827°N · 80.2707°E", range: [0.385, 0.415, 0.47, 0.5] },
-      { tag: "04 / TOWN", title: ["KATTAN-", "KULATHUR"], pos: "bl", body: "Down GST Road, where the city thins out and the campus begins.", cap: "12.8231°N · 80.0442°E", range: [0.5, 0.53, 0.58, 0.62] },
-      { tag: "05 / CAMPUS", title: ["SRM", "INSTITUTE"], pos: "bl", body: "B.Tech in Computer Science & Engineering at SRM Institute of Science and Technology. This is where I learn, build, and break things.", cap: "CGPA 9.01 · Computer Science & Engineering", range: [0.62, 0.66, 0.74, 0.78] },
-      { tag: "06 / THE CORE", title: ["ANSH", "GAUTAM"], pos: "c", body: "Full Stack AI Intern · Technical Head, IEEE GRSS. Welcome to the machine room.", cap: "", cta: "Scroll to see the work", range: [0.84, 0.9, 1.1, 1.2] },
+      { tag: "01 / ORBIT", title: ["THE", "PLANET"], pos: "tl", body: "Every story begins somewhere. This one begins on a small blue planet, drifting in the dark\u2026 *Scroll* \u2014 and follow Ansh home.", cap: "35,786 km · geostationary", range: [-0.1, -0.05, 0.1, 0.16], write: [0.0, 0.07] },
+      { tag: "02 / COUNTRY", title: ["INDIA"], pos: "bl", body: "Look closely. A country called *INDIA* \u2014 a billion stories, and one of them is *Ansh\u2019s*. Follow the coastline south-east. The story is about to get *personal*.", cap: "20.59°N · 78.96°E", range: [0.14, 0.19, 0.3, 0.355], write: [0.15, 0.27] },
+      { tag: "03 / CITY", title: ["CHENNAI"], pos: "bl", body: "Past the Bay of Bengal, on India\u2019s south-east coast: *Chennai*. Filter coffee, the Marina at dusk, and the city Ansh builds from.", cap: "13.0827°N · 80.2707°E", range: [0.375, 0.405, 0.47, 0.5], write: [0.385, 0.45] },
+      { tag: "04 / TOWN", title: ["KATTAN-", "KULATHUR"], pos: "bl", body: "Then GST Road. The city thins out, the noise fades, and a *campus* appears on the horizon.", cap: "12.8231°N · 80.0442°E", range: [0.5, 0.53, 0.58, 0.62], write: [0.505, 0.56] },
+      { tag: "05 / CAMPUS", title: ["SRM", "INSTITUTE"], pos: "bl", body: "SRM Institute of Science and Technology. This is where Ansh studies Computer Science, and where *\u201cwhat if\u2026\u201d* turns into real projects.", cap: "CGPA 9.01 · Computer Science & Engineering", range: [0.62, 0.66, 0.79, 0.83], write: [0.63, 0.74] },
+      { tag: "06 / THE CORE", title: ["ANSH", "GAUTAM"], pos: "c", body: "Late nights. Broken builds. Fixed builds. *AI*, full-stack, a community to lead at IEEE GRSS \u2014 it all leads to one place. Full Stack AI Intern \u00b7 Technical Head, IEEE GRSS.", cap: "", cta: "Scroll once more - meet Ansh", range: [0.83, 0.88, 1.1, 1.2], write: [0.84, 0.97] },
     ],
   },
 

@@ -1,6 +1,5 @@
 import { Suspense, lazy, useEffect } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Loader from "./components/Loader/Loader.jsx";
 import Reveal from "./components/Landing/Reveal.jsx";
 // import Hero from "./components/Hero/Hero.jsx"; // previous hero – still on disk, swap back here if you want it
 import Warp from "./components/Warp/Warp.jsx";
@@ -53,9 +52,10 @@ export default function App() {
 
   return (
     <>
-      <Loader />
-      <Reveal />
+      {/* Act 0 + 1: the Earth is the loader. Prologue while it builds, then the scroll-driven flight; it shatters open onto the landing */}
       <Journey />
+      {/* Act 2: the landing */}
+      <Reveal />
       <Warp />
       <Collage />
       <Diary />

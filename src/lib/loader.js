@@ -23,10 +23,49 @@ export function whenReleased(fn) {
   if (released) fn(); else subs.push(fn);
 }
 
+// ---- the story gate -------------------------------------------------------------------------------------------------
+// Loader -> Earth -> landing. When the loader has finished it does NOT release the page any more: it starts the story
+// (startStory). The Earth intro plays, and only when it shatters does it call release(), so the landing's own intro
+// (the name being written, stickers falling) happens right behind the breaking glass.
+let storyOn = false, storyStarted = false;
+const storySubs = [];
+export const registerStory = () => { storyOn = true; };
+export const hasStory = () => storyOn;
+/** run fn when the loader hands over to the story; returns an unsubscribe */
+export function whenStory(fn) {
+  if (storyStarted) { fn(); return () => {}; }
+  storySubs.push(fn);
+  return () => { const i = storySubs.indexOf(fn); if (i >= 0) storySubs.splice(i, 1); };
+}
+export function startStory() {
+  if (storyStarted) return;
+  storyStarted = true;
+  if (!storyOn) { release(); return; }          // nobody is going to tell a story: just open the page
+  storySubs.splice(0).forEach((f) => { try { f(); } catch (e) { /* ignore */ } });
+  setTimeout(release, 90000);                    // safety net: never lock the page forever
+}
+
+// After the Earth shatters the landing page plays its intro. Scrolling stays locked for SETTLE ms so the landing can be seen properly
+// (otherwise the first wheel tick starts shrinking it into a card while the name is still being written).
+export const SETTLE = 4200;
+let settled = false;
+const settleSubs = [];
+export const isSettled = () => settled;
+export function whenSettled(fn) { if (settled) fn(); else settleSubs.push(fn); }
+
 export function release() {
   if (released) return;
   released = true;
-  if (typeof document !== "undefined") document.documentElement.classList.remove("is-loading");
+  if (typeof document !== "undefined") {
+    const cl = document.documentElement.classList;
+    cl.add("is-settling");
+    cl.remove("is-loading");
+    setTimeout(() => {
+      settled = true;
+      cl.remove("is-settling");
+      settleSubs.splice(0).forEach((f) => { try { f(); } catch (e) { /* ignore */ } });
+    }, SETTLE);
+  }
   subs.splice(0).forEach((f) => { try { f(); } catch (e) { /* ignore */ } });
 }
 

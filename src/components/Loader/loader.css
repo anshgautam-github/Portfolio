@@ -43,3 +43,22 @@ html.is-loading .ll, html.is-loading .ll * { animation-play-state: paused !impor
 .ld-num b { font-weight: 500; }
 .ld--out .ld-orbit { transition: transform .6s cubic-bezier(.5, 0, .2, 1), opacity .5s; transform: scale(1.5); opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .ld-spin, .ld-ring, .ld-sat, .ld-core { animation: none; } }
+
+/* ---- prologue (the story told while the page loads) ---- */
+.ld-stars { position: absolute; inset: 0; pointer-events: none; }
+.ld-stars i { position: absolute; border-radius: 50%; background: #cfe0ff; opacity: .15; animation: ldTwinkle ease-in-out infinite; }
+@keyframes ldTwinkle { 50% { opacity: .9; transform: scale(1.5); } }
+.ld-story { position: relative; width: min(88vw, 760px); height: clamp(64px, 11vh, 110px); margin-top: 30px; text-align: center; }
+.ld-line { position: absolute; left: 0; right: 0; top: 50%; margin: 0; translate: 0 -50%; font-family: "Newsreader", "Gloock", Georgia, serif; font-style: italic; font-weight: 400;
+  font-size: clamp(22px, 3.6vw, 44px); line-height: 1.12; letter-spacing: .12em; color: #fff; opacity: 0; filter: blur(14px); transform: translate3d(0, 22px, 0) scale(1.04);
+  transition: opacity .9s cubic-bezier(.2, .7, .2, 1), filter .9s cubic-bezier(.2, .7, .2, 1), transform 1.1s cubic-bezier(.2, .7, .2, 1), letter-spacing 1.6s cubic-bezier(.2, .7, .2, 1); will-change: transform, opacity, filter; }
+.ld-line.on { opacity: 1; filter: blur(0); transform: none; letter-spacing: -.005em; text-shadow: 0 0 30px rgba(110, 150, 255, .55); }
+.ld-line.past { opacity: 0; filter: blur(10px); transform: translate3d(0, -22px, 0) scale(.97); letter-spacing: -.03em; transition-duration: .6s, .6s, .7s, .7s; }
+.is-lite .ld-line { filter: none !important; }
+.ld-meta { margin-top: 8px; font-size: 10px; opacity: .8; }
+/* hyperspace flash that rides the curtain opening */
+.ld-flash { position: absolute; left: 50%; top: 50%; width: 40vmax; height: 40vmax; margin: -20vmax 0 0 -20vmax; border-radius: 50%; opacity: 0; pointer-events: none; z-index: 3;
+  background: radial-gradient(circle, #fff 0, rgba(190, 215, 255, .85) 18%, rgba(80, 120, 255, .35) 42%, transparent 68%); transform: scale(.05); }
+.ld--out .ld-flash { animation: ldFlash 1.5s cubic-bezier(.2, .6, .2, 1) both; }
+@keyframes ldFlash { 0% { opacity: 0; transform: scale(.05); } 18% { opacity: 1; } 100% { opacity: 0; transform: scale(4.5); } }
+@media (prefers-reduced-motion: reduce) { .ld-stars i { animation: none; } .ld-line { transition-duration: .01s; } }

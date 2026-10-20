@@ -1,5 +1,6 @@
-.jr { position: relative; z-index: 5; background: transparent; color: #fff; margin-top: -250vh; margin-bottom: -100vh; pointer-events: none; }
-.jr-pin { position: relative; width: 100%; height: 100vh; height: 100svh; overflow: hidden; background: #02040a; }
+/* the Earth is now the opening act: a fixed full-screen overlay that sits above the page (and the landing behind it) until it shatters away */
+.jr { position: fixed; inset: 0; z-index: 99000; background: transparent; color: #fff; pointer-events: none; }
+.jr-pin { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; background: #02040a; }
 .jr-gl, .jr-core, .jr-hud, .jr-fallback { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .jr-hud { pointer-events: none; z-index: 3; }
 .jr-core { z-index: 1; visibility: hidden; }
@@ -34,8 +35,8 @@
   text-transform: uppercase; line-height: .92; letter-spacing: -.01em; font-size: clamp(34px, 5.8vw, 108px); }
 .jr-title span { display: block; font-family: 'Archivo', 'Inter Tight', Arial, sans-serif !important; }
 .jr-st--c .jr-title { font-size: clamp(38px, 8vw, 136px); }
-.jr-body { margin: 0 0 12px; font-size: clamp(12px, 1vw, 14px); line-height: 1.7; color: rgba(255,255,255,.82); max-width: 46ch; }
-.jr-st--c .jr-body { max-width: 56ch; }
+.jr-body { margin: 0 0 14px; font-size: clamp(14px, 1.3vw, 20px); line-height: 1.65; color: rgba(255,255,255,.94); max-width: 50ch; text-shadow: 0 2px 18px rgba(2,4,10,.9); }
+.jr-st--c .jr-body { max-width: 60ch; }
 .jr-cap { margin: 0; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #ffc45c; }
 .jr-cta { margin: 22px 0 0; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #fff; }
 .jr-arrow { display: inline-block; animation: jrBob 1.4s ease-in-out infinite; color: #ffc45c; }
@@ -55,7 +56,129 @@
 
 .jr-shatter { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; visibility: hidden; }
 .jr-pin.shat { background: transparent !important; }
-.jr-pin.shat .jr-gl, .jr-pin.shat .jr-core, .jr-pin.shat .jr-hud, .jr-pin.shat .jr-shade, .jr-pin.shat .jr-grain, .jr-pin.shat .jr-fallback { visibility: hidden !important; }
 .jr-pin.shat .jr-prog, .jr-pin.shat .jr-name { opacity: 0; }
 
-.jr-iris { position: fixed; left: 0; top: 0; width: 100%; height: 100%; z-index: 7; pointer-events: none; opacity: 0; }
+
+/* light-speed streaks (fast camera moves + every new chapter) */
+.jr-warp { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+.jr-pin.shat .jr-warp { visibility: hidden; }
+
+/* skip */
+.jr-skip { position: absolute; z-index: 8; right: 34px; bottom: 54px; padding: 10px 16px; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; background: rgba(2,4,10,.4); color: rgba(255,255,255,.85);
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase; cursor: pointer; pointer-events: none; opacity: 0; transform: translateY(8px); transition: opacity .6s ease .8s, transform .6s ease .8s, background .2s, border-color .2s; backdrop-filter: blur(6px); }
+.jr-skip.on { opacity: 1; transform: none; pointer-events: auto; }
+.jr-skip:hover { background: rgba(255,196,92,.18); border-color: #ffc45c; color: #fff; }
+.jr-skip span { display: inline-block; margin-left: 4px; color: #ffc45c; }
+
+/* ---- Act 0: the Earth is the loader - the prologue told over the dark sky ---- */
+html.is-loading, html.is-settling { overflow: hidden; scrollbar-gutter: stable; }
+html.is-loading .ll, html.is-loading .ll * { animation-play-state: paused !important; }
+.jr { touch-action: none; }
+.jr-pro { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(120% 90% at 50% 110%, #0b1d44 0%, #050a18 55%, #02040a 100%); transition: opacity 1.6s ease .5s, visibility 0s linear 2.1s; }
+.jr-pro.out { opacity: 0; visibility: hidden; }
+.jr-stars { position: absolute; inset: 0; pointer-events: none; }
+.jr-stars i { position: absolute; border-radius: 50%; background: #cfe0ff; opacity: .15; animation: jrTwinkle ease-in-out infinite; }
+@keyframes jrTwinkle { 50% { opacity: .9; transform: scale(1.5); } }
+.jr-pro-top { position: absolute; top: max(22px, env(safe-area-inset-top)); left: 6vw; right: 6vw; display: flex; justify-content: space-between; font-size: 12px; letter-spacing: .24em; opacity: .7; }
+.jr-story { position: relative; width: min(88vw, 820px); height: clamp(90px, 16vh, 150px); text-align: center; }
+.jr-line { position: absolute; left: 0; right: 0; top: 50%; margin: 0; translate: 0 -50%; font-family: "Newsreader", "Gloock", Georgia, serif !important; font-style: italic; font-weight: 400;
+  font-size: clamp(26px, 4.4vw, 56px); line-height: 1.12; letter-spacing: .12em; color: #fff; opacity: 0; filter: blur(14px); transform: translate3d(0, 22px, 0) scale(1.04);
+  transition: opacity .9s cubic-bezier(.2,.7,.2,1), filter .9s cubic-bezier(.2,.7,.2,1), transform 1.1s cubic-bezier(.2,.7,.2,1), letter-spacing 1.6s cubic-bezier(.2,.7,.2,1); will-change: transform, opacity, filter; }
+.jr-line.on { opacity: 1; filter: blur(0); transform: none; letter-spacing: -.005em; text-shadow: 0 0 34px rgba(110,150,255,.6); }
+.jr-line.past { opacity: 0; filter: blur(10px); transform: translate3d(0, -22px, 0) scale(.97); letter-spacing: -.03em; transition-duration: .6s, .6s, .7s, .7s; }
+.is-lite .jr-line { filter: none !important; }
+.jr-pro-foot { position: absolute; left: 6vw; right: 6vw; bottom: max(28px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 18px; font-size: 12px; letter-spacing: .2em; }
+.jr-pro-num b { font-weight: 500; font-variant-numeric: tabular-nums; }
+.jr-pro-bar { flex: 1; height: 2px; background: rgba(160,190,255,.16); overflow: hidden; }
+.jr-pro-bar i { display: block; height: 100%; background: linear-gradient(90deg, #6b9bff, #ffc45c); transform-origin: left; transform: scaleX(0); will-change: transform; }
+.jr-flash { position: absolute; left: 50%; top: 50%; width: 40vmax; height: 40vmax; margin: -20vmax 0 0 -20vmax; border-radius: 50%; opacity: 0; pointer-events: none;
+  background: radial-gradient(circle, #fff 0, rgba(190,215,255,.85) 18%, rgba(80,120,255,.35) 42%, transparent 68%); transform: scale(.05); }
+.jr-pro.out .jr-flash { animation: jrFlash 1.8s cubic-bezier(.2,.6,.2,1) both; }
+@keyframes jrFlash { 0% { opacity: 0; transform: scale(.05); } 18% { opacity: 1; } 100% { opacity: 0; transform: scale(4.5); } }
+
+/* scroll cue */
+.jr-cue { position: absolute; z-index: 8; left: 50%; bottom: 5vh; translate: -50% 0; display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: rgba(255,255,255,.85);
+  opacity: 0; transition: opacity .7s ease; pointer-events: none; }
+.jr-cue.on { opacity: 1; }
+.jr-cue i { width: 1px; height: 38px; background: linear-gradient(#ffc45c, transparent); animation: jrCue 1.6s ease-in-out infinite; transform-origin: top; }
+@keyframes jrCue { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .jr-stars i, .jr-cue i { animation: none; } .jr-line { transition-duration: .01s; } }
+
+/* story words (the stage body writes itself as you scroll) */
+.jr-nw { display: inline; will-change: opacity, transform; }
+.jr-nw.a { color: #ffc45c; }
+
+/* ---- one typeface for the whole story: the wide Archivo of the big titles ---- */
+.jr-tag, .jr-body, .jr-body *, .jr-cap, .jr-cta, .jr-cta *, .jr-bar, .jr-bar *, .jr-name, .jr-skip, .jr-skip *, .jr-cue, .jr-cue *,
+.jr-pro-top, .jr-pro-top *, .jr-pro-foot, .jr-pro-foot *, .jr-line {
+  font-family: 'Archivo', 'Inter Tight', Arial, sans-serif !important; font-stretch: 125%; font-weight: 800; }
+.jr-body { text-transform: uppercase; font-size: clamp(13px, 1.3vw, 21px); line-height: 1.4; letter-spacing: .01em; max-width: 36em; }
+.jr-st--c .jr-body { max-width: 40em; }
+.jr-tag, .jr-cap, .jr-cta { letter-spacing: .12em; }
+.jr-bar { letter-spacing: .08em; }
+.jr-line { text-transform: uppercase; font-style: normal !important; font-size: clamp(20px, 3.3vw, 46px); line-height: 1.08; }
+.jr-line.on { letter-spacing: 0; }
+@media (max-width: 720px) { .jr-body { font-size: clamp(12px, 3.4vw, 15px); } }
+
+/* the story paragraphs are regular weight (only the titles are heavy) */
+.jr-body, .jr-body * { font-weight: 400 !important; letter-spacing: .02em; }
+
+/* sound toggle sits above the skip button */
+.jr-snd b { font-weight: inherit; }
+.jr-snd.is-on { border-color: #ffc45c; color: #fff; }
+
+/* ---- controls: sound + skip live in one container so they never overlap the cue ---- */
+.jr-ctl { position: absolute; z-index: 8; right: 34px; bottom: 54px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; pointer-events: none; }
+.jr-ctl .jr-skip, .jr-ctl .jr-snd { position: static; right: auto; bottom: auto; white-space: nowrap; }
+.jr-cue { left: 0; right: 0; translate: none; align-items: center; text-align: center; padding: 0 16px; }
+
+/* ---- "falling to meet Ansh" caption, under the top bar ---- */
+
+/* ---- phones ---- */
+@media (max-width: 720px) {
+  .jr-bar { padding: 0 14px; font-size: 8.5px; letter-spacing: .06em; }
+  .jr-bar, .jr-bar * { white-space: nowrap; }
+  .jr-bar-r { gap: 12px; }
+  .jr-bar-r span:nth-child(2), .jr-bar-r span:nth-child(3) { display: none; }
+  .jr-ctl { left: 14px; right: 14px; bottom: max(20px, env(safe-area-inset-bottom)); flex-direction: row; justify-content: space-between; align-items: center; gap: 10px; }
+  .jr-ctl .jr-skip { padding: 9px 13px; font-size: 10px; }
+  .jr-cue { bottom: calc(max(20px, env(safe-area-inset-bottom)) + 62px); font-size: 10px; }
+  .jr-story { height: clamp(120px, 22vh, 190px); }
+  .jr-narr { display: none; }
+}
+
+/* ---- "falling to meet Ansh": takes the place of the "scroll to begin" cue as soon as you start scrolling - one calm line at the bottom ---- */
+.jr-fl { position: absolute; z-index: 6; left: 0; right: 0; bottom: 5vh; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 16px; padding: 0 240px 0 24px; text-align: center; pointer-events: none;
+  opacity: 0; transition: opacity .6s ease; text-shadow: 0 2px 18px rgba(2,4,10,.95), 0 0 2px rgba(2,4,10,.8); }
+.jr-fl.on { opacity: 1; }
+.jr-fl, .jr-fl * { font-family: 'Archivo', 'Inter Tight', Arial, sans-serif !important; font-stretch: 125%; font-weight: 800; }
+.jr-fl-top { display: flex; align-items: center; gap: 10px; font-size: clamp(11px, .9vw, 14px); letter-spacing: .18em; text-transform: uppercase; color: #ffc45c; }
+.jr-fl-top i { font-style: normal; font-size: .85em; display: inline-block; animation: jrFl 1.1s ease-in infinite; }
+.jr-fl-top b { display: inline-block; }
+.jr-fl-top b.swap { animation: jrSwap .7s cubic-bezier(.2,.7,.2,1); }
+.jr-fl-num { display: flex; align-items: baseline; gap: .3em; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; }
+.jr-fl-num::before { content: ""; width: 1px; height: 1.1em; background: rgba(255,255,255,.35); margin-right: 14px; align-self: center; }
+.jr-fl-num strong { font-size: clamp(16px, 1.6vw, 26px); letter-spacing: .01em; }
+.jr-fl-num em { font-style: normal; font-size: clamp(11px, .9vw, 14px); color: #ffc45c; letter-spacing: .1em; }
+.jr-fl-to { font-size: clamp(11px, .9vw, 14px); letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.8); }
+@keyframes jrSwap { 0% { opacity: 0; transform: translateY(8px); filter: blur(6px); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes jrFl { 0% { transform: translateY(-4px); opacity: 0; } 40% { opacity: 1; } 100% { transform: translateY(5px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .jr-fl-top i, .jr-fl-top b.swap { animation: none; } }
+@media (max-width: 1100px) { .jr-fl { padding: 0 200px 0 16px; } }
+@media (max-width: 720px) {
+  .jr-fl { bottom: calc(max(20px, env(safe-area-inset-bottom)) + 62px); padding: 0 16px; gap: 4px 10px; }
+  .jr-fl-top { flex-basis: 100%; justify-content: center; font-size: 10px; }
+  .jr-fl-num::before { display: none; }
+  .jr-fl-num strong { font-size: 18px; }
+  .jr-fl-num em, .jr-fl-to { font-size: 10px; }
+}
+.jr-pin.shat .jr-gl, .jr-pin.shat .jr-core, .jr-pin.shat .jr-hud, .jr-pin.shat .jr-shade, .jr-pin.shat .jr-grain, .jr-pin.shat .jr-fallback { visibility: hidden !important; }
+
+.jr-pin.shat .jr-fl, .jr-pin.shat .jr-ctl, .jr-pin.shat .jr-cue { opacity: 0 !important; }
+
+/* phones: the story text sits above the "falling" caption + buttons, never under them */
+@media (max-width: 720px) {
+  .jr-st--bl { bottom: calc(max(20px, env(safe-area-inset-bottom)) + 138px); }
+  .jr-st--tl { top: 11vh; }
+  .jr-body { font-size: clamp(12px, 3.3vw, 15px); line-height: 1.38; }
+}

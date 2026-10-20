@@ -2,7 +2,7 @@
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { isReleased, whenReleased } from "./loader.js";
+import { isSettled, whenSettled } from "./loader.js";
 
 const SMOOTH_TOUCH = true;
 let lenis = null;
@@ -26,8 +26,8 @@ export function initSmoothScroll() {
   window.__lenis = lenis;
   lenis.on("scroll", ScrollTrigger.update);
   gsap.ticker.add((t) => lenis.raf(t * 1000));
-  // the page is locked while the loader is up
-  if (!isReleased()) { lenis.stop(); whenReleased(() => lenis.start()); }
+  // the page is locked while the Earth intro plays, and for a few seconds after it shatters so the landing can be seen
+  if (!isSettled()) { lenis.stop(); whenSettled(() => lenis.start()); }
   return lenis;
 }
 
