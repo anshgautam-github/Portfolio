@@ -40,7 +40,7 @@ export function whenStory(fn) {
 export function startStory() {
   if (storyStarted) return;
   storyStarted = true;
-  if (!storyOn) { release(); return; }          // nobody is going to tell a story: just open the page
+  if (!storyOn) { release(true); return; }          // nobody is going to tell a story: just open the page
   storySubs.splice(0).forEach((f) => { try { f(); } catch (e) { /* ignore */ } });
   setTimeout(release, 90000);                    // safety net: never lock the page forever
 }
@@ -53,7 +53,7 @@ const settleSubs = [];
 export const isSettled = () => settled;
 export function whenSettled(fn) { if (settled) fn(); else settleSubs.push(fn); }
 
-export function release() {
+export function release(instant) {
   if (released) return;
   released = true;
   if (typeof document !== "undefined") {
@@ -64,7 +64,7 @@ export function release() {
       settled = true;
       cl.remove("is-settling");
       settleSubs.splice(0).forEach((f) => { try { f(); } catch (e) { /* ignore */ } });
-    }, SETTLE);
+    }, instant ? 0 : SETTLE);
   }
   subs.splice(0).forEach((f) => { try { f(); } catch (e) { /* ignore */ } });
 }

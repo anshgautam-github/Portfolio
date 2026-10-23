@@ -1,14 +1,17 @@
-// Dummy copy – swap for your own. "■" blocks are a stylised redaction (like a company name placeholder).
+// Landing / hero copy.
 export const landingContent = {
-  logo: "YOURNAME.DEV",
+  logo: "ANSH GAUTAM",
+  logoTag: ".DEV",
   nav: [
-    { label: "WORK", target: "next" },
+    { label: "WORK", target: "projects" },
     { label: "CONTACT", target: "end" },
   ],
-  label: ["AI &", "Engineering"],
-  tagline: ["Thinking in models.", "Shipping with care."],
-  bio: "I'm Your Name, a computer science engineer building machine learning systems and AI products at ■■■■■■, from research prototypes to production at scale. Outside work, I build open-source tools for ML workflows.",
-  headline: ["I BUILD", "MODELS & AGENTS", "THAT SHIP"],
-  country: "", // leave empty to auto-detect from the browser locale
-  temperature: "24°C",
+  cols: ["Role", "Approach", "About"],
+  status: "Building with AI",
+  cta: [{ label: "View selected work", target: "projects" }, { label: "Get in touch", target: "end" }],
+  label: ["AI ENGINEER", "& BUILDER"],
+  tagline: ["From first principles.", "To working systems."],
+  bio: "I'm a computer science engineer focused on AI, machine learning, and building useful software. From training language models from scratch to developing AI-powered products, I enjoy taking ideas from experimentation to implementation.",
+  headline: ["I BUILD", "AI SYSTEMS", "THAT MATTER"],
+  footnote: "AI • ML • SOFTWARE ENGINEERING",   // static: no fake live clock / weather
 };

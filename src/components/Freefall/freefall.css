@@ -1,0 +1,647 @@
+/* ───────── <Freefall /> : light gallery with a scroll-driven falling deck ───────── */
+@property --glow {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #8a7bff;
+}
+
+.ff {
+  --glow: #8a7bff;
+  --cw: 420px; /* card width, set from JS */
+  --blue: #3a3aff;
+  position: relative;
+  box-sizing: border-box;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #f1f1ee;
+  color: #0d0d0f;
+  font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  transition: --glow 0.9s ease;
+}
+.ff *,
+.ff *::before,
+.ff *::after {
+  box-sizing: border-box;
+}
+.ff button {
+  font: inherit;
+}
+
+/* backdrop: soft studio light + a pool of colour that follows the current card */
+.ff-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: radial-gradient(62% 58% at 68% 44%, #fbfbfa 0%, rgba(251, 251, 250, 0) 72%), linear-gradient(180deg, #f6f6f4 0%, #e9e9e6 100%);
+}
+.ff-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .07 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+}
+.ff-glow {
+  position: absolute;
+  left: 44vw;
+  top: 18vh;
+  width: 52vw;
+  height: 66vh;
+  z-index: -1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 34%, transparent), color-mix(in srgb, var(--glow) 8%, transparent) 60%, transparent);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+/* ───────── left: eyebrow, headline, lede, button ───────── */
+.ff-left {
+  position: absolute;
+  left: 7.6vw;
+  top: 50%;
+  translate: 0 -50%;
+  max-width: 44vw;
+  z-index: 3;
+}
+.ff-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 1.1em;
+  margin-bottom: 2.2vh;
+  font: 500 clamp(10px, 0.78vw, 14px) / 1 "JetBrains Mono", ui-monospace, Menlo, monospace;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #9b9b97;
+}
+.ff-eyebrow i {
+  width: 3.4em;
+  height: 1px;
+  background: #b9b9b4;
+}
+.ff-title {
+  margin: 0 0 3.2vh;
+  font-family: "Archivo", "Inter Tight", Arial, sans-serif;
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(48px, 6.4vw, 124px);   /* "Where / I’ve Worked" is wider than the old two-word title */
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+}
+.ff-in,
+.ff-fall {
+  display: block;
+  white-space: nowrap;
+}
+.ff-in {
+  color: #0b0b0d;
+}
+.ff-fall {
+  transform: skewX(-13deg);
+  transform-origin: 0 100%;
+  padding-right: 0.1em;
+}
+.ff-letter {
+  display: inline-block;
+  will-change: transform;
+}
+.ff-lede {
+  margin: 0 0 4vh;
+  max-width: 23em;
+  font-size: clamp(14px, 1.12vw, 21px);
+  line-height: 1.62;
+  color: #6c6c68;
+}
+.ff-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.1em;
+  padding: 0.55em 0.55em 0.55em 1.75em;
+  border: 0;
+  border-radius: 99px;
+  background: #0d0d10;
+  color: #fff;
+  font-weight: 500;
+  font-size: clamp(14px, 1.08vw, 20px);
+  cursor: pointer;
+  box-shadow: 0 14px 30px -10px rgba(10, 10, 20, 0.55);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s;
+}
+.ff-cta b {
+  display: grid;
+  place-items: center;
+  width: 2.1em;
+  height: 2.1em;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s;
+}
+.ff-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 38px -10px rgba(10, 10, 20, 0.6);
+}
+.ff-cta:hover b {
+  transform: translateX(3px);
+  background: rgba(255, 255, 255, 0.26);
+}
+.ff-cta:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+/* ───────── the deck ───────── */
+.ff-deck {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 47vw;
+  width: 45vw;
+  z-index: 2;
+  perspective: 1900px;
+  perspective-origin: 50% 40%;
+  pointer-events: none;
+}
+.ff-card {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 420px;
+  height: 480px;
+  font-size: calc(var(--cw) / 34);
+  border-radius: calc(var(--cw) * 0.07);
+  overflow: hidden;
+  background: #16161c;
+  color: #fff;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  visibility: hidden;
+  box-shadow: 0 2.2em 3.6em -1.2em rgba(24, 24, 44, 0.42), 0 0.4em 1em rgba(24, 24, 44, 0.16);
+}
+.ff-art {
+  position: absolute;
+  inset: -2% 0;
+  background-size: cover;
+  background-position: 50% 50%;
+  will-change: transform;
+}
+.ff-card::after {
+  /* thin inner highlight so the edges read like glass */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), inset 0 1.4em 2em -1em rgba(255, 255, 255, 0.16);
+  pointer-events: none;
+}
+.ff-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 10, 20, 0.55), rgba(10, 10, 20, 0.8));
+  opacity: 0;
+  pointer-events: none;
+}
+.ff-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(112deg, transparent 38%, rgba(255, 255, 255, 0.2) 50%, transparent 62%);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+.ff-chip,
+.ff-tag {
+  position: absolute;
+  top: 1.45em;
+  font: 700 0.88em / 1 "JetBrains Mono", ui-monospace, Menlo, monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  z-index: 2;
+}
+.ff-chip {
+  left: 1.5em;
+  padding: 0.62em 1em;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+.ff-tag {
+  right: 1.7em;
+  top: 1.95em;
+  font-size: 0.8em;
+  opacity: 0.88;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+.ff-cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 5.5em 2.2em 2.1em;
+  background: linear-gradient(180deg, transparent, rgba(5, 5, 12, 0.62) 55%, rgba(5, 5, 12, 0.78));
+  z-index: 2;
+}
+.ff-cap small {
+  display: block;
+  margin-bottom: 0.55em;
+  font: 600 0.82em / 1 "JetBrains Mono", ui-monospace, Menlo, monospace;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+}
+.ff-cap h3 {
+  margin: 0 0 0.3em;
+  font-weight: 700;
+  font-size: 3.5em;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.ff-cap p {
+  margin: 0;
+  max-width: 22em;
+  font-size: 1.02em;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+/* ───────── right rail: counter, progress line, vertical name ───────── */
+.ff-rail {
+  position: absolute;
+  right: 3.2vw;
+  top: 20vh;
+  bottom: 12vh;
+  width: 6.4vw;
+  min-width: 70px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+.ff-num {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35em;
+  overflow: hidden;
+  padding: 0.05em 0.1em;
+  font-family: "Archivo", "Inter Tight", Arial, sans-serif;
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(34px, 4.2vw, 84px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.ff-num small {
+  font: 500 0.27em / 1 "JetBrains Mono", ui-monospace, Menlo, monospace;
+  letter-spacing: 0;
+  color: #8b8b87;
+  padding-bottom: 0.4em;
+}
+.ff-num-in {
+  display: inline-block;
+  animation: ff-num 0.7s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+@keyframes ff-num {
+  from {
+    transform: translateY(-110%);
+    opacity: 0;
+    filter: blur(6px);
+  }
+}
+.ff-line {
+  position: relative;
+  flex: 1;
+  width: 2px;
+  margin: 3.2vh 0 2.4vh;
+  background: #d7d7d3;
+  border-radius: 2px;
+}
+.ff-line-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #5a5aff, var(--blue));
+  transform-origin: top;
+  transform: scaleY(0);
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(58, 58, 255, 0.55);
+}
+.ff-tick {
+  position: absolute;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: #c9c9c4;
+}
+.ff-dot {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 0 5px rgba(58, 58, 255, 0.18), 0 0 18px rgba(58, 58, 255, 0.7);
+}
+.ff-name {
+  height: 7.5em;
+  overflow: hidden;
+  font: 600 clamp(11px, 0.85vw, 15px) / 1 "Archivo", "Inter Tight", Arial, sans-serif;
+  font-stretch: 125%;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #1a1a1d;
+  writing-mode: vertical-rl;
+}
+.ff-name span {
+  display: inline-block;
+  animation: ff-name 0.6s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+@keyframes ff-name {
+  from {
+    transform: translateY(-60%);
+    opacity: 0;
+  }
+}
+
+/* ───────── small screens ───────── */
+@media (max-width: 900px) {
+  .ff-left {
+    left: 6vw;
+    top: 7vh;
+    translate: none;
+    max-width: 70vw;
+  }
+  .ff-eyebrow {
+    margin-bottom: 1.4vh;
+  }
+  .ff-title {
+    font-size: clamp(34px, 9.5vw, 72px);
+    margin-bottom: 1.6vh;
+  }
+  .ff-lede,
+  .ff-cta {
+    display: none;
+  }
+  .ff-deck {
+    left: 0;
+    width: 100%;
+  }
+  .ff-glow {
+    left: 10vw;
+    width: 80vw;
+    top: 34vh;
+  }
+  .ff-rail {
+    right: 5vw;
+    top: 8vh;
+    bottom: auto;
+    width: auto;
+  }
+  .ff-line,
+  .ff-name {
+    display: none;
+  }
+  .ff-num {
+    font-size: clamp(34px, 11vw, 60px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ff-num-in,
+  .ff-name span {
+    animation: none;
+  }
+}
+
+
+/* internship cards: logo + organisation row, role as the headline, then the description */
+.ff-cap--job { padding-top: 7em; background: linear-gradient(180deg, transparent, rgba(5, 5, 12, 0.72) 32%, rgba(5, 5, 12, 0.9)); }
+.ff-org { display: flex; align-items: center; gap: 0.9em; margin-bottom: 1.1em; }
+.ff-logo { flex: none; width: 3.6em; height: 3.6em; border-radius: 50%; object-fit: cover; background: #fff; box-shadow: 0 0 0 0.18em rgba(255, 255, 255, 0.9), 0 0.4em 1.2em rgba(0, 0, 0, 0.45); }
+.ff-org b { display: block; font-size: 1.22em; font-weight: 700; letter-spacing: -0.01em; line-height: 1.15; }
+.ff-org small { display: block; margin: 0.4em 0 0; font: 500 0.78em / 1.3 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255, 255, 255, 0.72); }
+.ff-cap--job h3 { font-size: 2.55em; line-height: 1.04; margin-bottom: 0.45em; text-wrap: balance; }
+.ff-cap--job p { max-width: none; font-size: 1em; line-height: 1.5; }
+.ff-org small.ff-place { margin-top: 0.3em; opacity: 0.85; }
+
+
+/* internship cards: a designed backdrop instead of a photo - brand-tinted light on a deep base, a fine grid, rings and a ghost number */
+.ff-art--job {
+  overflow: hidden;
+  background:
+    radial-gradient(95% 65% at 88% 4%, color-mix(in srgb, var(--c1) 85%, transparent) 0%, transparent 58%),
+    radial-gradient(80% 60% at 4% 46%, color-mix(in srgb, var(--c2) 80%, transparent) 0%, transparent 62%),
+    linear-gradient(180deg, color-mix(in srgb, var(--c3) 78%, var(--c2)) 0%, var(--c3) 70%);
+}
+.ff-gridl {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 2.6em 2.6em;
+  -webkit-mask-image: radial-gradient(75% 60% at 70% 22%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(75% 60% at 70% 22%, #000 0%, transparent 78%);
+}
+.ff-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.16); }
+.ff-ring--a { width: 22em; height: 22em; right: -6em; top: -5em; }
+.ff-ring--b { width: 33em; height: 33em; right: -11.5em; top: -10.5em; border-color: rgba(255, 255, 255, 0.08); }
+.ff-ghost {
+  position: absolute; right: 1.2rem; top: 3.4em; font: 800 14em / 0.8 "Archivo", "Inter Tight", Arial, sans-serif; letter-spacing: -0.06em;
+  color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2); pointer-events: none; user-select: none;
+}
+.ff-card--job .ff-cap--job { background: linear-gradient(180deg, transparent, rgba(4, 4, 10, 0.38) 40%, rgba(4, 4, 10, 0.55)); }
+.ff-logo--sq { border-radius: 24%; }
+.ff-org b { text-wrap: balance; }
+
+
+/* ───────── designer pass: atmosphere, index, sharper card edges ───────── */
+.ff-deco { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.ff-aur { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.55; transition: background 0.9s; animation: ff-drift 18s ease-in-out infinite alternate; }
+.ff-aur--a { width: 38vw; height: 38vw; left: -8vw; top: -12vw; background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 30%, transparent), transparent); }
+.ff-aur--b { width: 34vw; height: 34vw; right: -6vw; bottom: -14vw; background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 24%, transparent), transparent); animation-delay: -7s; }
+@keyframes ff-drift { to { transform: translate3d(4vw, 3vw, 0) scale(1.12); } }
+.ff-dots {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(20, 20, 30, 0.16) 1px, transparent 1.4px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(70% 70% at 65% 50%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(70% 70% at 65% 50%, #000 0%, transparent 78%);
+}
+.ff-tick-c { position: absolute; width: 18px; height: 18px; border: 0 solid rgba(20, 20, 30, 0.35); }
+.ff-tick-c--tl { left: 2vw; top: 3vh; border-left-width: 1.5px; border-top-width: 1.5px; }
+.ff-tick-c--tr { right: 2vw; top: 3vh; border-right-width: 1.5px; border-top-width: 1.5px; }
+.ff-tick-c--bl { left: 2vw; bottom: 3vh; border-left-width: 1.5px; border-bottom-width: 1.5px; }
+.ff-tick-c--br { right: 2vw; bottom: 3vh; border-right-width: 1.5px; border-bottom-width: 1.5px; }
+.ff-side { position: absolute; left: 2vw; top: 50%; translate: 0 -50%; rotate: 180deg; writing-mode: vertical-rl; font: 500 clamp(9px, 0.7vw, 12px) / 1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(20, 20, 30, 0.38); }
+.ff-ghost-word { position: absolute; left: 6vw; bottom: -3.2vw; font: 800 15vw / 0.8 "Archivo", "Inter Tight", Arial, sans-serif; font-stretch: 125%; letter-spacing: -0.05em; text-transform: uppercase; color: transparent; -webkit-text-stroke: 1.5px rgba(20, 20, 30, 0.07); white-space: nowrap; }
+
+/* index of internships under the lede */
+.ff-index { list-style: none; margin: 0 0 4vh; padding: 0; max-width: 26em; border-top: 1px solid rgba(20, 20, 30, 0.14); }
+.ff-index li { border-bottom: 1px solid rgba(20, 20, 30, 0.1); }
+.ff-index button { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 2.6em 1fr auto; align-items: baseline; width: 100%; padding: 0.78em 0.2em; position: relative; font-size: clamp(12px, 0.95vw, 17px); color: #8b8b86; transition: color 0.3s, padding 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.ff-index button::before { content: ""; position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%; background: linear-gradient(90deg, var(--glow), transparent); transform: scaleX(0); transform-origin: left; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.ff-index button:hover, .ff-index button.is-on { color: #0d0d0f; }
+.ff-index button.is-on { padding-left: 0.7em; }
+.ff-index button.is-on::before { transform: scaleX(1); }
+.ff-ix-n { font: 500 0.78em / 1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.1em; color: var(--blue); opacity: 0.85; }
+.ff-ix-c { font-weight: 600; letter-spacing: -0.01em; }
+.ff-ix-y { font: 500 0.74em / 1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+@media (max-height: 760px), (max-width: 900px) { .ff-index { display: none; } }
+
+/* card edges: a lit gradient rim, a crisp outer line and a coloured halo; every layer is rounded with the card */
+.ff-card { --r: calc(var(--cw) * 0.07); border-radius: var(--r); clip-path: inset(0 round var(--r)); }
+.ff-card--job::before, .ff-card::after { border-radius: var(--r); }
+.ff-card--job {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 2.4em 4em -1.4em color-mix(in srgb, var(--g) 55%, rgba(20, 20, 40, 0.5)),
+    0 0.5em 1.2em rgba(24, 24, 44, 0.2);
+}
+.ff-card--job::before {
+  content: ""; position: absolute; inset: 0; z-index: 4; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.85) 0%, color-mix(in srgb, var(--g) 80%, white) 22%, rgba(255, 255, 255, 0.06) 52%, color-mix(in srgb, var(--g) 85%, transparent) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.ff-card--job .ff-chip { background: rgba(255, 255, 255, 0.14); }
+.ff-card--job .ff-tag { padding: 0.5em 0.8em; border-radius: 99px; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(255, 255, 255, 0.22); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 1; }
+
+/* internship card typography: clear 4-step hierarchy - org (eyebrow) > role (headline) > description, with a hairline between org and role */
+.ff-cap--job { padding: 7em 2.2em 2.3em; }
+.ff-cap--job .ff-org { gap: 1em; margin-bottom: 1.3em; padding-bottom: 1.2em; border-bottom: 1px solid rgba(255, 255, 255, 0.16); }
+.ff-cap--job .ff-logo { width: 4em; height: 4em; }
+.ff-cap--job .ff-org b { font-size: 1.45em; font-weight: 700; letter-spacing: -0.015em; line-height: 1.1; }
+.ff-cap--job .ff-org small { margin-top: 0.55em; font-size: 0.82em; letter-spacing: 0.08em; line-height: 1.35; color: rgba(255, 255, 255, 0.82); }
+.ff-cap--job .ff-org small.ff-place { margin-top: 0.3em; color: rgba(255, 255, 255, 0.62); opacity: 1; }
+.ff-cap--job h3 { font-size: 3em; line-height: 1.02; letter-spacing: -0.03em; margin: 0 0 0.5em; }
+.ff-cap--job p { font-size: 1.12em; line-height: 1.55; color: rgba(255, 255, 255, 0.84); max-width: 30em; }
+
+/* richer internship backdrops: a light beam, a per-role line motif, film grain and a soft vignette */
+.ff-art--job { background:
+  radial-gradient(95% 65% at 88% 4%, color-mix(in srgb, var(--c1) 85%, transparent) 0%, transparent 58%),
+  radial-gradient(80% 60% at 4% 46%, color-mix(in srgb, var(--c2) 80%, transparent) 0%, transparent 62%),
+  conic-gradient(from 210deg at 78% 8%, transparent 0deg, color-mix(in srgb, var(--c1) 38%, transparent) 40deg, transparent 90deg),
+  linear-gradient(180deg, color-mix(in srgb, var(--c3) 78%, var(--c2)) 0%, var(--c3) 70%); }
+.ff-beam { position: absolute; left: 38%; top: -20%; width: 46%; height: 85%; transform: rotate(18deg); pointer-events: none;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c1) 55%, white) 0%, transparent 85%); opacity: 0.16; filter: blur(14px);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 50%, transparent); mask-image: linear-gradient(90deg, transparent, #000 50%, transparent); }
+.ff-motif { position: absolute; left: 6%; right: 6%; top: 4%; height: 52%; color: color-mix(in srgb, var(--c1) 55%, white); opacity: 0.5; pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%); mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+  filter: drop-shadow(0 0 0.6em color-mix(in srgb, var(--c1) 60%, transparent)); }
+.ff-motif svg { width: 100%; height: 100%; display: block; }
+.ff-grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.16; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.ff-art--job::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.35) 100%); }
+
+/* livelier page: orbit rings behind the deck, a stat strip, a running ticker and stronger ambient colour */
+.ff-aur { opacity: 0.9; }
+.ff-aur--a { width: 46vw; height: 46vw; background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 42%, transparent), transparent); }
+.ff-aur--b { width: 44vw; height: 44vw; background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 36%, transparent), transparent); }
+.ff-orbit { position: absolute; left: 69.5%; top: 54%; width: 0; height: 0; }
+.ff-orb { position: absolute; border-radius: 50%; translate: -50% -50%; border: 1px solid color-mix(in srgb, var(--glow) 40%, rgba(20, 20, 30, 0.12)); animation: ff-spin 60s linear infinite; }
+.ff-orb--a { width: 42vw; height: 42vw; max-width: 760px; max-height: 760px; border-style: dashed; border-color: color-mix(in srgb, var(--glow) 38%, rgba(20, 20, 30, 0.1)); }
+.ff-orb--b { width: 56vw; height: 56vw; max-width: 1020px; max-height: 1020px; animation-duration: 90s; animation-direction: reverse; opacity: 0.7; }
+.ff-orb--c { width: 30vw; height: 30vw; max-width: 540px; max-height: 540px; background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 22%, transparent), transparent); border: 0; animation: none; }
+.ff-orb u { position: absolute; left: 50%; top: -5px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--glow); box-shadow: 0 0 0 5px color-mix(in srgb, var(--glow) 25%, transparent), 0 0 18px var(--glow); }
+.ff-orb--b u { top: auto; bottom: -5px; width: 7px; height: 7px; }
+@keyframes ff-spin { to { transform: rotate(360deg); } }
+.ff-stats { display: flex; gap: clamp(20px, 3vw, 56px); margin: 0; padding: 1.4em 0 0; max-width: 26em; }
+.ff-stats div { display: flex; flex-direction: column; gap: 0.3em; }
+.ff-stats dt { font: 800 clamp(26px, 2.6vw, 48px) / 1 "Archivo", "Inter Tight", Arial, sans-serif; letter-spacing: -0.04em; background: linear-gradient(120deg, #0d0d0f, var(--glow)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ff-stats dd { margin: 0; font: 500 clamp(9px, 0.72vw, 12px) / 1.2 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(20, 20, 30, 0.5); }
+.ff-ticker { position: absolute; left: 0; right: 0; bottom: 0; height: clamp(34px, 3.2vw, 54px); overflow: hidden; display: flex; align-items: center; border-top: 1px solid rgba(20, 20, 30, 0.1); background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.7)); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.ff-ticker-t { display: flex; width: max-content; animation: ff-tick 46s linear infinite; }
+.ff-ticker-t > span { display: flex; flex: none; }
+.ff-ticker em { font-style: normal; display: inline-flex; align-items: center; gap: 0.9em; white-space: nowrap; padding-right: 2.6em; font: 600 clamp(10px, 0.85vw, 14px) / 1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(20, 20, 30, 0.7); }
+.ff-ticker em b { font-weight: 500; color: rgba(20, 20, 30, 0.4); }
+.ff-ticker em b::before { content: "/"; margin-right: 0.9em; color: var(--glow); }
+.ff-ticker em::after { content: ""; width: 7px; height: 7px; margin-left: 1.7em; transform: rotate(45deg); background: var(--glow); }
+@keyframes ff-tick { to { transform: translateX(-50%); } }
+@media (max-height: 820px), (max-width: 900px) { .ff-stats, .ff-ticker { display: none; } }
+@media (max-width: 900px) { .ff-orbit { left: 50%; } }
+@media (prefers-reduced-motion: reduce) { .ff-orb, .ff-ticker-t { animation: none; } }
+
+/* =====================================================================
+   LIFE: ambient motion, depth and small rewards so the page never sits still
+   (everything is transform / opacity / translate only; animations pause when the section is off screen)
+   ===================================================================== */
+.ff:not(.is-live) *, .ff:not(.is-live) *::before, .ff:not(.is-live) *::after { animation-play-state: paused !important; }
+
+/* soft light that follows the cursor */
+.ff-spot { position: absolute; left: 0; top: 0; width: 900px; height: 900px; border-radius: 50%; translate: 55vw 20vh; pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 22%, transparent), transparent 70%); will-change: translate; transition: background .9s; }
+
+/* depth: each layer drifts a different amount with the pointer */
+.ff-deck { transform: perspective(2200px) rotateY(calc(var(--px, 0) * 7deg)) rotateX(calc(var(--py, 0) * -5deg)); transform-style: flat; will-change: transform; }
+.ff-left { translate: calc(var(--px, 0) * -10px) calc(-50% + var(--py, 0) * -6px); will-change: translate; }
+.ff-aur--a { translate: calc(var(--px, 0) * -60px) calc(var(--py, 0) * -40px); }
+.ff-aur--b { translate: calc(var(--px, 0) * 70px) calc(var(--py, 0) * 50px); }
+.ff-orbit { translate: calc(var(--px, 0) * 26px) calc(var(--py, 0) * 18px); }
+.ff-ghost-word { translate: calc(var(--px, 0) * -40px) 0; animation: ff-ghostword 42s ease-in-out infinite alternate; }
+@keyframes ff-ghostword { from { transform: translateX(-2vw); } to { transform: translateX(7vw); } }
+
+/* rising sparks */
+.ff-spark { position: absolute; left: var(--x); bottom: -24px; width: var(--s); height: var(--s); border-radius: 50%; background: var(--glow); opacity: 0; box-shadow: 0 0 calc(var(--s) * 4) var(--glow);
+  animation: ff-rise var(--t) linear infinite; animation-delay: var(--d); }
+@keyframes ff-rise { 0% { transform: translate3d(0, 0, 0); opacity: 0; } 12% { opacity: .75; } 70% { opacity: .55; } 100% { transform: translate3d(var(--w), -112vh, 0); opacity: 0; } }
+
+/* headline: the letters of "I've Worked" ripple, and bounce when touched */
+.ff-fall .ff-letter { display: inline-block; animation: ff-wave 4.6s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -0.28s); transition: scale .35s cubic-bezier(.2, 1.6, .3, 1), rotate .35s cubic-bezier(.2, 1.6, .3, 1); }
+.ff-fall .ff-letter:hover { scale: 1.14; rotate: -5deg; }
+@keyframes ff-wave { 0%, 100% { translate: 0 0; } 50% { translate: 0 -.05em; } }
+.ff-title { pointer-events: auto; }
+
+/* index: rows slide, the active row breathes */
+.ff-index button:hover { padding-left: .55em; }
+.ff-index button:hover .ff-ix-n { opacity: 1; }
+.ff-index button.is-on .ff-ix-n::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: .5em; border-radius: 50%; background: var(--glow); box-shadow: 0 0 0 0 var(--glow); animation: ff-ping 1.8s ease-out infinite; vertical-align: middle; }
+@keyframes ff-ping { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--glow) 55%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
+.ff-stats dt { font-variant-numeric: tabular-nums; }
+
+/* cards: a gentle float, and a light streak that sweeps across the artwork */
+.ff-art--job { overflow: hidden; }
+.ff-streak { position: absolute; top: -20%; bottom: -20%; left: 0; width: 38%; pointer-events: none; transform: translateX(-160%) skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .22), transparent); animation: ff-streak 6.5s ease-in-out infinite; }
+.ff-card:nth-child(2n) .ff-streak { animation-delay: -2.4s; } .ff-card:nth-child(3n) .ff-streak { animation-delay: -4.4s; }
+@keyframes ff-streak { 0%, 55% { transform: translateX(-160%) skewX(-18deg); } 100% { transform: translateX(520%) skewX(-18deg); } }
+.ff-ring--a { animation: ff-spin 50s linear infinite; } .ff-ring--b { animation: ff-spin 80s linear infinite reverse; }
+
+/* progress dot sends out ripples */
+.ff-dot::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 1.5px solid var(--blue); opacity: 0; animation: ff-dotring 2.2s ease-out infinite; }
+@keyframes ff-dotring { 0% { transform: scale(.6); opacity: .8; } 100% { transform: scale(2.6); opacity: 0; } }
+
+/* scroll cue */
+.ff-cue { position: absolute; left: 69.5%; bottom: clamp(78px, 11vh, 120px); translate: -50% 0; z-index: 4; display: flex; align-items: center; gap: 12px; padding: 10px 18px 10px 20px; border-radius: 99px; pointer-events: none;
+  font: 500 clamp(10px, .75vw, 12px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .26em; text-transform: uppercase; color: #3b3b44; background: rgba(255, 255, 255, .72); box-shadow: 0 10px 30px -12px rgba(30, 30, 60, .35), 0 0 0 1px rgba(20, 20, 30, .08);
+  opacity: 0; transform: translateY(14px); transition: opacity .6s, transform .6s cubic-bezier(.2, .8, .2, 1); }
+.ff-cue.is-on { opacity: 1; transform: none; }
+.ff-cue i { position: relative; width: 14px; height: 22px; border-radius: 8px; border: 1.5px solid #3b3b44; }
+.ff-cue i::after { content: ""; position: absolute; left: 50%; top: 4px; width: 3px; height: 5px; margin-left: -1.5px; border-radius: 2px; background: var(--blue); animation: ff-wheel 1.5s ease-in-out infinite; }
+@keyframes ff-wheel { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(7px); opacity: 0; } 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ff-spark, .ff-card, .ff-streak, .ff-fall .ff-letter, .ff-ghost-word, .ff-dot::after, .ff-ring--a, .ff-ring--b { animation: none !important; }
+  .ff-deck { transform: none; } .ff-spot { display: none; }
+}
+@media (max-width: 900px) { .ff-cue, .ff-spot { display: none; } .ff-deck { transform: none; } }
+
+/* ---- shatter ---- */
+.ff-cue { display: none !important; }
+.ff-shards { position: absolute; left: 50%; pointer-events: none; transform-style: preserve-3d; display: none; --r: calc(var(--cw) * 0.07); }
+.ff-shards .ff-shard { position: absolute; overflow: hidden; will-change: transform, opacity; contain: layout paint; }
+.ff-shards .ff-shardcard { position: absolute !important; margin: 0 !important; visibility: visible !important; opacity: 1 !important; transform: none !important; will-change: auto !important; box-shadow: none !important; animation: none !important; }
+.ff-shards .ff-shardcard *, .ff-shards .ff-shardcard *::before, .ff-shards .ff-shardcard *::after { animation: none !important; }
+.ff-cracks { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; overflow: visible; border-radius: var(--r); }
+.ff-cracks line { stroke: rgba(255, 255, 255, .85); stroke-width: 1.1px; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 2px rgba(255, 255, 255, .8)); }
+.ff-flash { position: absolute; inset: 0; opacity: 0; border-radius: var(--r); background: radial-gradient(60% 55% at 50% 30%, rgba(255, 255, 255, .95), rgba(255, 255, 255, .25) 55%, transparent 80%); mix-blend-mode: normal; }
+
+/* ---- performance: fewer simultaneous animated layers ---- */
+.ff-spark:nth-of-type(n+9) { display: none; }
+.ff-spark { box-shadow: none; }
+.ff-card .ff-streak { animation-duration: 8s; }
+.ff-card:not(:first-of-type) .ff-streak { animation: none; }

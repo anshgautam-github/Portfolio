@@ -245,7 +245,7 @@ html.has-cursor [contenteditable="true"] {
 .cur-orbit > span::after {
   content: "\2726";
   position: absolute;
-  left: 38px;
+  left: 30px;
   top: -9px;
   font-size: 14px;
   color: #d7ff3b;
@@ -311,8 +311,8 @@ html.has-cursor [contenteditable="true"] {
   pointer-events: none;
   opacity: 0;
   border: 2px solid #d7ff3b;
-  box-shadow: 0 0 0 2px #111, 0 0 26px rgba(215, 255, 59, 0.38), inset 0 0 18px rgba(215, 255, 59, 0.16);
-  background: rgba(215, 255, 59, 0.1);
+  box-shadow: 0 0 0 2px #111, 0 0 22px rgba(215, 255, 59, 0.32);
+  background: transparent;
   overflow: visible;
   will-change: transform, width, height;
 }
@@ -329,7 +329,7 @@ html.has-cursor [contenteditable="true"] {
   bottom: 0;
   width: 40%;
   left: -50%;
-  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.16), transparent);
   animation: cur-shine 1.4s ease-in-out infinite;
 }
 @keyframes cur-shine {

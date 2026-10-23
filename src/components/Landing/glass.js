@@ -45,6 +45,7 @@ uniform vec2 uRes;
 uniform float uAspect;
 uniform float uTime;
 uniform float uDark;
+uniform vec4 uDrops[16];   // water drops: xy = position (aspect units), z = birth time, w = strength
 out vec4 o;
 ${NOISE_GLSL}
 // ---------- background: pale blue sky with soft diagonal cream light streaks ----------
@@ -52,7 +53,23 @@ vec3 background(vec2 sa, vec2 dflow) {
   const float ang = 0.50;
   vec2 dir = vec2(cos(ang), sin(ang));
   vec2 prp = vec2(-dir.y, dir.x);
-  vec2 q = sa + dflow * 0.25;
+  // ---- liquid surface: every pointer drop sends out circular waves that travel, interfere and fade ----
+  float wh = 0.0;            // surface height
+  vec2 wg = vec2(0.0);       // surface slope
+  for (int i = 0; i < 16; i++) {
+    vec4 d = uDrops[i];
+    float age = uTime - d.z;
+    if (d.w <= 0.0 || age < 0.0 || age > 6.0) continue;
+    vec2 dv = sa - d.xy;
+    float r = length(dv) + 1e-4;
+    float front = age * 0.34;
+    float x = (r - front);
+    float env = exp(-(x * x) / 0.0105) * exp(-age * 0.50) * d.w / (1.0 + r * 5.0);
+    float ph = x * 78.0;
+    wh += sin(ph) * env;
+    wg += (dv / r) * (cos(ph) * 78.0 * env);
+  }
+  vec2 q = sa + wg * 0.00024 + dflow * 0.25;
   float u = dot(q, prp);
   float w = dot(q, dir);
   float t = uTime;
@@ -65,16 +82,55 @@ vec3 background(vec2 sa, vec2 dflow) {
 
   vec3 skyL = vec3(0.755, 0.855, 0.945);
   vec3 deepL = vec3(0.706, 0.824, 0.929);
-  vec3 creamL = vec3(0.992, 0.957, 0.890);
+  vec3 creamL = vec3(0.90, 0.92, 0.94);
   vec3 L = mix(skyL, deepL, smoothstep(0.3, 0.75, f2) * 0.55);
-  L = mix(L, creamL, streak * 0.95);
+  L = mix(L, creamL, streak * 0.55);
 
   vec3 skyD = vec3(0.043, 0.071, 0.133);
   vec3 deepD = vec3(0.055, 0.105, 0.215);
   vec3 glowD = vec3(0.20, 0.32, 0.62);
   vec3 D = mix(skyD, deepD, smoothstep(0.3, 0.75, f2));
   D = mix(D, glowD, streak * 0.55);
-  return mix(L, D, uDark);
+  vec3 col = mix(L, D, uDark);
+
+  // water shading: crests catch light, troughs go a shade deeper, plus a faint caustic shimmer that is always moving
+  float crest = clamp(wh * 1.1, 0.0, 1.0), trough = clamp(-wh * 1.1, 0.0, 1.0);
+  float slope = clamp(length(wg) * 0.010, 0.0, 1.0);
+  col += vec3(0.96, 0.98, 1.00) * (crest * crest * 0.25 + slope * slope * 0.18) * (1.0 - uDark * 0.35);
+  col -= vec3(0.17, 0.12, 0.05) * trough * 0.30 * (1.0 - uDark * 0.5);
+  vec2 cp = sa * 4.2;
+  float ca = sin(cp.x * 1.7 + t * 0.55 + sin(cp.y * 2.3 - t * 0.5)) * sin(cp.y * 1.9 - t * 0.42 + sin(cp.x * 2.1 + t * 0.4));
+  ca = pow(1.0 - abs(ca), 7.0);
+  col += vec3(0.92, 0.96, 1.0) * ca * 0.05 * (1.0 - uDark * 0.5);
+
+  // ---- lively light: aurora ribbons, drifting glow orbs, a slow sweeping beam and twinkling stars (all blue) ----
+  vec3 live = vec3(0.0);
+  for (int k = 0; k < 3; k++) {
+    float fk = float(k);
+    float yy = sa.y + 0.12 * sin(sa.x * 2.2 + t * (0.25 + 0.07 * fk) + fk * 2.0) + 0.05 * sin(sa.x * 5.0 - t * 0.4 + fk);
+    float c = 0.28 + 0.24 * fk + 0.05 * sin(t * 0.2 + fk * 1.7);
+    float dd = yy - c;
+    float rib = exp(-dd * dd / 0.0040) * (0.55 + 0.45 * sin(sa.x * 3.0 + t * 0.5 + fk * 4.0));
+    live += mix(vec3(0.10, 0.30, 0.95), vec3(0.40, 0.78, 1.00), fk * 0.5) * rib * 0.30;
+  }
+  for (int i = 0; i < 7; i++) {
+    float fi = float(i);
+    vec2 p = vec2(uAspect * fract(0.13 + fi * 0.318 + t * (0.010 + 0.003 * fi)), 0.14 + 0.72 * fract(fi * 0.618 + 0.06 * sin(t * 0.12 + fi * 1.9)));
+    float rad = 0.030 + 0.034 * fract(fi * 0.37 + 0.2);
+    float dd = length(sa - p);
+    float pulse = 0.55 + 0.45 * sin(t * 0.8 + fi * 2.1);
+    float orb = exp(-dd * dd / (rad * rad * 0.9)) * 0.55 + smoothstep(0.010, 0.0, abs(dd - rad)) * 0.55;
+    live += vec3(0.34, 0.60, 1.00) * orb * pulse * 0.24;
+  }
+  float bm = dot(sa, vec2(0.62, 0.78));
+  float bpos = fract(t * 0.030) * 3.2 - 0.9;
+  live += vec3(0.45, 0.72, 1.0) * exp(-(bm - bpos) * (bm - bpos) / 0.012) * 0.20;
+  vec2 gp = sa * 64.0;
+  float sh = hash21(floor(gp));
+  float tw = pow(max(0.0, sin(t * (1.4 + 3.0 * fract(sh * 37.0)) + sh * 50.0)), 8.0);
+  live += vec3(0.72, 0.86, 1.0) * step(0.982, sh) * tw * smoothstep(0.40, 0.0, length(fract(gp) - 0.5)) * 1.1;
+  col += live * mix(0.30, 1.0, uDark);
+  return col;
 }
 
 
@@ -591,6 +647,7 @@ export function createGlassScene(canvas, opts = {}) {
   let flowA = null, flowB = null, encoded = false;
   let dark = 0, darkTarget = 0;
   let mouse = { x: 0, y: 0, tx: 0, ty: 0, has: false, inside: false, act: 0 };
+  const drops = new Float32Array(64); let dropI = 0, lastDropX = 0, lastDropY = 0, lastDropT = -9, hadDrop = false;
   let last = performance.now();
   let t0 = performance.now();
   let raf = 0, destroyed = false, visible = true;
@@ -764,6 +821,18 @@ export function createGlassScene(canvas, opts = {}) {
     gl.uniform1f(progBg.u.uAspect, aspect);
     gl.uniform1f(progBg.u.uTime, opts.time != null ? opts.time : (now - t0) / 1000);
     gl.uniform1f(progBg.u.uDark, dark);
+    {
+      const tSec = opts.time != null ? opts.time : (now - t0) / 1000;
+      if (mouse.inside && mouse.has) {
+        const dd = Math.hypot(mouse.x - lastDropX, mouse.y - lastDropY);
+        if (!hadDrop || (dd > 0.045 && tSec - lastDropT > 0.05)) {
+          const sp = Math.min(1, dd * 9 + 0.35);
+          drops[dropI * 4] = mouse.x; drops[dropI * 4 + 1] = mouse.y; drops[dropI * 4 + 2] = tSec; drops[dropI * 4 + 3] = 0.5 + 0.9 * sp;
+          dropI = (dropI + 1) % 16; lastDropX = mouse.x; lastDropY = mouse.y; lastDropT = tSec; hadDrop = true;
+        }
+      } else hadDrop = false;
+      if (progBg.u.uDrops) gl.uniform4fv(progBg.u.uDrops, drops);
+    }
     drawTri();
 
     /* --- 2) scene --- */

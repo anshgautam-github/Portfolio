@@ -1,0 +1,36 @@
+/* The site frame: a click-through ring drawn over the whole page (see Frame.jsx) */
+:root {
+  --fr-bg: #efede7;
+  --fr-m: 14px;     /* gap between the browser edge and the window */
+  --fr-r: 30px;     /* corner radius of the window */
+  --fr-nw: 330px;   /* width of the brand tab */
+  --fr-nh: 52px;    /* depth of the brand tab */
+  --fr-nr: 28px;    /* shoulder curve into the tab */
+}
+@media (max-width: 1024px) { :root { --fr-m: 11px; --fr-r: 26px; --fr-nw: 270px; --fr-nh: 46px; --fr-nr: 22px; } }
+@media (max-width: 640px)  { :root { --fr-m: 7px;  --fr-r: 20px; --fr-nw: 196px; --fr-nh: 38px; --fr-nr: 16px; } }
+
+html, body { background: var(--fr-bg); }
+
+.fr { position: fixed; inset: 0; z-index: 9000; pointer-events: none; }
+.fr-svg { position: absolute; inset: 0; display: block; overflow: visible; filter: drop-shadow(0 1px 0 rgba(0,0,0,.05)); }
+.fr-ring { fill: var(--fr-bg); }
+.fr-ring, .fr-edge { shape-rendering: geometricPrecision; stroke-linejoin: miter; }
+.fr-edge { fill: none; stroke: rgba(20,20,20,.14); stroke-width: 1; }
+
+.fr-brand {
+  all: unset; box-sizing: border-box; pointer-events: auto; cursor: pointer;
+  position: absolute; left: 50%; top: var(--fr-m); height: var(--fr-nh); transform: translateX(-50%);
+  display: flex; align-items: center; justify-content: center; max-width: calc(var(--fr-nw) - 24px);
+  white-space: nowrap; color: #0b0b0b;
+  font-family: "Archivo", "Inter Tight", Arial, sans-serif; font-stretch: 125%; font-weight: 800;
+  font-size: clamp(13px, 1.5vw, 22px); letter-spacing: .01em;
+}
+@media (max-width: 640px) { .fr-brand { font-size: 12px; } }
+.fr-brand:focus-visible { outline: 2px solid #0b0b0b; outline-offset: -6px; border-radius: 12px; }
+
+/* the brand now lives in the frame tab - hide the landing's own copy so it isn't shown twice */
+/* the landing logo is hidden only while the frame tab shows it; the tab melts away on scroll, so keep it hidden only in the hero */
+.ll-logo { visibility: hidden; }
+
+.fr-brand .fr-tag { margin-left: .35em; font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-stretch: 100%; font-weight: 500; font-size: .55em; letter-spacing: .04em; opacity: .55; align-self: flex-end; padding-bottom: .55em; }

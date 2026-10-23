@@ -11,11 +11,13 @@ export function createScene(glCanvas, fxCanvas) {
   let gl3 = null;
   try { gl3 = createGL3D(glCanvas); } catch (e) { console.warn("[collab] WebGL scene unavailable", e); }
   const ctx = fxCanvas.getContext("2d");
-  let W = 0, H = 0, gw = 2, gh = 2, dpr = 1, S = 1, scale = 0.6, last = 0, acc = 0, nfr = 0;
+  let W = 0, H = 0, gw = 2, gh = 2, dpr = 1, S = 1, scale = 0.6, last = 0, acc = 0, nfr = 0, cool = 0;
   const st = { p: 0, shown: 0, done: false, hs: 0, flash: 0, shake: 0, t: 0, since: 0, onDone: null, onReset: null, mouse: [0, 0], mouseT: [0, 0] };
   const rings = [], parts = [], petals = [];
   let seed = 5; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
   for (let i = 0; i < 16; i++) petals.push(newPetal(true));
+  const birds = Array.from({ length: 7 }, (_, i) => ({ x: rnd() * 1.2 - 0.1, y: 0.10 + rnd() * 0.30, s: 0.6 + rnd() * 0.9, v: 0.012 + rnd() * 0.018, ph: rnd() * TAU, fl: 5 + rnd() * 3, dy: rnd() * TAU }));
+  const seeds = Array.from({ length: 26 }, () => ({ x: rnd(), y: 0.35 + rnd() * 0.65, z: 0.3 + rnd() * 1.1, ph: rnd() * TAU, r: rnd() * TAU }));
   function newPetal(init) { return { x: rnd(), y: init ? rnd() : -0.1, z: 0.35 + rnd() * 1.0, r: rnd() * TAU, vr: (rnd() - 0.5) * 1.6, ph: rnd() * TAU, c: rnd() }; }
 
   function resize() {
@@ -28,7 +30,7 @@ export function createScene(glCanvas, fxCanvas) {
   }
   function sizeGL() {
     gw = Math.max(2, Math.round(W / dpr * Math.min(dpr, 1.25) * scale)); gh = Math.max(2, Math.round(H / dpr * Math.min(dpr, 1.25) * scale));
-    glCanvas.width = gw; glCanvas.height = gh;
+    if (glCanvas.width !== gw || glCanvas.height !== gh) { glCanvas.width = gw; glCanvas.height = gh; }
   }
 
   function burst(cx, cy, n) {
@@ -51,7 +53,7 @@ export function createScene(glCanvas, fxCanvas) {
   }
 
   function frame(dt, holding) {
-    dt = Math.min(dt, 0.05); st.t += dt; st.since += dt;
+    dt = Math.max(0, Math.min(dt, 0.05)); st.t += dt; st.since += dt;
     if (!st.done) {
       if (holding) st.p = Math.min(1, st.p + dt / 2.8); else st.p = Math.max(0, st.p - dt / 1.1);
       st.shown += (st.p - st.shown) * (1 - Math.pow(0.0005, dt));
@@ -68,10 +70,17 @@ export function createScene(glCanvas, fxCanvas) {
     const tension = Math.pow(p, 2.2) * (st.done ? 0 : 1);
     const calm = st.done ? clamp((st.hs - 0.2) / 0.8) : 0;
 
-    // ---- adaptive resolution of the 3D pass
+    // ---- adaptive resolution of the 3D pass (steady: ignores gaps/hitches, slow to change, never thrashes)
     const now = performance.now();
-    if (last) { acc += now - last; nfr++; if (nfr >= 8) { const ms = acc / nfr; if (ms > 20 && scale > 0.35) { scale = Math.max(0.35, scale - 0.1); sizeGL(); } else if (ms < 12 && scale < 0.8) { scale = Math.min(0.8, scale + 0.05); sizeGL(); } acc = 0; nfr = 0; } }
-    last = now;
+    const gap = last ? now - last : 0; last = now;
+    if (gap > 0 && gap < 60 && now > cool) {
+      acc += gap; nfr++;
+      if (nfr >= 30) {
+        const ms = acc / nfr; acc = 0; nfr = 0;
+        if (ms > 22 && scale > 0.4) { scale = Math.max(0.4, scale - 0.1); sizeGL(); cool = now + 1500; }
+        else if (ms < 10 && scale < 0.8) { scale = Math.min(0.8, scale + 0.1); sizeGL(); cool = now + 4000; }
+      }
+    } else { acc = 0; nfr = 0; }
 
     if (gl3) gl3.draw(gw, gh, { t: T, p, tension, calm, hs: st.hs, shake: st.shake, mouse: st.mouse });
 
@@ -88,6 +97,33 @@ export function createScene(glCanvas, fxCanvas) {
       const sz = (3 + 6.5 * q.z * q.z) * dpr * (S * 0.8 + 0.2);
       petal(x, y, sz, q.r + T * 0.3, q.c, 0.5 + 0.35 * (q.z - 0.35), q.z > 1.15 ? 4 : 0);
     }
+    // drifting dandelion seeds (parallax: nearer ones are bigger, faster and sharper)
+    ctx.save(); ctx.lineCap = "round";
+    for (const q of seeds) {
+      q.x += (0.010 + 0.006 * Math.sin(T * 0.5 + q.ph)) * dt * q.z; q.y -= (0.004 + 0.012 * Math.max(0, Math.sin(T * 0.7 + q.ph))) * dt * q.z; q.r += dt * 0.4 * q.z;
+      if (q.x > 1.06 || q.y < -0.05) { q.x = -0.04; q.y = 0.45 + rnd() * 0.55; }
+      const pull = (tension * 0.35) * q.z;
+      const x = lerp(q.x * W, cx, pull) + Math.sin(T * 0.9 + q.ph) * 8 * dpr * q.z, y = lerp(q.y * H, cy, pull) + Math.cos(T * 0.7 + q.ph) * 6 * dpr * q.z;
+      const rr = (3 + 5 * q.z) * dpr * (S * 0.7 + 0.3), al = 0.35 + 0.4 * q.z * 0.6;
+      ctx.strokeStyle = `rgba(255,255,255,${(al * 0.8).toFixed(3)})`; ctx.lineWidth = Math.max(1, 0.7 * dpr);
+      ctx.beginPath();
+      for (let k = 0; k < 9; k++) { const a = q.r + (k / 9) * TAU; ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+      ctx.stroke();
+      ctx.fillStyle = `rgba(255,255,255,${al.toFixed(3)})`; ctx.beginPath(); ctx.arc(x, y, Math.max(1.2, 1.3 * dpr * q.z), 0, TAU); ctx.fill();
+    }
+    ctx.restore();
+    // a few far-off birds crossing the sky
+    ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+    for (const b of birds) {
+      b.x += b.v * dt * (1 - 0.7 * p); if (b.x > 1.12) { b.x = -0.1; b.y = 0.10 + rnd() * 0.30; }
+      const bx = b.x * W, by = (b.y + Math.sin(T * 0.4 + b.dy) * 0.012) * H, sz = 13 * b.s * dpr * (S * 0.7 + 0.3);
+      const fl = Math.sin(T * b.fl + b.ph), glide = Math.sin(T * 0.3 + b.ph) > 0.55 ? 0.15 : 1;
+      const w = fl * glide;
+      ctx.strokeStyle = `rgba(36,52,84,${(0.50 * (1 - p * 0.6)).toFixed(3)})`; ctx.lineWidth = Math.max(1, 1.4 * dpr * b.s);
+      ctx.beginPath(); ctx.moveTo(bx - sz, by - sz * 0.15 * w - sz * 0.15); ctx.quadraticCurveTo(bx - sz * 0.45, by - sz * (0.55 * w + 0.2), bx, by);
+      ctx.quadraticCurveTo(bx + sz * 0.45, by - sz * (0.55 * w + 0.2), bx + sz, by - sz * 0.15 * w - sz * 0.15); ctx.stroke();
+    }
+    ctx.restore();
     ctx.save(); ctx.globalCompositeOperation = "lighter";
     for (let i = parts.length - 1; i >= 0; i--) {
       const q = parts[i]; q.life += dt;
@@ -119,5 +155,6 @@ export function createScene(glCanvas, fxCanvas) {
   }
 
   function reset() { st.p = 0; st.done = false; st.hs = 0; st.since = 0; parts.length = 0; rings.length = 0; st.onReset && st.onReset(); }
-  return { st, frame, resize, reset };
+  function wake() { last = 0; acc = 0; nfr = 0; cool = performance.now() + 600; }
+  return { st, frame, resize, reset, wake };
 }

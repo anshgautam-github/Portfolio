@@ -11,7 +11,7 @@ import "./reveal.css";
  * landing shrinks into a card, a signature signs itself behind it, strips slide past, then the deep-navy beat before the Earth.
  * It replaces <Landing /> in App.jsx; the landing itself is still built by mountLanding (landing.js).
  */
-export default function Reveal({ content = landingContent, scrollLength = 6 }) {
+export default function Reveal({ content = landingContent, scrollLength = 3.75 }) {
   const ref = useRef(null);
   useEffect(() => {
     const rv = mountReveal(ref.current, undefined, { scrollLength });

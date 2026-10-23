@@ -118,7 +118,7 @@ const PLANTS = RAW.map((r, i) => {
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 
-export default function Garden() {
+export default function Garden({ embedded = false, ctl = null }) {
   const root = useRef(null);
   const svg = useRef(null);
   const cursor = useRef(null);
@@ -204,21 +204,30 @@ export default function Garden() {
           gsap.from(root.current.querySelectorAll("[data-rise]"), { y: 38, autoAlpha: 0, duration: 1.1, ease: "power3.out", stagger: 0.12 });
         }
       };
-      ScrollTrigger.create({
-        trigger: root.current,
-        start: "top 72%",
-        once: true,
-        onEnter: intro,
-      });
-      ScrollTrigger.create({
-        trigger: root.current,
-        start: "top bottom",
-        end: "bottom top",
-        onToggle: (self) => {
-          visible = self.isActive;
-          if (root.current) root.current.dataset.live = self.isActive ? "1" : "0";
-        },
-      });
+      if (embedded) {
+        // living inside another section's pinned scroll (Toolkit finale): that section drives the intro + the live flag
+        let played = false;
+        if (ctl) ctl.current = {
+          intro: () => { if (!played) { played = true; intro(); } },
+          live: (on) => { visible = on; if (root.current) root.current.dataset.live = on ? "1" : "0"; },
+        };
+      } else {
+        ScrollTrigger.create({
+          trigger: root.current,
+          start: "top 72%",
+          once: true,
+          onEnter: intro,
+        });
+        ScrollTrigger.create({
+          trigger: root.current,
+          start: "top bottom",
+          end: "bottom top",
+          onToggle: (self) => {
+            visible = self.isActive;
+            if (root.current) root.current.dataset.live = self.isActive ? "1" : "0";
+          },
+        });
+      }
 
       /* ---------------- watering can cursor ---------------- */
       const secRect = () => root.current.getBoundingClientRect();
@@ -607,10 +616,10 @@ export default function Garden() {
 
       {/* ---------------- copy ---------------- */}
       <div className="gd-copy pointer-events-none absolute inset-x-0 top-[22%] z-10 flex flex-col items-center px-6 text-center md:top-[26%]">
-        <p data-rise className="max-w-[min(90vw,52vw)] font-display text-[clamp(1rem,1.7vw,2.2rem)] leading-[1.3] tracking-[-0.02em] max-md:max-w-[88vw]">
+        <p data-rise className="max-w-[min(90vw,52vw)] font-display text-[clamp(1.05rem,1.45vw,1.75rem)] leading-[1.4] tracking-[-0.01em] text-balance max-md:max-w-[88vw]">
           {garden.blurb}
         </p>
-        <h2 data-rise className="mt-[5.5vw] font-serif text-[clamp(2.6rem,6.7vw,9rem)] leading-[1] tracking-[-0.02em] max-md:mt-10">
+        <h2 data-rise className="mt-[4.5vw] font-serif text-[clamp(2.6rem,6.2vw,8.5rem)] leading-[1.02] tracking-[-0.015em] [word-spacing:0.1em] text-balance max-md:mt-10">
           {garden.title}
         </h2>
       </div>
@@ -760,7 +769,7 @@ export default function Garden() {
       </button>
 
       {/* ---------------- footer line ---------------- */}
-      <div className="absolute inset-x-0 bottom-0 z-30 flex items-end justify-between px-5 pb-5 font-display text-[clamp(0.8rem,1.1vw,1.4rem)] text-white md:px-7 md:pb-7">
+      <div className="absolute inset-x-0 bottom-0 z-30 flex items-end justify-between px-5 pb-5 font-display text-[clamp(0.875rem,1.05vw,1.25rem)] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.7)] md:px-7 md:pb-7">
         <span className="tracking-[-0.01em]">{garden.credit}</span>
         <nav className="flex gap-[2.2vw] max-md:gap-4">
           {garden.links.map((l) => (

@@ -164,7 +164,7 @@ function ContactDesktop() {
             height: u(69),
             borderRadius: u(14),
             gap: u(10),
-            fontSize: u(23),
+            fontSize: u(22),
           })}
         >
           <BagIcon style={{ width: u(22), height: u(22) }} />
@@ -264,13 +264,13 @@ function ContactDesktop() {
         <nav key={col.name} aria-label={col.name} className="z-30">
           <p
             data-fade
-            className="text-center font-medium uppercase tracking-[0.06em] text-white/55"
+            className="text-center font-medium uppercase tracking-[0.18em] text-white/60"
             style={abs({
               left: u(col.x - 150),
               width: u(300),
               top: u(658),
-              fontSize: u(12),
-              lineHeight: u(14),
+              fontSize: u(15),
+              lineHeight: u(18),
             })}
           >
             {col.label}
@@ -298,7 +298,7 @@ function ContactDesktop() {
                 hover="text-white"
                 className="font-cond font-bold uppercase text-[#9dbcff]"
               >
-                <span style={{ fontSize: u(26), lineHeight: u(28), display: "block" }}>{store.label}</span>
+                <span style={{ fontSize: u(30), lineHeight: u(32), display: "block" }}>{store.label}</span>
               </RollLink>
             </div>
           )}
@@ -330,7 +330,7 @@ function ContactDesktop() {
       <p
         data-fade
         className="z-30 font-medium text-[#0b1630]"
-        style={abs({ left: u(24), top: u(1140), fontSize: u(15), lineHeight: u(24) })}
+        style={abs({ left: u(24), top: u(1140), fontSize: u(17), lineHeight: u(24) })}
       >
         © 2026 <strong className="font-bold">{content.copyright.holder}.</strong> {content.copyright.text}
       </p>
@@ -346,7 +346,7 @@ function ContactDesktop() {
               hover="text-white"
               className="font-cond font-bold uppercase"
             >
-              <span style={{ fontSize: u(22), lineHeight: u(24), display: "block" }}>{l.label}</span>
+              <span style={{ fontSize: u(19), lineHeight: u(24), display: "block" }}>{l.label}</span>
             </RollLink>
           </li>
         ))}

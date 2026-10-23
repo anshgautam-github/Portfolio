@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import "./toolkit.css";
+import Garden from "../Garden/Garden.jsx";
 import { capDpr, skipFrame, IS_MOBILE } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -63,18 +64,23 @@ const GRAIN =
   "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
 
 /* ───────── backdrop: a skill-radar chart (six domains, rings, sweeping scanner) so the section reads as "skills" at a glance ───────── */
-const RADAR = [
-  { k: "Front-end", v: 0.9 },
-  { k: "Back-end", v: 0.82 },
-  { k: "AI / ML", v: 0.78 },
-  { k: "Cloud", v: 0.66 },
-  { k: "Databases", v: 0.72 },
-  { k: "Design", v: 0.6 },
-];
+const RADAR = content.toolkit.axes;
 const R_MAX = 410;
 const rpt = (i, r) => {
   const a = ((-60 + i * 60) * Math.PI) / 180;
   return [Math.cos(a) * r, Math.sin(a) * r];
+};
+
+// long axis names break onto two balanced lines
+const axisLines = (k) => {
+  if (k.length <= 13) return [k];
+  const w = k.split(" ");
+  let best = [k], gap = Infinity;
+  for (let i = 1; i < w.length; i++) {
+    const a = w.slice(0, i).join(" "), b = w.slice(i).join(" ");
+    if (Math.abs(a.length - b.length) < gap) { gap = Math.abs(a.length - b.length); best = [a, b]; }
+  }
+  return best;
 };
 
 function SkillRadar() {
@@ -84,28 +90,28 @@ function SkillRadar() {
     <svg className="tk-radar" viewBox="-500 -500 1000 1000" fill="none" aria-hidden="true">
       <defs>
         <radialGradient id="tk-r-fill" cx="0" cy="0" r={R_MAX} gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#d7ff3b" stopOpacity="0.02" />
-          <stop offset="1" stopColor="#d7ff3b" stopOpacity="0.2" />
+          <stop offset="0" stopColor="#6aa9ff" stopOpacity="0.02" />
+          <stop offset="1" stopColor="#6aa9ff" stopOpacity="0.2" />
         </radialGradient>
         <linearGradient id="tk-r-sweep" x1="1" y1="0" x2="0" y2="0">
-          <stop offset="0" stopColor="#d7ff3b" stopOpacity="0.16" />
-          <stop offset="1" stopColor="#d7ff3b" stopOpacity="0" />
+          <stop offset="0" stopColor="#6aa9ff" stopOpacity="0.16" />
+          <stop offset="1" stopColor="#6aa9ff" stopOpacity="0" />
         </linearGradient>
       </defs>
 
       {/* rotating measuring ticks */}
       <g>
         {!IS_MOBILE && <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="140s" repeatCount="indefinite" />}
-        <circle r="478" stroke="rgba(245,232,225,.22)" strokeWidth="14" strokeDasharray="1.6 19.6" />
+        <circle r="478" stroke="rgba(225,238,255,.22)" strokeWidth="14" strokeDasharray="1.6 19.6" />
       </g>
       <g>
         {!IS_MOBILE && <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="90s" repeatCount="indefinite" />}
-        <circle r="446" stroke="rgba(215,255,59,.22)" strokeWidth="1.2" strokeDasharray="3 9" />
+        <circle r="446" stroke="rgba(106,169,255,.22)" strokeWidth="1.2" strokeDasharray="3 9" />
       </g>
 
       {/* level rings */}
       {[0.25, 0.5, 0.75, 1].map((f, i) => (
-        <circle key={f} r={R_MAX * f} stroke={`rgba(245,232,225,${i === 3 ? 0.3 : 0.14})`} strokeWidth="1.4" strokeDasharray={i === 3 ? "none" : "4 9"} />
+        <circle key={f} r={R_MAX * f} stroke={`rgba(225,238,255,${i === 3 ? 0.3 : 0.14})`} strokeWidth="1.4" strokeDasharray={i === 3 ? "none" : "4 9"} />
       ))}
       {[25, 50, 75, 100].map((n, i) => (
         <text key={n} x={R_MAX * ((i + 1) / 4) - 8} y="-10" textAnchor="end" className="tk-r-lvl">
@@ -120,9 +126,11 @@ function SkillRadar() {
         const anchor = Math.abs(lx) < 20 ? "middle" : lx > 0 ? "start" : "end";
         return (
           <g key={a.k}>
-            <line x1="0" y1="0" x2={x} y2={y} stroke="rgba(245,232,225,.13)" strokeWidth="1.4" />
+            <line x1="0" y1="0" x2={x} y2={y} stroke="rgba(225,238,255,.13)" strokeWidth="1.4" />
             <text x={lx} y={ly + 6} textAnchor={anchor} className="tk-r-ax">
-              {a.k}
+              {axisLines(a.k).map((ln, j, arr) => (
+                <tspan key={j} x={lx} dy={j === 0 ? (Math.abs(ly) < 20 ? `${-(arr.length - 1) * 0.5}em` : ly > 0 ? 0 : `${-(arr.length - 1)}em`) : "1.25em"}>{ln}</tspan>
+              ))}
             </text>
           </g>
         );
@@ -132,26 +140,40 @@ function SkillRadar() {
       <g>
         {!IS_MOBILE && <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="9s" repeatCount="indefinite" />}
         <path d={`M0 0 L${sweepEnd[0].toFixed(1)} ${sweepEnd[1].toFixed(1)} A${R_MAX} ${R_MAX} 0 0 1 ${R_MAX} 0 Z`} fill="url(#tk-r-sweep)" />
-        <line x1="0" y1="0" x2={R_MAX} y2="0" stroke="rgba(215,255,59,.55)" strokeWidth="1.6" />
+        <line x1="0" y1="0" x2={R_MAX} y2="0" stroke="rgba(106,169,255,.55)" strokeWidth="1.6" />
       </g>
+
+      {/* orbiting satellites on the outer rings */}
+      {!IS_MOBILE && (
+        <>
+          <g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="24s" repeatCount="indefinite" />
+            <circle cx={R_MAX} cy="0" r="7" fill="#6aa9ff" /><circle cx={R_MAX} cy="0" r="18" fill="#6aa9ff" opacity=".18" /></g>
+          <g><animateTransform attributeName="transform" type="rotate" from="200" to="-160" dur="38s" repeatCount="indefinite" />
+            <circle cx={R_MAX * 0.75} cy="0" r="5" fill="#ff8a5c" /><circle cx={R_MAX * 0.75} cy="0" r="13" fill="#ff8a5c" opacity=".2" /></g>
+          <g><animateTransform attributeName="transform" type="rotate" from="90" to="450" dur="60s" repeatCount="indefinite" />
+            <circle cx="446" cy="0" r="5" fill="#e8f1ff" opacity=".8" /></g>
+        </>
+      )}
 
       {/* the skill shape */}
       <g>
         {!IS_MOBILE && <animateTransform attributeName="transform" type="scale" values="1;1.035;1" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" dur="6s" repeatCount="indefinite" />}
-        <polygon points={poly} fill="url(#tk-r-fill)" stroke="rgba(215,255,59,.7)" strokeWidth="2.2" strokeLinejoin="round" />
+        <polygon points={poly} fill="url(#tk-r-fill)" stroke="rgba(106,169,255,.7)" strokeWidth="2.2" strokeLinejoin="round" style={IS_MOBILE ? undefined : { filter: "drop-shadow(0 0 14px rgba(106,169,255,.45))" }} />
+        <polygon points={poly} fill="none" stroke="#d6e8ff" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" pathLength="100" className="tk-r-flow" />
         {RADAR.map((a, i) => {
           const [x, y] = rpt(i, a.v * R_MAX);
           return (
             <g key={a.k}>
-              <circle cx={x} cy={y} r="15" fill="rgba(215,255,59,.16)" />
-              <circle cx={x} cy={y} r="6" fill="#d7ff3b" />
+              <circle cx={x} cy={y} r="15" fill="rgba(106,169,255,.16)" className="tk-r-pulse" style={{ animationDelay: `${(RADAR.indexOf(a) * 0.45).toFixed(2)}s`, transformOrigin: `${x}px ${y}px` }} />
+              <circle cx={x} cy={y} r="6" fill="#6aa9ff" />
+              <text x={x} y={y - 24} textAnchor="middle" className="tk-r-val">{Math.round(a.v * 100)}</text>
             </g>
           );
         })}
       </g>
 
       {/* centre hub (sits behind the card) */}
-      <circle r="5" fill="rgba(245,232,225,.5)" />
+      <circle r="5" fill="rgba(225,238,255,.5)" />
     </svg>
   );
 }
@@ -163,6 +185,8 @@ export default function Toolkit() {
   const cardsA = useRef([]);
   const cardsB = useRef([]);
   const finalCard = useRef(null);
+  const gwin = useRef(null);
+  const gctl = useRef(null);
   const wave = useRef(null);
   const sub1 = useRef(null);
   const sub2 = useRef(null);
@@ -218,6 +242,8 @@ export default function Toolkit() {
                 onUpdate: (self) => {
                   if (picked.current && Math.abs(self.progress - lastP.current) > 0.003) closePick.current();
                   lastP.current = self.progress;
+                  if (gctl.current) gctl.current.live(self.progress > 0.8);
+                  if (gwin.current) gwin.current.style.pointerEvents = self.progress > 0.96 ? "auto" : "none";
                   if (fill.current) fill.current.style.transform = `scaleX(${self.progress.toFixed(4)})`;
                 },
               },
@@ -276,6 +302,15 @@ export default function Toolkit() {
         const cover = Math.max(W / c, H / ch) * 1.3;
         tl.to(fin, { scale: cover, y: -H * 0.1, ease: "power3.inOut", duration: 1.9, force3D: true }, 16.1);
         tl.to(ticks.current, { autoAlpha: 0, duration: 0.5, ease: "power1.in" }, 16.2);
+        // the "Let's grow" scene opens as a small window inside the card, then grows with it until it IS the screen:
+        // it is laid out at full viewport size and shrunk by 1/cover, so when the card reaches scale `cover` it fills the screen 1:1
+        const gw = gwin.current;
+        if (gw) {
+          gsap.set(gw, { width: W, height: H, xPercent: -50, yPercent: -50, scale: 1 / cover, opacity: 0, borderRadius: c * 0.075 * cover, transformOrigin: "50% 50%" });
+          tl.call(() => gctl.current && gctl.current.intro(), null, 15.5);
+          tl.to(gw, { opacity: 1, duration: 0.5, ease: "power1.out" }, 15.6);
+          tl.to(gw, { borderRadius: 0, duration: 1.9, ease: "power3.inOut" }, 16.1);
+        }
 
         tl.set({}, {}, T);
         if (reduce) tl.progress(5.4 / T);
@@ -387,8 +422,8 @@ export default function Toolkit() {
     let W = 0, H = 0, raf = 0, running = false, last = 0;
     const m = { x: -999, y: -999, px: -999, py: -999, vx: 0, vy: 0 };
     let grab = null;
-    const items = [...sceneA.cards, ...sceneB.cards].map((d) => ({ d, label: d.name.replace(/\n/g, ""), x: 0, y: 0, vx: 0, vy: 0, r: 40, ph: Math.random() * 6.28, seeded: false }));
-    const radius = () => Math.max(30, Math.min(W, H) * 0.052);
+    const items = (content.toolkit.bubbles || [...sceneA.cards, ...sceneB.cards]).map((d) => ({ d, label: d.name.replace(/\n/g, ""), x: 0, y: 0, vx: 0, vy: 0, r: 40, ph: Math.random() * 6.28, seeded: false }));
+    const radius = () => Math.max(26, Math.min(W, H) * (items.length > 16 ? 0.042 : 0.052));
     const size = () => {
       const dpr = capDpr(1.5, 1.25);
       const r = cv.getBoundingClientRect();
@@ -452,13 +487,23 @@ export default function Toolkit() {
         const sx = 1 + sp * 0.12, sy = 1 - sp * 0.1, a = Math.atan2(b.vy, b.vx);
         ctx.save();
         ctx.translate(b.x, b.y);
-        ctx.fillStyle = "rgba(0,0,0,0.45)";
+        ctx.fillStyle = "rgba(2,8,30,0.5)";
         ctx.beginPath(); ctx.arc(4, 7, b.r, 0, 6.283); ctx.fill();
         ctx.rotate(a); ctx.scale(sx, sy); ctx.rotate(-a);
-        ctx.globalAlpha = 0.94;
+        ctx.globalAlpha = 0.95;
+        if (!IS_MOBILE) { ctx.shadowColor = b.d.bg; ctx.shadowBlur = b.r * 0.55; }
         ctx.fillStyle = b.d.bg;
         ctx.beginPath(); ctx.arc(0, 0, b.r, 0, 6.283); ctx.fill();
-        ctx.strokeStyle = "rgba(255,255,255,0.18)"; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.shadowBlur = 0; ctx.shadowColor = "transparent";
+        // glass: soft top-left light, deeper bottom-right, a bright rim and a small specular
+        let g = ctx.createRadialGradient(-b.r * 0.35, -b.r * 0.45, b.r * 0.05, 0, 0, b.r);
+        g.addColorStop(0, "rgba(255,255,255,0.38)"); g.addColorStop(0.5, "rgba(255,255,255,0.04)"); g.addColorStop(1, "rgba(0,0,0,0.34)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, b.r, 0, 6.283); ctx.fill();
+        g = ctx.createLinearGradient(-b.r, -b.r, b.r, b.r);
+        g.addColorStop(0, "rgba(255,255,255,0.75)"); g.addColorStop(0.45, "rgba(255,255,255,0.06)"); g.addColorStop(1, "rgba(106,169,255,0.45)");
+        ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, 0, b.r - 0.8, 0, 6.283); ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,0.55)";
+        ctx.beginPath(); ctx.ellipse(-b.r * 0.38, -b.r * 0.5, b.r * 0.2, b.r * 0.09, -0.7, 0, 6.283); ctx.fill();
         ctx.globalAlpha = 1;
         ctx.fillStyle = b.d.fg;
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
@@ -516,22 +561,25 @@ export default function Toolkit() {
   return (
     <section
       ref={root}
-      className="relative h-screen min-h-[560px] w-full overflow-hidden bg-[#1f1e1e] text-[#f5e8e1] [--c:min(46vw,27vh)] md:[--c:min(17.25vw,29.5vh)]"
+      className="tk-sec relative h-screen min-h-[560px] w-full overflow-hidden text-[#e8f1ff] [--c:min(46vw,27vh)] md:[--c:min(17.25vw,29.5vh)]"
     >
       {/* ---------------- playable background ---------------- */}
       <div className="tk-bg" aria-hidden="true">
+        <i className="tk-aur tk-aur1" /><i className="tk-aur tk-aur2" /><i className="tk-aur tk-aur3" />
         <i className="tk-dots" />
+        <i className="tk-scan" />
         <SkillRadar />
         <i className="tk-spot" ref={spot} />
-        <span className="tk-hud tk-hud--l">{"\u25c6 Skill matrix"}</span>
-        <span className="tk-hud tk-hud--r">6 domains {"\u00b7"} always levelling up</span>
+        <i className="tk-corner tk-corner--tl" /><i className="tk-corner tk-corner--tr" /><i className="tk-corner tk-corner--bl" /><i className="tk-corner tk-corner--br" />
+        <span className="tk-hud tk-hud--l"><b className="tk-live" />{content.toolkit.hudLeft}</span>
+        <span className="tk-hud tk-hud--r">{content.toolkit.hudRight}</span>
       </div>
       <canvas ref={play} className="tk-play absolute inset-0 z-[1]" aria-hidden="true" />
       <span className="tk-hint" aria-hidden="true">Drag the bubbles · click empty space to pop</span>
 
       {/* ---------------- heading ---------------- */}
       <div className="pointer-events-none absolute inset-x-0 top-[9%] z-10 text-center md:top-[11.5%]">
-        <h2 className="font-display text-[14vw] font-semibold leading-none tracking-[-0.035em] md:text-[5.9vw]">{title}</h2>
+        <h2 className="tk-title font-display text-[11vw] font-semibold leading-none tracking-[-0.035em] md:text-[5.9vw]">{title}</h2>
         <div className="relative mt-[2.2vw] h-[7vw] max-md:mt-3 md:h-[3vw]">
           <p ref={sub1} className="absolute inset-x-0 top-0 font-display text-[5vw] font-normal leading-none tracking-[-0.02em] md:text-[2.1vw]">
             {sceneA.subtitle}
@@ -588,6 +636,10 @@ export default function Toolkit() {
               <path d="M0 6 C 16 -3, 34 13, 52 5 S 86 -1, 100 7 L100 400 L0 400 Z" fill={endColor} />
             </g>
           </svg>
+          {/* the next section's scene, opening inside the card */}
+          <div ref={gwin} className="tk-gwin" style={{ opacity: 0 }}>
+            <Garden embedded ctl={gctl} />
+          </div>
         </div>
       </div>
 

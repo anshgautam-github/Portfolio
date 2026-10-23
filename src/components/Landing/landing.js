@@ -26,7 +26,7 @@ function region(content) {
 export function mountLanding(root, content = landingContent, options = {}) {
   const c = content;
   root.classList.add("ll");
-  root.dataset.theme = "light";
+  root.dataset.theme = "dark";
   root.innerHTML = `
     <canvas class="ll-gl"></canvas>
     <div class="ll-grid" aria-hidden="true">
@@ -37,15 +37,28 @@ export function mountLanding(root, content = landingContent, options = {}) {
     <div class="ll-t ll-logo ll-rise ll-d1">${esc(c.logo)}</div>
     <nav class="ll-t ll-nav ll-rise ll-d1" aria-label="Primary">
       ${c.nav.map((n, i) => `<button type="button" data-nav="${esc(n.target)}" data-i="${i}">${esc(n.label)}</button>`).join("")}
-      <button type="button" data-theme-btn>THEME[<span data-theme-l>L</span>]</button>
+      <button type="button" data-theme-btn>THEME[<span data-theme-l>D</span>]</button>
       <button type="button" data-sound-btn>SOUND[<span data-sound-s>·</span>]</button>
     </nav>
-    <div class="ll-t ll-label ll-rise ll-d2">${c.label.map(esc).join("<br>")}</div>
-    <p class="ll-t ll-mono ll-tag ll-rise ll-d2">${c.tagline.map(esc).join("<br>")}</p>
-    <p class="ll-t ll-mono ll-bio ll-rise ll-d3">${esc(c.bio)}</p>
+    <div class="ll-spot" aria-hidden="true"></div>
+    <div class="ll-t ll-col ll-c1">
+      <div class="ll-ch ll-d2"><i>01</i><span>${esc(c.cols?.[0] || "Role")}</span></div>
+      <h3 class="ll-role ll-rise ll-d2">${c.label.map(esc).join("<br>")}</h3>
+      <div class="ll-status ll-rise ll-d4"><b></b>${esc(c.status || "Available")}</div>
+    </div>
+    <div class="ll-t ll-col ll-c2">
+      <div class="ll-ch ll-d3"><i>02</i><span>${esc(c.cols?.[1] || "Approach")}</span></div>
+      <h2 class="ll-h2" aria-label="${esc(c.tagline.join(" "))}">${c.tagline.map((l) => `<span class="ll-ln2" aria-hidden="true"><span>${esc(l)}</span></span>`).join("")}</h2>
+    </div>
+    <div class="ll-t ll-col ll-c3">
+      <div class="ll-ch ll-d4"><i>03</i><span>${esc(c.cols?.[2] || "About")}</span></div>
+      <p class="ll-bio ll-rise ll-d4">${esc(c.bio)}</p>
+      <div class="ll-ctas ll-rise ll-d5">${(c.cta || []).map((b, i) => `<button type="button" class="ll-cta${i ? " is-ghost" : ""}" data-nav="${esc(b.target)}"><span>${esc(b.label)}</span><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>`).join("")}</div>
+    </div>
     <h1 class="ll-t ll-h1" aria-label="${esc(c.headline.join(" "))}">${c.headline.map((l) => `<span class="ll-ln" aria-hidden="true"><span>${esc(l)}</span></span>`).join("")}</h1>
     <div class="ll-t ll-mono ll-foot ll-clock ll-rise ll-d5" data-clock></div>
     <div class="ll-t ll-mono ll-foot ll-coords ll-rise ll-d5" data-coords>0000 X 0000 Y</div>
+    <div class="ll-t ll-scroll ll-rise ll-d6" aria-hidden="true"><span>Scroll</span><i></i></div>
     <div class="ll-globe ll-rise ll-d6" aria-hidden="true">
       <svg viewBox="0 0 40 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
         <ellipse cx="20" cy="12" rx="19" ry="11"/>
@@ -111,6 +124,10 @@ export function mountLanding(root, content = landingContent, options = {}) {
     lastX = x; lastY = y; lastT = now; hasLast = true;
     if (dragging && e.pointerId === dragging.id) dragging.b.drag = { x, y };
     else if (!dragging) root.style.cursor = sprites.pick(x, y) ? "grab" : "";
+    root.style.setProperty("--sx", x.toFixed(0) + "px");
+    root.style.setProperty("--sy", y.toFixed(0) + "px");
+    root.style.setProperty("--hx", ((x / r.width - 0.5) * -10).toFixed(2) + "px");
+    root.style.setProperty("--hy", ((y / r.height - 0.5) * -6).toFixed(2) + "px");
     // parallax for the big pointer
     const nx = x / r.width - 0.5, ny = y / r.height - 0.5;
     arrowEl.style.setProperty("--ax", (-nx * 26).toFixed(1));
@@ -155,7 +172,10 @@ export function mountLanding(root, content = landingContent, options = {}) {
     glass && glass.setDark(dark);
     if (persist) { try { localStorage.setItem("ll-theme", dark ? "dark" : "light"); } catch { /* private mode */ } }
   };
-  try { if (localStorage.getItem("ll-theme") === "dark") setTheme(true, false); } catch { /* noop */ }
+  /* dark is the default; only a saved "light" choice (made with the toggle) overrides it */
+  let savedLight = false;
+  try { savedLight = localStorage.getItem("ll-theme") === "light"; } catch { /* noop */ }
+  setTheme(!savedLight, false);
   const setSound = (on) => {
     soundOn = on;
     $("[data-sound-s]").textContent = on ? "●" : "·";
@@ -164,6 +184,13 @@ export function mountLanding(root, content = landingContent, options = {}) {
   const scrollTo = (target) => {
     if (target === "next") { const w = root.closest(".pin-spacer") || root; smoothScrollTo(w.getBoundingClientRect().bottom + window.scrollY); }
     else if (target === "end") smoothScrollTo(document.documentElement.scrollHeight);
+    else if (target === "projects") {
+      const el = document.querySelector("[data-warp-wrap]");
+      if (!el) { smoothScrollTo(document.documentElement.scrollHeight); return; }
+      window.__skipHold = true;   // stop the paddock's arrival glide/lock from catching the jump half-way
+      smoothScrollTo(el.getBoundingClientRect().top + window.scrollY, { duration: 2, onComplete: () => { setTimeout(() => { window.__skipHold = false; }, 300); } });
+      setTimeout(() => { window.__skipHold = false; }, 4000);
+    }
     else smoothScrollTo(target);
   };
   const onClick = (e) => {
@@ -174,6 +201,16 @@ export function mountLanding(root, content = landingContent, options = {}) {
     else if (b.dataset.nav) scrollTo(b.dataset.nav);
   };
   root.addEventListener("click", onClick);
+  const ctaMove = (e) => {
+    const b = e.target.closest && e.target.closest(".ll-cta");
+    if (!b) return;
+    const r = b.getBoundingClientRect();
+    b.style.setProperty("--mx", ((e.clientX - r.left - r.width / 2) * 0.22).toFixed(1) + "px");
+    b.style.setProperty("--my", ((e.clientY - r.top - r.height / 2) * 0.3).toFixed(1) + "px");
+  };
+  const ctaOut = (e) => { const b = e.target.closest && e.target.closest(".ll-cta"); if (b) { b.style.setProperty("--mx", "0px"); b.style.setProperty("--my", "0px"); } };
+  root.addEventListener("pointermove", ctaMove);
+  root.addEventListener("pointerout", ctaOut);
   const onKey = (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const t = e.target;
@@ -183,17 +220,9 @@ export function mountLanding(root, content = landingContent, options = {}) {
   };
   window.addEventListener("keydown", onKey);
 
-  /* ---------- clock ---------- */
-  const reg = region(c);
-  const tz = tzLabel();
-  const updateClock = () => {
-    const d = new Date();
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mm = String(d.getMinutes()).padStart(2, "0");
-    clockEl.textContent = `${tz} ${reg} ${hh}:${mm} ${c.temperature}`;
-  };
-  updateClock();
-  const clockTimer = setInterval(updateClock, 10000);
+  /* ---------- footnote (static text, no fake live data) ---------- */
+  clockEl.textContent = c.footnote || "";
+  const clockTimer = 0;
 
   destroy.setLoad = (m) => glass && glass.setLoad && glass.setLoad(m);
   return destroy;
@@ -207,6 +236,8 @@ export function mountLanding(root, content = landingContent, options = {}) {
     root.removeEventListener("pointerup", onUp);
     root.removeEventListener("pointercancel", onUp);
     root.removeEventListener("click", onClick);
+    root.removeEventListener("pointermove", ctaMove);
+    root.removeEventListener("pointerout", ctaOut);
     sprites.destroy();
     glass && glass.destroy();
     root.innerHTML = "";

@@ -3,6 +3,7 @@ import * as snd from "./warpSound.js";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { createWarpEngine } from "./warpEngine.js";
+import { startFlow } from "./flowField.js";
 import WarpProjects from "./WarpProjects.jsx";
 import { IS_MOBILE } from "../../lib/perf.js";
 import { perf } from "../../lib/perf.js";
@@ -34,8 +35,8 @@ function initialState() {
   return {
     cs: 1, // cursor scale
     cr: 0, // cursor rotation (deg)
-    cx: 0.27, // cursor offset, fraction of width (starts parked on the right, beside the intro text)
-    cy: -0.03, // cursor offset, fraction of height
+    cx: 0.245, // cursor offset, fraction of width (starts parked on the right, tucked behind the "BUILT" word)
+    cy: 0.065, // cursor offset, fraction of height
     tilt: 0, // 3D extrusion amount
     cAlpha: 1,
     cMix: 0, // 0 bright blue … 1 deep blue
@@ -65,6 +66,8 @@ export default function Warp({
   const wrap = useRef(null);
   const root = useRef(null);
   const canvas = useRef(null);
+  const flow = useRef(null);
+  useEffect(() => (flow.current ? startFlow(flow.current) : undefined), []);
   const limeRef = useRef(null);
   const coordRef = useRef(null);
   const clockRef = useRef(null);
@@ -193,16 +196,15 @@ export default function Warp({
            a hyperspace burst tears past, and the intro caption slams in. Scrubbed with the scroll. ---- */
         // phones skip the expanding clip-path disc, the 250vmax glowing rim and the two 120vmax masked spoke layers: each one forces a
         // full-screen repaint (or a giant GPU layer) on every scroll frame. They get a plain cross-fade instead.
-        const rim = IS_MOBILE ? null : q("[data-rim]")[0];
-        const b1 = IS_MOBILE ? null : q("[data-burst1]")[0];
-        const b2 = IS_MOBILE ? null : q("[data-burst2]")[0];
+        const rim = null; /* the expanding circle + rim + spoke bursts are replaced by the horizontal PushTransition slide */
+        const b1 = null;
+        const b2 = null;
         const R = () => Math.hypot(window.innerWidth, window.innerHeight) * 1.06;
         const enter = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: { trigger: wrap.current, start: "top bottom", end: "top top", scrub: 0.5, invalidateOnRefresh: true, onUpdate: (self) => (flag.on = self.progress > 0 && self.progress < 1), onLeave: () => (flag.on = false), onLeaveBack: () => (flag.on = false) },
         });
         if (IS_MOBILE) enter.fromTo(el, { autoAlpha: 0, y: 36, force3D: true }, { autoAlpha: 1, y: 0, ease: "power2.out", duration: 0.7 }, 0);
-        else enter.fromTo(el, { clipPath: () => "circle(0px at 50% 0px)" }, { clipPath: () => `circle(${R()}px at 50% 0px)`, ease: "power2.in", duration: 1 }, 0);
         if (rim) {
           enter.fromTo(rim, { scale: 0, autoAlpha: 1 }, { scale: () => R() / (1.28 * Math.max(window.innerWidth, window.innerHeight)), ease: "power2.in", duration: 1 }, 0);
           enter.to(rim, { autoAlpha: 0, duration: 0.18 }, 0.82);
@@ -215,7 +217,7 @@ export default function Warp({
           enter.fromTo(b2, { scale: 0.15, rotation: 0, autoAlpha: 0 }, { scale: 4.2, rotation: -55, autoAlpha: 0.9, duration: 0.8, ease: "power3.in" }, 0.1);
           enter.to(b2, { autoAlpha: 0, duration: 0.25 }, 0.8);
         }
-        enter.fromTo(q("[data-i]"), { y: 110, autoAlpha: 0, scale: 1.12 }, { y: 0, autoAlpha: 1, scale: 1, stagger: 0.07, duration: 0.3, ease: "power3.out" }, 0.62);
+        enter.fromTo(q("[data-i]"), { y: 110, autoAlpha: 0, scale: 1.12 }, { y: 0, autoAlpha: 1, scale: 1, stagger: 0.07, duration: 0.3, ease: "power3.out" }, 0.66);
 
         /* 1-4 · the cursor swells, tilts, swallows the screen, then the streaks take over */
         to({ cs: 3.4, cr: 16, tilt: 1, cx: 0.17, cy: -0.02, density: 0.2, ease: "power1.inOut" }, 0, 1.6);
@@ -225,6 +227,8 @@ export default function Warp({
 
         /* intro caption leaves as the blue floods the screen */
         const intro = q("[data-intro]")[0];
+        const ibg = q("[data-introbg]")[0];
+        if (ibg) tl.to(ibg, { autoAlpha: 0, duration: 1.15, ease: "power2.inOut" }, 0.55);
         if (intro) tl.to(intro, { autoAlpha: 0, y: -46, ...(IS_MOBILE ? {} : { filter: "blur(10px)" }), duration: 1.15, ease: "power2.inOut" }, 0.55);
 
         /* mid caption: lives on the blue while the cursor swallows the screen, with a counting percentage */
@@ -251,6 +255,7 @@ export default function Warp({
         const rail = q("[data-rail]")[0];
         const dots = q("[data-dot]");
         const prog = q("[data-prog]")[0];
+        const wipe = IS_MOBILE ? null : q("[data-wipe]")[0];
         const A = 5.0;
         const T0 = A + 0.5;
         const STEP = 3.4;
@@ -290,6 +295,12 @@ export default function Warp({
             tl.fromTo(dots[i], { "--on": 0 }, { "--on": 1, duration: 0.5, ease: "none", ...nf }, T + 0.1);
           }
           if (!last) {
+            if (wipe) {
+              // a soft light bar sweeps across as the next project takes over
+              tl.fromTo(wipe, { xPercent: -140, skewX: -18, autoAlpha: 0 }, { xPercent: 240, duration: 1.15, ease: "power2.inOut", ...nf }, T + 2.35);
+              tl.fromTo(wipe, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.35, ease: "none", ...nf }, T + 2.4);
+              tl.to(wipe, { autoAlpha: 0, duration: 0.4, ease: "none" }, T + 3.1);
+            }
             if (dots[i]) tl.to(dots[i], { "--on": 0, duration: 0.5, ease: "none" }, T + 2.7);
             tl.to(ts, { y: -34, autoAlpha: 0, duration: 0.5, stagger: 0.04, ease: "power2.in" }, T + 2.55);
             tl.to(st, { x: -dir * 120, scale: 0.95, duration: 0.7, ease: "power2.in" }, T + 2.55);
@@ -321,7 +332,7 @@ export default function Warp({
   const gy = ["34.5%", "69%"];
 
   return (
-    <div ref={wrap} className="relative w-full" style={{ background: "linear-gradient(180deg, #e8ecf8 0%, #f5f4ef 100%)" }}>
+    <div ref={wrap} data-warp-wrap className="relative w-full" style={{ background: "linear-gradient(180deg, #e8ecf8 0%, #f5f4ef 100%)" }}>
     <section
       ref={root}
       className="relative h-screen w-full select-none overflow-hidden text-white"
@@ -329,6 +340,9 @@ export default function Warp({
       aria-label="Selected projects"
     >
       <canvas ref={canvas} className="absolute inset-0 h-full w-full" />
+
+      {/* intro backdrop: a current of fine light threads that parts around the pointer */}
+      <canvas ref={flow} data-introbg className="pointer-events-none absolute inset-0 z-[1] h-full w-full" aria-hidden="true" />
 
       {/* entry effects: hyperspace spokes + glowing rim of the expanding disc */}
       <div
@@ -409,8 +423,8 @@ export default function Warp({
           <br />
           designed &amp; <span style={{ color: "#8db4ff" }}>built</span>
         </h2>
-        <p data-i className="mt-6 max-w-[520px] text-[clamp(14px,1.15vw,18px)] leading-[1.65] text-white/70" style={{ fontFamily: "'Inter Tight', 'Inter', system-ui, sans-serif" }}>
-          Three projects across education, mobile and machine learning, each taken from idea to a shipped product. Scroll to walk through them.
+        <p data-i className="mt-6 max-w-[620px] text-pretty text-[clamp(14px,1.15vw,18px)] leading-[1.65] text-white/70" style={{ fontFamily: "'Inter Tight', 'Inter', system-ui, sans-serif" }}>
+          From AI-powered platforms to language models built from scratch, these projects reflect how I turn complex ideas into working systems. Scroll to explore the thinking, engineering, and experimentation behind each build.
         </p>
         <div data-i className="mt-7 flex items-center gap-3 text-[12px] uppercase tracking-[0.2em] text-white/60" style={MONO}>
           <span className="relative block h-px w-14 overflow-hidden bg-white/25">
@@ -431,7 +445,7 @@ export default function Warp({
           <h2
             data-m
             className="m-0 uppercase tracking-[-0.01em]"
-            style={{ ...WIDE, fontSize: "clamp(2.2rem, 6.4vw, 8.5rem)", lineHeight: 0.98, textShadow: "0 6px 40px rgba(10,30,90,.45)" }}
+            style={{ ...WIDE, fontSize: "clamp(2.2rem, 6vw, 8rem)", lineHeight: 0.98, textShadow: "0 6px 40px rgba(10,30,90,.45)" }}
           >
             Step inside
             <br />

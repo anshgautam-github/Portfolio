@@ -1,0 +1,43 @@
+.mb { position: relative; width: 100%; background: #0b0b0f; color: #f3f3f6; }
+.mb *, .mb *::before, .mb *::after { box-sizing: border-box; }
+.mb-stage {
+  --mb-s: .86; --mb-rot: -16deg; --mb-dim: 1; --mb-to: 1; --mb-tt: 0px; --mb-rig-o: 1; --mb-rig-y: 0px;
+  position: relative; width: 100%; height: 100vh; height: 100svh; overflow: hidden; background: #0b0b0f;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 7vh;
+}
+.mb-title {
+  margin: 0 0 2.2rem; padding: 0 1.5rem; text-align: center; font-size: clamp(1.3rem, 3vw, 2.1rem); font-weight: 700; line-height: 1.2;
+  font-family: "Archivo", "Inter Tight", Arial, sans-serif; font-stretch: 125%; position: relative; z-index: 3;
+  opacity: var(--mb-to); transform: translateY(var(--mb-tt)); will-change: transform, opacity;
+}
+
+/* the rig is 32rem wide; JS scales it to fit the screen */
+.mb-rig { position: relative; width: 32rem; flex: none; transform-origin: top center; transform: translateY(var(--mb-rig-y)) scale(var(--mb-s)); opacity: var(--mb-rig-o); will-change: transform, opacity; }
+.mb-lid { position: relative; width: 32rem; height: 20rem; }
+.mb-back, .mb-logo { display: none; }
+.mb-logo { width: 4rem; height: 4rem; color: #8b8b92; }
+.mb-face { position: absolute; inset: 0; border-radius: 1rem 1rem .25rem .25rem; background: #010101; padding: .5rem; overflow: hidden; border: 1px solid #2a2a2e; }
+.mb-notch { position: absolute; z-index: 2; left: 50%; top: .5rem; width: 5rem; height: .9rem; transform: translateX(-50%); border-radius: 0 0 .6rem .6rem; background: #010101; }
+.mb-img { position: absolute; inset: .5rem; width: calc(100% - 1rem); height: calc(100% - 1rem); object-fit: cover; object-position: center; border-radius: .6rem; background: #272729; display: block; filter: brightness(var(--mb-dim)); }
+
+.mb-base {
+  position: relative; z-index: 0; width: 32rem; height: 22rem; margin-top: -2px; border-radius: .3rem .3rem 1.2rem 1.2rem;
+  background: linear-gradient(#d6d7da, #c3c4c8); border: 1px solid #a9aaae; overflow: hidden; box-shadow: 0 30px 60px rgba(0, 0, 0, .45);
+}
+.mb-bar { position: absolute; left: 0; right: 0; top: 0; height: .9rem; background: linear-gradient(#0a0a0a, #1a1a1c); }
+.mb-deck { position: absolute; inset: 1.1rem 1rem .6rem; display: flex; flex-direction: column; align-items: center; gap: .7rem; }
+.mb-kb { padding: .5rem .55rem; border-radius: .4rem; background: #0a0a0b; display: flex; flex-direction: column; gap: .22rem; flex: none; width: calc(100% - 4.4rem); position: relative; z-index: 1; }
+.mb-row { display: flex; gap: .22rem; height: 1.45rem; }
+.mb-row--fn { height: 1.05rem; }
+.mb-key { min-width: 0; border-radius: .22rem; background: #1b1b1e; display: grid; place-items: center; color: #aaa; font: 500 .38rem/1 "JetBrains Mono", monospace; box-shadow: inset 0 -1px 0 #000; }
+.mb-key i { font-style: normal; text-transform: lowercase; }
+.mb-spk { position: absolute; top: 0; width: 2rem; height: 6.4rem; opacity: .55; background: radial-gradient(circle, #6b6c70 1px, transparent 1.4px) 0 0 / .32rem .32rem; }
+.mb-spk--l { left: 0; } .mb-spk--r { right: 0; }
+.mb-pad { width: 10rem; height: 7rem; margin-top: .1rem; border-radius: .5rem; background: linear-gradient(#cfd0d4, #bdbec2); border: 1px solid #a3a4a8; box-shadow: inset 0 1px 0 rgba(255,255,255,.6); flex: none; }
+.mb-lip { position: absolute; left: 50%; bottom: 0; width: 6rem; height: .5rem; transform: translateX(-50%); border-radius: 0 0 .5rem .5rem; background: #9a9ba0; }
+.mb-badge { position: absolute; left: 1.4rem; bottom: 1.2rem; }
+.mb-grad { position: absolute; inset: auto 0 -6rem; height: 10rem; background: linear-gradient(transparent, #0b0b0f); pointer-events: none; z-index: 2; }
+
+/* the picture that lifts out of the screen */
+.mb-pop { position: absolute; z-index: 4; left: 0; top: 0; width: 0; height: 0; opacity: 0; overflow: hidden; background: #272729; pointer-events: none; transform-origin: 50% 100%; will-change: left, top, width, height, transform; }
+.mb-pop img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }

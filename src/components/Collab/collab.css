@@ -36,7 +36,7 @@
 .cb-win { position: absolute; z-index: 4; left: 0; right: 0; bottom: clamp(24px, 7vh, 80px); text-align: center; pointer-events: none; }
 .cb-kicker, .cb-h span, .cb-cta { opacity: 0; transform: translateY(28px); filter: blur(10px); transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1), filter .8s; }
 .cb-kicker { font: 500 12px/1 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: .3em; color: #ffc45c; margin-bottom: 14px; text-shadow: 0 0 20px rgba(255,170,70,.7); }
-.cb-h { margin: 0; font: 800 clamp(34px, 6.2vw, 96px)/.98 "Archivo", "Inter Tight", "Helvetica Neue", Arial, sans-serif; font-stretch: 112%; letter-spacing: -.035em; text-transform: uppercase; text-shadow: 0 6px 40px rgba(0,0,0,.65); }
+.cb-h { margin: 0; font: 800 clamp(34px, 6vw, 96px)/.98 "Archivo", "Inter Tight", "Helvetica Neue", Arial, sans-serif; font-stretch: 112%; letter-spacing: -.035em; text-transform: uppercase; text-shadow: 0 6px 40px rgba(0,0,0,.65); }
 .cb-h span { display: block; }
 .cb-h em { font-family: "Gloock", Georgia, serif; font-style: normal; font-weight: 400; text-transform: none; color: #ffd08c; letter-spacing: -.01em; }
 .cb-cta { display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: clamp(16px, 3vh, 30px); flex-wrap: wrap; }
@@ -70,3 +70,87 @@
 .cb-ring::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.7); animation: cbPing 2.2s ease-out infinite; pointer-events: none; }
 .cb.is-holding .cb-ring::after { animation: none; opacity: 0; }
 @keyframes cbPing { 0% { transform: scale(.94); opacity: .8; } 100% { transform: scale(1.4); opacity: 0; } }
+
+/* ================= designer pass: bright live meadow, editorial HUD ================= */
+.cb { background: #8fb3de; }
+.cb-scrim { position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(180deg, rgba(14,34,78,.22) 0%, rgba(14,34,78,0) 20%, rgba(14,34,78,0) 70%, rgba(10,28,50,.34) 100%); }
+.cb-frame i { position: absolute; z-index: 3; width: 26px; height: 26px; border: 0 solid rgba(255,255,255,.85); pointer-events: none; }
+.cb-frame i:nth-child(1) { left: 16px; top: 16px; border-width: 1.5px 0 0 1.5px; } .cb-frame i:nth-child(2) { right: 16px; top: 16px; border-width: 1.5px 1.5px 0 0; }
+.cb-frame i:nth-child(3) { left: 16px; bottom: 16px; border-width: 0 0 1.5px 1.5px; } .cb-frame i:nth-child(4) { right: 16px; bottom: 16px; border-width: 0 1.5px 1.5px 0; }
+.cb-vert { position: absolute; z-index: 3; top: 50%; font: 600 10px/1 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: .34em; text-transform: uppercase; color: rgba(255,255,255,.9); white-space: nowrap; text-shadow: 0 1px 10px rgba(10,30,70,.5); pointer-events: none; }
+.cb-vert--l { left: 30px; transform: translate(-50%, -50%) rotate(-90deg); margin-left: 5px; }
+.cb-vert--r { right: 30px; transform: translate(50%, -50%) rotate(90deg); margin-right: 5px; }
+
+.cb-title { position: absolute; z-index: 3; left: clamp(26px, 4.2vw, 74px); top: clamp(86px, 14vh, 150px); margin: 0; pointer-events: none; color: #fff;
+  font: 400 clamp(30px, 4.6vw, 76px)/.98 "Newsreader", "Gloock", Georgia, serif; letter-spacing: -.03em; text-shadow: 0 2px 30px rgba(12,34,80,.45);
+  transition: opacity .7s, transform .9s cubic-bezier(.2,.8,.2,1), filter .7s; }
+.cb-title span { display: block; }
+.cb-title em { font-style: italic; background: linear-gradient(100deg, #fff 0%, #ffe3b5 55%, #ffc2dc 100%); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; filter: drop-shadow(0 2px 20px rgba(12,34,80,.35)); }
+.cb.is-holding .cb-title { opacity: .0; transform: translateY(-14px); filter: blur(8px); }
+.cb.is-done .cb-title { opacity: 0; transform: translateY(-24px); filter: blur(10px); }
+
+/* button: bigger glass orb with a ticked dial */
+.cb-ring { overflow: visible; }
+.cb-ring svg.cb-dial, .cb-ring svg.cb-orbit { position: absolute; left: -34px; top: -34px; width: calc(100% + 68px); height: calc(100% + 68px); pointer-events: none; transform: none; overflow: visible; }
+.cb-dial line { stroke: rgba(255,255,255,.45); stroke-width: 1.2; stroke-linecap: round; transition: stroke .25s, stroke-width .25s; }
+.cb-dial line.on { stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 4px rgba(255,200,120,.95)); }
+.cb-ring svg.cb-orbit { left: -52px; top: -52px; width: calc(100% + 104px); height: calc(100% + 104px); animation: cbRot 28s linear infinite; }
+.cb-orbit text { font: 600 6.4px "JetBrains Mono", ui-monospace, monospace; letter-spacing: .38em; fill: rgba(255,255,255,.88); }
+.cb.is-holding .cb-ring svg.cb-orbit { animation-duration: 6s; }
+@keyframes cbRot { to { transform: rotate(360deg); } }
+.cb-ring { width: 124px; height: 124px; margin: -62px 0 0 -62px; }
+.cb-ring svg:not(.cb-dial):not(.cb-orbit) { transform: rotate(-90deg); }
+.cb-lbl { font-family: "Archivo", sans-serif; font-weight: 800; letter-spacing: .2em; left: calc(100% + 64px); }
+.cb-lbl::before { content: ""; position: absolute; left: -44px; top: 50%; width: 30px; height: 1.5px; background: rgba(255,255,255,.85); }
+.cb.is-holding .cb-lbl { opacity: 0; transform: translate(14px, -50%); transition: opacity .3s, transform .4s; }
+.cb-stat { position: absolute; z-index: 3; left: 0; right: 0; top: calc(50% + 156px); margin: 0; display: flex; justify-content: center; align-items: center; gap: 10px; pointer-events: none;
+  font: 600 11px/1 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: .24em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 12px rgba(10,30,70,.6); transition: opacity .5s; }
+.cb-stat i { width: 7px; height: 7px; border-radius: 50%; background: #ffc45c; box-shadow: 0 0 12px #ffc45c; animation: cbPulse 1.4s ease-in-out infinite; }
+.cb.is-done .cb-stat { opacity: 0; }
+
+/* equaliser bars + live readouts along the bottom */
+.cb-eq { position: absolute; z-index: 3; bottom: clamp(26px, 6vh, 64px); height: 34px; width: min(22vw, 300px); display: flex; align-items: flex-end; gap: 3px; pointer-events: none; margin-bottom: -10px; }
+.cb-eq--l { left: clamp(70px, 7vw, 130px); } .cb-eq--r { right: clamp(70px, 7vw, 130px); }
+.cb-eq i { flex: 1; height: 100%; border-radius: 2px; background: linear-gradient(180deg, #fff, rgba(255,255,255,.45)); transform-origin: bottom; transform: scaleY(.1); box-shadow: 0 0 10px rgba(255,255,255,.4); will-change: transform; }
+.cb.is-done .cb-eq i { background: linear-gradient(180deg, #ffe3b5, rgba(255,196,92,.5)); }
+.cb-read { position: absolute; z-index: 3; bottom: 40px; display: flex; flex-direction: column; gap: 6px; font: 500 10px/1 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: .2em; color: rgba(255,255,255,.85); text-shadow: 0 1px 8px rgba(10,30,70,.6); pointer-events: none; }
+.cb-read b { color: #ffc45c; font-weight: 600; }
+.cb-read--l { left: 34px; bottom: 52px; } .cb-read--r { right: 34px; bottom: 52px; text-align: right; }
+.cb-eq { bottom: clamp(26px, 6vh, 64px); }
+.cb.is-done .cb-read, .cb.is-done .cb-eq, .cb.is-done .cb-vert { opacity: .0; transition: opacity .6s; }
+
+/* headline after the lock: serif italic + glass CTA */
+.cb-h em { color: #ffe3b5; }
+.cb-mail { background: rgba(255,255,255,.92); box-shadow: 0 14px 50px rgba(255,200,120,.5), inset 0 0 0 1px #fff; }
+.cb-win::before { content: ""; position: absolute; left: 50%; bottom: -30px; width: min(90vw, 1100px); height: 360px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(10,28,60,.55), transparent); z-index: -1; opacity: 0; transition: opacity 1s .4s; }
+.cb.is-done .cb-win::before { opacity: 1; }
+
+@media (max-width: 900px) {
+  .cb-vert, .cb-read--r, .cb-eq--r { display: none; }
+  .cb-eq--l { left: 20px; width: 34vw; }
+  .cb-read--l { left: auto; right: 20px; bottom: 40px; text-align: right; }
+  .cb-title { top: 82px; }
+  .cb-lbl { left: 50%; top: calc(100% + 60px); }
+  .cb-lbl::before { display: none; }
+  .cb-stat { top: calc(50% + 190px); }
+}
+@media (prefers-reduced-motion: reduce) { .cb-orbit { animation: none; } }
+
+/* ===== perf pass: nothing blurs/filters the live WebGL canvas, nothing restyles per frame ===== */
+.cb-chip, .cb-again, .cb-ring { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.cb-chip { background: rgba(40,60,100,.34); }
+.cb-ring { background: radial-gradient(circle at 50% 38%, rgba(255,255,255,.38), rgba(255,255,255,.16) 70%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.55), inset 0 8px 18px rgba(255,255,255,.25); }
+.cb-again { background: rgba(40,60,100,.4); }
+.cb-arc, .cb-dial line.on, .cb-tick, .cb-chip i, .cb-stat i, .cb-eq i { filter: none !important; box-shadow: none; }
+.cb-arc { stroke: #fff; stroke-width: 5; }
+.cb-dial line { transition: none; }
+.cb-dial line.on { stroke: #ffe9c2; }
+.cb-title em { filter: none; }
+.cb-title { transition: opacity .6s, transform .8s cubic-bezier(.2,.8,.2,1); }
+.cb.is-holding .cb-title, .cb.is-done .cb-title { filter: none; }
+.cb-kicker, .cb-h span, .cb-cta { filter: none; transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1); }
+.cb-ring svg.cb-orbit { will-change: transform; }
+.cb-ring::after, .cb-core { will-change: transform, opacity; }
+.cb:not(.is-live) *, .cb:not(.is-live) *::after { animation-play-state: paused !important; }
+.cb-gl, .cb-cv { contain: strict; }

@@ -354,7 +354,7 @@ export default function Picked() {
 
       <h2
         ref={head}
-        className="pointer-events-none absolute inset-x-0 top-[11%] z-10 px-6 text-center font-display text-[7.4vw] font-semibold leading-[1.05] tracking-[-0.035em] md:top-[12%] md:text-[3.5vw]"
+        className="pointer-events-none absolute inset-x-0 top-[11%] z-10 px-6 text-center font-display text-[7.4vw] font-semibold leading-[1.05] tracking-[-0.035em] md:top-[12%] md:text-[4.4vw]"
       >
         {title}
       </h2>

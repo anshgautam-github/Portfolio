@@ -10,7 +10,7 @@ const FS = `#version 300 es
 precision highp float;
 out vec4 oCol;
 uniform vec2 uRes; uniform float uTime, uTension, uCalm, uP, uHv;
-uniform vec3 uCam; uniform vec2 uMouse; uniform float uDbg, uDream, uHasTex; uniform sampler2D uTex;
+uniform vec3 uCam; uniform vec2 uMouse; uniform float uDbg, uDream, uHasTex, uTexA; uniform sampler2D uTex, uMap;
 uniform vec4 uC[84];          // 2 x 21 capsules x (A,B)
 uniform vec4 uCuff[4];        // sleeves: [0,1] white cuff of the right hand, [2,3] dark jacket sleeve of the left hand
 uniform vec4 uBB[4];          // per-hand bounding capsule (A.xyz r, B.xyz r)
@@ -59,8 +59,79 @@ vec4 column(vec2 q, float cx, float baseY, float topY, float w){
   return vec4(stone * shade, m);
 }
 
+// ---------------------------------------------------------------- live photo backdrop (meadow + cloud-wrapped mirror ball)
+// The still photo is animated in-shader: wind through the grass, clouds that billow and drift, cloud-shadows crossing the valley, a
+// bobbing mirror ball whose tiles glitter, a pulsing sun-flare with rays, depth parallax with the mouse, and a slow camera breath.
+// uMap: R = sky, G = near vegetation (depth-weighted), B = cloud.
+vec3 liveScene(vec2 uv, float a){
+  float t = uTime;
+  float ra = a / uTexA;
+  vec2 c = uv - 0.5;
+  if (ra > 1.0) c.y /= ra; else c.x *= ra;                       // object-fit: cover
+  float breath = 0.965 - 0.012 * sin(t * 0.21);                  // slow push-in / pull-out
+  c *= breath;
+  vec2 iuv = c + 0.5 + vec2(0.0, 0.045) + uMouse * 0.006;
+  vec3 mp = texture(uMap, iuv).rgb;                              // sky, ground, cloud
+  float sky = mp.r, grd = mp.g, cld = mp.b;
+  // parallax: near meadow slides more than the sky
+  iuv += vec2(uMouse.x * 0.014, uMouse.y * 0.007) * grd - vec2(uMouse.x * 0.004, 0.0) * sky;
+  // wind through the grass and flowers: long gust waves + fast flutter, strongest in the foreground
+  float gust = sin(iuv.x * 6.5 - t * 0.85 + fbm(iuv * 3.0 + t * 0.03) * 4.0);
+  float flut = sin(iuv.x * 55.0 + iuv.y * 38.0 - t * 3.1) * vn(iuv * 30.0 + t * 0.4);
+  iuv += vec2(gust * 0.0042 + flut * 0.0014, sin(iuv.x * 9.0 + t * 1.1) * 0.0012) * grd * (0.35 + 0.65 * grd);
+  // clouds billow and drift: a low-frequency warp, only where there is cloud
+  vec2 wv = vec2(fbm(iuv * 3.2 + vec2(t * 0.035, 0.0)), fbm(iuv * 3.2 + vec2(9.0, -t * 0.03))) - 0.5;
+  iuv += wv * 0.020 * cld + vec2(sin(t * 0.045) * 0.006, 0.0) * sky * (0.4 + cld);
+  // the mirror ball floats
+  vec2 BC = vec2(0.497, 0.692);
+  vec2 dpx = (iuv - BC) * vec2(1780.0, 1232.0);
+  float bd = length(dpx) / 208.0;
+  float bw = smoothstep(1.45, 0.95, bd);
+  iuv -= vec2(sin(t * 0.8) * 0.0012, sin(t * 0.8 + 0.7) * 0.0042 + sin(t * 1.9) * 0.0008) * bw;
+  dpx = (iuv - BC) * vec2(1780.0, 1232.0); bd = length(dpx) / 208.0;
+  vec3 col = texture(uTex, iuv, uDream * 0.9).rgb;               // blurred at first, racks into focus as you hold
+  float lum = dot(col, vec3(0.3, 0.59, 0.11));
+  float sat = max(col.r, max(col.g, col.b)) - min(col.r, min(col.g, col.b));
+  // mirror tiles: rotating facet grid, each facet flickers; sparkles where the light hits
+  float onBall = smoothstep(1.0, 0.93, bd) * smoothstep(0.02, 0.10, sat);
+  if (onBall > 0.001) {
+    vec3 n = vec3(dpx / 208.0, sqrt(max(1.0 - bd * bd, 0.0)));
+    float rot = t * 0.22, cr = cos(rot), sr = sin(rot);
+    vec3 nr = vec3(n.x * cr + n.z * sr, n.y, -n.x * sr + n.z * cr);
+    vec2 gp = vec2(atan(nr.x, nr.z) * 9.5, asin(clamp(nr.y, -1.0, 1.0)) * 18.0);
+    vec2 id = floor(gp), f = fract(gp);
+    float h = h21(id + 3.7);
+    float edge = smoothstep(0.0, 0.10, min(min(f.x, 1.0 - f.x), min(f.y, 1.0 - f.y)));
+    float lit = pow(max(dot(normalize(n), normalize(vec3(0.55, 0.70, 0.62))), 0.0), 2.0);
+    float tw = pow(max(sin(t * (1.2 + h * 3.5) + h * 61.0), 0.0), 18.0);
+    col *= 1.0 + (h - 0.5) * 0.32 * (0.5 + 0.5 * sin(t * 1.4 + h * 40.0)) * onBall;
+    col += vec3(1.0, 0.97, 0.90) * tw * step(0.45, h) * edge * (0.25 + 0.85 * lit) * 1.15 * onBall;
+    col *= 1.0 - 0.10 * (1.0 - edge) * onBall;
+  }
+  // cloud shadows sliding across the valley
+  float shd = smoothstep(0.48, 0.72, fbm(vec2(iuv.x * 2.2 - t * 0.022, iuv.y * 3.0 + 4.0)));
+  col *= 1.0 - 0.17 * shd * (1.0 - sky) * smoothstep(0.30, 0.55, iuv.y * -1.0 + 0.80);
+  // dew / pollen glints in the foreground
+  vec2 gq = floor(iuv * vec2(520.0, 360.0));
+  float gh = h21(gq + 11.0);
+  float gl = pow(max(sin(t * (1.6 + gh * 2.0) + gh * 80.0), 0.0), 40.0) * step(0.9935, gh) * smoothstep(0.30, 0.8, lum) * (1.0 - sky);
+  col += vec3(1.0, 0.98, 0.9) * gl * 1.1;
+  // sun flare: pulse + rays
+  vec2 SUNP = vec2(0.562, 0.846);
+  vec2 sv = (iuv - SUNP) * vec2(1.445, 1.0);
+  float sl = length(sv);
+  float pulse = 0.82 + 0.18 * sin(t * 0.7) + 0.06 * sin(t * 2.3);
+  col += vec3(1.0, 0.93, 0.80) * (exp(-sl * 9.0) * 0.42 + exp(-sl * 3.2) * 0.14) * pulse;
+  float ang = atan(sv.y, sv.x);
+  float rays = pow(fbm(vec2(ang * 4.0, t * 0.05)), 2.6) * smoothstep(1.1, 0.05, sl);
+  col += vec3(1.0, 0.95, 0.84) * rays * 0.20 * (1.0 - 0.3 * (1.0 - sky)) * pulse;
+  float ghost = exp(-length(sv * 2.0 + (SUNP - vec2(0.5)) * vec2(1.445, 1.0) * -1.2) * 14.0);
+  col += vec3(0.9, 0.95, 1.0) * ghost * 0.06 * pulse;
+  return col;
+}
+
 vec3 landscape(vec2 uv, float a){
-  if (uHasTex > 0.5) { vec2 tuv = (uv - 0.5) / 1.06 + 0.5 + uMouse * 0.006; return texture(uTex, vec2(tuv.x, tuv.y)).rgb; }
+  if (uHasTex > 0.5) return liveScene(uv, a);
   vec2 q = vec2((uv.x - 0.5) * a, uv.y);
   float t = uTime;
   vec2 par = uMouse * 0.012;
@@ -213,7 +284,7 @@ void main(){
   vec2 uv = frag / uRes;
   vec3 col = landscape(uv, a);
   float dream = uDream;
-  if (dream > 0.02) {   // defocus: a few jittered taps of the landscape
+  if (dream > 0.02 && uHasTex < 0.5) {   // defocus: a few jittered taps of the landscape
     float br = 0.010 * dream;
     col += landscape(uv + vec2(br, 0.0), a) + landscape(uv + vec2(-br * 0.5, br * 0.87), a) + landscape(uv + vec2(-br * 0.5, -br * 0.87), a);
     col *= 0.25;
@@ -239,25 +310,25 @@ void main(){
     vec3 p = ro + rd * (hit ? t : tm);
     vec3 n = nrm(p);
     vec3 hc = shade(p, n, rd, hit ? id : (dmin < 1.0 ? id : 0.0));
-    hc = mix(hc, vec3(0.86, 0.94, 0.90) * 1.05, dream * 0.38);
+    hc = mix(hc, vec3(0.86, 0.94, 0.90) * 1.05, dream * 0.38 * (1.0 - 0.7 * uHasTex));
     col = mix(col, hc, cov * (1.0 - dream * 0.12));
   }
 
   // ---- dreamy -> real: a minty bloom haze that lifts as you hold, leaving a darker, contrastier, true-to-life picture
   vec2 vv = (uv - 0.5) * vec2(a * 0.9, 1.0);
   float edge = smoothstep(0.15, 0.85, length(vv));
-  col = mix(col, vec3(0.70, 0.86, 0.80) * 1.15, dream * (0.20 + 0.38 * edge));
-  col += vec3(1.0, 0.98, 0.92) * dream * 0.14 * exp(-length(uv - vec2(0.8, 0.9)) * 2.2);
-  col = mix(col, vec3(dot(col, vec3(0.3, 0.59, 0.11))), dream * 0.18);
+  col = mix(col, vec3(0.70, 0.86, 0.80) * 1.15, dream * (0.20 + 0.38 * edge) * (1.0 - 0.92 * uHasTex));
+  col += vec3(1.0, 0.98, 0.92) * dream * 0.14 * (1.0 - 0.8 * uHasTex) * exp(-length(uv - vec2(0.8, 0.9)) * 2.2);
+  col = mix(col, vec3(dot(col, vec3(0.3, 0.59, 0.11))), dream * 0.18 * (1.0 - uHasTex));
   float real = 1.0 - dream;
-  col = mix(col, (col - 0.42) * 1.28 + 0.40, real * 0.75);
-  col *= mix(1.0, 0.78, real * (1.0 - uCalm * 0.6));
+  col = mix(col, (col - 0.42) * 1.28 + 0.40, real * 0.75 * (1.0 - 0.55 * uHasTex));
+  col *= mix(1.0, mix(0.78, 0.95, uHasTex), real * (1.0 - uCalm * 0.6));
   // ---- grade: warm up and darken toward the red climax; golden-hour calm afterwards
   float tn = uTension;
   col = mix(col, (col - 0.40) * 1.18 + 0.38, tn * 0.6);   // natural: just a touch more contrast, no colour cast
   col = mix(col, col * vec3(1.06, 0.96, 0.84) + vec3(0.03, 0.015, 0.0), uCalm * 0.55);
   float vig = smoothstep(1.15, 0.2, length((uv - 0.5) * vec2(a * 0.9, 1.0)));
-  col *= mix(1.0, vig, 0.55 + 0.2 * tn);
+  col *= mix(1.0, vig, (0.55 + 0.2 * tn) * (1.0 - 0.45 * uHasTex));
   col *= 1.0 - 0.18 * tn * tn;
   // filmic curve + grain
   col = col * 1.06 / (1.0 + col * 0.16);
@@ -359,7 +430,7 @@ export function createGL3D(canvas) {
     if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
     gl.useProgram(pr);
     const U = (n) => gl.getUniformLocation(pr, n);
-    u = { res: U("uRes"), time: U("uTime"), tension: U("uTension"), calm: U("uCalm"), p: U("uP"), hv: U("uHv"), cam: U("uCam"), mouse: U("uMouse"), dbg: U("uDbg"), c: U("uC"), cuff: U("uCuff"), dream: U("uDream"), hasTex: U("uHasTex"), tex: U("uTex"), bb: U("uBB") };
+    u = { res: U("uRes"), time: U("uTime"), tension: U("uTension"), calm: U("uCalm"), p: U("uP"), hv: U("uHv"), cam: U("uCam"), mouse: U("uMouse"), dbg: U("uDbg"), c: U("uC"), cuff: U("uCuff"), dream: U("uDream"), hasTex: U("uHasTex"), tex: U("uTex"), map: U("uMap"), texA: U("uTexA"), bb: U("uBB") };
     // one throw-away draw into a 4x4 viewport so any lazy driver work happens here, not on the first visible frame
     gl.viewport(0, 0, 4, 4); gl.uniform2f(u.res, 4, 4); gl.bindVertexArray(vao); gl.drawArrays(gl.TRIANGLES, 0, 3);
     ready = true;
@@ -373,14 +444,18 @@ export function createGL3D(canvas) {
   };
   const caps = new Float32Array(84 * 4), bb = new Float32Array(16), cuff = new Float32Array(16);
   vao = gl.createVertexArray(); gl.bindVertexArray(vao);
-  // optional photo backdrop: drop a landscape photo at public/collab/scene.jpg and it replaces the procedural meadow
-  let tex = null;
+  // live photo backdrop: public/collab/scene.jpg (+ scene-map.png: R sky, G near vegetation, B cloud) — see liveScene() in the shader
+  const pend = []; let tex = null, texMap = null, texA = 1780 / 1232;
+  const mk = (im, unit, flip) => { const t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im); gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); return t; };
   try {
-    const im = new Image(); im.crossOrigin = "anonymous";
-    im.onload = () => { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im); gl.generateMipmap(gl.TEXTURE_2D);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); tex = t; };
-    im.src = "/collab/scene.jpg";
+    const base = (import.meta.env && import.meta.env.BASE_URL) || "/";
+    const im = new Image(), mm = new Image();
+    im.onload = () => { texA = im.naturalWidth / im.naturalHeight; pend.push(() => { tex = mk(im, 0); }); };
+    mm.onload = () => { pend.push(() => { texMap = mk(mm, 1); }); };
+    im.src = base + "collab/scene.jpg"; mm.src = base + "collab/scene-map.png";
   } catch (e) { /* no photo: procedural scene */ }
   if (!par) poll();
   return {
@@ -389,6 +464,7 @@ export function createGL3D(canvas) {
     // s: {t, p, tension, calm, hs(0..1 handshake), shake, jx, jy, mouse:[x,y], aspect}
     draw(w, h, s) {
       if (!poll()) return;
+      if (pend.length) pend.shift()();
       gl.viewport(0, 0, w, h);
       const a = w / h;
       const hv = Math.max(4.3, 7.6 / a);                       // visible world height at z = 0
@@ -427,7 +503,7 @@ export function createGL3D(canvas) {
       placeHand(caps, 21, { curl: mixc(idle(1)), thumb: 0.3 * (1 - eIn) + O.th * eIn, spread: 1 - eIn }, posR, yawR, pitchR, rollR, 1, 1, bb, 8, cuff, 0);
       gl.uniform2f(u.res, w, h); gl.uniform1f(u.time, T); gl.uniform1f(u.tension, tension); gl.uniform1f(u.calm, s.calm); gl.uniform1f(u.p, p); gl.uniform1f(u.hv, hv);
       gl.uniform3f(u.cam, (s.mouse ? s.mouse[0] : 0) * 0.15, (s.mouse ? s.mouse[1] : 0) * 0.1, 12.0);
-      gl.uniform1f(u.dbg, s.dbg ? 1 : 0); gl.uniform1f(u.dream, Math.max(0, 1 - Math.min(1, p / 0.7)) * (1 - s.calm)); gl.uniform1f(u.hasTex, tex ? 1 : 0); if (tex) { gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex); gl.uniform1i(u.tex, 0); } gl.uniform2f(u.mouse, s.mouse ? s.mouse[0] : 0, s.mouse ? s.mouse[1] : 0);
+      gl.uniform1f(u.dbg, s.dbg ? 1 : 0); gl.uniform1f(u.dream, Math.max(0, 1 - Math.min(1, p / 0.7)) * (1 - s.calm)); const hasT = tex && texMap; gl.uniform1f(u.hasTex, hasT ? 1 : 0); if (hasT) { gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex); gl.uniform1i(u.tex, 0); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, texMap); gl.uniform1i(u.map, 1); gl.uniform1f(u.texA, texA); } gl.uniform2f(u.mouse, s.mouse ? s.mouse[0] : 0, s.mouse ? s.mouse[1] : 0);
       gl.uniform4fv(u.c, caps); gl.uniform4fv(u.bb, bb); gl.uniform4fv(u.cuff, cuff);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },

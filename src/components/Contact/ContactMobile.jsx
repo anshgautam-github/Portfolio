@@ -157,8 +157,8 @@ export default function ContactMobile() {
               <nav key={col.label} aria-label={col.label}>
                 <p
                   data-fade
-                  className="font-medium uppercase tracking-[0.06em] text-white/55"
-                  style={{ fontSize: m(11), lineHeight: m(14), marginBottom: m(10) }}
+                  className="font-medium uppercase tracking-[0.18em] text-white/60"
+                  style={{ fontSize: m(12), lineHeight: m(16), marginBottom: m(12) }}
                 >
                   {col.label}
                 </p>

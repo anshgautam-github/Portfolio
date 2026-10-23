@@ -51,6 +51,7 @@ export default function Cursor() {
     // the "capture plate": a springy sticker frame that snaps around small links / buttons
     const pl = { x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, vw: 0, vh: 0, a: 0, on: false, r: "12px", seeded: false };
     let heartAt = 0;
+    const lbl = { x: 0, y: 0, on: false };
 
     const classify = (t) => {
       if (!(t instanceof Element)) return { s: "idle" };
@@ -78,7 +79,7 @@ export default function Cursor() {
       magnet = c.el || null;
       wrap.current.classList.toggle("cur-hide", state === "text");
       orbit.current.classList.toggle("is-on", state === "link");
-      scaleT = state === "link" ? 1.45 : state === "drag" ? 1.7 : 1;
+      scaleT = state === "link" ? 0.9 : state === "drag" ? 1.7 : 1;
       if (c.text) { label.current.textContent = c.text; label.current.classList.add("is-on"); } else label.current.classList.remove("is-on");
     };
 
@@ -118,15 +119,18 @@ export default function Cursor() {
       if (!m.seen) return;
       const dt = Math.min(dtms, 50) / 16.667;
       let tx = m.x, ty = m.y;
-      if (state === "link" && magnet) {
-        const b = magnet.getBoundingClientRect();
-        if (b.width < 420 && b.height < 160) { tx += (b.left + b.width / 2 - m.x) * 0.3; ty += (b.top + b.height / 2 - m.y) * 0.3; }
-      }
       // capture plate
       let tgt = null;
       if (state === "link" && magnet) {
         const b = magnet.getBoundingClientRect();
         if (b.width > 8 && b.width < 460 && b.height < 170) tgt = b;
+      }
+      // the creature never sits ON the button's text: it hops onto the plate's top-right corner and peeks at the pointer
+      let perch = false;
+      if (tgt) {
+        perch = true;
+        tx = Math.min(W - 26, Math.max(26, tgt.right + 6));
+        ty = Math.min(H - 26, Math.max(26, tgt.top - 8)) + (reduce ? 0 : Math.sin(performance.now() * 0.006) * 2.2);
       }
       if (tgt) {
         const pad = 7;
@@ -142,7 +146,7 @@ export default function Cursor() {
         // little hearts float up from the button while it is hovered
         if (!reduce && performance.now() - heartAt > 520) {
           heartAt = performance.now();
-          sparks.push({ heart: true, x: tgt.left + 8 + Math.random() * (tgt.width - 16), y: tgt.top + tgt.height * 0.3, vx: (Math.random() - 0.5) * 0.7, vy: -1.3 - Math.random(), life: 1, s: 9 + Math.random() * 6, c: ["#ff8fb4", "#d7ff3b", "#7fe7ff"][(Math.random() * 3) | 0] });
+          sparks.push({ heart: true, x: tgt.left + 8 + Math.random() * (tgt.width - 16), y: tgt.top - 4, vx: (Math.random() - 0.5) * 0.7, vy: -1.3 - Math.random(), life: 1, s: 9 + Math.random() * 6, c: ["#ff8fb4", "#d7ff3b", "#7fe7ff"][(Math.random() * 3) | 0] });
         }
       } else {
         pl.a += (0 - pl.a) * 0.3;
@@ -180,13 +184,19 @@ export default function Cursor() {
       });
 
       // face: eyes look where it is heading (or at the pointer when still), whole face leans into the motion
-      const lx = Math.cos(ang) * Math.min(sp * 0.7, 1), ly = Math.sin(ang) * Math.min(sp * 0.7, 1);
+      let lx = Math.cos(ang) * Math.min(sp * 0.7, 1), ly = Math.sin(ang) * Math.min(sp * 0.7, 1);
+      if (perch && sp < 2) { const dx = m.x - h.x, dy = m.y - h.y, dl = Math.hypot(dx, dy) || 1; lx = dx / dl; ly = dy / dl; }
       look.x += (lx - look.x) * 0.2; look.y += (ly - look.y) * 0.2;
       const idleFor = performance.now() - lastMove;
       face.current.style.transform = `translate3d(${h.x + look.x * 4}px,${h.y + look.y * 3}px,0) scale(${scale * 0.95}) rotate(${look.x * 6}deg)`;
       eyes.current.forEach((p) => p && (p.style.transform = `translate(${look.x * 2.2}px,${look.y * 2.2}px)`));
       orbit.current.style.transform = `translate3d(${h.x}px,${h.y}px,0)`;
-      label.current.style.transform = `translate3d(${h.x}px,${h.y + 14 * scale}px,0)`;
+      // label: under the plate when a button is hovered (never over its text), otherwise under the creature
+      const lt = perch ? { x: tgt.left + tgt.width / 2, y: tgt.bottom + 12 - 30 } : { x: h.x, y: h.y + 14 * scale };
+      if (!lbl.on) { lbl.x = lt.x; lbl.y = lt.y; lbl.on = true; }
+      const lk = 1 - Math.pow(0.78, dt);
+      lbl.x += (lt.x - lbl.x) * lk; lbl.y += (lt.y - lbl.y) * lk;
+      label.current.style.transform = `translate3d(${lbl.x}px,${lbl.y}px,0)`;
 
       // mood
       if (m.down) setMood("press");

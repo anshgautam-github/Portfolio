@@ -143,3 +143,97 @@ html.is-mobile .pj-mb-pad { z-index: 1; }
 html.is-mobile .wp-ghost { background: none; -webkit-background-clip: border-box; background-clip: border-box; -webkit-text-stroke: 1.5px rgba(160, 200, 255, .5); }
 /* gradient-clipped text forces an offscreen mask pass: use a flat colour */
 html.is-mobile .wp-text h3 .acc { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: #9dc0ff; }
+
+/* =====================================================================
+   v4 · motion pass: per-project accent, word-by-word headline, shimmer,
+   sparkles, cursor tilt / parallax, magnetic CTA, slide-change light sweep.
+   (delete from here down to go back to the previous look)
+   ===================================================================== */
+.wp-slide { --a: #7fa8ff; --a2: #b9d4ff; --b1: #3f72ee; --b2: #6b9bff; --g: 90, 140, 255; }
+.wp-slide[data-id="tracker"] { --a: #c4a1ff; --a2: #f3dcff; --b1: #7a46ee; --b2: #b07bff; --g: 160, 110, 255; }
+.wp-slide[data-id="dashboard"] { --a: #6fe3d6; --a2: #d2fff7; --b1: #0b94b0; --b2: #3fd0dc; --g: 50, 210, 220; }
+
+/* accent colour flows through text, tags, button, numerals, glow */
+.wp-text h3 .acc { background-image: linear-gradient(100deg, var(--a) 0%, var(--a2) 38%, #fff 50%, var(--a2) 62%, var(--a) 100%); background-size: 260% 100%; animation: wpShimmer 5.5s linear infinite; }
+@keyframes wpShimmer { from { background-position: 130% 0; } to { background-position: -130% 0; } }
+.wp-no em { color: var(--a); }
+.wp-no i { background: linear-gradient(90deg, var(--a), transparent); }
+.wp-tags li { color: var(--a2); background: color-mix(in srgb, var(--a) 14%, transparent); border-color: color-mix(in srgb, var(--a) 38%, transparent); transition: transform .3s cubic-bezier(.2,.8,.2,1), background .3s, box-shadow .3s; }
+.wp-tags li:hover { transform: translateY(-3px); background: color-mix(in srgb, var(--a) 26%, transparent); box-shadow: 0 8px 22px -8px rgba(var(--g), .8); }
+.wp-btn { background: linear-gradient(110deg, var(--b1), var(--b2)); box-shadow: 0 10px 34px -8px rgba(var(--g), .75), inset 0 1px 0 rgba(255,255,255,.35); }
+.wp-btn:hover { box-shadow: 0 18px 44px -8px rgba(var(--g), .95), inset 0 1px 0 rgba(255,255,255,.4); }
+.wp-btn b { color: var(--b1); }
+.wp-glow { background: radial-gradient(closest-side, rgba(var(--g), .42), rgba(var(--g), .13) 55%, transparent 75%); }
+.wp-ghost { -webkit-text-stroke-color: color-mix(in srgb, var(--a2) 62%, transparent); background-image: linear-gradient(180deg, color-mix(in srgb, var(--a) 34%, transparent), color-mix(in srgb, var(--b1) 5%, transparent)); filter: drop-shadow(0 0 22px rgba(var(--g), .55)); }
+.wp-floor { background: radial-gradient(closest-side, color-mix(in srgb, var(--a) 55%, transparent), rgba(var(--g), .15) 60%, transparent); }
+html.is-mobile .wp-text h3 .acc { color: var(--a); animation: none; }
+
+/* headline: every word rises out of a blur, one after another, driven by the slide's --p */
+.wp-w { --wp: clamp(0, calc(var(--p, 1) * 2.1 - var(--i, 0) * .3), 1); display: inline-block; opacity: var(--wp); transform: translateY(calc((1 - var(--wp)) * 55%)) rotate(calc((1 - var(--wp)) * 3deg)); transform-origin: 0 100%; filter: blur(calc((1 - var(--wp)) * 9px)); }
+.wp-tags li { opacity: clamp(0, calc(var(--p, 1) * 3 - var(--i, 0) * .45), 1); scale: calc(.8 + clamp(0, calc(var(--p, 1) * 3 - var(--i, 0) * .45), 1) * .2); }
+.wp-meta > div { position: relative; }
+.wp-meta dd::after { content: ""; display: block; height: 1px; margin-top: 9px; background: linear-gradient(90deg, var(--a), transparent); transform-origin: left; transform: scaleX(var(--p, 1)); }
+
+/* CTA: cursor-following sheen, arrow nudges, magnetic pull (set from JS) */
+.wp-btn { transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s, translate .25s cubic-bezier(.2,.8,.2,1); }
+.wp-btn::before { content: ""; position: absolute; inset: 0; background: radial-gradient(90px circle at var(--mx, 50%) 50%, rgba(255,255,255,.35), transparent 70%); opacity: 0; transition: opacity .3s; }
+.wp-btn:hover::before { opacity: 1; }
+.wp-btn b svg { animation: wpNudge 2.2s ease-in-out infinite; transition: transform .3s; }
+.wp-btn:hover b { transform: scale(1.08) rotate(-8deg); }
+.wp-btn b { transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+@keyframes wpNudge { 0%, 60%, 100% { translate: 0 0; } 75% { translate: 4px 0; } 90% { translate: -1px 0; } }
+
+/* device: tilt wrapper (JS sets transform), gentle idle float, drifting sparkles */
+.wp-tilt { position: relative; z-index: 2; width: 100%; display: grid; place-items: center; transition: transform .12s linear; will-change: transform; }
+.wp-tilt .wp-device { animation: wpFloat 7s ease-in-out infinite; }
+@keyframes wpFloat { 0%, 100% { translate: 0 0; } 50% { translate: 0 -12px; } }
+.wp-sparks { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.wp-sparks i { position: absolute; left: calc(6% + var(--k) * 10.5%); bottom: calc(8% + var(--k) * 2.6%); width: 3px; aspect-ratio: 1; border-radius: 50%; background: var(--a2); box-shadow: 0 0 10px 2px rgba(var(--g), .9); opacity: 0; animation: wpSpark calc(5s + var(--k) * .6s) ease-in-out infinite; animation-delay: calc(var(--k) * -1.3s); }
+.wp-sparks i:nth-child(3n) { width: 5px; }
+.wp-sparks i:nth-child(3n+1) { width: 4px; }
+.wp-sparks i:nth-child(even) { bottom: calc(30% - var(--k) * 1.5%); }
+@keyframes wpSpark { 0% { opacity: 0; transform: translate3d(0, 0, 0) scale(.4); } 15% { opacity: calc(var(--p, 1) * .95); } 100% { opacity: 0; transform: translate3d(calc((var(--k) - 4) * 9px), -190px, 0) scale(1.1); } }
+
+/* progress rail: active number gets a pulsing ring */
+.wp-rail b::after { content: ""; position: absolute; inset: 0 -9px; border-radius: 99px; border: 1px solid rgba(141,180,255,.8); opacity: var(--on, 0); animation: wpRailPulse 2s ease-out infinite; pointer-events: none; }
+@keyframes wpRailPulse { 0% { transform: scale(.85); opacity: calc(var(--on, 0) * .9); } 100% { transform: scale(1.55); opacity: 0; } }
+
+/* light sweep that crosses the screen when one project hands over to the next (driven from Warp.jsx) */
+.wp-wipe { position: absolute; top: -10%; bottom: -10%; left: 0; width: 46%; z-index: 7; pointer-events: none; visibility: hidden; opacity: 0; mix-blend-mode: screen; filter: blur(10px); background: linear-gradient(90deg, transparent 0%, rgba(90,140,255,.0) 8%, rgba(110,160,255,.3) 40%, rgba(255,255,255,.55) 50%, rgba(200,150,255,.4) 58%, rgba(90,140,255,0) 92%, transparent 100%); }
+
+/* keep off-screen slides quiet; and keep the heavy bits off touch screens */
+.wp-slide[style*="visibility: hidden"] :is(.wp-sparks i, .wp-tilt .wp-device, .wp-btn b svg, .acc) { animation-play-state: paused; }
+@media (max-width: 900px), (pointer: coarse) {
+  .wp-tilt .wp-device, .wp-sparks i, .wp-btn b svg, .wp-text h3 .acc { animation: none; }
+  .wp-sparks, .wp-wipe { display: none; }
+  .wp-w { filter: none; }
+}
+@media (prefers-reduced-motion: reduce) { .wp-tilt .wp-device, .wp-sparks i, .wp-text h3 .acc { animation: none; } }
+
+/* credit line + spec strip (project 01) */
+.wp-credit { margin: 18px 0 0 !important; font: 500 11px/1.5 "JetBrains Mono", ui-monospace, monospace !important; letter-spacing: .04em; color: rgba(255,255,255,.5) !important; max-width: 420px !important; }
+.wp-specs { position: absolute; left: clamp(20px, 5.5vw, 96px); right: clamp(20px, 16vw, 300px); bottom: 13.5vh; max-width: 1400px; margin: 0 auto; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: clamp(8px, .9vw, 14px); z-index: 1; pointer-events: none; }
+.wp-specs li { position: relative; flex: 0 0 auto; display: flex; align-items: center; gap: clamp(10px, 1vw, 16px); padding: clamp(10px, 1.4vh, 15px) clamp(14px, 1.3vw, 22px); border-radius: 14px; background: linear-gradient(160deg, rgba(var(--g), .18), rgba(8,12,26,.6) 75%); border: 1px solid rgba(var(--g), .34); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); overflow: hidden; }
+.wp-specs li::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--a), transparent); }
+.wp-specs strong { flex: none; font: 700 clamp(24px, 2.5vw, 42px)/1 "Inter Tight", sans-serif; letter-spacing: -0.045em; color: #fff; text-shadow: 0 0 26px rgba(var(--g), .85), 0 0 2px rgba(255,255,255,.4); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wp-specs span { max-width: 11em; font: 500 clamp(8.5px, .66vw, 10.5px)/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--a2, #b9d4ff); opacity: .85; }
+/* the slide that carries the strip lifts its content so text, laptop and strip never overlap */
+.wp-slide[data-id="llm"] { padding-bottom: 22vh; }
+@media (max-width: 1100px), (max-height: 800px) { .wp-specs { display: none; } .wp-slide[data-id="llm"] { padding-bottom: 11vh; } }
+@media (max-width: 900px) { .wp-credit { display: none; } }
+
+/* headline accent word: plain solid colour - WebKit drops background-clip:text inside the filtered/animated word wrapper */
+.wp-text h3 .acc, html.is-mobile .wp-text h3 .acc { background: none !important; -webkit-background-clip: border-box; background-clip: border-box; -webkit-text-fill-color: currentColor; color: var(--a2, #b9d4ff); animation: none; text-shadow: 0 0 28px rgba(var(--g), .55); display: inline; }
+
+/* feature list + audience chips (project 02) */
+.wp-feats { list-style: none; margin: 0 0 18px; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 22px; max-width: 540px; }
+.wp-feats li { position: relative; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
+.wp-feats li::before { content: ""; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--a); box-shadow: 0 0 10px rgba(var(--g), .9); }
+.wp-feats li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.wp-feats b { font-weight: 600; font-size: clamp(12.5px, .98vw, 15px); color: #fff; letter-spacing: -.01em; }
+.wp-feats span { font-size: clamp(11px, .8vw, 12.5px); line-height: 1.45; color: rgba(255,255,255,.58); }
+.wp-who { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 0 0 22px; max-width: 540px; }
+.wp-who em { font: 500 10.5px/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--a2); margin-right: 4px; font-style: normal; }
+.wp-who span { padding: 6px 11px; border-radius: 99px; font-size: clamp(11px, .8vw, 12.5px); color: rgba(255,255,255,.82); border: 1px solid rgba(var(--g), .3); background: rgba(var(--g), .08); }
+@media (max-width: 900px), (max-height: 780px) { .wp-feats span { display: none; } .wp-feats { gap: 8px 18px; } }
+@media (max-width: 900px) { .wp-feats, .wp-who { display: none; } }

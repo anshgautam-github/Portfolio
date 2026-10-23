@@ -2,25 +2,37 @@ import { Suspense, lazy, useEffect } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Reveal from "./components/Landing/Reveal.jsx";
 // import Hero from "./components/Hero/Hero.jsx"; // previous hero – still on disk, swap back here if you want it
+import KimiAntonelli from "./components/Kimi/Kimi.jsx";
 import Warp from "./components/Warp/Warp.jsx";
+import PushTransition from "./components/Transitions/PushTransition.jsx";
+import GardenTransition from "./components/Transitions/GardenTransition.jsx";
 import Journey from "./components/Journey/Journey.jsx";
-import Collage from "./components/Collage/Collage.jsx";
+import { startStory } from "./lib/loader.js";
+
+// Flip to true to bring back the Earth journey (the loader). While false the page opens straight on the landing.
+const SHOW_INTRO = false;
 import Showcase from "./components/Showcase/Showcase.jsx";
-import Picked from "./components/Picked/Picked.jsx";
+import ArcCarousel from "./components/ArcCarousel/ArcCarousel.jsx";
+import WorkTransition from "./components/Transitions/WorkTransition.jsx";
+import Freefall from "./components/Freefall/Freefall.jsx";
 import Toolkit from "./components/Toolkit/Toolkit.jsx";
-import Garden from "./components/Garden/Garden.jsx";
-import Socials from "./components/Socials/Socials.jsx";
 import Collab from "./components/Collab/Collab.jsx";
 import Contact from "./components/Contact/Contact.jsx";
 import Diary from "./components/Diary/Diary.jsx";
-import Outro from "./components/Outro/Outro.jsx";
+import Frame from "./components/Frame/Frame.jsx";
 import Cursor from "./components/Cursor/Cursor.jsx";
 // the assistant is a fixed overlay (not part of the scroll layout), so it can load after the page is interactive
 const Teddy = lazy(() => import("./components/Teddy/Teddy.jsx"));
 
+const SHOW_DIARY = false;
+
 export default function App() {
   // The pinned showcase + web fonts + images all change page height after first paint.
   // Re-measure every scroll trigger whenever that happens so the Socials / Contact reveals fire when you reach them.
+  useEffect(() => {
+    if (!SHOW_INTRO) startStory();
+  }, []);
+
   useEffect(() => {
     let last = document.documentElement.scrollHeight;
     let t;
@@ -53,23 +65,26 @@ export default function App() {
   return (
     <>
       {/* Act 0 + 1: the Earth is the loader. Prologue while it builds, then the scroll-driven flight; it shatters open onto the landing */}
-      <Journey />
+      {SHOW_INTRO && <Journey />}
       {/* Act 2: the landing */}
       <Reveal />
+      {/* Act 2b: the Kimi Antonelli driver block, straight after the landing */}
+      <KimiAntonelli />
       <Warp />
-      <Collage />
-      <Diary />
-      <Showcase />
-      <Picked />
+      <PushTransition />
+      <WorkTransition />
+      <Freefall />
+      <ArcCarousel />
       <Toolkit />
-      <Garden />
-      <Socials />
+      {/* hidden for now - flip SHOW_DIARY to bring it back (sits after Toolkit) */}
+      {SHOW_DIARY && <Diary />}
+      <Showcase />
       <Collab />
       <Contact />
-      <Outro />
       <Suspense fallback={null}>
         <Teddy />
       </Suspense>
+      <Frame />
       <Cursor />
     </>
   );

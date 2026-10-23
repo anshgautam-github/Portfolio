@@ -5,6 +5,9 @@
   data-night on the section, so toggling it cross-fades everything.
 */
 
+import { Seaside } from "./Seaside.jsx";
+import "./seaside.css";
+
 const mulberry = (a) => () => {
   a |= 0;
   a = (a + 0x6d2b79f5) | 0;
@@ -194,49 +197,7 @@ export function World() {
         ))}
       </div>
 
-      {/* hot-air balloon */}
-      <div className="gd-balloon">
-        <svg viewBox="0 0 80 110">
-          <defs>
-            <linearGradient id="gdBal" x1="0" x2="1">
-              <stop offset="0" stopColor="#ff6b57" />
-              <stop offset="0.5" stopColor="#ffd36e" />
-              <stop offset="1" stopColor="#4d7dff" />
-            </linearGradient>
-          </defs>
-          <path d="M40 4 C70 4 76 36 62 58 C56 66 50 72 48 78 L32 78 C30 72 24 66 18 58 C4 36 10 4 40 4 Z" fill="url(#gdBal)" />
-          <path d="M40 4 C28 20 26 52 32 78 M40 4 C52 20 54 52 48 78" fill="none" stroke="#fff" strokeOpacity=".55" strokeWidth="1.6" />
-          <path d="M32 78 L35 94 M48 78 L45 94" stroke="#5b4636" strokeWidth="1.4" />
-          <rect x="33" y="94" width="14" height="10" rx="2" fill="#8a5a3a" />
-        </svg>
-      </div>
-
-      {/* hills with windmill + pines (layered, drifting slightly with the pointer) */}
-      <svg className="gd-hills gd-hills--far" viewBox="0 0 2000 520" preserveAspectRatio="xMidYMax slice">
-        <defs>
-          <linearGradient id="gdMist" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" className="gd-mist-a" stopOpacity="0" />
-            <stop offset="0.85" className="gd-mist-a" stopOpacity="0.7" />
-          </linearGradient>
-        </defs>
-        <path d={MOUNTS} className="gd-mount" />
-        <path d={SNOW} className="gd-snow" />
-        <path d="M-60 210 L2060 210 L2060 520 L-60 520 Z" className="gd-mist" />
-      </svg>
-      <svg className="gd-hills gd-hills--mid" viewBox="0 0 2000 520" preserveAspectRatio="xMidYMax slice">
-        <path d={MID} className="gd-hill-mid" />
-        <Windmill x={560} y={yMid(560) + 6} />
-        <Pine x={1340} y={yMid(1340) + 6} s={0.9} />
-        <Pine x={1380} y={yMid(1380) + 6} s={1.15} />
-        <Pine x={1422} y={yMid(1422) + 6} s={0.8} />
-      </svg>
-      <svg className="gd-hills gd-hills--near" viewBox="0 0 2000 520" preserveAspectRatio="xMidYMax slice">
-        <path d={NEAR} className="gd-hill-near" />
-        <Pine x={210} y={yNear(210) + 8} s={1.35} />
-        <Pine x={262} y={yNear(262) + 8} s={1} />
-        <Pine x={1830} y={yNear(1830) + 8} s={1.5} />
-        <Pine x={1886} y={yNear(1886) + 8} s={1.1} />
-      </svg>
+      <Seaside />
 
       {/* birds */}
       <div className="gd-birds">

@@ -50,37 +50,99 @@ export const content = {
     ],
   },
 
-  // Creative diary: click the cover, flip the pages. Add every internship / role to `experience` - they all appear on ONE page
-  // (it scales its text down automatically past 5 entries). Education + certifications are read from `picked` above.
+  // Personal diary: click the cover, flip the pages. Everything here is placeholder-friendly: keep what is true for you, edit the rest.
   diary: {
-    title: "Ansh\u2019s Experience Archive",
+    title: "Ansh\u2019s Personal Archive",
     owner: "Ansh Gautam",
     name: "Ansh",
-    volume: "2025\u201326",
-    strip: "Learn \u00b7 Build \u00b7 Ship",
-    // shown on the desk snapshot card next to the diary
-    stack: ["FastAPI", "RBAC", "APIs", "Databases"],
-    highlights: ["Shipped AI apps & backends", "Led a web dev team"],
-    // [title, subtitle] shown next to the arrows for each spread: closed, contents, experience, education, last page
+    file: "personal-archive.fig",
+    spine: "The Personal Archive",
+    hello: "I\u2019m",
+    open: "Click to explore",
+    strip: "Thoughts \u00b7 Moments \u00b7 Little wins",
+    volume: "Life lately",
+    badge: ["OFF", "SCRIPT"],
+    seal: "PERSONAL \u2022 ARCHIVE \u2022 CURIOUS \u2022 ",
+    scrap: "mood: curious",
+    ledger: ["still exploring"],
+    pink: ["\u221e", "things to explore"],
+    // sticky note on the left
+    snapshot: {
+      title: "Little things about me",
+      rows: [["likes", "Late-night ideas"], ["hobby", "Exploring how things work"], ["currently", "Learning something new"], ["off duty", "Music \u00b7 Curiosity \u00b7 Red Bull"]],
+      tally: [["01", "mind always curious"], ["02", "playlists on repeat"], ["\u221e", "things to explore"]],
+      checks: ["Always asking why", "Collecting ideas, not just tabs"],
+    },
+    // hanging tag
+    tag: { mode: ["MODE", "CURIOUS"], place: "based in india", foot: ["always exploring", "\u221e"] },
+    // colourful cards on the right
+    traitsTitle: "Me, in four words",
+    traitsNote: "a few things I enjoy",
+    traits: [
+      { name: "Curious", sub: "always exploring" },
+      { name: "Creative", sub: "ideas everywhere" },
+      { name: "Playful", sub: "never too serious" },
+      { name: "Explorer", sub: "forever learning" },
+    ],
+    // terminal on the right: [command, output]
+    terminal: [["whoami", "ansh_gautam"], ["current_mode", "curious"], ["next_adventure", "loading..."], ["status", "always_in_progress"]],
+    notes: {
+      psst: "psst\u2026 there\u2019s more to me",
+      terminal: "little moments, random thoughts & more",
+      flip: "flip through",
+    },
+    cursors: ["Ansh", "You (hi!)"],
+    // shown next to the arrows for each state: closed, contents, spread 2, 3, 4, last page
     captions: [
-      ["Open the diary", "(click the cover)"],
+      ["Click to open my world", "(the cover is waiting)"],
       ["Contents", "(start anywhere)"],
-      ["Experience & Certifications", "(every internship, one page)"],
-      ["Education & Project", "(SRM \u00b7 Metaverse mini-project)"],
+      ["Life lately & Beyond the screen", "(what I\u2019m into right now)"],
+      ["Random thoughts & Little wins", "(small things, big deal)"],
+      ["Behind the scenes & On my mind", "(the unedited bits)"],
       ["The last page", "(thanks for flipping)"],
     ],
-    experience: [
-      { company: "Genospark", role: "Full Stack AI Intern", period: "Dec 2025 \u2013 Mar 2026", text: "Built AI applications and backend systems using FastAPI, APIs, RBAC and database integration." },
-      { company: "IEEE GRSS", role: "Technical Head \u00b7 Web App Domain", period: "Mar 2025 \u2013 May 2026", kind: "Leadership", text: "Led web development projects, guided team members and helped turn requirements into working applications." },
-      // { company: "Company", role: "Role", period: "Mon YYYY \u2013 Mon YYYY", text: "One line about what you built or learned." },
+    pager: ["Cover", "Contents", "Life & beyond", "Thoughts & wins", "Behind & mind", "A note"],
+    inside: { small: "this diary belongs to", hint: "if found, please return to Ansh (and say hi)", note: "a little bit of everything \u2192" },
+    // the six entries inside the diary: spread = which flip state shows it (for the Contents list)
+    entries: [
+      { id: "life", title: "Life lately", blurb: "What I\u2019m enjoying, learning and thinking about right now.", spread: 2,
+        items: [
+          ["Learning", "Something new every week", "Right now: how modern AI systems actually work under the hood."],
+          ["Building", "Small, working things", "Turning ideas into experiments, and experiments into real products."],
+          ["On repeat", "A playlist that never ends", "Background music for late-night ideas."],
+        ] },
+      { id: "beyond", title: "Beyond the screen", blurb: "Music, hobbies and how I spend my free time.", spread: 2,
+        items: [
+          ["Music", "Always playing", "Playlists for building, thinking, and everything in between."],
+          ["Red Bull", "Fuel for late-night builds", "A cold can and a quiet hour beat most brainstorms."],
+          ["Curiosity", "Taking things apart", "Mentally, at least: how does it work, and why that way?"],
+        ] },
+      { id: "thoughts", title: "Random thoughts", blurb: "Short reflections, opinions and ideas.", spread: 3,
+        items: [
+          ["01", "Ask why, then ask again", "The second answer is usually the interesting one."],
+          ["02", "Good engineering = good questions", "Code is the easy part once the question is right."],
+          ["03", "Done is a milestone", "Better is a habit."],
+        ] },
+      { id: "wins", title: "Little wins", blurb: "Milestones and moments I\u2019m proud of.", spread: 3,
+        items: [
+          ["Built", "A language model from scratch", "Understanding it end to end, not just calling an API."],
+          ["Shared", "1,800+ students mentored", "Teaching what I learn is the best way to keep learning."],
+          ["Shipped", "AI apps & backends", "From first commit to something real people could use."],
+        ] },
+      { id: "behind", title: "Behind the scenes", blurb: "Funny moments, lessons learned and stories from the journey.", spread: 4,
+        items: [
+          ["Late nights", "Broken builds, fixed builds", "Every working demo has a pile of failed attempts behind it."],
+          ["Lesson", "Read the error message first", "It\u2019s usually telling you exactly what\u2019s wrong."],
+          ["Truth", "Most bugs are assumptions", "Just wearing a disguise."],
+        ] },
+      { id: "mind", title: "On my mind", blurb: "Books, technologies and ideas I\u2019m curious about.", spread: 4,
+        items: [
+          ["How", "Machines learn", "Models, retrieval, agents, and what comes next."],
+          ["Why", "Some products stick", "What makes something people actually use?"],
+          ["Next", "What to learn next", "The list only ever gets longer."],
+        ] },
     ],
-    project: {
-      title: "Virtual Campus Explorer",
-      course: "Metaverse Fundamentals \u00b7 21CSE445T",
-      text: "A mini-project for the Metaverse Fundamentals course: a virtual campus you can walk around and explore.",
-      tags: ["Metaverse", "3D", "Virtual campus"],
-    },
-    closing: { line: "That\u2019s the story so far.", sub: "More pages are being written.", cta: { label: "Say hello", href: "#" } },
+    closing: { line: "That\u2019s a little more of me.", sub: "Thanks for flipping through.", cta: { label: "Say hello", href: "#" } },
   },
 
   // Closing call-to-action ("Want to see how I enable companies?"). Put your photo in /public (e.g. "/me.jpg") and set `avatar`;
@@ -143,31 +205,69 @@ export const content = {
   },
 
   toolkit: {
-    title: "Toolkit",
+    title: "My Arsenal",
     mark: "jc",
     finaleLabel: "Transition",
+    hudLeft: "Tech Stack / 001",
+    hudRight: "AI \u00b7 Engineering \u00b7 Product Development",
     endColor: "#ece7d3", // the panel that fills the screen at the end; matches the next section so the hand-off is seamless
+    // the radar's six axes, clockwise from the top-right; v = how strong (0-1) - tune these to your own honest levels
+    axes: [
+      { k: "AI & Machine Learning", v: 0.9 },
+      { k: "Backend Engineering", v: 0.82 },
+      { k: "LLM Engineering", v: 0.78 },
+      { k: "Databases & Infrastructure", v: 0.72 },
+      { k: "Developer Tools", v: 0.66 },
+      { k: "Frontend Engineering", v: 0.6 },
+    ],
+    // floating, draggable bubbles in the background
+    bubbles: [
+      { name: "Python", bg: "#2b5b84", fg: "#ffd43b" },
+      { name: "Java", bg: "#e76f00", fg: "#ffffff" },
+      { name: "JavaScript", bg: "#ecdc6a", fg: "#1f2020" },
+      { name: "SQL", bg: "#0b1e3a", fg: "#4aa3f5" },
+      { name: "React", bg: "#232832", fg: "#67bdd8" },
+      { name: "HTML & CSS", bg: "#e44d26", fg: "#ffffff" },
+      { name: "Tailwind", bg: "#0f172a", fg: "#38bdf8" },
+      { name: "PyTorch", bg: "#ee4c2c", fg: "#ffffff" },
+      { name: "Transformers", bg: "#ffd21e", fg: "#1f1f1f" },
+      { name: "LangChain", bg: "#12302b", fg: "#7ee0b5" },
+      { name: "LangGraph", bg: "#2b2d42", fg: "#9be7ff" },
+      { name: "RAG", bg: "#6c47ff", fg: "#ffffff" },
+      { name: "Embeddings", bg: "#0f766e", fg: "#d1fae5" },
+      { name: "FastAPI", bg: "#05998b", fg: "#ffffff" },
+      { name: "REST APIs", bg: "#f59e0b", fg: "#1f2020" },
+      { name: "PostgreSQL", bg: "#336791", fg: "#ffffff" },
+      { name: "pgvector", bg: "#1e3a8a", fg: "#93c5fd" },
+      { name: "Supabase", bg: "#161616", fg: "#3ecf8e" },
+      { name: "FAISS", bg: "#0866ff", fg: "#ffffff" },
+      { name: "Chroma", bg: "#ff6446", fg: "#ffffff" },
+      { name: "Git", bg: "#f05032", fg: "#ffffff" },
+      { name: "GitHub", bg: "#0d1117", fg: "#ffffff" },
+      { name: "Render", bg: "#46e3b7", fg: "#0b1e3a" },
+      { name: "Vercel", bg: "#000000", fg: "#ffffff" },
+    ],
     scenes: [
       {
-        subtitle: "Creative Front-end",
+        subtitle: "Languages & Frameworks",
         cards: [
+        { name: "Python", tag: "Language", bg: "#2b5b84", fg: "#ffd43b", tagBg: "#ffd43b", tagFg: "#2b5b84" },
+        { name: "Java", tag: "Language", bg: "#e76f00", fg: "#ffffff", tagBg: "#ffffff", tagFg: "#e76f00" },
         { name: "Java\nscript", tag: "Language", bg: "#ecdc6a", fg: "#1f2020", tagBg: "#1f2020", tagFg: "#ecdc6a" },
-        { name: "three\n.js", tag: "3D Library", bg: "#ffffff", fg: "#000000", tagBg: "#000000", tagFg: "#ffffff" },
-        { name: "GLSL", tag: "Shader language", bg: "#000000", fg: "#ffffff", tagBg: "#ffffff", tagFg: "#000000", learning: true },
-        { name: "GSAP", tag: "Motion Library", bg: "#0f1211", fg: "#4ee05a", tagBg: "#4ee05a", tagFg: "#0f1211", learning: true },
-        { name: "Vue", tag: "Framework", bg: "#6cb890", fg: "#3f4a62", tagBg: "#3f4a62", tagFg: "#6cb890" },
-        { name: "React", tag: "Framework", bg: "#232832", fg: "#67bdd8", tagBg: "#67bdd8", tagFg: "#232832", learning: true },
-        { name: "Web\nflow", tag: "Website builder", bg: "#ffffff", fg: "#2d62e8", tagBg: "#2d62e8", tagFg: "#ffffff" },
-        { name: "Shopify", tag: "E-commerce platform", bg: "#9bbf5a", fg: "#ffffff", tagBg: "#ffffff", tagFg: "#9bbf5a" },
+        { name: "SQL", tag: "Query language", bg: "#0b1e3a", fg: "#4aa3f5", tagBg: "#4aa3f5", tagFg: "#0b1e3a" },
+        { name: "React", tag: "UI library", bg: "#232832", fg: "#67bdd8", tagBg: "#67bdd8", tagFg: "#232832" },
+        { name: "Tail\nwind", tag: "CSS framework", bg: "#0f172a", fg: "#38bdf8", tagBg: "#38bdf8", tagFg: "#0f172a" },
+        { name: "Fast\nAPI", tag: "Backend framework", bg: "#05998b", fg: "#ffffff", tagBg: "#ffffff", tagFg: "#05998b" },
+        { name: "Py\nTorch", tag: "ML framework", bg: "#ee4c2c", fg: "#ffffff", tagBg: "#ffffff", tagFg: "#ee4c2c" },
         ],
       },
       {
-        subtitle: "Art Direction",
+        subtitle: "AI, Data & Infrastructure",
         cards: [
-        { name: "Figma", letters: ["#e8532f", "#f0624d", "#9a5cf0", "#3db4f2", "#4cc48a"], tag: "Design tool", bg: "#222323", fg: "#ffffff", tagBg: "#ee7060", tagFg: "#3a1c18" },
-        { name: "Photo\nshop", tag: "Image editor", bg: "#0b1e3a", fg: "#4aa3f5", tagBg: "#4aa3f5", tagFg: "#0b1e3a" },
-        { name: "Illu\nstrator", tag: "Vector design", bg: "#300302", fg: "#f19a2a", tagBg: "#f19a2a", tagFg: "#300302" },
-        { name: "In\nDesign", tag: "Layout tool", bg: "#46081e", fg: "#e8486c", tagBg: "#e8486c", tagFg: "#46081e" },
+        { name: "Lang\nChain", tag: "LLM framework", bg: "#12302b", fg: "#7ee0b5", tagBg: "#7ee0b5", tagFg: "#12302b" },
+        { name: "Postgre\nSQL", tag: "Database", bg: "#336791", fg: "#ffffff", tagBg: "#ffffff", tagFg: "#336791" },
+        { name: "Supa\nbase", tag: "Backend platform", bg: "#161616", fg: "#3ecf8e", tagBg: "#3ecf8e", tagFg: "#161616" },
+        { name: "GitHub", tag: "Version control", bg: "#0d1117", fg: "#ffffff", tagBg: "#ffffff", tagFg: "#0d1117" },
         ],
       },
     ],

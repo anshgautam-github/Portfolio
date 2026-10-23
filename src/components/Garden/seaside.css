@@ -1,0 +1,69 @@
+/* Seaside backdrop (see Seaside.jsx). Day = golden hour, night = moonlit; theme from .gd[data-night]. */
+.gd { --cl-a: #8b6a58; --cl-b: #5c4a47; --grass: #7fa266; --lh-body: #fbf3e4; --lh-band: #d8503f; --lh-deck: #4d4a58; --lh-roof: #b5483c; --isle: #6e7fa3; --house: #f2e6d0; --roof: #c46a50; --wave: rgba(255,255,255,.75); --reflect: rgba(60,50,60,.28); }
+.gd[data-night="1"] { --cl-a: #1f2a4a; --cl-b: #0e1630; --grass: #1d3550; --lh-body: #c9c7dc; --lh-band: #6a4a8a; --lh-deck: #1d1f38; --lh-roof: #3a2f5e; --isle: #1b2750; --house: #2a3358; --roof: #2d2a52; --wave: rgba(160,190,255,.55); --reflect: rgba(180,200,255,.25); }
+
+.ss-scene { position: absolute; left: -40px; bottom: 0; width: calc(100% + 80px); height: 62%; overflow: visible; transition: transform .8s cubic-bezier(.2,.7,.2,1); }
+.ss-sea-n { opacity: 0; transition: opacity 1.8s ease; }
+.gd[data-night="1"] .ss-sea-n { opacity: 1; }
+.ss-sea-d { transition: opacity 1.8s ease; }
+.gd[data-night="1"] .ss-sea-d { opacity: 0; }
+.ss-horizon { fill: rgba(255,240,205,.8); filter: blur(2px); transition: fill 1.8s ease; }
+.gd[data-night="1"] .ss-horizon { fill: rgba(150,140,220,.55); }
+
+.ss-wave { fill: none; stroke: var(--wave); stroke-linecap: round; animation: ss-flow var(--t) linear infinite; transition: stroke 1.8s ease; }
+.ss-wave--b { animation-direction: reverse; }
+@keyframes ss-flow { from { transform: translateX(0); } to { transform: translateX(calc(var(--per) * -4)); } }
+
+.ss-isle { fill: var(--isle); transition: fill 1.8s ease; }
+.ss-house { fill: var(--house); transition: fill 1.8s ease; }
+.ss-roof { fill: var(--roof); transition: fill 1.8s ease; }
+.ss-win { fill: #ffd98a; opacity: 0; transition: opacity 1.8s ease; }
+.gd[data-night="1"] .ss-win { opacity: 1; animation: ss-twk 4s ease-in-out infinite; filter: drop-shadow(0 0 3px #ffcf70); }
+@keyframes ss-twk { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+
+.ss-cl-a { stop-color: var(--cl-a); transition: stop-color 1.8s ease; }
+.ss-cl-b { stop-color: var(--cl-b); transition: stop-color 1.8s ease; }
+.ss-cliff-hi { stroke: rgba(255,255,255,.14); stroke-width: 3; }
+.ss-grass { fill: var(--grass); transition: fill 1.8s ease; }
+.ss-lh-body { fill: var(--lh-body); transition: fill 1.8s ease; }
+.ss-lh-band { fill: var(--lh-band); transition: fill 1.8s ease; }
+.ss-lh-deck { fill: var(--lh-deck); transition: fill 1.8s ease; }
+.ss-lh-roof { fill: var(--lh-roof); transition: fill 1.8s ease; }
+.ss-lh-door { fill: #5a3a2e; }
+.ss-lh-lamp { fill: #cfe3ee; }
+.ss-lh-lampglow { fill: #ffe9a0; opacity: 0; transition: opacity 1.8s ease; }
+.gd[data-night="1"] .ss-lh-lampglow { opacity: 1; filter: drop-shadow(0 0 14px #ffe9a0) drop-shadow(0 0 30px #ffd36e); animation: ss-lamp 3s ease-in-out infinite; }
+@keyframes ss-lamp { 50% { opacity: .78; } }
+.ss-beams { opacity: 0; transition: opacity 1.8s ease; }
+.gd[data-night="1"] .ss-beams { opacity: 1; }
+.ss-beam { transform-box: fill-box; transform-origin: 0% 50%; mix-blend-mode: screen; animation: ss-sweep 9s ease-in-out infinite alternate; }
+.ss-beam--l { transform-origin: 100% 50%; animation-delay: -4.5s; }
+@keyframes ss-sweep { from { transform: scaleY(.25) scaleX(.7); opacity: .25; } 50% { opacity: .85; } to { transform: scaleY(1.1) scaleX(1); opacity: .35; } }
+.ss-foam ellipse { fill: rgba(255,255,255,.7); animation: ss-foam 4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ss-foam ellipse:nth-child(2) { animation-delay: -1.3s; } .ss-foam ellipse:nth-child(3) { animation-delay: -2.4s; }
+@keyframes ss-foam { 50% { transform: scaleX(1.25); opacity: .35; } }
+
+.ss-drift { animation: ss-sail var(--t) ease-in-out infinite alternate; animation-delay: var(--d); }
+@keyframes ss-sail { from { transform: translateX(-70px); } to { transform: translateX(110px); } }
+.ss-bob { animation: ss-bob var(--b) ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes ss-bob { 0%, 100% { transform: translateY(0) rotate(-2.2deg); } 50% { transform: translateY(2.5px) rotate(2.2deg); } }
+.ss-mast { fill: #6a5446; }
+.ss-sail { opacity: .96; transition: filter 1.8s ease; }
+.gd[data-night="1"] .ss-sail { filter: brightness(.55) saturate(.7); }
+.ss-reflect { fill: var(--reflect); transition: fill 1.8s ease; }
+
+/* glitter path */
+.ss-glit { position: absolute; z-index: 1; width: 16vw; bottom: 0; height: 21%; transform: translateX(-50%); pointer-events: none; opacity: 0; transition: opacity 1.6s ease; }
+.ss-glit--sun { left: 76%; opacity: 1; }
+.ss-glit--moon { left: 18%; }
+.gd[data-night="1"] .ss-glit--sun { opacity: 0; }
+.gd[data-night="1"] .ss-glit--moon { opacity: 1; }
+.ss-glit { bottom: calc(62% * 0 + 0px); top: 63%; height: 30%; }
+.ss-glit i { position: absolute; left: 50%; height: 2px; border-radius: 2px; transform: translateX(-50%); background: linear-gradient(90deg, transparent, #fff3c8, transparent); animation: ss-glint 2.6s ease-in-out infinite; }
+.ss-glit--moon i { background: linear-gradient(90deg, transparent, #dfe8ff, transparent); }
+@keyframes ss-glint { 0%, 100% { opacity: .15; transform: translateX(-50%) scaleX(.5); } 50% { opacity: 1; transform: translateX(-50%) scaleX(1.1); } }
+
+.gd:not([data-night="1"]) .ss-beam, .gd:not([data-night="1"]) .ss-win, .gd:not([data-night="1"]) .ss-glit--moon i { animation-play-state: paused; }
+.gd[data-night="1"] .ss-glit--sun i { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .ss-wave, .ss-drift, .ss-bob, .ss-beam, .ss-foam ellipse, .ss-glit i { animation: none !important; } }
+@media (max-width: 767px) { .ss-scene { height: 52%; } .ss-glit { top: 70%; } .ss-glit--sun { left: 78%; } .ss-glit--moon { left: 22%; } }
