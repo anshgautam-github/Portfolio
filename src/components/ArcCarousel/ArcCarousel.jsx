@@ -104,7 +104,9 @@ export default function ArcCarousel({
     const measure = () => {
       W = el.clientWidth;
       const phone = W < 720, tablet = W >= 720 && W < 1100;
-      cardW = phone ? W * 0.46 : tablet ? clamp(W * 0.2, 150, 210) : clamp(W * 0.15, 170, 250);
+      // phones: as wide as the screen allows (neighbours still peek in), but never so tall that the card runs into the caption on short screens
+      const H = (root.current && root.current.clientHeight) || window.innerHeight;
+      cardW = phone ? Math.max(130, Math.min(W * 0.56, (H * 0.36) / 1.38)) : tablet ? clamp(W * 0.2, 150, 210) : clamp(W * 0.15, 170, 250);
       // cards sit on a real cylinder (viewer at the centre of the circle): arc length between cards = spacing
       spacing = cardW * (phone ? 1.12 : tablet ? 1.34 : 1.4);
       dth = (phone ? 24 : tablet ? 19 : 17) * Math.PI / 180;     // angle between neighbouring cards
@@ -231,7 +233,7 @@ export default function ArcCarousel({
     el.addEventListener("wheel", onWheel, { passive: false });
     el.addEventListener("click", onClickCapture, true);
     window.addEventListener("keydown", onKey);
-    const ro = new ResizeObserver(measure); ro.observe(el);
+    const ro = new ResizeObserver(measure); ro.observe(el); if (root.current) ro.observe(root.current);
     const io = new IntersectionObserver(([en]) => { S.visible = en.isIntersecting && en.intersectionRatio > 0.35; if (en.isIntersecting) S.started = true; root.current && root.current.classList.toggle("is-live", en.isIntersecting); }, { threshold: [0, 0.35, 0.6] });
     io.observe(root.current);
     return () => {

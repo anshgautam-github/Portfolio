@@ -645,3 +645,109 @@
 .ff-spark { box-shadow: none; }
 .ff-card .ff-streak { animation-duration: 8s; }
 .ff-card:not(:first-of-type) .ff-streak { animation: none; }
+
+/* crisp text: the front card is drawn flat (no tilt / sub-pixel scale) and the deck is never 3D-rotated, so the text isn't resampled */
+.ff-deck { transform: none !important; will-change: translate; }
+.ff-card { -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; backface-visibility: visible; }
+
+/* ===== phones / touch: keep everything on the compositor ===== */
+@media (max-width: 900px), (pointer: coarse) {
+  .ff-aur { filter: none !important; animation: none !important; opacity: .35; background: radial-gradient(closest-side, currentColor, transparent 70%); }
+  .ff-spark, .ff-streak, .ff-ghost-word, .ff-orbit { display: none !important; }
+  .ff-card, .ff-card * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  .ff-card { box-shadow: 0 12px 24px -10px rgba(24,24,44,.4) !important; }
+  .ff-card::before, .ff-card::after, .ff-grain { display: none !important; }
+  .ff *, .ff *::before, .ff *::after { animation-iteration-count: 1 !important; }
+  .ff-ticker-t, .ff-orb, .ff-glow { animation: none !important; }
+}
+
+/* =====================================================================
+   MOBILE / TABLET (<= 900px): headline block on top, deck centred under it, counter + pager bar at the bottom.
+   The desktop parallax rule `.ff-left { translate: ... -50% }` is declared later in this file than the first mobile block,
+   so it must be switched off explicitly here (it used to drag the whole headline half its height up over the top edge).
+   ===================================================================== */
+.ff-pager { display: none; }
+@media (max-width: 900px) {
+  .ff-left {
+    translate: none !important;
+    left: 6vw;
+    right: 6vw;
+    max-width: none;
+    top: calc(env(safe-area-inset-top, 0px) + max(34px, 5.5svh));
+  }
+  .ff-eyebrow {
+    gap: 0.9em;
+    margin-bottom: 1.4svh;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    white-space: nowrap;
+  }
+  .ff-eyebrow i { width: 1.8em; flex: none; }
+  .ff-title { font-size: clamp(36px, 12vw, 68px); margin: 0; }
+
+  /* the corner ticks and vertical label stay out of the way of the content */
+  .ff-tick-c--tl, .ff-tick-c--tr { top: calc(env(safe-area-inset-top, 0px) + 14px); }
+  .ff-tick-c--bl, .ff-tick-c--br { bottom: 14px; }
+  .ff-side { display: none; }
+
+  /* internship card: type scaled up so it reads on a phone (base size follows the card width) */
+  .ff-card { font-size: calc(var(--cw) / 26); }
+  .ff-chip { top: 1.25em; left: 1.25em; }
+  .ff-card--job .ff-tag { top: 1.25em; right: 1.25em; }
+  .ff-cap--job { padding: 5em 1.7em 1.8em; }
+  .ff-cap--job .ff-org { gap: 0.85em; margin-bottom: 1em; padding-bottom: 0.95em; }
+  .ff-cap--job .ff-logo { width: 3.4em; height: 3.4em; }
+  .ff-cap--job .ff-org b { font-size: 1.28em; }
+  .ff-cap--job .ff-org small { font-size: 0.74em; letter-spacing: 0.05em; margin-top: 0.45em; }
+  .ff-cap--job h3 { font-size: 2.15em; margin-bottom: 0.4em; }
+  .ff-cap--job p { font-size: 1.02em; line-height: 1.5; }
+
+  /* bottom bar: counter on the left (the panda helper lives bottom-right), pager next to it */
+  .ff-rail {
+    left: 6vw;
+    right: auto;
+    top: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + max(26px, 3.4svh));
+    min-width: 0;
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+  }
+  .ff-num { font-size: 30px; }
+  .ff-num small { font-size: 12px; padding-bottom: 5px; }
+  .ff-pager {
+    position: absolute;
+    z-index: 4;
+    left: calc(6vw + 92px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + max(26px, 3.4svh) - 7px);
+    display: flex;
+    align-items: center;
+  }
+  .ff-pager button {
+    all: unset;
+    box-sizing: border-box;
+    position: relative;
+    width: 30px;                /* 44px tap target via the ::before hit area, the visible pill is the ::after */
+    height: 44px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ff-pager button::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    translate: -50% -50%;
+    border-radius: 99px;
+    background: rgba(20, 20, 30, 0.22);
+    transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s;
+  }
+  .ff-pager button.is-on::after { width: 24px; background: var(--glow); }
+}
+/* short landscape phones: the headline and the card can't both fit, so the eyebrow goes and the title shrinks */
+@media (max-width: 900px) and (max-height: 520px) {
+  .ff-eyebrow { display: none; }
+  .ff-title { font-size: clamp(28px, 6vw, 44px); }
+}

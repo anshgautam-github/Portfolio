@@ -49,6 +49,7 @@ export default function Spotlight({ items, index, from, getRect, onIndex, onClos
   const root = useRef(null);
   const media = useRef(null);
   const stage = useRef(null);
+  const grid = useRef(null);
   const base = useRef(0.42);                    // text starts after the flight on first open, quickly afterwards
   const busy = useRef(true);
   const d = items[idx];
@@ -154,6 +155,24 @@ export default function Spotlight({ items, index, from, getRect, onIndex, onClos
 
   useEffect(() => { root.current && root.current.focus({ preventScroll: true }); }, []);
 
+  // phones: a new project always starts at the top of its page
+  useEffect(() => { if (grid.current) grid.current.scrollTop = 0; }, [idx]);
+
+  // phones: swipe left / right to browse (only when the gesture is clearly horizontal, so vertical scrolling is untouched)
+  useEffect(() => {
+    const el = root.current; if (!el) return;
+    let x0 = 0, y0 = 0, t0 = 0, on = false;
+    const down = (e) => { if (e.touches.length !== 1) { on = false; return; } on = true; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now(); };
+    const up = (e) => {
+      if (!on) return; on = false;
+      const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+      if (Math.abs(dx) > 56 && Math.abs(dx) > Math.abs(dy) * 1.6 && Date.now() - t0 < 700) go(dx < 0 ? 1 : -1);
+    };
+    el.addEventListener("touchstart", down, { passive: true });
+    el.addEventListener("touchend", up, { passive: true });
+    return () => { el.removeEventListener("touchstart", down); el.removeEventListener("touchend", up); };
+  });
+
   const meta = [d.year, d.category].filter(Boolean);
   const style = { "--base": base.current + "s" };
 
@@ -161,8 +180,8 @@ export default function Spotlight({ items, index, from, getRect, onIndex, onClos
   const isProg = d.kind === "program";
   const platform = isProg ? d.mode : d.kind === "phones" ? "Mobile app" : "Web app";
   return createPortal(
-    <div ref={root} className={"spot" + (closing ? " is-closing" : "")} role="dialog" aria-modal="true" aria-label={d.title} tabIndex={-1} data-dir={dir} data-acc={ACC} data-prog={isProg ? "1" : undefined} style={style}
-         onClick={(e) => { if (e.target === e.currentTarget || e.target.classList.contains("spot-grid")) close(); }}>
+    <div ref={root} data-lenis-prevent className={"spot" + (closing ? " is-closing" : "")} role="dialog" aria-modal="true" aria-label={d.title} tabIndex={-1} data-dir={dir} data-acc={ACC} data-prog={isProg ? "1" : undefined} style={style}
+         onClick={(e) => { if (e.target === e.currentTarget || (innerWidth > 860 && e.target.classList.contains("spot-grid"))) close(); }}>
       <div className="spot-veil" />
       <div className="spot-blobs" aria-hidden="true"><i /><i /><i /></div>
       <div className="spot-deco" aria-hidden="true">
@@ -175,9 +194,10 @@ export default function Spotlight({ items, index, from, getRect, onIndex, onClos
       </div>
       <div className="spot-ghost" aria-hidden="true"><span key={idx}>{pad(idx + 1)}</span></div>
 
+      <div className="spot-scrim" aria-hidden="true" />
       <button type="button" className="spot-close" onClick={close} aria-label="Close"><span>Close</span><i /></button>
 
-      <div className="spot-grid">
+      <div ref={grid} className="spot-grid">
         <div ref={stage} className="spot-stage">
           <div ref={media} className="spot-media" data-kind={d.kind}>
             <div className="spot-art-wrap" key={idx}><Art d={d} /></div>

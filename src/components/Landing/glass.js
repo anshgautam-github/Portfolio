@@ -699,6 +699,7 @@ export function createGlassScene(canvas, opts = {}) {
     allocSky();
   };
 
+  let cardT = 0, cardBottom = 0;
   const boxFor = () => {
     // text box in aspect units (1 = viewport height). Wide, centred, never taller than ~44% of the viewport
     let bw = (aspect < 1 ? 0.94 : 0.70) * aspect;
@@ -706,7 +707,20 @@ export function createGlassScene(canvas, opts = {}) {
     const maxH = aspect < 1 ? 0.3 : 0.50;
     if (bh > maxH) bw = maxH * (MASK_W / MASK_H);
     const bhh = bw * (MASK_H / MASK_W);
-    const cx = 0.495 * aspect, cy = 0.51;
+    let cy = 0.51;
+    if (aspect < 0.7) {
+      // portrait phones: the copy takes the top, so the lettering sits lower - and never lands on the About card
+      cy = 0.585;
+      const now = performance.now();
+      if (now - cardT > 400) {
+        cardT = now;
+        const card = canvas.parentElement && canvas.parentElement.querySelector(".ll-c3");
+        const cr = card && card.getBoundingClientRect(), pr = canvas.getBoundingClientRect();
+        cardBottom = cr && pr.height ? (cr.bottom - pr.top) / pr.height : 0;
+      }
+      if (cardBottom) cy = Math.max(0.5, Math.min(0.72, Math.max(cy, cardBottom + bhh / 2 + 0.03)));
+    }
+    const cx = 0.495 * aspect;
     return [cx - bw / 2, cy - bhh / 2, bw, bhh];
   };
 

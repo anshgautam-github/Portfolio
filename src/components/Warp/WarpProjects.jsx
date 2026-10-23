@@ -9,6 +9,48 @@ import "./warpProjects.css";
 function WarpProjects() {
   const layer = useRef(null);
 
+  /* "Impact" numbers count up from 0 every time their slide comes into view, and reset when it leaves, so they replay on every visit */
+  useEffect(() => {
+    const root = layer.current;
+    if (!root) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const fmt = (n) => Math.round(n).toLocaleString("en-US");
+    const cleanups = [];
+    root.querySelectorAll("[data-slide]").forEach((slide) => {
+      const nums = Array.from(slide.querySelectorAll("[data-count]"));
+      if (!nums.length) return;
+      let raf = 0, delay = 0, live = false;
+      const set = (n, v) => { n.textContent = fmt(v); };
+      const stop = () => { clearTimeout(delay); cancelAnimationFrame(raf); };
+      const run = () => {
+        stop();
+        if (reduce) { nums.forEach((n) => set(n, +n.dataset.count)); return; }
+        delay = setTimeout(() => {
+          const t0 = performance.now(), DUR = 1900;
+          const tick = (now) => {
+            const k = Math.min(1, (now - t0) / DUR);
+            const e = 1 - Math.pow(1 - k, 4); /* ease-out quart */
+            nums.forEach((n) => set(n, +n.dataset.count * e));
+            if (k < 1) raf = requestAnimationFrame(tick);
+          };
+          raf = requestAnimationFrame(tick);
+        }, 450);
+      };
+      const check = () => {
+        const o = parseFloat(slide.style.opacity || "0");
+        const shown = slide.style.visibility !== "hidden" && o > 0.5;
+        const gone = slide.style.visibility === "hidden" || o < 0.05;
+        if (shown && !live) { live = true; run(); }
+        else if (gone && live) { live = false; stop(); nums.forEach((n) => set(n, 0)); }
+      };
+      const mo = new MutationObserver(check);
+      mo.observe(slide, { attributes: true, attributeFilter: ["style"] });
+      check();
+      cleanups.push(() => { mo.disconnect(); stop(); });
+    });
+    return () => cleanups.forEach((f) => f());
+  }, []);
+
   /* desktop only: the device leans toward the cursor, the giant numeral + colour orbs drift the other way (depth), and the CTA is magnetic.
      Everything is written straight to the few elements involved (never a CSS variable on the layer: that would restyle the whole 3D device). */
   useEffect(() => {
@@ -112,6 +154,29 @@ function WarpProjects() {
                       <li key={f.t}><b>{f.t}</b><span>{f.d}</span></li>
                     ))}
                   </ul>
+                )}
+                {p.featured && (
+                  <div data-t className="wp-featured">
+                    <em><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7.1L12 17.6 5.7 21.3l1.7-7.1L2 9.5l7.1-.6z" /></svg>Featured on</em>
+                    <div>
+                      {p.featured.map((f) => (
+                        <span key={f.n}><i>{f.logo ? <img src={f.logo} alt="" draggable={false} /> : f.i}</i><b>{f.n}</b></span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {p.impact && (
+                  <div data-t className="wp-impact">
+                    <em><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8M15 7h6v6" /></svg>Impact so far</em>
+                    <div>
+                      {p.impact.map((m) => (
+                        <span key={m.k}>
+                          <strong aria-label={m.to.toLocaleString("en-US") + m.suffix}><b data-count={m.to}>0</b><u>{m.suffix}</u></strong>
+                          <small>{m.k}</small>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 )}
                 {p.who && (
                   <div data-t className="wp-who">

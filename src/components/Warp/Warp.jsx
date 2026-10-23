@@ -31,12 +31,16 @@ const MONO = { fontFamily: "'JetBrains Mono', ui-monospace, Menlo, monospace" };
 
 const pad4 = (n) => String(Math.max(0, Math.round(n))).padStart(4, "0");
 
+const NARROW = typeof window !== "undefined" && window.innerWidth < 768;
+
 function initialState() {
   return {
     cs: 1, // cursor scale
     cr: 0, // cursor rotation (deg)
-    cx: 0.245, // cursor offset, fraction of width (starts parked on the right, tucked behind the "BUILT" word)
-    cy: 0.065, // cursor offset, fraction of height
+    // desktop: parked on the right, tucked behind the "BUILT" word. Phones: the headline wraps to 4 lines and fills that spot, so the
+    // cursor waits in the empty space above the text instead (and glides down to the centre as it swells).
+    cx: NARROW ? 0.2 : 0.245, // cursor offset, fraction of width
+    cy: NARROW ? -0.3 : 0.065, // cursor offset, fraction of height
     tilt: 0, // 3D extrusion amount
     cAlpha: 1,
     cMix: 0, // 0 bright blue … 1 deep blue
@@ -480,7 +484,7 @@ export default function Warp({
         </div>
       )}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 grid grid-cols-3 items-center px-[4.4vw] pb-7 text-[13px] uppercase tracking-wide text-white/90"
+        className="wp-hud pointer-events-none absolute inset-x-0 bottom-0 grid grid-cols-3 items-center px-[4.4vw] pb-7 text-[13px] uppercase tracking-wide text-white/90"
         style={MONO}
       >
         <span ref={clockRef} />
@@ -508,7 +512,7 @@ export default function Warp({
         }}
         aria-pressed={!muted}
         aria-label={muted ? "Turn sound on" : "Turn sound off"}
-        className="absolute bottom-[68px] left-[4.4vw] z-[6] cursor-pointer bg-transparent text-[12px] uppercase tracking-[0.18em] text-white/80 transition-opacity hover:text-white"
+        className="wp-sound absolute bottom-[68px] left-[4.4vw] z-[6] cursor-pointer bg-transparent text-[12px] uppercase tracking-[0.18em] text-white/80 transition-opacity hover:text-white"
         style={MONO}
       >
         Sound [{muted ? "off" : locked ? "click anywhere" : "on"}]

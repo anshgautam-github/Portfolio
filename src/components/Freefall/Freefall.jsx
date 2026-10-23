@@ -98,8 +98,8 @@ const BASE = import.meta.env.BASE_URL || "/";
 
 
 /* ---- shatter: a fixed jittered triangulation of the card, shared by every card ---- */
-const SH_C = 4, SH_R = 4, BREAK_AT = 0.14;
-const SHATTER = (() => {
+const BREAK_AT = 0.14;
+const makeShatter = (SH_C, SH_R) => {
   let a = 20261023;
   const rnd = () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   const P = [];
@@ -135,7 +135,9 @@ const SHATTER = (() => {
     };
   });
   return { shards, edges };
-})();
+};
+/* phones get a coarser break (3x3 = 18 shards instead of 32) so it stays smooth on a mobile GPU */
+const SHATTER = makeShatter(4, 4), SHATTER_LITE = makeShatter(3, 3);
 
 export default function Freefall() {
   const root = useRef(null);
@@ -149,6 +151,7 @@ export default function Freefall() {
     const el = root.current;
     const deck = deckRef.current;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const lite = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;   // phones: lighter shatter (fewer shards), quicker scrub
     const cleanups = [];
 
     const ctx = gsap.context(() => {
@@ -159,20 +162,21 @@ export default function Freefall() {
       const sheens = cards.map((c) => c.querySelector("[data-sheen]"));
       const intro = cards.map(() => ({ v: reduce ? 1 : 0 }));
       const prog = { t: 0 };
-      let H = 800, cw = 300, Y1 = 150, mobile = false;
+      let H = 800, cw = 300, Y1 = 150, ratio = 1.14, mobile = false;
       let current = -1;
       let st = null;
 
       /* ---- shatter pieces (built lazily, the first time a card breaks) ---- */
       const wraps = cards.map(() => null);
-      const sizeWrap = (w) => { w.style.top = `${slotPx}px`; w.style.width = `${cw}px`; w.style.height = `${cw * 1.14}px`; w.style.marginLeft = `${-cw / 2}px`; };
+      const sizeWrap = (w) => { w.style.top = `${slotPx}px`; w.style.width = `${cw}px`; w.style.height = `${cw * ratio}px`; w.style.marginLeft = `${-cw / 2}px`; };
       let slotPx = 0;
       const buildShards = (i) => {
         const w = document.createElement("div");
         w.className = "ff-shards"; w.setAttribute("aria-hidden", "true");
         w.style.zIndex = String(700 - i);
         const g = cards[i].style.getPropertyValue("--g");
-        const pieces = SHATTER.shards.map((sh) => {
+        const SH = lite ? SHATTER_LITE : SHATTER;
+        const pieces = SH.shards.map((sh) => {
           const box = document.createElement("div");
           box.className = "ff-shard";
           box.style.cssText = `left:${(sh.bx * 100).toFixed(3)}%;top:${(sh.by * 100).toFixed(3)}%;width:${(sh.bw * 100).toFixed(3)}%;height:${(sh.bh * 100).toFixed(3)}%;clip-path:${sh.poly};transform-origin:${sh.ox};display:none`;
@@ -194,7 +198,7 @@ export default function Freefall() {
         const NSV = "http://www.w3.org/2000/svg";
         const svg = document.createElementNS(NSV, "svg");
         svg.setAttribute("class", "ff-cracks"); svg.setAttribute("viewBox", "0 0 100 100"); svg.setAttribute("preserveAspectRatio", "none");
-        svg.innerHTML = SHATTER.edges.map((e) => `<line x1="${(e[0][0] * 100).toFixed(2)}" y1="${(e[0][1] * 100).toFixed(2)}" x2="${(e[1][0] * 100).toFixed(2)}" y2="${(e[1][1] * 100).toFixed(2)}"/>`).join("");
+        svg.innerHTML = SH.edges.map((e) => `<line x1="${(e[0][0] * 100).toFixed(2)}" y1="${(e[0][1] * 100).toFixed(2)}" x2="${(e[1][0] * 100).toFixed(2)}" y2="${(e[1][1] * 100).toFixed(2)}"/>`).join("");
         w.appendChild(svg);
         const flash = document.createElement("i"); flash.className = "ff-flash"; w.appendChild(flash);
         deck.appendChild(w);
@@ -214,11 +218,26 @@ export default function Freefall() {
         H = el.clientHeight;
         const Wd = el.clientWidth;
         mobile = Wd <= 900;
-        cw = mobile ? Math.min(Wd * 0.62, H * 0.3) : Math.min(H * 0.39, deck.clientWidth * 0.9);
-        const ch = cw * 1.14;
-        const slot = mobile ? H * 0.52 : H * 0.41;
+        let slot;
+        if (mobile) {
+          /* phones / tablets: stack the deck in the space left under the headline and above the counter bar, so nothing overlaps at any screen size */
+          const left = el.querySelector(".ff-left");
+          const head = left ? left.offsetTop + left.offsetHeight : H * 0.28;
+          ratio = 1.3;
+          Y1 = Math.min(H * 0.085, 90);
+          const topY = head + Y1 * 1.25 + 10;               // room for the cards peeking out behind the front one
+          const bottomY = H - Math.max(84, H * 0.1);        // room for the counter + pager
+          const avail = Math.max(180, bottomY - topY);
+          cw = clamp(Math.min(Wd * 0.84, 440, avail / ratio), 150, 440);
+          slot = topY + Math.max(0, avail - cw * ratio) * 0.45;
+        } else {
+          ratio = 1.14;
+          cw = Math.min(H * 0.39, deck.clientWidth * 0.9);
+          slot = H * 0.41;
+          Y1 = 0.192 * H;
+        }
+        const ch = cw * ratio;
         slotPx = slot;
-        Y1 = (mobile ? 0.15 : 0.192) * H;
         el.style.setProperty("--cw", `${cw.toFixed(1)}px`);
         wraps.forEach((x) => x && sizeWrap(x.w));
         cards.forEach((c) => {
@@ -243,14 +262,14 @@ export default function Freefall() {
             const r = 0.38;
             y = (-Y1 * (1 - Math.pow(r, d))) / (1 - r);
             s = 0.74 + 0.26 * Math.pow(0.5, d);
-            rx = 4 + 9 * (1 - Math.pow(0.55, d));
+            rx = 13 * (1 - Math.pow(0.55, d));
             op = 1 - sstep(4.6, 7.2, d);
             z = 500 - i;
           } else {
             const u = -d;
             if (!reduce) {
               /* brittle break: the card holds, shudders, cracks, then bursts into shards that tumble away under gravity */
-              y = 0; s = 1 + 0.012 * Math.min(1, u / BREAK_AT); rx = 4; z = 700 - i;
+              y = 0; s = 1 + 0.012 * Math.min(1, u / BREAK_AT); rx = 0; z = 700 - i;
               const pre = clamp(u / BREAK_AT, 0, 1);
               const sh = wraps[i] || (wraps[i] = buildShards(i));
               const rz = u < BREAK_AT ? Math.sin(u * 330) * 0.9 * pre : 0;
@@ -325,6 +344,7 @@ export default function Freefall() {
 
       layout();
       render();
+      document.fonts?.ready.then(() => { layout(); render(); });
 
       /* ---- the pinned scroll ---- */
       if (!reduce) {
@@ -334,7 +354,7 @@ export default function Freefall() {
             start: "top top",
             end: () => `+=${Math.round((N - 1) * window.innerHeight * 0.85 + window.innerHeight * 0.25)}`,
             pin: true,
-            scrub: 0.7,
+            scrub: lite ? 0.25 : 0.7,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             onRefreshInit: layout,
@@ -463,7 +483,7 @@ export default function Freefall() {
         raf = 0;
         cx += (tx - cx) * 0.07; cy += (ty - cy) * 0.07;
         if (el.clientWidth > 900) {
-          deck && (deck.style.transform = `perspective(2200px) rotateY(${(cx * 7).toFixed(2)}deg) rotateX(${(-cy * 5).toFixed(2)}deg)`);
+          deck && (deck.style.translate = `${(cx * 14).toFixed(1)}px ${(cy * 8).toFixed(1)}px`);
           left && (left.style.translate = `${(-cx * 10).toFixed(1)}px calc(-50% + ${(-cy * 6).toFixed(1)}px)`);
           aurA && (aurA.style.translate = `${(-cx * 60).toFixed(0)}px ${(-cy * 40).toFixed(0)}px`);
           aurB && (aurB.style.translate = `${(cx * 70).toFixed(0)}px ${(cy * 50).toFixed(0)}px`);
@@ -599,6 +619,12 @@ export default function Freefall() {
               </div>
             )}
           </article>
+        ))}
+      </div>
+
+      <div className="ff-pager" role="tablist" aria-label="Choose an internship">
+        {CARDS.map((card, i) => (
+          <button key={card.n} type="button" role="tab" aria-selected={i === active} aria-label={`${pad(i + 1)} ${card.short || card.n}`} className={i === active ? "is-on" : ""} onClick={() => api.current.step(i - active)} />
         ))}
       </div>
 

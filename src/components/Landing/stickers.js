@@ -33,130 +33,132 @@ function wrap(id, art, outline = 4.2) {
 </svg>`;
 }
 
+/* ------------------------------------------------------------------ logo stickers
+   Each sticker is a die-cut badge for a company / internship / program / community from the portfolio.
+   They are brand-style marks drawn as inline SVG (swap any of them for the official artwork if you prefer). */
+const FONT = "Helvetica Neue, Helvetica, Arial, sans-serif";
+const SERIF = "Georgia, 'Times New Roman', serif";
+
+/** rounded tile that every logo sits on */
+const tile = (fill, extra = "") => `<rect x="14" y="14" width="92" height="92" rx="24" fill="${fill}" stroke="${INK}" stroke-width="4.5"/>${extra}`;
+/** text that is forced to a fixed width so the layout survives any fallback font */
+const txt = (s, x, y, size, fill, w, weight = 800, family = FONT, extra = "") =>
+  `<text x="${x}" y="${y}" font-family="${family}" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="middle" textLength="${w}" lengthAdjust="spacingAndGlyphs" ${extra}>${s}</text>`;
+
 const S = {
-  /* friendly robot head */
-  robot: (id) => wrap(id, `
-    <rect x="26" y="34" width="68" height="58" rx="18" fill="url(#g${id}c)" stroke="${INK}" stroke-width="4.5"/>
-    <path d="M60 34 V21" stroke="${INK}" stroke-width="4.5" stroke-linecap="round"/>
-    <circle cx="60" cy="16" r="6.5" fill="#ff4d79" stroke="${INK}" stroke-width="4"/>
-    <rect x="17" y="53" width="9" height="20" rx="4.5" fill="#8fb4ff" stroke="${INK}" stroke-width="4"/>
-    <rect x="94" y="53" width="9" height="20" rx="4.5" fill="#8fb4ff" stroke="${INK}" stroke-width="4"/>
-    <rect x="38" y="50" width="16" height="20" rx="8" fill="${INK}"/><rect x="66" y="50" width="16" height="20" rx="8" fill="${INK}"/>
-    <circle cx="44" cy="56" r="3.2" fill="#fff"/><circle cx="72" cy="56" r="3.2" fill="#fff"/>
-    <path d="M44 78 Q60 90 76 78" fill="none" stroke="${INK}" stroke-width="4.5" stroke-linecap="round"/>`),
+  /* Amazon ML Summer School */
+  amazon: (id) => wrap(id, `
+    ${tile("#ffffff")}
+    ${txt("amazon", 60, 58, 24, "#232f3e", 62, 800, FONT, 'letter-spacing="-1"')}
+    <path d="M30 68 Q60 86 88 67" fill="none" stroke="#ff9900" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M80 62 L90 66 L84 75" fill="none" stroke="#ff9900" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${txt("ML SUMMER SCHOOL", 60, 94, 7, "#232f3e", 62, 700)}`),
 
-  /* neural network badge */
-  neural: (id) => wrap(id, `
-    <circle cx="60" cy="60" r="46" fill="${INK}"/>
-    <g stroke="#7f8fd0" stroke-width="1.6" opacity=".75">
-      <path d="M34 42 L60 34 M34 42 L60 60 M34 42 L60 86 M34 78 L60 34 M34 78 L60 60 M34 78 L60 86 M34 60 L60 34 M34 60 L60 60 M34 60 L60 86"/>
-      <path d="M60 34 L88 48 M60 34 L88 72 M60 60 L88 48 M60 60 L88 72 M60 86 L88 48 M60 86 L88 72"/>
-    </g>
-    <g stroke="${INK}" stroke-width="2.4">
-      <circle cx="34" cy="42" r="7" fill="#5eead4"/><circle cx="34" cy="60" r="7" fill="#5eead4"/><circle cx="34" cy="78" r="7" fill="#5eead4"/>
-      <circle cx="60" cy="34" r="7" fill="#ffd166"/><circle cx="60" cy="60" r="7" fill="#ffd166"/><circle cx="60" cy="86" r="7" fill="#ffd166"/>
-      <circle cx="88" cy="48" r="7.5" fill="#ff7ab6"/><circle cx="88" cy="72" r="7.5" fill="#ff7ab6"/>
-    </g>`),
+  /* IBM Z Student Ambassador */
+  ibm: (id) => `${wrap(id, `
+    ${tile("#ffffff")}
+    <g mask="url(#m${id})">${txt("IBM", 60, 72, 40, "#1f70c1", 66, 900, "Arial Black, Arial, Helvetica, sans-serif")}</g>
+    ${txt("Z STUDENT AMBASSADOR", 60, 92, 6.2, "#1f70c1", 66, 700)}`).replace("</defs>", `<mask id="m${id}"><rect width="120" height="120" fill="#fff"/><g stroke="#000" stroke-width="1.7">${[40, 44.6, 49.2, 53.8, 58.4, 63, 67.6, 72].map((y) => `<path d="M0 ${y} H120"/>`).join("")}</g></mask></defs>`)}`,
 
-  /* terminal prompt */
-  terminal: (id) => wrap(id, `
-    <rect x="12" y="24" width="96" height="72" rx="14" fill="#10162a" stroke="${INK}" stroke-width="4"/>
-    <circle cx="27" cy="37" r="4" fill="#ff6b6b"/><circle cx="40" cy="37" r="4" fill="#ffd166"/><circle cx="53" cy="37" r="4" fill="#4ade80"/>
-    <path d="M28 56 L44 68 L28 80" fill="none" stroke="#4ade80" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M54 82 H84" stroke="#4ade80" stroke-width="7.5" stroke-linecap="round"/>`),
+  /* Microsoft Learn Student Ambassador */
+  microsoft: (id) => wrap(id, `
+    ${tile("#ffffff")}
+    <rect x="34" y="30" width="24" height="24" fill="#f25022"/><rect x="62" y="30" width="24" height="24" fill="#7fba00"/>
+    <rect x="34" y="58" width="24" height="24" fill="#00a4ef"/><rect x="62" y="58" width="24" height="24" fill="#ffb900"/>
+    ${txt("MS LEARN AMBASSADOR", 60, 95, 6.4, "#3b3b3b", 66, 700)}`),
 
-  /* AI chip */
-  chip: (id) => wrap(id, `
-    <g stroke="${INK}" stroke-width="4.5" stroke-linecap="round">
-      <path d="M42 20 V32 M60 20 V32 M78 20 V32 M42 88 V100 M60 88 V100 M78 88 V100 M20 42 H32 M20 60 H32 M20 78 H32 M88 42 H100 M88 60 H100 M88 78 H100" fill="none"/>
-    </g>
-    <rect x="30" y="30" width="60" height="60" rx="12" fill="url(#g${id}b)" stroke="${INK}" stroke-width="4.5"/>
-    <rect x="42" y="42" width="36" height="36" rx="7" fill="#eef3ff" stroke="${INK}" stroke-width="3.5"/>
-    <path d="M50 70 L55.5 50 L61 70 M52 64.5 H59" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M68 50 V70" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`),
+  /* IEEE GRSS, Technical Head */
+  ieee: (id) => wrap(id, `
+    ${tile("#00629b")}
+    <path d="M60 24 L74 40 L60 56 L46 40 Z" fill="#fff" opacity=".18"/>
+    ${txt("IEEE", 60, 66, 31, "#ffffff", 62, 900)}
+    <path d="M30 74 H90" stroke="#7fc4ee" stroke-width="2.4" stroke-linecap="round"/>
+    ${txt("GRSS", 60, 91, 14, "#bfe4ff", 36, 800)}`),
 
-  /* </> pill */
-  code: (id) => wrap(id, `
-    <rect x="10" y="33" width="100" height="54" rx="27" fill="#c9ff3f" stroke="${INK}" stroke-width="4.5"/>
-    <g fill="none" stroke="${INK}" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M42 47 L29 60 L42 73"/><path d="M78 47 L91 60 L78 73"/><path d="M65 45 L55 75"/>
-    </g>`),
+  /* McKinsey Forward Program */
+  mckinsey: (id) => wrap(id, `
+    ${tile("#051c2c")}
+    ${txt("McKinsey", 60, 58, 22, "#ffffff", 68, 700, SERIF)}
+    ${txt("&amp; Company", 60, 73, 11, "#9fc2ff", 56, 400, SERIF, 'font-style="italic"')}
+    <path d="M32 82 H88" stroke="#2251ff" stroke-width="3" stroke-linecap="round"/>
+    ${txt("FORWARD", 60, 94, 7, "#cfe0ff", 40, 700)}`),
 
-  /* loss curve card */
-  loss: (id) => wrap(id, `
-    <rect x="14" y="16" width="92" height="88" rx="14" fill="#ffffff" stroke="${INK}" stroke-width="4.5"/>
-    <path d="M28 30 V88 H94" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M32 36 C44 38 46 74 60 78 S 84 80 92 79" fill="none" stroke="#ff5c7a" stroke-width="5" stroke-linecap="round"/>
-    <circle cx="74" cy="79.5" r="6" fill="#ffd166" stroke="${INK}" stroke-width="3.5"/>`),
+  /* Edge AI & Robotics Summer School, IISc (1 of 100) */
+  iisc: (id) => wrap(id, `
+    <circle cx="60" cy="60" r="47" fill="#7a1f2b" stroke="${INK}" stroke-width="4.5"/>
+    <circle cx="60" cy="60" r="38" fill="none" stroke="#f6dfb3" stroke-width="2.2"/>
+    <circle cx="60" cy="60" r="35" fill="none" stroke="#f6dfb3" stroke-width="0.9" stroke-dasharray="1.6 2.6"/>
+    ${txt("IISc", 60, 68, 30, "#fbe9c4", 50, 800, SERIF)}
+    ${txt("BENGALURU", 60, 84, 6.6, "#f6dfb3", 40, 700)}
+    <path d="M60 33 L62.4 38.6 L68.4 39 L63.8 42.8 L65.3 48.6 L60 45.4 L54.7 48.6 L56.2 42.8 L51.6 39 L57.6 38.6 Z" fill="#f6dfb3"/>`),
 
-  /* pixel heart */
-  heart: (id) => {
-    const rows = [
-      "..XX...XX..", ".XXXX.XXXX.", "XXXXXXXXXXX", "XXXXXXXXXXX", ".XXXXXXXXX.", "..XXXXXXX..", "...XXXXX...", "....XXX....", ".....X.....",
-    ];
-    const cs = 8.6, ox = 60 - (11 * cs) / 2, oy = 60 - (9 * cs) / 2;
-    let rects = "";
-    rows.forEach((r, y) => [...r].forEach((c, x) => {
-      if (c === "X") rects += `<rect x="${(ox + x * cs).toFixed(1)}" y="${(oy + y * cs).toFixed(1)}" width="${cs + 0.4}" height="${cs + 0.4}"/>`;
-    }));
-    return wrap(id, `
-      <g fill="#ff4f7b" stroke="#ff4f7b" stroke-width="0.8" shape-rendering="crispEdges">${rects}</g>
-      <rect x="${(ox + cs).toFixed(1)}" y="${(oy + 1.2 * cs).toFixed(1)}" width="${cs}" height="${cs}" fill="#fff" opacity=".85"/>
-      <rect x="${(ox + 2 * cs).toFixed(1)}" y="${(oy + 2.2 * cs).toFixed(1)}" width="${cs * 0.6}" height="${cs * 0.6}" fill="#fff" opacity=".7"/>`);
-  },
+  /* Genospark, Full Stack AI Intern */
+  genospark: (id) => wrap(id, `
+    ${tile("#10162a")}
+    <path d="M60 24 C62 40 66 44 82 46 C66 48 62 52 60 68 C58 52 54 48 38 46 C54 44 58 40 60 24 Z" fill="url(#g${id}c)" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="84" cy="30" r="3.2" fill="#8fb4ff"/><circle cx="35" cy="62" r="2.4" fill="#ff7ab6"/>
+    ${txt("Genospark", 60, 87, 15.5, "#ffffff", 68, 800)}
+    ${txt("FULL STACK AI INTERN", 60, 97, 5.6, "#8fb4ff", 62, 700)}`),
 
-  /* happy star with eyes */
-  starface: (id) => wrap(id, `
-    <path d="${star(60, 62, 48, 25)}" fill="url(#g${id}c)" stroke="${INK}" stroke-width="4.5" stroke-linejoin="round"/>
-    <ellipse cx="49" cy="62" rx="3.4" ry="6.2" fill="${INK}" transform="rotate(-12 49 62)"/>
-    <ellipse cx="71" cy="62" rx="3.4" ry="6.2" fill="${INK}" transform="rotate(12 71 62)"/>
-    <path d="M52 76 Q60 82 68 76" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`),
+  /* East Central Railway, IT Intern */
+  ecr: (id) => wrap(id, `
+    ${tile("#ffffff")}
+    ${txt("ECR", 60, 52, 30, "#c8102e", 56, 900)}
+    <path d="M44 60 L30 98 M76 60 L90 98" stroke="#1b3a8a" stroke-width="4" stroke-linecap="round"/>
+    <g stroke="#1b3a8a" stroke-width="3.2" stroke-linecap="round"><path d="M42 66 H78 M38 76 H82 M34 87 H86"/></g>`),
 
-  /* git branch */
-  git: (id) => wrap(id, `
-    <circle cx="60" cy="60" r="46" fill="#ff9a3d" stroke="${INK}" stroke-width="4.5"/>
-    <path d="M44 34 V86 M44 70 C44 56 76 62 76 46" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
-    <circle cx="44" cy="34" r="8" fill="#fff" stroke="${INK}" stroke-width="4"/>
-    <circle cx="44" cy="86" r="8" fill="#fff" stroke="${INK}" stroke-width="4"/>
-    <circle cx="76" cy="44" r="8" fill="#c9ff3f" stroke="${INK}" stroke-width="4"/>`),
+  /* GirlScript Summer of Code, Contributor + Campus Ambassador */
+  gssoc: (id) => wrap(id, `
+    <rect x="14" y="14" width="92" height="92" rx="24" fill="url(#g${id}c)" stroke="${INK}" stroke-width="4.5"/>
+    <circle cx="60" cy="44" r="14" fill="#fff" stroke="${INK}" stroke-width="3.5"/>
+    <path d="M54 44 L58.5 48.5 L67 39.5" fill="none" stroke="#ff7a00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    ${txt("GSSoC", 60, 78, 22, INK, 62, 900)}
+    ${txt("GIRLSCRIPT", 60, 93, 8, INK, 52, 800)}`),
 
-  /* tensor cube */
-  tensor: (id) => wrap(id, `
-    <g stroke="${INK}" stroke-width="4.5" stroke-linejoin="round">
-      <path d="M60 14 L100 36 L60 58 L20 36 Z" fill="#9ff3e3"/>
-      <path d="M20 36 L60 58 V104 L20 82 Z" fill="#4fd1c5"/>
-      <path d="M100 36 L60 58 V104 L100 82 Z" fill="#2aa39b"/>
-    </g>
-    <g stroke="${INK}" stroke-width="2.6" stroke-linecap="round" opacity=".8">
-      <path d="M40 25 L80 47 M80 25 L40 47 M40 47 V93 M80 47 V93 M20 59 L60 81 M100 59 L60 81"/>
-    </g>`),
+  /* Hacktoberfest contributor */
+  hacktoberfest: (id) => wrap(id, `
+    ${tile("#1a1033")}
+    <path d="M60 24 Q64 17 70 20" fill="none" stroke="#7ddc6b" stroke-width="4" stroke-linecap="round"/>
+    <ellipse cx="46" cy="49" rx="15" ry="17" fill="#ff8a00"/><ellipse cx="74" cy="49" rx="15" ry="17" fill="#ff8a00"/>
+    <ellipse cx="60" cy="49" rx="14" ry="19" fill="#ffa72e" stroke="#1a1033" stroke-width="2"/>
+    <path d="M51 46 L57 50 L51 54 M69 46 L63 50 L69 54" fill="none" stroke="#1a1033" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${txt("hacktoberfest", 60, 82, 13, "#ffffff", 70, 800)}
+    ${txt("OPEN SOURCE", 60, 95, 6.4, "#c9a4ff", 50, 700)}`),
 
-  /* binary badge */
-  binary: (id) => wrap(id, `
-    <circle cx="60" cy="60" r="46" fill="#bfe3ff" stroke="${INK}" stroke-width="4.5"/>
-    <g fill="none" stroke="${INK}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-      <ellipse cx="42" cy="60" rx="9" ry="14"/><path d="M72 46 L80 41 V79"/>
-    </g>
-    <path d="M30 28 A40 40 0 0 1 64 20" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".9"/>`),
+  /* SRM Institute of Science and Technology */
+  srm: (id) => wrap(id, `
+    ${tile("#0b4f9c")}
+    ${txt("SRM", 60, 62, 34, "#ffffff", 66, 900)}
+    <path d="M28 70 H92" stroke="#ff9d2e" stroke-width="4" stroke-linecap="round"/>
+    ${txt("INSTITUTE OF SCIENCE", 60, 83, 6.2, "#cfe5ff", 64, 700)}
+    ${txt("&amp; TECHNOLOGY", 60, 92, 6.2, "#cfe5ff", 50, 700)}`),
 
-  /* ai sparkle */
-  sparkle: (id) => wrap(id, `
-    <path d="M52 14 C56 44 66 54 98 58 C66 62 56 72 52 104 C48 72 38 62 6 58 C38 54 48 44 52 14 Z" transform="translate(8 2)" fill="url(#g${id}b)" stroke="${INK}" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="M96 12 C97.5 22 100 25 110 26 C100 27 97.5 30 96 40 C94.5 30 92 27 82 26 C92 25 94.5 22 96 12 Z" fill="#ffd166" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>`),
+  /* SRM iOS Development Center, iOS App Developer (top 100 of 1000+) */
+  ios: (id) => wrap(id, `
+    <rect x="14" y="14" width="92" height="92" rx="24" fill="url(#g${id}b)" stroke="${INK}" stroke-width="4.5"/>
+    <g fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M32 38 L21 49 L32 60"/><path d="M88 38 L99 49 L88 60"/></g>
+    ${txt("iOS", 60, 56, 26, "#ffffff", 40, 900)}
+    ${txt("SRM DEV CENTER", 60, 80, 8, "#ffffff", 58, 800)}
+    ${txt("TOP 100 / 1000+", 60, 93, 6.6, "#dbe7ff", 52, 700)}`),
 
-  /* gpu fan */
-  gpu: (id) => wrap(id, `
-    <rect x="10" y="30" width="100" height="60" rx="12" fill="#2c3354" stroke="${INK}" stroke-width="4.5"/>
-    <circle cx="40" cy="60" r="19" fill="#10162a" stroke="${INK}" stroke-width="3.5"/>
-    <circle cx="82" cy="60" r="19" fill="#10162a" stroke="${INK}" stroke-width="3.5"/>
-    <g fill="#8fb4ff"><path d="M40 60 L40 43 A17 17 0 0 1 53 49 Z"/><path d="M40 60 L57 60 A17 17 0 0 1 51 73 Z"/><path d="M40 60 L40 77 A17 17 0 0 1 27 71 Z"/><path d="M40 60 L23 60 A17 17 0 0 1 29 47 Z"/></g>
-    <g fill="#ff7ab6"><path d="M82 60 L82 43 A17 17 0 0 1 95 49 Z"/><path d="M82 60 L99 60 A17 17 0 0 1 93 73 Z"/><path d="M82 60 L82 77 A17 17 0 0 1 69 71 Z"/><path d="M82 60 L65 60 A17 17 0 0 1 71 47 Z"/></g>
-    <circle cx="40" cy="60" r="4" fill="#fff"/><circle cx="82" cy="60" r="4" fill="#fff"/>`),
+  /* CineMyst, the iOS app */
+  cinemyst: (id) => wrap(id, `
+    <defs><linearGradient id="cm${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5a1f43"/><stop offset=".5" stop-color="#8a4a72"/><stop offset="1" stop-color="#e0bfd4"/></linearGradient></defs>
+    <circle cx="60" cy="60" r="47" fill="url(#cm${id})" stroke="${INK}" stroke-width="4.5"/>
+    <circle cx="60" cy="60" r="31" fill="#07050a"/>
+    <path d="M72 46 A19 19 0 1 0 72 74" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/>`),
+
+  /* OwnMove, the opportunities platform */
+  ownmove: (id) => wrap(id, `
+    <g fill="#fff" stroke="${INK}" stroke-width="3.6">${[0, 45, 90, 135, 180, 225, 270, 315].map((a) => `<circle cx="${(60 + Math.cos((a * Math.PI) / 180) * 30).toFixed(1)}" cy="${(60 + Math.sin((a * Math.PI) / 180) * 30).toFixed(1)}" r="14"/>`).join("")}</g>
+    <circle cx="60" cy="60" r="25" fill="#d9c9ff" stroke="${INK}" stroke-width="3.6"/>
+    <circle cx="52" cy="55" r="3.2" fill="${INK}"/><circle cx="68" cy="55" r="3.2" fill="${INK}"/>
+    <path d="M50 66 Q60 77 70 66" fill="none" stroke="${INK}" stroke-width="3.6" stroke-linecap="round"/>`),
 };
 
-export const STICKER_ORDER = ["robot", "neural", "terminal", "chip", "heart", "starface", "code", "loss", "sparkle", "git", "tensor", "binary", "gpu"];
+export const STICKER_ORDER = ["amazon", "ibm", "microsoft", "ieee", "mckinsey", "iisc", "genospark", "ecr", "gssoc", "hacktoberfest", "srm", "ios", "cinemyst", "ownmove"];
 // relative sizes so the pile feels hand-placed
-export const STICKER_SCALE = { robot: 1.05, neural: 1.0, terminal: 1.0, chip: 1.0, heart: 0.9, starface: 1.0, code: 1.0, loss: 0.95, sparkle: 0.95, git: 0.92, tensor: 0.95, binary: 0.9, gpu: 1.0 };
+export const STICKER_SCALE = { amazon: 1.05, ibm: 1.0, microsoft: 1.0, ieee: 1.0, mckinsey: 1.0, iisc: 1.0, genospark: 1.0, ecr: 0.98, gssoc: 1.0, hacktoberfest: 1.0, srm: 1.0, ios: 1.0, cinemyst: 0.95, ownmove: 1.05 };
 
 export function stickerSvg(name, uid) {
   return S[name](uid);

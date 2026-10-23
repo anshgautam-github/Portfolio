@@ -735,3 +735,63 @@ html.kimi-menu-open { overflow: hidden; }
 @keyframes pcWheel { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(11px); opacity: 0; } 100% { transform: translateY(0); opacity: 0; } }
 @keyframes pcRun { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
 @media (prefers-reduced-motion: reduce) { .kimi .pc-mouse i, .kimi .pc-line i { animation: none; } }
+
+/* =====================================================================
+   MOBILE / TABLET (<1024px): editorial stack
+   light hero (headline + portrait) -> dark panel (intro, stats grid, swipeable stage rail)
+   ===================================================================== */
+@media (max-width: 1023px) {
+  .kimi .pad { --hero: min(148vw, 980px); --block-h: 0px; --head-left: 24px; --head-top: 30px; padding-top: var(--hero); min-height: 0; display: flex; flex-direction: column;
+    background:
+      radial-gradient(58% 52% at 20% 14%, rgba(255,255,255,.8), transparent 70%) 0 0 / 100% var(--hero) no-repeat,
+      radial-gradient(60% 46% at 92% 88%, rgba(118,150,246,.6), transparent 72%) 0 0 / 100% var(--hero) no-repeat,
+      linear-gradient(165deg, #dce9fb 0%, #c0d7f6 52%, #a9c4f4 100%) 0 0 / 100% var(--hero) no-repeat,
+      #0a0b0c; }
+  .kimi .pad::before { bottom: auto; height: var(--hero); }
+  .kimi .pad-bg, .kimi .pad-art, .kimi .pad-fig, .kimi .cheq { bottom: auto; height: var(--hero); }
+  .kimi .pad-band, .kimi .pad-melt, .kimi .pad-cue, .kimi .pa-rail, .kimi .pa-dots, .kimi .pa-line, .kimi .pa-stripes, .kimi .pad-hud,
+  .kimi .cal .link, .kimi .cal .mk, .kimi .cal .lv, .kimi .pad-panels [data-meet], .kimi .pad-panels [data-meet-brackets], .kimi .pad-panels [data-stat-brackets], .kimi .stat-rule { display: none !important; }
+
+  .kimi .last-layer > .pad { position: relative; } .kimi .last-layer::after { display: none; }
+
+  /* headline */
+  .kimi .pad-h { top: var(--head-top); left: var(--head-left); font-size: clamp(30px, 9.4vw, 64px); z-index: 25; }
+
+  /* portrait: sits in the lower part of the hero, fades into the dark panel */
+  .kimi .pad-fig img { left: 54%; bottom: 0; height: min(calc(var(--hero) * 0.70), 112vw); max-height: none; }
+  .kimi .pad-fig::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 36%; z-index: 12; pointer-events: none;
+    background: linear-gradient(to bottom, rgba(10,11,12,0), rgba(10,11,12,.85) 55%, #0a0b0c 82%); }
+  .kimi .pa-word { font-size: 52vw; left: -4vw; top: 32vw; }
+
+  /* dark panel */
+  .kimi .pad-intro { position: relative; left: auto; bottom: auto; order: 1; width: auto; max-width: 640px; padding: 4px 24px 0; gap: 16px; z-index: 20; }
+  .kimi .pad-intro p { color: #dfe6f3; font-size: 15px; line-height: 1.7; }
+  .kimi .pad-panels { display: block; order: 2; position: static; padding: 26px 24px 8px; z-index: 20; }
+  .kimi .pad-panels [data-stats] { position: static !important; width: auto !important; display: grid !important; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .kimi .stat-row { height: auto; flex-direction: column; align-items: flex-start; gap: 14px; padding: 16px 16px 18px; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: rgba(255,255,255,.04); }
+  .kimi .stat-row .stat-ic { width: 26px; height: 26px; }
+  .kimi .stat-row .lb { font-size: 10.5px; letter-spacing: .12em; color: rgba(255,255,255,.55); }
+  .kimi .stat-row .fg { font-size: 26px; line-height: 1; margin-top: 8px; color: #fff; letter-spacing: -.02em; }
+  .kimi .stat-row .fg.fg-sm { font-size: 17px; margin-top: 10px; }
+
+  /* stage rail: swipeable */
+  .kimi .pad .cal { position: relative; order: 3; height: auto; display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+    padding: 34px 24px 34px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,.1); scrollbar-width: none; scroll-padding-inline: 24px; background: transparent; box-shadow: none; }
+  .kimi .pad .cal::-webkit-scrollbar { display: none; }
+  .kimi .pad .cal::before { content: "Tap a stage \00b7 swipe"; position: absolute; left: 24px; top: 12px; font: 500 10px/1 var(--pm-mono); letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.4); }
+  .kimi .cal .card.hide-phone { display: flex !important; }
+  .kimi .cal .card { position: relative !important; left: auto !important; top: auto !important; flex: 0 0 auto; width: 168px !important; scroll-snap-align: start; align-items: flex-start; text-align: left; gap: 8px; padding: 14px 14px 16px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; background: rgba(255,255,255,.04); white-space: normal; }
+  .kimi .cal .card.live { border-color: #8db4ff; background: rgba(141,180,255,.1); }
+  .kimi .cal .card .nm { font-size: 13px; line-height: 1.2; }
+  .kimi .cal .card .rd, .kimi .cal .card .dt { font-size: 10.5px; white-space: normal; line-height: 1.5; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kimi .pad { --hero: min(118vw, 920px); }
+  .kimi .pad-fig img { height: calc(var(--hero) * 0.70); }
+  .kimi .pad-h { font-size: clamp(44px, 7.4vw, 76px); }
+  .kimi .pad-fig img { left: 62%; }
+  .kimi .pad-intro, .kimi .pad-panels { padding-left: 48px; padding-right: 48px; }
+  .kimi .pad .cal { padding-left: 48px; }
+  .kimi .pad .cal::before { left: 48px; }
+  .kimi .pad-panels [data-stats] { grid-template-columns: repeat(4, 1fr); }
+}

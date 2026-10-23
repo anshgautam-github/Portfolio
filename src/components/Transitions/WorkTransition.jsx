@@ -23,6 +23,8 @@ const RING = "NEXT CHAPTER · WHERE I’VE WORKED · NEXT CHAPTER · WHERE I’V
 export default function WorkTransition({ from = "[data-warp-wrap]", to = ".ff" }) {
   useLayoutEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    // phones / tablets: a full-screen animated clip-path + blur + SVG overlay is far too heavy for the compositor, so the page just scrolls in
+    if (window.matchMedia("(max-width: 900px), (pointer: coarse)").matches) return undefined;
     let A = null, B = null, st = null, cv = null, bl = null, cx = null, cur = 0, tgt = 0, raf = 0, lt = 0, boot = 0, fired = false;
 
     const overlay = () => {

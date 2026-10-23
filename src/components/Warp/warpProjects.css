@@ -237,3 +237,108 @@ html.is-mobile .wp-text h3 .acc { color: var(--a); animation: none; }
 .wp-who span { padding: 6px 11px; border-radius: 99px; font-size: clamp(11px, .8vw, 12.5px); color: rgba(255,255,255,.82); border: 1px solid rgba(var(--g), .3); background: rgba(var(--g), .08); }
 @media (max-width: 900px), (max-height: 780px) { .wp-feats span { display: none; } .wp-feats { gap: 8px 18px; } }
 @media (max-width: 900px) { .wp-feats, .wp-who { display: none; } }
+
+/* "Featured on" box (project 02): glass cards in the same language as the .wp-specs boxes */
+.wp-featured { position: relative; margin: 0 0 22px; max-width: 540px; padding: 14px 16px 16px; border-radius: 16px; background: linear-gradient(160deg, rgba(var(--g), .2), rgba(8,12,26,.62) 75%); border: 1px solid rgba(var(--g), .36); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); overflow: hidden; }
+.wp-featured::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--a), transparent); }
+.wp-featured::after { content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.1), transparent); transform: skewX(-18deg); animation: wpFeatShine 5.5s ease-in-out infinite; pointer-events: none; }
+@keyframes wpFeatShine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+.wp-featured em { display: flex; align-items: center; gap: 7px; margin-bottom: 11px; font: 500 10.5px/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; font-style: normal; color: var(--a2); }
+.wp-featured em svg { color: var(--a); filter: drop-shadow(0 0 6px rgba(var(--g), .9)); }
+.wp-featured div { display: flex; flex-wrap: wrap; gap: 10px; }
+.wp-featured div span { display: flex; align-items: center; gap: 10px; padding: 8px 16px 8px 8px; border-radius: 99px; background: rgba(255,255,255,.06); border: 1px solid rgba(var(--g), .3); }
+.wp-featured div i { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 700 11px/1 "Inter Tight", sans-serif; letter-spacing: .02em; font-style: normal; color: #14081f; background: linear-gradient(135deg, var(--a2), var(--a)); box-shadow: 0 0 16px rgba(var(--g), .7); }
+.wp-featured div b { font: 700 clamp(15px, 1.25vw, 19px)/1 "Inter Tight", sans-serif; letter-spacing: -.02em; color: #fff; text-shadow: 0 0 18px rgba(var(--g), .7); white-space: nowrap; }
+@media (max-width: 900px) { .wp-featured { display: none; } }
+@media (prefers-reduced-motion: reduce) { .wp-featured::after { animation: none; } }
+.wp-featured div span { padding: 6px 18px 6px 6px; }
+.wp-featured div i { width: 40px; height: 40px; overflow: hidden; background: #fff; box-shadow: 0 0 0 2px rgba(var(--g), .55), 0 0 18px rgba(var(--g), .65); }
+.wp-featured div i img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.04); }
+/* polish: pills share the box width evenly (no dead space on the right), logos shown whole inside their circle */
+.wp-featured { width: fit-content; max-width: 540px; min-width: min(100%, 460px); }
+.wp-featured div { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.wp-featured div span { min-width: 0; }
+.wp-featured div b { overflow: hidden; text-overflow: ellipsis; }
+.wp-featured div i img { object-fit: contain; transform: none; padding: 3px; border-radius: 50%; }
+
+/* "Impact so far" box (project 03): same glass card as .wp-featured, with count-up numbers */
+.wp-impact { position: relative; margin: 0 0 20px; width: fit-content; min-width: min(100%, 360px); max-width: 540px; padding: 14px 18px 16px; border-radius: 16px; background: linear-gradient(160deg, rgba(var(--g), .2), rgba(8,12,26,.62) 75%); border: 1px solid rgba(var(--g), .36); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); overflow: hidden; }
+.wp-impact::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--a), transparent); }
+.wp-impact::after { content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.1), transparent); transform: skewX(-18deg); animation: wpFeatShine 5.5s ease-in-out infinite; pointer-events: none; }
+.wp-impact em { display: flex; align-items: center; gap: 7px; margin-bottom: 11px; font: 500 10.5px/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; font-style: normal; color: var(--a2); }
+.wp-impact em svg { color: var(--a); filter: drop-shadow(0 0 6px rgba(var(--g), .9)); }
+.wp-impact div { display: flex; gap: clamp(22px, 2.6vw, 44px); }
+.wp-impact div span { display: flex; flex-direction: column; gap: 6px; }
+.wp-impact strong { display: flex; align-items: baseline; font: 700 clamp(28px, 2.7vw, 44px)/1 "Inter Tight", sans-serif; letter-spacing: -.045em; color: #fff; text-shadow: 0 0 26px rgba(var(--g), .85), 0 0 2px rgba(255,255,255,.4); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wp-impact strong b { font: inherit; letter-spacing: inherit; }
+.wp-impact strong u { text-decoration: none; color: var(--a); margin-left: 1px; }
+.wp-impact small { font: 500 clamp(8.5px, .66vw, 10.5px)/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--a2); opacity: .85; }
+@media (max-width: 900px) { .wp-impact { display: none; } }
+@media (prefers-reduced-motion: reduce) { .wp-impact::after { animation: none; } }
+
+/* =====================================================================
+   PHONES (<=900px): one project per screen, designed top -> bottom
+   number row . headline . one-line pitch . tags . proof strip . device . full-width CTA
+   ===================================================================== */
+@media (max-width: 900px) {
+  .wp-slide { display: flex; flex-direction: column; padding: max(60px, 8svh) 20px max(22px, 4svh); align-items: stretch; box-sizing: border-box; max-width: 600px; margin: 0 auto; }
+  .wp-grid, .wp-slide.side-right .wp-grid { display: contents; }
+  .wp-text, .wp-slide.side-right .wp-text { display: contents; }
+  .wp-text::before { display: none; }
+  .wp-text > * { will-change: auto; pointer-events: auto; }
+
+  .wp-no { order: 1; margin: 0 0 12px; gap: 10px; font-size: 11px; }
+  .wp-no span { font-size: 26px; }
+  .wp-no i { width: 34px; }
+  .wp-no em { display: inline; margin-left: auto; font-size: 10px; letter-spacing: .18em; white-space: nowrap; }
+  .wp-no { white-space: nowrap; }
+  .wp-text h3 { order: 2; font-size: clamp(30px, 9.2vw, 44px); line-height: 1.02; margin: 0 0 10px; }
+  .wp-text > p:not(.wp-credit) { order: 3; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; margin: 0 0 14px; font-size: 14px; line-height: 1.55; color: rgba(255,255,255,.7); }
+  .wp-tags { order: 4; margin: 0 0 14px; gap: 6px; }
+  .wp-tags li { padding: 6px 11px; font-size: 10.5px; }
+  .wp-meta, .wp-credit, .wp-feats, .wp-who { display: none; }
+
+  /* proof strips: compact single-row glass chips */
+  .wp-featured, .wp-impact { display: block; order: 5; width: 100%; min-width: 0; max-width: none; margin: 0 0 8px; padding: 10px 12px 11px; border-radius: 14px; backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(var(--g), .12); }
+  .wp-featured, .wp-impact, .wp-btn { box-sizing: border-box; }
+  .wp-featured::after, .wp-impact::after { display: none; }
+  .wp-featured em, .wp-impact em { margin-bottom: 8px; font-size: 9.5px; }
+  .wp-featured div { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .wp-featured div span { padding: 4px 10px 4px 4px; gap: 8px; }
+  .wp-featured div i { width: 28px; height: 28px; }
+  .wp-featured div b { font-size: 13px; }
+  .wp-impact div { gap: 28px; }
+  .wp-impact strong { font-size: 26px; }
+  .wp-impact small { font-size: 9px; }
+  .wp-specs { display: grid; position: static; order: 5; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 8px; padding: 0; right: auto; max-width: none; pointer-events: none; }
+  .wp-specs li { padding: 9px 11px; gap: 8px; border-radius: 12px; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .wp-specs strong { font-size: 19px; }
+  .wp-specs span { font-size: 8.5px; max-width: none; line-height: 1.3; }
+  .wp-specs li:nth-child(n+3) { display: none; }
+  .wp-slide[data-id="llm"] { padding-bottom: max(22px, 4svh); }
+
+  /* device */
+  .wp-stage { order: 6; flex: 1 1 0; min-height: 0; margin: 0; }
+  .wp-device, .wp-stage.phones .wp-device { width: min(100%, 100vw - 40px, 44svh); }
+  .wp-stage.phones .wp-device { width: min(100%, 40svh); }
+  .wp-ghost { left: 0 !important; right: 0 !important; bottom: auto; top: 46%; text-align: center; font-size: 34svh; opacity: .55; z-index: 0; pointer-events: none; }
+
+  /* CTA: full-width thumb-friendly pill */
+  .wp-btn { order: 7; width: 100%; justify-content: space-between; margin-top: 12px; padding: 7px 7px 7px 24px; font-size: 15.5px; }
+  .wp-btn b { width: 42px; height: 42px; }
+}
+@media (max-width: 900px) and (max-height: 720px) {
+  .wp-text > p:not(.wp-credit) { -webkit-line-clamp: 2; font-size: 13px; }
+  .wp-specs, .wp-featured em, .wp-impact em { display: none; }
+  .wp-featured, .wp-impact { padding: 8px 10px; }
+}
+
+
+/* phones / tablets: the scene readouts (clock, coordinates, globe, sound toggle) sit exactly where the project CTA lives, so they go;
+   the CTA gets the bottom of the screen to itself, lifted clear of the corner mascot */
+@media (max-width: 900px) {
+  .wp-hud, .wp-sound { display: none !important; }
+  .wp-slide { padding-bottom: max(104px, 13svh); }
+  .wp-slide[data-id="llm"] { padding-bottom: max(104px, 13svh); }
+  .wp-btn { margin-top: 10px; }
+}

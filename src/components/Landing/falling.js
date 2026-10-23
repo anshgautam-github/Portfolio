@@ -19,7 +19,7 @@ const ART = IS_MOBILE ? 160 : 256;                      // sticker artwork size 
 const QUAD = ATLAS_CELL / ART;        // sprite quad / artwork size
 
 /** which stickers pile up at the bottom (in order of arrival); everything else drifts down and vanishes */
-export const PILE_NAMES = ["robot", "starface", "gpu", "code", "heart", "chip"];
+export const PILE_NAMES = ["amazon", "ibm", "microsoft", "ieee", "mckinsey", "iisc"];
 
 const hash = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -193,7 +193,7 @@ export function createFallingStickers(opts = {}) {
   function step(t, w, h, px, py, active, dt) {
     const oldW = W;
     W = w; H = h;
-    base = Math.max(92, Math.min(158, W * 0.074));
+    base = W < 700 ? Math.max(52, Math.min(68, W * 0.16)) : Math.max(92, Math.min(158, W * 0.074));   // phones: smaller stickers so they never swamp the copy
     if (!spawned && W > 0) spawn();
     if (oldW && Math.abs(oldW - W) > 0.5) for (const b of pile) b.x = Math.min(Math.max(b.r, (b.x / oldW) * W), W - b.r);
     for (const b of pile) { const s = bodySize(b.cell); if (Math.abs(s - b.size) > 0.5) { b.size = s; b.r = s * 0.43; b.m = s * s; } }
