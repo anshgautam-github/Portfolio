@@ -290,7 +290,7 @@ export const content = {
 
   // "Let's grow" garden section
   garden: {
-    blurb: "Whether it's a rough idea or a product ready to scale, I help ambitious teams build websites that feel fast, considered, and alive.",
+    blurb: "From curious ideas to intelligent systems, I build AI-powered products and software that turn possibilities into something real.",
     title: "Let\u2019s grow your next idea",
     hint: "Water me",
     full: "In full bloom",

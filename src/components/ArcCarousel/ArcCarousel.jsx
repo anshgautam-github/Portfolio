@@ -290,21 +290,48 @@ export default function ArcCarousel({
   const it = items[active];
   const meta = [it.year, it.category, it.duration].filter(Boolean);
   return (
-    <section ref={root} className="arc" aria-label="Programs and communities">
-      <div className="arc-bg" aria-hidden="true"><i /><i /><i /></div>
+    <section
+      ref={root}
+      className="arc"
+      aria-label="Programs and communities"
+      style={{
+        "--c1": it.acc?.[0] || "#818cf8",
+        "--c2": it.acc?.[1] || "#c084fc",
+      }}
+    >
+      <div className="arc-bg" aria-hidden="true">
+        <div className="arc-aurora-glow" />
+        <div className="arc-stars" />
+        <div className="arc-light-sweep" />
+        <svg className="arc-wave-stream" viewBox="0 0 1200 400" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="arcWaveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#818cf8" stopOpacity="0" />
+              <stop offset="25%" stopColor="#818cf8" stopOpacity="0.45" />
+              <stop offset="60%" stopColor="#c084fc" stopOpacity="0.5" />
+              <stop offset="85%" stopColor="#38bdf8" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="arcWaveGrad2" x1="100%" y1="0%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#f472b6" stopOpacity="0" />
+              <stop offset="35%" stopColor="#f472b6" stopOpacity="0.4" />
+              <stop offset="70%" stopColor="#6366f1" stopOpacity="0.45" />
+              <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path className="arc-wave-path arc-wave-path--1" d="M0,210 C300,110 480,290 760,160 C980,60 1100,240 1200,180" fill="none" stroke="url(#arcWaveGrad1)" strokeWidth="2" />
+          <path className="arc-wave-path arc-wave-path--2" d="M0,170 C240,270 540,90 840,240 C1040,320 1120,150 1200,200" fill="none" stroke="url(#arcWaveGrad2)" strokeWidth="1.5" strokeDasharray="6 8" />
+        </svg>
+        <div className="arc-floor-orbit arc-floor-orbit--1"><span className="arc-orbit-dot" /></div>
+        <div className="arc-floor-orbit arc-floor-orbit--2"><span className="arc-orbit-dot" /></div>
+        <div className="arc-floor-orbit arc-floor-orbit--3" />
+        <i /><i /><i />
+      </div>
       <div className="arc-deco" aria-hidden="true" data-acc={items[active].kind}>
-        <span className="arc-blob arc-blob--a" /><span className="arc-blob arc-blob--b" /><span className="arc-blob arc-blob--c" />
-        <span className="arc-grain" />
-        <div className="arc-marq"><div>{Array.from({ length: 2 }, (_, r) => (<span key={r}>{items.map((d, k) => (<Fragment key={k}>{d.title}<i>✦</i></Fragment>))}</span>))}</div></div>
-        <i className="arc-crop arc-crop--tl" /><i className="arc-crop arc-crop--tr" /><i className="arc-crop arc-crop--bl" /><i className="arc-crop arc-crop--br" />
-        <span className="arc-side arc-side--l">Programs &amp; Communities &mdash; {new Date().getFullYear()}</span>
-        <span className="arc-side arc-side--r">Community</span>
-        <svg className="arc-cross" viewBox="0 0 40 40"><circle cx="20" cy="20" r="9" /><path d="M20 0v40M0 20h40" /></svg>
-        <svg className="arc-squig" viewBox="0 0 160 30"><path d="M2 15q10-14 20 0t20 0 20 0 20 0 20 0 20 0 20 0" /></svg>
-        <div className="arc-badge"><svg viewBox="0 0 120 120"><defs><path id="arcBadgeP" d="M60 60m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0" /></defs><text><textPath href="#arcBadgeP">EXPLORE · DISCOVER · LEARN · EXPLORE · DISCOVER · LEARN ·</textPath></text></svg><b>↔</b></div>
-        <div className="arc-chip arc-chip--1"><i /> {items[active].tags?.[0] || "Product"}</div>
-        <div className="arc-chip arc-chip--2">{items[active].year || "2025"}</div>
-        <div className="arc-chip arc-chip--3">{items[active].tags?.[1] || "UI / UX"} <u /></div>
+        <span className="arc-blob arc-blob--a" />
+        <span className="arc-blob arc-blob--b" />
+        <span className="arc-blob arc-blob--c" />
+        <span className="arc-blob arc-blob--hero" />
       </div>
       <div className="arc-head">
         <p className="arc-eyebrow"><i /> {eyebrow} <i /></p>

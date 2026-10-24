@@ -23,7 +23,7 @@ const MOTIF = {
   hacktoberfest: () => (<>{Array.from({ length: 9 }, (_, r) => Array.from({ length: 7 }, (_, c) => <circle key={r + "-" + c} cx={8 + c * 14 + (r % 2) * 7} cy={8 + r * 14} r={1 + ((r * 3 + c) % 4) * 0.45} fill="#fff" opacity={0.22} />))}<path d="M14 118l26-30 14 14 32-40" {...L} strokeWidth="1" opacity=".5" /></>),
 };
 
-const ON_WHITE = new Set(["ibm", "iisc"]);      // these logos ship on a white square
+const ON_WHITE = new Set([]);
 
 export default function ProgramArt({ d }) {
   return (

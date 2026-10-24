@@ -22,7 +22,7 @@ const REV_IN = 110;                                              // the next pag
 const SMALL = 0.52;                                              // how small the screens get at the heart of the turn
 const mix = (a, b, t) => Math.round(a + (b - a) * t);
 const FROM = [16, 18, 17];                                       // the projects' own background (#101211)
-const TO = [241, 241, 238];                                      // the next page's paper (#f1f1ee)
+const TO = [181, 207, 243];                                      // the landing page sky-blue (#b5cff3)
 
 export default function WorkTransition({ from = "[data-warp-wrap]", to = ".ff" }) {
   useLayoutEffect(() => {

@@ -1,51 +1,451 @@
-.tk-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.tk-dots { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.14) 1px, transparent 1.4px); background-size: 34px 34px;
-  -webkit-mask-image: radial-gradient(75% 70% at 50% 55%, #000 25%, transparent 100%); mask-image: radial-gradient(75% 70% at 50% 55%, #000 25%, transparent 100%); }
-.tk-spot { --mx: 50%; --my: 55%; position: absolute; inset: 0; background: radial-gradient(34vmax 34vmax at var(--mx) var(--my), rgba(106,169,255,.10), rgba(150,190,255,.04) 45%, transparent 70%); }
-.tk-play { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.tk-hint { position: absolute; left: 50%; bottom: 3.2vh; translate: -50% 0; z-index: 5; pointer-events: none; font: 500 clamp(10px, .85vw, 13px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: rgba(225,238,255,.5); }
+/* =====================================================================
+   TOOLKIT ("MY ARSENAL") — CINEMATIC OBSIDIAN DARK THEME
+   Unified with Programs & Communities (ArcCarousel):
+   Deep cosmic atmosphere, dynamic aurora glow, celestial stardust,
+   sweeping volumetric lighting, kinetic wave stream, and luxury milled cards.
+   ===================================================================== */
 
-.tk-radar { position: absolute; left: 50%; top: 57%; width: min(82vh, 110vw); aspect-ratio: 1; translate: -50% -50%; overflow: visible; }
-.tk-r-ax { font: 600 16px/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; fill: rgba(106,169,255,.62); }
-.tk-r-lvl { font: 500 14px/1 "JetBrains Mono", ui-monospace, monospace; fill: rgba(225,238,255,.4); }
-.tk-hud { position: absolute; top: 3.2vh; z-index: 2; font: 500 clamp(10px, .85vw, 13px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; color: rgba(106,169,255,.6); }
-.tk-hud--l { left: 2vw; }
-.tk-hud--r { right: 2vw; color: rgba(225,238,255,.4); }
-@media (max-width: 767px) { .tk-r-ax { font-size: 20px; } .tk-hud--r { display: none; } }
+.tk-sec {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  isolation: isolate;
+  background: radial-gradient(130% 90% at 50% 28%, #080d22 0%, #040715 50%, #010206 100%) !important;
+  color: #f8fafc !important;
+  font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --acc: #818cf8;
+  --acc2: #c084fc;
+}
 
-/* phones: flatten the section so scrolling through / back into it stays on the compositor */
-html.is-mobile .tk-dots { -webkit-mask-image: none; mask-image: none; opacity: .5; }
-html.is-mobile .tk-spot { background: radial-gradient(60vmax 60vmax at 50% 55%, rgba(106,169,255,.08), transparent 70%); }
-html.is-mobile .tk-radar { contain: paint; }
+.tk-sec *, .tk-sec *::before, .tk-sec *::after {
+  box-sizing: border-box;
+}
 
-/* ───────── enhanced look ───────── */
-.tk-aur { position: absolute; display: block; border-radius: 50%; filter: blur(90px); mix-blend-mode: screen; will-change: transform; }
-.tk-aur1 { width: 52vmax; height: 40vmax; left: -14vmax; top: -10vmax; background: radial-gradient(closest-side, rgba(80,140,255,.34), transparent 70%); animation: tkA1 22s ease-in-out infinite alternate; }
-.tk-aur2 { width: 46vmax; height: 38vmax; right: -12vmax; top: 6vmax; background: radial-gradient(closest-side, rgba(70,120,255,.30), transparent 70%); animation: tkA2 26s ease-in-out infinite alternate; }
-.tk-aur3 { width: 42vmax; height: 30vmax; left: 24%; bottom: -16vmax; background: radial-gradient(closest-side, rgba(60,200,255,.22), transparent 70%); animation: tkA3 30s ease-in-out infinite alternate; }
-@keyframes tkA1 { to { transform: translate(18vmax, 12vmax) scale(1.2); } }
-@keyframes tkA2 { to { transform: translate(-16vmax, 14vmax) scale(1.25); } }
-@keyframes tkA3 { to { transform: translate(16vmax, -10vmax) scale(1.3); } }
-.tk-scan { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0, rgba(106,169,255,.05) 50%, transparent 100%); height: 30%; animation: tkScan 8s linear infinite; }
-@keyframes tkScan { from { transform: translateY(-100%); } to { transform: translateY(420%); } }
-.tk-corner { position: absolute; width: 22px; height: 22px; border: 0 solid rgba(106,169,255,.5); }
-.tk-corner--tl { left: 1.4vw; top: 1.4vh; border-width: 1.5px 0 0 1.5px; } .tk-corner--tr { right: 1.4vw; top: 1.4vh; border-width: 1.5px 1.5px 0 0; }
-.tk-corner--bl { left: 1.4vw; bottom: 1.4vh; border-width: 0 0 1.5px 1.5px; } .tk-corner--br { right: 1.4vw; bottom: 1.4vh; border-width: 0 1.5px 1.5px 0; }
-.tk-live { display: inline-block; width: 7px; height: 7px; margin-right: 10px; border-radius: 50%; background: #6aa9ff; box-shadow: 0 0 10px #6aa9ff; animation: tkBlink 1.6s ease-in-out infinite; vertical-align: 1px; }
-@keyframes tkBlink { 50% { opacity: .3; } }
-.tk-r-val { font: 700 16px/1 "JetBrains Mono", ui-monospace, monospace; fill: #d6e8ff; letter-spacing: .04em; }
-.tk-r-flow { stroke-dasharray: 14 86; animation: tkFlow 5s linear infinite; filter: drop-shadow(0 0 6px #6aa9ff); }
-@keyframes tkFlow { to { stroke-dashoffset: -100; } }
-.tk-r-pulse { animation: tkPulse 2.8s ease-out infinite; }
-@keyframes tkPulse { 0% { transform: scale(.7); opacity: .9; } 100% { transform: scale(2.3); opacity: 0; } }
-.tk-title { background: linear-gradient(100deg, #e8f1ff 0%, #e8f1ff 38%, #bcd8ff 50%, #e8f1ff 62%, #e8f1ff 100%); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; animation: tkShine 7s ease-in-out infinite; }
-@keyframes tkShine { 0% { background-position: 120% 0; } 60%, 100% { background-position: -60% 0; } }
-[data-face] { box-shadow: 0 30px 60px -18px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.14) inset; overflow: hidden; }
-[data-face]::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,.28) 0, rgba(255,255,255,0) 32%, rgba(255,255,255,0) 68%, rgba(0,0,0,.12) 100%); }
-@media (prefers-reduced-motion: reduce) { .tk-aur, .tk-scan, .tk-live, .tk-r-flow, .tk-r-pulse, .tk-title { animation: none; } }
-html.is-mobile .tk-aur, html.is-mobile .tk-scan { display: none; }
+/* Deep vignette edges for dramatic stage focus */
+.tk-sec::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(85% 75% at 50% 50%, transparent 40%, rgba(1, 2, 6, 0.82) 100%);
+}
 
-.tk-sec { background: radial-gradient(120% 90% at 50% 40%, #12306e 0%, #0a1d4a 45%, #050f2b 100%); }
-.tk-sec .tk-dots { background-image: radial-gradient(rgba(170,205,255,.18) 1px, transparent 1.4px); }
+.tk-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
 
-.tk-gwin { position: absolute; left: 50%; top: 50%; overflow: hidden; pointer-events: none; will-change: transform, opacity; background: #bcd8f2; }
+/* Dynamic Aurora Atmosphere Canvas */
+.tk-aurora-glow {
+  position: absolute;
+  inset: -25%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(48vmax 38vmax at 18% 22%, rgba(99, 102, 241, 0.32), transparent 70%),
+    radial-gradient(44vmax 36vmax at 84% 68%, rgba(217, 70, 239, 0.26), transparent 70%),
+    radial-gradient(40vmax 32vmax at 76% 16%, rgba(6, 182, 212, 0.24), transparent 70%),
+    radial-gradient(36vmax 30vmax at 28% 86%, rgba(244, 63, 94, 0.20), transparent 70%);
+  filter: blur(50px);
+  animation: tkAuroraDrift 20s ease-in-out infinite alternate;
+  will-change: transform;
+  opacity: 0.95;
+}
+
+@keyframes tkAuroraDrift {
+  0% { transform: scale(1) translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: scale(1.08) translate3d(2vw, -2vh, 0) rotate(3deg); }
+  100% { transform: scale(1.04) translate3d(-2vw, 3vh, 0) rotate(-2deg); }
+}
+
+/* Shimmering celestial stardust particles */
+.tk-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(1.5px 1.5px at 32% 64%, rgba(165, 180, 252, 0.7), transparent),
+    radial-gradient(1px 1px at 58% 14%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.5px 1.5px at 76% 32%, rgba(217, 70, 239, 0.65), transparent),
+    radial-gradient(1px 1px at 88% 74%, rgba(6, 182, 212, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 22% 84%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 66% 86%, rgba(129, 140, 248, 0.6), transparent),
+    radial-gradient(2px 2px at 46% 40%, rgba(255, 255, 255, 0.8), transparent);
+  background-size: 420px 420px;
+  opacity: 0.55;
+  animation: tkTwinkle 8s ease-in-out infinite alternate;
+}
+@keyframes tkTwinkle {
+  0% { opacity: 0.4; }
+  100% { opacity: 0.75; }
+}
+
+/* Volumetric Light Sweep */
+.tk-light-sweep {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 0;
+  pointer-events: none;
+  background: conic-gradient(from 180deg at 50% 50%, transparent 0deg, rgba(99, 102, 241, 0.08) 25deg, rgba(168, 85, 247, 0.14) 45deg, transparent 65deg);
+  filter: blur(40px);
+  animation: tkSweepRotate 32s linear infinite;
+  transform-origin: 50% 50%;
+}
+@keyframes tkSweepRotate {
+  to { transform: rotate(360deg); }
+}
+
+/* 3D Holographic Perspective Floor */
+.tk-floor {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  bottom: -22%;
+  height: 60vh;
+  transform: perspective(1000px) rotateX(68deg);
+  background:
+    linear-gradient(rgba(129, 140, 248, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(129, 140, 248, 0.15) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 50% at 50% 60%, black 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 60%, black 20%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Floor Orbit Rings with Photon Nodes */
+.tk-floor-orbit {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.tk-floor-orbit--1 {
+  width: 70vw;
+  height: 70vw;
+  border: 1.5px solid rgba(129, 140, 248, 0.22);
+  box-shadow: 0 0 60px rgba(99, 102, 241, 0.15), inset 0 0 40px rgba(99, 102, 241, 0.08);
+  animation: tkOrbitRotate1 26s linear infinite;
+}
+.tk-floor-orbit--2 {
+  width: 90vw;
+  height: 90vw;
+  border: 1px dashed rgba(217, 70, 239, 0.2);
+  animation: tkOrbitRotate2 34s linear infinite reverse;
+}
+.tk-orbit-dot {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c084fc;
+  box-shadow: 0 0 16px #c084fc, 0 0 30px #818cf8;
+}
+@keyframes tkOrbitRotate1 { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes tkOrbitRotate2 { to { transform: translate(-50%, -50%) rotate(-360deg); } }
+
+/* Kinetic Laser Wave Stream */
+.tk-wave-stream {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 48%;
+  width: 100%;
+  height: clamp(180px, 26vh, 320px);
+  transform: translateY(-50%);
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+  opacity: 0.85;
+}
+.tk-wave-path--1 {
+  animation: tkWaveFloat1 12s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 12px rgba(129, 140, 248, 0.5));
+}
+.tk-wave-path--2 {
+  animation: tkWaveFloat2 16s ease-in-out infinite alternate, tkWaveDash 28s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(244, 114, 182, 0.45));
+}
+@keyframes tkWaveFloat1 {
+  0% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-16px) scaleY(1.12); }
+  100% { transform: translateY(14px) scaleY(0.92); }
+}
+@keyframes tkWaveFloat2 {
+  0% { transform: translateY(0) scaleY(1); stroke-dashoffset: 0; }
+  50% { transform: translateY(18px) scaleY(1.1); }
+  100% { transform: translateY(-12px) scaleY(0.95); stroke-dashoffset: 400; }
+}
+@keyframes tkWaveDash {
+  to { stroke-dashoffset: 1000; }
+}
+
+/* Constellation grid dots */
+.tk-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(165, 180, 252, 0.16) 1px, transparent 1.4px);
+  background-size: 36px 36px;
+  -webkit-mask-image: radial-gradient(75% 70% at 50% 55%, #000 25%, transparent 100%);
+  mask-image: radial-gradient(75% 70% at 50% 55%, #000 25%, transparent 100%);
+}
+
+/* Mouse spotlight glow */
+.tk-spot {
+  --mx: 50%;
+  --my: 55%;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(36vmax 36vmax at var(--mx) var(--my), rgba(129, 140, 248, 0.14), rgba(192, 132, 252, 0.06) 45%, transparent 70%);
+}
+
+.tk-play {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Bottom Hint Pill */
+.tk-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 3.2vh;
+  translate: -50% 0;
+  z-index: 5;
+  pointer-events: none;
+  font: 600 clamp(10px, 0.85vw, 12px)/1 "Inter Tight", -apple-system, sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(199, 210, 254, 0.85);
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(165, 180, 252, 0.22);
+  padding: 8px 20px;
+  border-radius: 99px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Skill Radar Backdrop */
+.tk-radar {
+  position: absolute;
+  left: 50%;
+  top: 57%;
+  width: min(82vh, 110vw);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  overflow: visible;
+}
+.tk-r-ax {
+  font: 600 15px/1 "Inter Tight", "JetBrains Mono", monospace;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  fill: #c7d2fe;
+  filter: drop-shadow(0 0 10px rgba(129, 140, 248, 0.45));
+}
+.tk-r-lvl {
+  font: 500 13px/1 "JetBrains Mono", monospace;
+  fill: rgba(165, 180, 252, 0.55);
+}
+.tk-r-val {
+  font: 700 15px/1 "JetBrains Mono", monospace;
+  fill: #f8fafc;
+  letter-spacing: 0.04em;
+  filter: drop-shadow(0 0 6px rgba(129, 140, 248, 0.7));
+}
+.tk-r-flow {
+  stroke-dasharray: 14 86;
+  animation: tkFlow 5s linear infinite;
+  filter: drop-shadow(0 0 10px #818cf8);
+}
+@keyframes tkFlow {
+  to { stroke-dashoffset: -100; }
+}
+.tk-r-pulse {
+  animation: tkPulse 2.8s ease-out infinite;
+}
+@keyframes tkPulse {
+  0% { transform: scale(0.7); opacity: 0.9; }
+  100% { transform: scale(2.3); opacity: 0; }
+}
+
+/* HUD Badges & Corner Framing */
+.tk-hud {
+  position: absolute;
+  top: 3.2vh;
+  z-index: 5;
+  font: 600 clamp(10px, 0.85vw, 12px)/1 "Inter Tight", "JetBrains Mono", monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c7d2fe;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(165, 180, 252, 0.22);
+  padding: 7px 16px;
+  border-radius: 99px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+.tk-hud--l { left: 2.2vw; }
+.tk-hud--r { right: 2.2vw; }
+
+.tk-live {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: #818cf8;
+  box-shadow: 0 0 10px #818cf8, 0 0 20px rgba(129, 140, 248, 0.8);
+  animation: tkBlink 1.6s ease-in-out infinite;
+  vertical-align: 1px;
+}
+@keyframes tkBlink { 50% { opacity: 0.3; } }
+
+.tk-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 0 solid rgba(129, 140, 248, 0.38);
+}
+.tk-corner--tl { left: 1.4vw; top: 1.4vh; border-width: 1.5px 0 0 1.5px; }
+.tk-corner--tr { right: 1.4vw; top: 1.4vh; border-width: 1.5px 1.5px 0 0; }
+.tk-corner--bl { left: 1.4vw; bottom: 1.4vh; border-width: 0 0 1.5px 1.5px; }
+.tk-corner--br { right: 1.4vw; bottom: 1.4vh; border-width: 0 1.5px 1.5px 0; }
+
+.tk-scan {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0, rgba(129, 140, 248, 0.08) 50%, transparent 100%);
+  height: 30%;
+  animation: tkScan 8s linear infinite;
+}
+@keyframes tkScan {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(420%); }
+}
+
+/* Eyebrow matching Programs & Communities */
+.tk-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font: 600 11px/1 "Inter Tight", -apple-system, sans-serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(165, 180, 252, 0.25);
+  padding: 7px 18px;
+  border-radius: 99px;
+  margin-bottom: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.tk-eyebrow i {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #818cf8;
+  box-shadow: 0 0 8px #818cf8;
+}
+
+/* Luxury Metallic Title */
+.tk-title {
+  font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 45%, #94a3b8 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  filter: drop-shadow(0 4px 28px rgba(129, 140, 248, 0.38));
+}
+
+.tk-sub {
+  color: #cbd5e1;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* Center Stack Cards — Precision Milled Obsidian Face */
+[data-face] {
+  box-shadow:
+    0 24px 60px -12px rgba(0, 0, 0, 0.85),
+    0 0 0 1px rgba(255, 255, 255, 0.16) inset,
+    0 0 40px rgba(99, 102, 241, 0.22);
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  position: relative;
+}
+[data-face]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.18), transparent 70%);
+}
+[data-face]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.32) 0, rgba(255, 255, 255, 0) 36%, rgba(0, 0, 0, 0.25) 100%);
+}
+
+.tk-gwin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  overflow: hidden;
+  pointer-events: none;
+  will-change: transform, opacity;
+  background: #bcd8f2;
+}
+
+/* Reduced Motion & Mobile Optimization */
+@media (prefers-reduced-motion: reduce) {
+  .tk-aurora-glow, .tk-stars, .tk-light-sweep, .tk-scan, .tk-live, .tk-r-flow, .tk-r-pulse,
+  .tk-wave-path--1, .tk-wave-path--2, .tk-floor-orbit--1, .tk-floor-orbit--2 {
+    animation: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .tk-r-ax { font-size: 20px; }
+  .tk-hud--r { display: none; }
+  .tk-floor { height: 40vh; }
+}
+
+html.is-mobile .tk-dots {
+  -webkit-mask-image: none;
+  mask-image: none;
+  opacity: 0.5;
+}
+html.is-mobile .tk-spot {
+  background: radial-gradient(60vmax 60vmax at 50% 55%, rgba(129, 140, 248, 0.08), transparent 70%);
+}
+html.is-mobile .tk-radar {
+  contain: paint;
+}
+html.is-mobile .tk-aurora-glow,
+html.is-mobile .tk-scan {
+  display: none;
+}

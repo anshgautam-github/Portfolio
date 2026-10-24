@@ -768,17 +768,8 @@ export default function Garden({ embedded = false, ctl = null }) {
         </svg>
       </button>
 
-      {/* ---------------- footer line ---------------- */}
-      <div className="absolute inset-x-0 bottom-0 z-30 flex items-end justify-between px-5 pb-5 font-display text-[clamp(0.875rem,1.05vw,1.25rem)] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.7)] md:px-7 md:pb-7">
-        <span className="tracking-[-0.01em]">{garden.credit}</span>
-        <nav className="flex gap-[2.2vw] max-md:gap-4">
-          {garden.links.map((l) => (
-            <a key={l.label} href={l.href} className="transition-opacity duration-300 hover:opacity-60" style={{ cursor: "pointer" }}>
-              {l.label}
-            </a>
-          ))}
-        </nav>
-      </div>
+
+
 
       {/* ---------------- water drops ---------------- */}
       <div ref={drops} className="pointer-events-none absolute inset-0 z-40" aria-hidden="true" />

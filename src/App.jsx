@@ -15,9 +15,6 @@ import Showcase from "./components/Showcase/Showcase.jsx";
 import ArcCarousel from "./components/ArcCarousel/ArcCarousel.jsx";
 import WorkTransition from "./components/Transitions/WorkTransition.jsx";
 import RevealTransition from "./components/Transitions/RevealTransition.jsx";
-import ShatterTransition from "./components/Transitions/ShatterTransition.jsx";
-import ToolkitTransition from "./components/Transitions/ToolkitTransition.jsx";
-import ArcHold from "./components/Transitions/ArcHold.jsx";
 import Freefall from "./components/Freefall/Freefall.jsx";
 import Toolkit from "./components/Toolkit/Toolkit.jsx";
 import Collab from "./components/Collab/Collab.jsx";
@@ -86,10 +83,7 @@ export default function App() {
       <PushTransition />
       <WorkTransition />
       <Freefall />
-      <ShatterTransition />
       <ArcCarousel />
-      <ArcHold />
-      <ToolkitTransition />
       <Toolkit />
       {/* hidden for now - flip SHOW_DIARY to bring it back (sits after Toolkit) */}
       {SHOW_DIARY && <Diary />}

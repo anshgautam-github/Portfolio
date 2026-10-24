@@ -90,28 +90,28 @@ function SkillRadar() {
     <svg className="tk-radar" viewBox="-500 -500 1000 1000" fill="none" aria-hidden="true">
       <defs>
         <radialGradient id="tk-r-fill" cx="0" cy="0" r={R_MAX} gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#6aa9ff" stopOpacity="0.02" />
-          <stop offset="1" stopColor="#6aa9ff" stopOpacity="0.2" />
+          <stop offset="0" stopColor="#818cf8" stopOpacity="0.04" />
+          <stop offset="1" stopColor="#6366f1" stopOpacity="0.25" />
         </radialGradient>
         <linearGradient id="tk-r-sweep" x1="1" y1="0" x2="0" y2="0">
-          <stop offset="0" stopColor="#6aa9ff" stopOpacity="0.16" />
-          <stop offset="1" stopColor="#6aa9ff" stopOpacity="0" />
+          <stop offset="0" stopColor="#818cf8" stopOpacity="0.28" />
+          <stop offset="1" stopColor="#818cf8" stopOpacity="0" />
         </linearGradient>
       </defs>
 
       {/* rotating measuring ticks */}
       <g>
         {!IS_MOBILE && <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="140s" repeatCount="indefinite" />}
-        <circle r="478" stroke="rgba(225,238,255,.22)" strokeWidth="14" strokeDasharray="1.6 19.6" />
+        <circle r="478" stroke="rgba(165,180,252,.22)" strokeWidth="14" strokeDasharray="1.6 19.6" />
       </g>
       <g>
         {!IS_MOBILE && <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="90s" repeatCount="indefinite" />}
-        <circle r="446" stroke="rgba(106,169,255,.22)" strokeWidth="1.2" strokeDasharray="3 9" />
+        <circle r="446" stroke="rgba(129,140,248,.32)" strokeWidth="1.2" strokeDasharray="3 9" />
       </g>
 
       {/* level rings */}
       {[0.25, 0.5, 0.75, 1].map((f, i) => (
-        <circle key={f} r={R_MAX * f} stroke={`rgba(225,238,255,${i === 3 ? 0.3 : 0.14})`} strokeWidth="1.4" strokeDasharray={i === 3 ? "none" : "4 9"} />
+        <circle key={f} r={R_MAX * f} stroke={`rgba(165,180,252,${i === 3 ? 0.35 : 0.16})`} strokeWidth="1.4" strokeDasharray={i === 3 ? "none" : "4 9"} />
       ))}
       {[25, 50, 75, 100].map((n, i) => (
         <text key={n} x={R_MAX * ((i + 1) / 4) - 8} y="-10" textAnchor="end" className="tk-r-lvl">
@@ -126,7 +126,7 @@ function SkillRadar() {
         const anchor = Math.abs(lx) < 20 ? "middle" : lx > 0 ? "start" : "end";
         return (
           <g key={a.k}>
-            <line x1="0" y1="0" x2={x} y2={y} stroke="rgba(225,238,255,.13)" strokeWidth="1.4" />
+            <line x1="0" y1="0" x2={x} y2={y} stroke="rgba(165,180,252,.15)" strokeWidth="1.4" />
             <text x={lx} y={ly + 6} textAnchor={anchor} className="tk-r-ax">
               {axisLines(a.k).map((ln, j, arr) => (
                 <tspan key={j} x={lx} dy={j === 0 ? (Math.abs(ly) < 20 ? `${-(arr.length - 1) * 0.5}em` : ly > 0 ? 0 : `${-(arr.length - 1)}em`) : "1.25em"}>{ln}</tspan>
@@ -140,32 +140,32 @@ function SkillRadar() {
       <g>
         {!IS_MOBILE && <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="9s" repeatCount="indefinite" />}
         <path d={`M0 0 L${sweepEnd[0].toFixed(1)} ${sweepEnd[1].toFixed(1)} A${R_MAX} ${R_MAX} 0 0 1 ${R_MAX} 0 Z`} fill="url(#tk-r-sweep)" />
-        <line x1="0" y1="0" x2={R_MAX} y2="0" stroke="rgba(106,169,255,.55)" strokeWidth="1.6" />
+        <line x1="0" y1="0" x2={R_MAX} y2="0" stroke="rgba(129,140,248,.65)" strokeWidth="1.6" />
       </g>
 
       {/* orbiting satellites on the outer rings */}
       {!IS_MOBILE && (
         <>
           <g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="24s" repeatCount="indefinite" />
-            <circle cx={R_MAX} cy="0" r="7" fill="#6aa9ff" /><circle cx={R_MAX} cy="0" r="18" fill="#6aa9ff" opacity=".18" /></g>
+            <circle cx={R_MAX} cy="0" r="7" fill="#818cf8" /><circle cx={R_MAX} cy="0" r="18" fill="#818cf8" opacity=".22" /></g>
           <g><animateTransform attributeName="transform" type="rotate" from="200" to="-160" dur="38s" repeatCount="indefinite" />
-            <circle cx={R_MAX * 0.75} cy="0" r="5" fill="#ff8a5c" /><circle cx={R_MAX * 0.75} cy="0" r="13" fill="#ff8a5c" opacity=".2" /></g>
+            <circle cx={R_MAX * 0.75} cy="0" r="5" fill="#c084fc" /><circle cx={R_MAX * 0.75} cy="0" r="13" fill="#c084fc" opacity=".22" /></g>
           <g><animateTransform attributeName="transform" type="rotate" from="90" to="450" dur="60s" repeatCount="indefinite" />
-            <circle cx="446" cy="0" r="5" fill="#e8f1ff" opacity=".8" /></g>
+            <circle cx="446" cy="0" r="5" fill="#38bdf8" opacity=".8" /></g>
         </>
       )}
 
       {/* the skill shape */}
       <g>
         {!IS_MOBILE && <animateTransform attributeName="transform" type="scale" values="1;1.035;1" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" dur="6s" repeatCount="indefinite" />}
-        <polygon points={poly} fill="url(#tk-r-fill)" stroke="rgba(106,169,255,.7)" strokeWidth="2.2" strokeLinejoin="round" style={IS_MOBILE ? undefined : { filter: "drop-shadow(0 0 14px rgba(106,169,255,.45))" }} />
-        <polygon points={poly} fill="none" stroke="#d6e8ff" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" pathLength="100" className="tk-r-flow" />
+        <polygon points={poly} fill="url(#tk-r-fill)" stroke="rgba(129,140,248,.8)" strokeWidth="2.2" strokeLinejoin="round" style={IS_MOBILE ? undefined : { filter: "drop-shadow(0 0 16px rgba(129,140,248,.5))" }} />
+        <polygon points={poly} fill="none" stroke="#e0e7ff" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" pathLength="100" className="tk-r-flow" />
         {RADAR.map((a, i) => {
           const [x, y] = rpt(i, a.v * R_MAX);
           return (
             <g key={a.k}>
-              <circle cx={x} cy={y} r="15" fill="rgba(106,169,255,.16)" className="tk-r-pulse" style={{ animationDelay: `${(RADAR.indexOf(a) * 0.45).toFixed(2)}s`, transformOrigin: `${x}px ${y}px` }} />
-              <circle cx={x} cy={y} r="6" fill="#6aa9ff" />
+              <circle cx={x} cy={y} r="15" fill="rgba(129,140,248,.2)" className="tk-r-pulse" style={{ animationDelay: `${(RADAR.indexOf(a) * 0.45).toFixed(2)}s`, transformOrigin: `${x}px ${y}px` }} />
+              <circle cx={x} cy={y} r="6" fill="#818cf8" />
               <text x={x} y={y - 24} textAnchor="middle" className="tk-r-val">{Math.round(a.v * 100)}</text>
             </g>
           );
@@ -173,7 +173,7 @@ function SkillRadar() {
       </g>
 
       {/* centre hub (sits behind the card) */}
-      <circle r="5" fill="rgba(225,238,255,.5)" />
+      <circle r="5" fill="rgba(165,180,252,.6)" />
     </svg>
   );
 }
@@ -487,7 +487,7 @@ export default function Toolkit() {
         const sx = 1 + sp * 0.12, sy = 1 - sp * 0.1, a = Math.atan2(b.vy, b.vx);
         ctx.save();
         ctx.translate(b.x, b.y);
-        ctx.fillStyle = "rgba(2,8,30,0.5)";
+        ctx.fillStyle = "rgba(1, 2, 6, 0.75)";
         ctx.beginPath(); ctx.arc(4, 7, b.r, 0, 6.283); ctx.fill();
         ctx.rotate(a); ctx.scale(sx, sy); ctx.rotate(-a);
         ctx.globalAlpha = 0.95;
@@ -497,12 +497,12 @@ export default function Toolkit() {
         ctx.shadowBlur = 0; ctx.shadowColor = "transparent";
         // glass: soft top-left light, deeper bottom-right, a bright rim and a small specular
         let g = ctx.createRadialGradient(-b.r * 0.35, -b.r * 0.45, b.r * 0.05, 0, 0, b.r);
-        g.addColorStop(0, "rgba(255,255,255,0.38)"); g.addColorStop(0.5, "rgba(255,255,255,0.04)"); g.addColorStop(1, "rgba(0,0,0,0.34)");
+        g.addColorStop(0, "rgba(255,255,255,0.42)"); g.addColorStop(0.5, "rgba(255,255,255,0.04)"); g.addColorStop(1, "rgba(0,0,0,0.42)");
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, b.r, 0, 6.283); ctx.fill();
         g = ctx.createLinearGradient(-b.r, -b.r, b.r, b.r);
-        g.addColorStop(0, "rgba(255,255,255,0.75)"); g.addColorStop(0.45, "rgba(255,255,255,0.06)"); g.addColorStop(1, "rgba(106,169,255,0.45)");
+        g.addColorStop(0, "rgba(255,255,255,0.85)"); g.addColorStop(0.45, "rgba(255,255,255,0.08)"); g.addColorStop(1, "rgba(129,140,248,0.55)");
         ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, 0, b.r - 0.8, 0, 6.283); ctx.stroke();
-        ctx.fillStyle = "rgba(255,255,255,0.55)";
+        ctx.fillStyle = "rgba(255,255,255,0.65)";
         ctx.beginPath(); ctx.ellipse(-b.r * 0.38, -b.r * 0.5, b.r * 0.2, b.r * 0.09, -0.7, 0, 6.283); ctx.fill();
         ctx.globalAlpha = 1;
         ctx.fillStyle = b.d.fg;
@@ -561,11 +561,37 @@ export default function Toolkit() {
   return (
     <section
       ref={root}
-      className="tk-sec relative h-screen min-h-[560px] w-full overflow-hidden text-[#e8f1ff] [--c:min(46vw,27vh)] md:[--c:min(17.25vw,29.5vh)]"
+      className="tk-sec relative h-screen min-h-[560px] w-full overflow-hidden text-[#e8f1ff] [--c:min(56vw,38vh)] md:[--c:min(26vw,44vh)]"
     >
-      {/* ---------------- playable background ---------------- */}
+      {/* ---------------- playable background with Programs & Communities theme ---------------- */}
       <div className="tk-bg" aria-hidden="true">
-        <i className="tk-aur tk-aur1" /><i className="tk-aur tk-aur2" /><i className="tk-aur tk-aur3" />
+        <div className="tk-aurora-glow" />
+        <div className="tk-stars" />
+        <div className="tk-light-sweep" />
+
+        <div className="tk-floor">
+          <svg className="tk-wave-stream" viewBox="0 0 1200 400" fill="none" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="tkWaveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#818cf8" stopOpacity="0" />
+                <stop offset="35%" stopColor="#818cf8" stopOpacity="0.85" />
+                <stop offset="70%" stopColor="#38bdf8" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#c084fc" stopOpacity="0" />
+              </linearGradient>
+              <linearGradient id="tkWaveGrad2" x1="100%" y1="0%" x2="0%" y2="0%">
+                <stop offset="0%" stopColor="#c084fc" stopOpacity="0" />
+                <stop offset="40%" stopColor="#e879f9" stopOpacity="0.75" />
+                <stop offset="75%" stopColor="#818cf8" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path className="tk-wave-path tk-wave-path--1" d="M0,210 C300,110 480,290 760,160 C980,60 1100,240 1200,180" fill="none" stroke="url(#tkWaveGrad1)" strokeWidth="2" />
+            <path className="tk-wave-path tk-wave-path--2" d="M0,170 C240,270 540,90 840,240 C1040,320 1120,150 1200,200" fill="none" stroke="url(#tkWaveGrad2)" strokeWidth="1.5" strokeDasharray="6 8" />
+          </svg>
+          <div className="tk-floor-orbit tk-floor-orbit--1"><span className="tk-orbit-dot" /></div>
+          <div className="tk-floor-orbit tk-floor-orbit--2" />
+        </div>
+
         <i className="tk-dots" />
         <i className="tk-scan" />
         <SkillRadar />
@@ -578,13 +604,14 @@ export default function Toolkit() {
       <span className="tk-hint" aria-hidden="true">Drag the bubbles · click empty space to pop</span>
 
       {/* ---------------- heading ---------------- */}
-      <div className="pointer-events-none absolute inset-x-0 top-[9%] z-10 text-center md:top-[11.5%]">
-        <h2 className="tk-title font-display text-[11vw] font-semibold leading-none tracking-[-0.035em] md:text-[5.9vw]">{title}</h2>
-        <div className="relative mt-[2.2vw] h-[7vw] max-md:mt-3 md:h-[3vw]">
-          <p ref={sub1} className="absolute inset-x-0 top-0 font-display text-[5vw] font-normal leading-none tracking-[-0.02em] md:text-[2.1vw]">
+      <div className="pointer-events-none absolute inset-x-0 top-[7%] z-10 flex flex-col items-center text-center md:top-[8.5%]">
+        <p className="tk-eyebrow"><i /> SKILLS &amp; ARSENAL <i /></p>
+        <h2 className="tk-title font-display text-[11vw] font-semibold leading-none tracking-[-0.035em] md:text-[5.4vw]">{title}</h2>
+        <div className="relative mt-[1.8vw] h-[7vw] max-md:mt-2 md:h-[2.8vw]">
+          <p ref={sub1} className="tk-sub absolute inset-x-0 top-0 font-display text-[5vw] font-medium leading-none tracking-[-0.02em] md:text-[1.85vw]">
             {sceneA.subtitle}
           </p>
-          <p ref={sub2} className="absolute inset-x-0 top-0 font-display text-[5vw] font-normal leading-none tracking-[-0.02em] opacity-0 md:text-[2.1vw]">
+          <p ref={sub2} className="tk-sub absolute inset-x-0 top-0 font-display text-[5vw] font-medium leading-none tracking-[-0.02em] opacity-0 md:text-[1.85vw]">
             {sceneB.subtitle}
           </p>
         </div>

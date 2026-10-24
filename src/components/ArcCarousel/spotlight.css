@@ -306,3 +306,89 @@
   .spot-dock { background: rgba(250, 252, 255, .96); }
   .spot-nav button { background: #fff; }
 }
+
+/* =====================================================================
+   DARK THEME SPOTLIGHT OVERRIDE
+   ===================================================================== */
+.spot {
+  --ink: #f8fafc;
+  --blue: #818cf8;
+  color: #f8fafc;
+}
+
+.spot-veil {
+  background: radial-gradient(110% 90% at 30% 40%, rgba(9, 14, 28, 0.96), rgba(5, 7, 16, 0.98) 60%, rgba(1, 2, 6, 0.98)) !important;
+}
+
+.spot-ghost {
+  color: rgba(255, 255, 255, 0.03);
+}
+
+.spot-role {
+  color: rgba(203, 213, 225, 0.7);
+}
+
+.spot-desc {
+  color: rgba(226, 232, 240, 0.85);
+}
+
+.spot-rule {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), transparent) !important;
+}
+
+.spot-spec {
+  border-top-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.spot-spec > div {
+  border-right-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.spot-tags li {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.spot-chips > div,
+.spot-float {
+  background: rgba(13, 19, 36, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+.spot-nav button,
+.spot-close i {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+.spot-close i::before,
+.spot-close i::after {
+  background: #f8fafc !important;
+}
+
+.spot-cta {
+  background: #f8fafc !important;
+  color: #070913 !important;
+}
+
+.spot-cta:hover {
+  background: #818cf8 !important;
+  color: #fff !important;
+}
+
+.spot-dock {
+  background: rgba(10, 15, 30, 0.88) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+.spot-dock button.is-on {
+  background: #818cf8 !important;
+  color: #fff !important;
+}
+

@@ -50,35 +50,39 @@ const MOTIFS = [
 
 const CARDS = [
   {
-    art: 1, theme: ["#e0453c", "#7b1623", "#130709"], glow: "#e5483f", tag: "ON-SITE", rail: "Railway", short: "East Central Railway", yr: "Dec 25", logo: "ecr.png",
+    art: 1, theme: ["#e0453c", "#7b1623", "#0e1020"], glow: "#4267f5", tag: "ON-SITE", rail: "Railway", short: "East Central Railway", yr: "Dec 25", logo: "ecr.png",
     n: "Information Technology Intern",
     company: "East Central Railway", kind: "Internship", when: "Dec 2025 \u2013 Jan 2026 \u00b7 2 mos",
     text: "Worked as an Information Technology Intern at East Central Railway, getting hands-on experience with enterprise IT systems and day to day technical operations.",
+    skills: ["Enterprise Systems", "Network Ops", "IT Infrastructure"],
   },
   {
-    art: 5, theme: ["#33b5a0", "#14524d", "#06161a"], glow: "#33b5a0", tag: "HYBRID", rail: "Seven Hills", short: "Seven Hills National", yr: "Dec 25", logo: "shn.png",
+    art: 5, theme: ["#14b8a6", "#0f524d", "#091624"], glow: "#14b8a6", tag: "HYBRID", rail: "Seven Hills", short: "Seven Hills National", yr: "Dec 25", logo: "shn.png",
     n: "Web Developer",
     company: "Seven Hills National", kind: "Internship", when: "Dec 2025 \u2013 Jan 2026 \u00b7 2 mos", place: "Chennai, Tamil Nadu, India",
     text: "Led an awesome team of 4 devs and built responsive web apps.",
+    skills: ["React.js", "Team Lead (4 Devs)", "Responsive Web"],
   },
   {
-    art: 6, theme: ["#4b86f0", "#1e3a8a", "#060b1c"], glow: "#2f64e0", tag: "ON-SITE", rail: "Infosys", short: "Infosys", yr: "Mar 26", logo: "infosys.png",
+    art: 6, theme: ["#3b82f6", "#1e3a8a", "#091226"], glow: "#3b82f6", tag: "ON-SITE", rail: "Infosys", short: "Infosys", yr: "Mar 26", logo: "infosys.png",
     n: "iOS Developer",
     company: "Infosys", kind: "Internship", when: "Mar 2026 \u00b7 1 mo", place: "Mysore, Karnataka, India",
     text: "Completed an iOS Development Internship with Infosys through the SRM \u00d7 Apple \u00d7 Infosys collaboration.",
+    skills: ["iOS & Swift", "Apple \u00d7 Infosys", "Mobile Architecture"],
   },
   {
-    art: 8, theme: ["#c9a24a", "#5c4514", "#0b0905"], glow: "#c9a24a", tag: "REMOTE", rail: "SDG Research", short: "SDG & Policy Research", yr: "Oct 25", logo: "iisppr.png", sq: true,
+    art: 8, theme: ["#f59e0b", "#784b12", "#14110e"], glow: "#f59e0b", tag: "REMOTE", rail: "SDG Research", short: "SDG & Policy Research", yr: "Oct 25", logo: "iisppr.png", sq: true,
     n: "Head of Research",
     company: "International Institute of SDG\u2019s and Public Policy Research", kind: "Internship", when: "Oct \u2013 Dec 2025 \u00b7 3 mos", place: "Remote \u00b7 Delhi, India",
     text: "Started as a Research Intern, reading papers and digging into data, then got to lead an amazing team of 9 researchers.",
+    skills: ["Lead (9 Researchers)", "Data Analysis", "Public Policy"],
   },
 ];
 const N = CARDS.length;
 const LINE1 = "Where";
 const WORD = "I\u2019ve Worked".split("");
-// blue -> violet -> magenta -> orange, spread evenly over however many letters the headline has
-const STOPS = ["#3a2cff", "#7b2dcc", "#c02e92", "#ea5a58", "#f26a45"];
+// electric ultramarine -> royal indigo -> deep periwinkle
+const STOPS = ["#1224b8", "#223ae0", "#4032e6", "#5828e4", "#1b52ee"];
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const WORD_COLORS = WORD.map((_, i) => {
   const t = (i / (WORD.length - 1)) * (STOPS.length - 1), k = Math.min(STOPS.length - 2, Math.floor(t)), f = t - k;
@@ -366,7 +370,7 @@ export default function Freefall() {
             start: "top top",
             end: () => `+=${Math.round((N - 1) * window.innerHeight * 0.85 + window.innerHeight * 0.25)}`,
             pin: true,
-            scrub: lite ? 0.2 : 0.35,       // Lenis already glides the scroll itself; a long scrub on top only adds trailing latency
+            scrub: 0.15,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             onRefreshInit: layout,
@@ -386,7 +390,6 @@ export default function Freefall() {
         cardsIn = true;
         gsap.to(intro, { v: 1, duration: 1.25, ease: "power3.out", stagger: { each: 0.085, from: "end" }, onUpdate: render });
       };
-      /* the headline + copy replay every time the section comes back into view */
       const playText = () => {
         if (textOn) return;
         textOn = true;
@@ -394,23 +397,15 @@ export default function Freefall() {
         gsap.fromTo(letters, { yPercent: -150, rotate: -16, autoAlpha: 0 }, { yPercent: 0, rotate: 0, autoAlpha: 1, duration: 1.1, ease: "bounce.out", stagger: 0.05, delay: 0.15 });
         gsap.fromTo(enterEls, { y: 30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.9, ease: "power3.out", stagger: 0.1, delay: 0.1 });
       };
-      const resetText = () => {
-        if (!textOn) return;
-        textOn = false;
-        gsap.killTweensOf(letters); gsap.killTweensOf(enterEls);
-        gsap.set(letters, { autoAlpha: 0 });
-        gsap.set(enterEls, { autoAlpha: 0 });
-      };
       if (!reduce) {
         gsap.set(letters, { autoAlpha: 0 });
         gsap.set(enterEls, { autoAlpha: 0 });
         const io = new IntersectionObserver((es) => {
           for (const x of es) {
-            if (el.hasAttribute("data-tx")) continue;          // the work transition is still revealing the page; it fires ff:reveal itself
-            if (x.intersectionRatio >= 0.25) { playCards(); playText(); }
-            else if (!x.isIntersecting) resetText();
+            if (el.hasAttribute("data-tx")) continue;
+            if (x.intersectionRatio >= 0.15) { playCards(); playText(); }
           }
-        }, { threshold: [0, 0.25] });
+        }, { threshold: [0, 0.15] });
         io.observe(el);
         const onReveal = () => { playCards(); playText(); };
         window.addEventListener("ff:reveal", onReveal);
@@ -532,6 +527,25 @@ export default function Freefall() {
         <i className="ff-tick-c ff-tick-c--tl" /><i className="ff-tick-c ff-tick-c--tr" /><i className="ff-tick-c ff-tick-c--bl" /><i className="ff-tick-c ff-tick-c--br" />
         <span className="ff-side ff-side--l">Experience &mdash; 2025 / 26</span>
         <span className="ff-ghost-word">Experience</span>
+        <svg className="ff-wave-stream" viewBox="0 0 1440 380" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="ffWaveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#2563eb" stopOpacity="0" />
+              <stop offset="25%" stopColor="#2563eb" stopOpacity="0.45" />
+              <stop offset="55%" stopColor="#7c3aed" stopOpacity="0.5" />
+              <stop offset="80%" stopColor="#0284c7" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#0284c7" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="ffWaveGrad2" x1="100%" y1="0%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#38bdf8" stopOpacity="0" />
+              <stop offset="35%" stopColor="#38bdf8" stopOpacity="0.4" />
+              <stop offset="65%" stopColor="#4f46e5" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#4f46e5" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path className="ff-wave-path ff-wave-path--1" d="M0,200 C360,110 520,290 860,150 C1100,50 1280,240 1440,180" fill="none" stroke="url(#ffWaveGrad1)" strokeWidth="2" />
+          <path className="ff-wave-path ff-wave-path--2" d="M0,160 C300,270 600,90 940,240 C1180,330 1320,140 1440,190" fill="none" stroke="url(#ffWaveGrad2)" strokeWidth="1.5" strokeDasharray="6 8" />
+        </svg>
         <div className="ff-orbit"><i className="ff-orb ff-orb--a"><u /></i><i className="ff-orb ff-orb--b"><u /></i><i className="ff-orb ff-orb--c" /></div>
         <div className="ff-ticker">
           <div className="ff-ticker-t">
@@ -548,8 +562,9 @@ export default function Freefall() {
 
       <div className="ff-left">
         <div className="ff-eyebrow" data-enter>
+          <span className="ff-eyebrow-pill">INTERNSHIPS</span>
           <i />
-          <span>Career Journey · Internships</span>
+          <span>CAREER TIMELINE</span>
         </div>
         <h2 className="ff-title" aria-label="Where I’ve Worked">
           <span className="ff-in" aria-hidden="true">
@@ -561,7 +576,7 @@ export default function Freefall() {
           </span>
           <span className="ff-fall" aria-hidden="true">
             {WORD.map((ch, i) => (
-              <span key={i} className="ff-letter" data-letter style={{ color: WORD_COLORS[i], "--i": i }}>
+              <span key={i} className="ff-letter ff-shimmer-letter" data-letter style={{ "--i": i }}>
                 {ch === " " ? "\u00A0" : ch}
               </span>
             ))}
@@ -573,19 +588,59 @@ export default function Freefall() {
         <ol className="ff-index" data-enter aria-label="Internships">
           {CARDS.map((card, i) => (
             <li key={card.n}>
-              <button type="button" className={i === active ? "is-on" : ""} onClick={() => api.current.step(i - active)}>
-                <span className="ff-ix-n">{pad(i + 1)}</span>
-                <span className="ff-ix-c">{card.short || card.n}</span>
-                <span className="ff-ix-y">{card.yr || ""}</span>
+              <button
+                type="button"
+                className={i === active ? "is-on" : ""}
+                onClick={() => api.current.step(i - active)}
+              >
+                <span className="ff-ix-num">{pad(i + 1)}/</span>
+                <span className="ff-ix-body">
+                  <span className="ff-ix-name">{card.short || card.n}</span>
+                  <span className="ff-ix-role">{card.n}</span>
+                </span>
+                <span className="ff-ix-meta">
+                  <span className="ff-ix-year">{card.yr || ""}</span>
+                  <span className="ff-ix-arrow" aria-hidden="true">→</span>
+                </span>
               </button>
             </li>
           ))}
         </ol>
-        <dl className="ff-stats" data-enter>
-          <div><dt data-count="4">04</dt><dd>Internships</dd></div>
-          <div><dt data-count="4">04</dt><dd>Organisations</dd></div>
-          <div><dt data-count="3">03</dt><dd>Work modes</dd></div>
-        </dl>
+
+        <div className="ff-stats-wrap" data-enter>
+          <div className="ff-stats-head">
+            <span className="ff-stats-tag">METRICS // 2025–26</span>
+            <span className="ff-stats-line" />
+          </div>
+          <dl className="ff-stats">
+            <div className="ff-stat-col">
+              <span className="ff-stat-idx">[ 01 ]</span>
+              <dt data-count="4">04</dt>
+              <dd>
+                <b>INTERNSHIPS</b>
+                <small>COMPLETED</small>
+              </dd>
+            </div>
+            <i className="ff-stat-div" />
+            <div className="ff-stat-col">
+              <span className="ff-stat-idx">[ 02 ]</span>
+              <dt data-count="4">04</dt>
+              <dd>
+                <b>ORGANISATIONS</b>
+                <small>ENTERPRISE &amp; LABS</small>
+              </dd>
+            </div>
+            <i className="ff-stat-div" />
+            <div className="ff-stat-col">
+              <span className="ff-stat-idx">[ 03 ]</span>
+              <dt data-count="3">03</dt>
+              <dd>
+                <b>WORK MODES</b>
+                <small>ON-SITE &middot; HYBRID &middot; REMOTE</small>
+              </dd>
+            </div>
+          </dl>
+        </div>
       </div>
 
       <div ref={deckRef} className="ff-deck">
@@ -608,9 +663,13 @@ export default function Freefall() {
             <i className="ff-sheen" data-sheen />
             <i className="ff-shade" data-shade />
             <span className="ff-chip">
+              <span className="ff-chip-dot" />
               {pad(i + 1)} / {pad(N)}
             </span>
-            <span className="ff-tag">{card.tag}</span>
+            <span className="ff-tag">
+              <span className="ff-tag-live" />
+              {card.tag}
+            </span>
             {card.company ? (
               <div className="ff-cap ff-cap--job" data-cap>
                 <div className="ff-org">
@@ -622,6 +681,15 @@ export default function Freefall() {
                 </div>
                 <h3>{card.n}</h3>
                 <p>{card.text}</p>
+                {card.skills && (
+                  <div className="ff-skills">
+                    {card.skills.map((sk) => (
+                      <span key={sk} className="ff-skill-pill">
+                        <i>◆</i> {sk}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="ff-cap" data-cap>

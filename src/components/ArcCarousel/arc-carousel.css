@@ -1,604 +1,989 @@
+/* =====================================================================
+   ARC CAROUSEL — CINEMATIC DARK THEME
+   Concave 3D gallery with precision-milled obsidian card materials,
+   volumetric stage lighting, holographic perspective floor,
+   and luxury typography.
+   ===================================================================== */
+
 .arc {
-  position: relative; width: 100%; height: 100vh; height: 100svh; min-height: 680px; overflow: hidden; isolation: isolate;
-  background: linear-gradient(180deg, #a9c8ee 0%, #c6dcf4 45%, #dfeaf8 100%); color: #0b1424;
-  font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  min-height: 680px;
+  overflow: hidden;
+  isolation: isolate;
+  background: radial-gradient(130% 90% at 50% 28%, #080d22 0%, #040715 50%, #010206 100%) !important;
+  color: #f8fafc !important;
+  font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --acc: #818cf8;
+  --acc2: #c084fc;
+  --px: 0;
+  --py: 0;
 }
-.arc *, .arc *::before, .arc *::after { box-sizing: border-box; }
-.arc-head { position: absolute; z-index: 5; left: 0; right: 0; top: clamp(34px, 7vh, 80px); text-align: center; pointer-events: none; padding: 0 20px; }
-.arc-eyebrow { display: inline-flex; align-items: center; gap: 16px; margin: 0 0 clamp(8px, 2vh, 22px); font: 600 clamp(9px, .8vw, 12px)/1 "Inter Tight", Arial, sans-serif; letter-spacing: .3em; text-transform: uppercase; color: #4d6a96; }
-.arc-eyebrow i { width: clamp(24px, 3vw, 46px); height: 1px; background: rgba(60,100,170,.45); }
-.arc-title { margin: 0; font-weight: 400; font-size: clamp(34px, 5.2vw, 78px); line-height: 1.02; letter-spacing: -.02em; }
-.arc-title em { font-style: italic; }
 
-/* ghost number behind the cards */
-.arc-ghost { position: absolute; z-index: 0; left: 50%; top: 56%; transform: translate(-50%, -50%); pointer-events: none; font-size: clamp(220px, 34vw, 520px); line-height: 1; font-weight: 400; color: rgba(40, 90, 200, .10); user-select: none; }
-.arc-ghost span { display: block; animation: arcGhost .8s cubic-bezier(.2, .8, .2, 1) both; }
-@keyframes arcGhost { from { opacity: 0; transform: translateY(30px) scale(.94); filter: blur(10px); } }
+.arc *, .arc *::before, .arc *::after {
+  box-sizing: border-box;
+}
 
+/* Dynamic Aurora Atmosphere Canvas */
+.arc-aurora-glow {
+  position: absolute;
+  inset: -25%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(48vmax 38vmax at 18% 22%, rgba(99, 102, 241, 0.32), transparent 70%),
+    radial-gradient(44vmax 36vmax at 84% 68%, rgba(217, 70, 239, 0.26), transparent 70%),
+    radial-gradient(40vmax 32vmax at 76% 16%, rgba(6, 182, 212, 0.24), transparent 70%),
+    radial-gradient(36vmax 30vmax at 28% 86%, rgba(244, 63, 94, 0.20), transparent 70%);
+  filter: blur(50px);
+  animation: arcAuroraDrift 20s ease-in-out infinite alternate;
+  will-change: transform;
+  opacity: 0.95;
+}
+
+@keyframes arcAuroraDrift {
+  0% { transform: scale(1) translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: scale(1.08) translate3d(2vw, -2vh, 0) rotate(3deg); }
+  100% { transform: scale(1.04) translate3d(-2vw, 3vh, 0) rotate(-2deg); }
+}
+
+/* Shimmering celestial stardust particles */
+.arc-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(1.5px 1.5px at 32% 64%, rgba(165, 180, 252, 0.7), transparent),
+    radial-gradient(1px 1px at 58% 14%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.5px 1.5px at 76% 32%, rgba(217, 70, 239, 0.65), transparent),
+    radial-gradient(1px 1px at 88% 74%, rgba(6, 182, 212, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 22% 84%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 66% 86%, rgba(129, 140, 248, 0.6), transparent),
+    radial-gradient(2px 2px at 46% 40%, rgba(255, 255, 255, 0.8), transparent);
+  background-size: 420px 420px;
+  opacity: 0.55;
+  animation: arcTwinkle 8s ease-in-out infinite alternate;
+}
+@keyframes arcTwinkle {
+  0% { opacity: 0.4; }
+  100% { opacity: 0.75; }
+}
+
+/* Seamless vignette edges for legibility & focus */
+.arc::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(85% 75% at 50% 50%, transparent 40%, rgba(1, 2, 6, 0.82) 100%);
+}
+
+/* Interactive Floating Plasma Blobs */
+.arc-deco {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.arc-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Active card dynamic accent aura - shifts smoothly with the active program */
+.arc-blob--hero {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: calc(var(--cw, 220px) * 4.2);
+  height: calc(var(--ch, 300px) * 2.4);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--c1, #818cf8) 75%, transparent) 0%, color-mix(in srgb, var(--c2, #c084fc) 40%, transparent) 45%, transparent 75%);
+  opacity: 0.45;
+  filter: blur(55px);
+  transition: background 0.8s ease, opacity 0.8s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Electric indigo plasma orb (top-left) with mouse parallax */
+.arc-blob--a {
+  width: 50vw;
+  height: 50vw;
+  left: -12vw;
+  top: 4vh;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(139, 92, 246, 0.18) 50%, transparent 72%);
+  filter: blur(70px);
+  transform: translate3d(calc(var(--px, 0) * 50px), calc(var(--py, 0) * 40px), 0);
+  animation: arcBlobPulseA 15s ease-in-out infinite alternate;
+}
+
+/* Electric cyan / azure plasma orb (bottom-right) with mouse parallax */
+.arc-blob--b {
+  width: 46vw;
+  height: 46vw;
+  right: -10vw;
+  bottom: -6vh;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.32) 0%, rgba(59, 130, 246, 0.16) 50%, transparent 70%);
+  filter: blur(80px);
+  transform: translate3d(calc(var(--px, 0) * -60px), calc(var(--py, 0) * -45px), 0);
+  animation: arcBlobPulseB 18s ease-in-out infinite alternate-reverse;
+}
+
+/* Radiant magenta / orchid nebula orb (top-right) with mouse parallax */
+.arc-blob--c {
+  width: 36vw;
+  height: 36vw;
+  right: 16vw;
+  top: 6vh;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.25) 0%, rgba(168, 85, 247, 0.14) 50%, transparent 70%);
+  filter: blur(65px);
+  transform: translate3d(calc(var(--px, 0) * 40px), calc(var(--py, 0) * -30px), 0);
+  animation: arcBlobPulseC 16s ease-in-out infinite alternate;
+}
+
+@keyframes arcBlobPulseA {
+  0% { transform: translate3d(calc(var(--px, 0) * 50px), calc(var(--py, 0) * 40px), 0) scale(1); }
+  100% { transform: translate3d(calc(var(--px, 0) * 50px + 3vw), calc(var(--py, 0) * 40px + 4vh), 0) scale(1.15); }
+}
+@keyframes arcBlobPulseB {
+  0% { transform: translate3d(calc(var(--px, 0) * -60px), calc(var(--py, 0) * -45px), 0) scale(1); }
+  100% { transform: translate3d(calc(var(--px, 0) * -60px - 4vw), calc(var(--py, 0) * -45px - 3vh), 0) scale(1.14); }
+}
+@keyframes arcBlobPulseC {
+  0% { transform: translate3d(calc(var(--px, 0) * 40px), calc(var(--py, 0) * -30px), 0) scale(1); }
+  100% { transform: translate3d(calc(var(--px, 0) * 40px - 2vw), calc(var(--py, 0) * -30px + 3vh), 0) scale(1.18); }
+}
+
+/* =====================================================================
+   MOVING CREATIVE ELEMENTS — Volumetric Light Sweep & Kinetic Wave Ribbon
+   ===================================================================== */
+
+/* Volumetric Light Sweep */
+.arc-light-sweep {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 0;
+  pointer-events: none;
+  background: conic-gradient(from 180deg at 50% 50%, transparent 0deg, rgba(99, 102, 241, 0.08) 25deg, rgba(168, 85, 247, 0.14) 45deg, transparent 65deg);
+  filter: blur(40px);
+  animation: arcSweepRotate 32s linear infinite;
+  transform-origin: 50% 50%;
+}
+@keyframes arcSweepRotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Kinetic undulating laser wave stream */
+.arc-wave-stream {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 48%;
+  width: 100%;
+  height: clamp(180px, 26vh, 320px);
+  transform: translateY(-50%);
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+  opacity: 0.85;
+}
+.arc-wave-path--1 {
+  animation: arcWaveFloat1 12s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 12px rgba(129, 140, 248, 0.5));
+}
+.arc-wave-path--2 {
+  animation: arcWaveFloat2 16s ease-in-out infinite alternate, arcWaveDash 28s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(244, 114, 182, 0.45));
+}
+@keyframes arcWaveFloat1 {
+  0% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-16px) scaleY(1.12); }
+  100% { transform: translateY(14px) scaleY(0.92); }
+}
+@keyframes arcWaveFloat2 {
+  0% { transform: translateY(0) scaleY(1); stroke-dashoffset: 0; }
+  50% { transform: translateY(18px) scaleY(1.1); }
+  100% { transform: translateY(-12px) scaleY(0.95); stroke-dashoffset: 400; }
+}
+@keyframes arcWaveDash {
+  to { stroke-dashoffset: 1000; }
+}
+
+/* Holographic 3D Gallery Floor rings with Orbiting Photon Nodes */
+.arc-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  perspective: 1000px;
+}
+
+.arc-floor-orbit {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotateX(72deg);
+  pointer-events: none;
+}
+.arc-floor-orbit--1 {
+  width: 66vw;
+  height: 66vw;
+  border: 1.5px solid rgba(129, 140, 248, 0.24);
+  box-shadow: 0 0 60px rgba(99, 102, 241, 0.16), inset 0 0 40px rgba(99, 102, 241, 0.08);
+  animation: arcOrbitRotate1 24s linear infinite;
+}
+.arc-floor-orbit--2 {
+  width: 94vw;
+  height: 94vw;
+  border: 1.5px dashed rgba(6, 182, 212, 0.18);
+  box-shadow: 0 0 50px rgba(6, 182, 212, 0.1);
+  animation: arcOrbitRotate2 36s linear infinite reverse;
+}
+.arc-floor-orbit--3 {
+  width: 126vw;
+  height: 126vw;
+  border: 1px solid rgba(168, 85, 247, 0.12);
+}
+.arc-orbit-dot {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 16px 5px rgba(99, 102, 241, 0.95), 0 0 28px 10px rgba(129, 140, 248, 0.7);
+}
+.arc-floor-orbit--2 .arc-orbit-dot {
+  background: #38bdf8;
+  box-shadow: 0 0 16px 5px rgba(6, 182, 212, 0.95), 0 0 28px 10px rgba(56, 189, 248, 0.7);
+}
+@keyframes arcOrbitRotate1 {
+  to { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg); }
+}
+@keyframes arcOrbitRotate2 {
+  to { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg); }
+}
+
+.arc-bg i {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  border-radius: 50%;
+  border: 1px solid rgba(99, 102, 241, 0.12);
+  transform: translate(-50%, -50%) rotateX(72deg);
+}
+.arc-bg i:nth-child(1) { width: 66vw; height: 66vw; border-color: rgba(129, 140, 248, 0.16); }
+.arc-bg i:nth-child(2) { width: 94vw; height: 94vw; border-color: rgba(6, 182, 212, 0.12); border-style: dashed; }
+.arc-bg i:nth-child(3) { width: 126vw; height: 126vw; border-color: rgba(168, 85, 247, 0.08); }
+
+/* Header & Section Title */
+.arc-head {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  top: clamp(34px, 7vh, 80px);
+  text-align: center;
+  pointer-events: none;
+  padding: 0 20px;
+}
+
+.arc-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 clamp(10px, 2.2vh, 24px);
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font: 600 clamp(10px, 0.85vw, 12px)/1 "Inter Tight", -apple-system, sans-serif;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #a5b4fc !important;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.5);
+}
+
+.arc-eyebrow i {
+  width: clamp(20px, 2.5vw, 36px);
+  height: 1px;
+  background: linear-gradient(90deg, rgba(165, 180, 252, 0.6), transparent);
+}
+.arc-eyebrow i:first-child {
+  background: linear-gradient(270deg, rgba(165, 180, 252, 0.6), transparent);
+}
+
+.arc-title {
+  margin: 0;
+  font-weight: 400;
+  font-size: clamp(38px, 5.6vw, 84px);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: #f8fafc !important;
+  text-shadow: 0 4px 40px rgba(99, 102, 241, 0.22);
+}
+
+.arc-title em {
+  font-style: italic;
+  font-weight: 400;
+  background: linear-gradient(110deg, #818cf8 0%, #c084fc 40%, #f472b6 75%, #fb923c 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  padding: 0 0.05em;
+}
+
+/* Watermark Ghost Number — Luminous Architectural Outline */
+.arc-ghost {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: 54%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  font-size: clamp(240px, 36vw, 540px);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: rgba(255, 255, 255, 0.04) !important;
+  -webkit-text-stroke: 2px rgba(165, 180, 252, 0.28) !important;
+  text-shadow: 0 0 80px rgba(99, 102, 241, 0.35);
+  user-select: none;
+}
+.arc-ghost span {
+  display: block;
+  animation: arcGhost 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes arcGhost {
+  from { opacity: 0; transform: translateY(24px) scale(0.95); }
+}
+
+/* =====================================================================
+   3D CAROUSEL STAGE & VOLUMETRIC SPOTLIGHT
+   ===================================================================== */
 .arc-stage {
-  --cw: 210px; --ch: 290px; --persp: 1200px;
-  position: absolute; z-index: 2; left: 0; right: 0; top: 50%; height: calc(var(--ch) * 1.6); transform: translateY(-46%);
-  perspective: var(--persp); perspective-origin: 50% 46%; cursor: grab; touch-action: pan-y; outline: none; -webkit-user-select: none; user-select: none;
+  --cw: 210px;
+  --ch: 290px;
+  --persp: 1200px;
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: calc(var(--ch) * 1.85);
+  transform: translateY(-48%);
+  perspective: var(--persp);
+  perspective-origin: 50% 46%;
+  cursor: grab;
+  touch-action: pan-y;
+  outline: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
-.arc-stage.is-drag { cursor: grabbing; }
+
+.arc-stage.is-drag {
+  cursor: grabbing;
+}
+
+/* Overhead Volumetric Spotlight beaming down onto the center card */
+.arc-stage::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--cw) * 2.8);
+  height: calc(var(--ch) * 1.8);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgba(99, 102, 241, 0.24) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 80%);
+  filter: blur(20px);
+  opacity: 0.9;
+}
+
+/* =====================================================================
+   THE 3D CARDS — TACTILE OBSIDIAN PHYSICAL SLABS
+   ===================================================================== */
 .arc-card {
-  position: absolute; left: 50%; top: 50%; width: var(--cw); height: var(--ch); margin: calc(var(--ch) / -2) 0 0 calc(var(--cw) / -2);
-  border-radius: calc(var(--cw) * .085); overflow: hidden; background: #cfd8e6; will-change: transform, opacity; backface-visibility: hidden; clip-path: inset(0 round calc(var(--cw) * .085)); isolation: isolate;
-  box-shadow: 0 28px 50px -18px rgba(30, 50, 90, .45), 0 10px 22px -10px rgba(30, 50, 90, .3), 0 0 0 1px rgba(255, 255, 255, .35) inset;
-  transition: box-shadow .5s ease;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--cw);
+  height: var(--ch);
+  margin: calc(var(--ch) / -2) 0 0 calc(var(--cw) / -2);
+  border-radius: calc(var(--cw) * 0.09);
+  overflow: hidden;
+  background: #090e1c !important;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  clip-path: inset(0 round calc(var(--cw) * 0.09));
+  isolation: isolate;
+  cursor: pointer;
+  /* Realistic physical shadow + micro rim highlight */
+  box-shadow:
+    0 32px 64px -16px rgba(0, 0, 0, 0.88),
+    0 12px 28px -10px rgba(0, 0, 0, 0.65),
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+  transition: box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.arc-card.is-on { box-shadow: 0 46px 80px -22px rgba(30, 60, 140, .55), 0 14px 30px -12px rgba(30, 60, 140, .35), 0 0 0 1px rgba(255, 255, 255, .5) inset; }
-.arc-img { position: absolute; inset: -4% -10%; filter: brightness(var(--dim, 1)) blur(var(--blur, 0px)); }
-.arc-img img { width: 100%; height: 100%; object-fit: cover; display: block; transform: translate3d(var(--par, 0px), 0, 0) scale(1.02); transition: transform .12s linear; pointer-events: none; }
-.arc-glare { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent calc(var(--glare, 50%) - 30%), rgba(255, 255, 255, .26) var(--glare, 50%), transparent calc(var(--glare, 50%) + 30%)); mix-blend-mode: soft-light; }
-.arc-card::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8, 14, 30, 0) 55%, rgba(8, 14, 30, .5)); }
-.arc-num { position: absolute; z-index: 2; left: 10px; top: 9px; font: 600 10px/1 "Inter Tight", Arial, sans-serif; letter-spacing: .12em; color: #fff; text-shadow: 0 1px 6px rgba(0, 0, 0, .4); }
-.arc-card figcaption { position: absolute; z-index: 2; left: 12px; bottom: 11px; right: 10px; font-size: clamp(14px, 1.35vw, 19px); color: #fff; text-shadow: 0 1px 10px rgba(0, 0, 0, .45); }
 
-.arc-hint { position: absolute; z-index: 4; left: 0; right: 0; bottom: clamp(120px, 19vh, 190px); margin: 0; text-align: center; font: 600 clamp(9px, .75vw, 11px)/1 "Inter Tight", Arial, sans-serif; letter-spacing: .3em; text-transform: uppercase; color: #9aa1af; pointer-events: none; }
+/* ACTIVE / CENTER CARD — The Hero */
+.arc-card.is-on {
+  box-shadow:
+    0 45px 90px -20px rgba(0, 0, 0, 0.95),
+    0 0 65px -10px rgba(99, 102, 241, 0.45),
+    0 14px 32px -8px rgba(0, 0, 0, 0.7),
+    inset 0 2px 2px rgba(255, 255, 255, 0.45),
+    inset 0 0 0 1.2px rgba(129, 140, 248, 0.4) !important;
+}
 
-.arc-meta { position: absolute; z-index: 4; left: 0; right: 0; bottom: clamp(48px, 9vh, 92px); text-align: center; pointer-events: none; animation: arcMeta .6s cubic-bezier(.2, .8, .2, 1) both; }
+.arc-card.is-far {
+  visibility: hidden;
+}
+
+.arc-img {
+  position: absolute;
+  inset: 0;
+}
+
+/* Glass glare / Specular sheen */
+.arc-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 36%, rgba(0, 0, 0, 0.35) 100%);
+  border-radius: inherit;
+}
+
+/* Card Number Tag */
+.arc-num {
+  position: absolute;
+  z-index: 8;
+  left: 7%;
+  top: 18px;
+  transform: translateY(-50%);
+  font: 700 11px/1 "SF Mono", "Roboto Mono", Menlo, monospace;
+  letter-spacing: 0.14em;
+  color: rgba(248, 250, 252, 0.85);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Card Caption (Org, Title, Year) */
+.arc-card figcaption {
+  position: absolute;
+  z-index: 8;
+  left: 7%;
+  right: 7%;
+  bottom: 7%;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  pointer-events: none;
+}
+
+.arc-card figcaption .cap-org {
+  font: 700 10px/1.2 "Inter Tight", -apple-system, sans-serif;
+  font-style: normal;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a5b4fc;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.arc-card figcaption .cap-title {
+  font-size: clamp(14px, 1.25vw, 19px);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  color: #ffffff;
+  text-wrap: balance;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.arc-card figcaption .cap-when {
+  font: 500 11.5px/1.2 "Inter Tight", -apple-system, sans-serif;
+  letter-spacing: 0.02em;
+  color: rgba(203, 213, 225, 0.72);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.arc-card .pa-org,
+.arc-card .pa-when {
+  display: none !important;
+}
+
+/* =====================================================================
+   INSIDE CARD ARTWORK (ProgramArt.jsx) — Realistic Materials & Medallions
+   ===================================================================== */
+.pa {
+  position: absolute;
+  inset: 0;
+  container-type: inline-size;
+  overflow: hidden;
+  color: #fff;
+  text-align: center;
+  background:
+    radial-gradient(90% 65% at 15% 5%, color-mix(in srgb, var(--c1) 85%, #fff 15%) 0%, transparent 60%),
+    radial-gradient(85% 60% at 95% 42%, color-mix(in srgb, var(--c1) 60%, var(--c2)) 0%, transparent 65%),
+    linear-gradient(175deg, color-mix(in srgb, var(--c1) 40%, #060914) 0%, color-mix(in srgb, var(--c2) 50%, #02040a) 60%, #010206 100%);
+}
+
+/* Dark gradient vignette over card content for text readability */
+.pa::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(180deg, rgba(4, 6, 14, 0.08) 0%, rgba(4, 6, 14, 0.25) 48%, rgba(2, 3, 8, 0.88) 100%);
+  pointer-events: none;
+}
+
+/* Program Duration Capsule */
+.pa-dur {
+  position: absolute;
+  right: 6cqw;
+  top: 3.4cqw;
+  z-index: 8;
+  font: 600 4.6cqw/1 "Inter Tight", -apple-system, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2.2cqw 3.6cqw;
+  border-radius: 99px;
+  background: rgba(10, 15, 30, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #e2e8f0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Realistic Emblem / Medallion Tile for Logo */
+.pa-tile.pa-bare {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  width: 44cqw;
+  height: 44cqw;
+  transform: translateX(-50%);
+  z-index: 6;
+  border-radius: 26%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow:
+    0 12px 24px -6px rgba(0, 0, 0, 0.7),
+    0 4px 10px -2px rgba(0, 0, 0, 0.5),
+    inset 0 1.5px 0.5px rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 7cqw !important;
+  box-sizing: border-box;
+}
+
+.pa-tile.pa-bare img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
+}
+
+.pa-tile.pa-bare.is-mono {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 242, 250, 0.9) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 1) !important;
+  box-shadow: 0 14px 28px -6px rgba(0, 0, 0, 0.7), inset 0 1px 0 #fff !important;
+  padding: 5cqw !important;
+}
+.pa-tile.pa-bare.is-mono img {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  filter: none;
+}
+
+.pa-tile.pa-bare.is-ms {
+  padding: 8cqw !important;
+}
+
+.pa-halo {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: calc(18% + 22cqw);
+  width: 60cqw;
+  height: 60cqw;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--c1) 70%, #fff) 0%, transparent 75%);
+  opacity: 0.35;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.pa-motif {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.pa-sheen, .pa-grain {
+  display: none;
+}
+
+/* =====================================================================
+   CLEANING UP THE AI-GENERATED CLUTTER
+   (chips, floating doodles, clip-art badges)
+   ===================================================================== */
+.arc-squig,
+.arc-badge,
+.arc-chip,
+.arc-marq,
+.arc-crop,
+.arc-side {
+  display: none !important;
+}
+
+/* Architectural Framing & Crop Marks */
+.arc-crop {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 0 solid rgba(165, 180, 252, 0.25);
+  pointer-events: none;
+}
+.arc-crop--tl { left: 24px; top: 24px; border-width: 1px 0 0 1px; }
+.arc-crop--tr { right: 24px; top: 24px; border-width: 1px 1px 0 0; }
+.arc-crop--bl { left: 24px; bottom: 24px; border-width: 0 0 1px 1px; }
+.arc-crop--br { right: 24px; bottom: 24px; border-width: 0 1px 1px 0; }
+
+.arc-side {
+  position: absolute;
+  top: 50%;
+  font: 600 10px/1 "SF Mono", "Roboto Mono", Menlo, monospace;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(165, 180, 252, 0.4);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.arc-side--l {
+  left: 28px;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: left center;
+  margin-top: 90px;
+}
+.arc-side--r {
+  right: 28px;
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: right center;
+  margin-top: 90px;
+}
+.arc-cross {
+  position: absolute;
+  left: 6%;
+  top: 22%;
+  width: 32px;
+  fill: none;
+  stroke: rgba(165, 180, 252, 0.2);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+/* Hint */
+.arc-hint {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  bottom: clamp(120px, 18vh, 180px);
+  margin: 0;
+  text-align: center;
+  font: 600 clamp(9.5px, 0.8vw, 11px)/1 "SF Mono", "Roboto Mono", Menlo, monospace;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(165, 180, 252, 0.4) !important;
+  pointer-events: none;
+}
+
+/* =====================================================================
+   ACTIVE PROJECT METADATA & TELEMETRY HUD
+   ===================================================================== */
+.arc-meta {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  bottom: clamp(48px, 9vh, 92px);
+  text-align: center;
+  pointer-events: none;
+  animation: arcMeta 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  padding: 0 20px;
+}
 .arc-meta[data-dir="-1"] { --from: -18px; }
-.arc-meta h3 { margin: 0 0 6px; font-weight: 400; font-size: clamp(26px, 3vw, 42px); letter-spacing: -.01em; }
-.arc-meta p { margin: 0; display: inline-flex; align-items: center; gap: 10px; font: 500 clamp(12px, 1vw, 15px)/1 "Inter Tight", Arial, sans-serif; color: #3a4152; }
-.arc-meta b { color: #c3c9d4; }
-.arc-star { display: inline-flex; align-items: center; gap: 5px; color: #101421; font-weight: 600; }
-.arc-star svg { color: #2f5ff0; }
-@keyframes arcMeta { from { opacity: 0; transform: translateX(var(--from, 18px)); filter: blur(6px); } }
-
-.arc-dots { position: absolute; z-index: 4; left: 0; right: 0; bottom: clamp(26px, 5vh, 52px); display: flex; justify-content: center; gap: 8px; }
-.arc-dots button { all: unset; cursor: pointer; width: 7px; height: 7px; border-radius: 99px; background: #cdd2dc; transition: width .45s cubic-bezier(.2, .8, .2, 1), background .3s; }
-.arc-dots button:hover { background: #9aa6c0; }
-.arc-dots button.is-on { width: 28px; background: #2f5ff0; }
-.arc-dots button:focus-visible { outline: 2px solid #2f5ff0; outline-offset: 3px; }
-
-.arc-count { position: absolute; z-index: 4; left: clamp(20px, 3.4vw, 52px); bottom: clamp(26px, 5vh, 52px); font-size: clamp(34px, 3.4vw, 50px); line-height: 1; }
-.arc-count span { font-size: .38em; color: #9aa1af; font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; }
-.arc-nav { position: absolute; z-index: 6; right: clamp(20px, 3.4vw, 52px); bottom: clamp(20px, 4vh, 44px); display: flex; gap: 12px; }
-.arc-nav button { all: unset; cursor: pointer; width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; background: #fff; box-shadow: 0 8px 22px rgba(30, 50, 90, .14), 0 0 0 1px rgba(30, 50, 90, .06); font-size: 24px; line-height: 1; transition: transform .25s cubic-bezier(.2, .8, .2, 1), box-shadow .25s; }
-.arc-nav button:hover { transform: translateY(-2px) scale(1.06); box-shadow: 0 14px 28px rgba(30, 50, 90, .2), 0 0 0 1px rgba(30, 50, 90, .08); }
-.arc-nav button:active { transform: scale(.94); }
-.arc-nav button:focus-visible { outline: 2px solid #2f5ff0; outline-offset: 3px; }
-
-@media (max-width: 720px) {
-  .arc { min-height: 660px; }
-  .arc-count { bottom: 22px; left: 18px; font-size: 28px; }
-  .arc-nav { bottom: 14px; right: 16px; gap: 8px; }
-  .arc-nav button { width: 42px; height: 42px; font-size: 20px; }
-  .arc-hint { bottom: 218px; }
-  .arc-meta { bottom: 106px; padding: 0 16px; }
-  .arc-meta h3 { font-size: clamp(21px, 6.2vw, 26px); }
-  .arc-dots { bottom: 74px; }
+.arc-meta h3 {
+  margin: 0 0 8px;
+  font-weight: 400;
+  font-size: clamp(24px, 2.8vw, 40px);
+  letter-spacing: -0.02em;
+  color: #f8fafc !important;
+  text-wrap: balance;
 }
-@media (prefers-reduced-motion: reduce) { .arc-ghost span, .arc-meta { animation: none; } }
-
-/* ---- project art: real screenshot if provided, otherwise the built-in mock interface on a tinted backdrop ---- */
-.arc-img[data-kind] { inset: 0; }
-.arc-mock { position: absolute; inset: 0; background: radial-gradient(120% 90% at 30% 10%, #36507f 0%, #1c2742 60%, #131a2e 100%); }
-.arc-mock--ph { background: radial-gradient(120% 90% at 70% 10%, #5b4a8f 0%, #2a2150 60%, #171232 100%); }
-.arc-lp { position: absolute; left: 50%; top: 50%; width: 640px; height: 400px; transform: translate(-50%, -50%) scale(var(--kl, .3)); border-radius: 14px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.12); pointer-events: none; }
-.arc-ph { position: absolute; left: 50%; top: 50%; width: 268px; height: 578px; transform: translate(-50%, -48%) scale(var(--kp, .3)); border-radius: 34px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,.55), 0 0 0 6px #0c0d12, 0 0 0 7px rgba(255,255,255,.14); pointer-events: none; }
-.arc-lp > *, .arc-ph > * { pointer-events: none; }
-
-.arc-link { pointer-events: auto; display: inline-block; margin-top: 12px; font: 600 12px/1 "Inter Tight", Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #2f5ff0; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 3px; }
-.arc-link:focus-visible { outline: 2px solid #2f5ff0; outline-offset: 4px; }
-.arc-meta p { flex-wrap: wrap; justify-content: center; }
-.arc-meta { bottom: clamp(44px, 8vh, 84px); }
-
-/* soft elliptical "gallery floor" rings behind the arc */
-.arc-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-.arc-bg i { position: absolute; left: 50%; top: 58%; border-radius: 50%; border: 1px solid rgba(60, 90, 160, .09); transform: translate(-50%, -50%) rotateX(68deg); }
-.arc-bg i:nth-child(1) { width: 62vw; height: 62vw; }
-.arc-bg i:nth-child(2) { width: 88vw; height: 88vw; border-color: rgba(60, 90, 160, .06); }
-.arc-bg i:nth-child(3) { width: 118vw; height: 118vw; border-color: rgba(60, 90, 160, .04); }
-.arc-bg { perspective: 900px; }
-@media (max-width: 720px) {
-  .arc-meta { bottom: 112px; padding: 0 16px; }
-  .arc-dots { bottom: 76px; }
-  .arc-link { margin-top: 8px; }
+.arc-meta p {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  font: 500 clamp(12px, 0.95vw, 15px)/1 "Inter Tight", -apple-system, sans-serif;
+  color: rgba(203, 213, 225, 0.72) !important;
+}
+.arc-meta p b {
+  padding: 0 0.8em;
+  color: rgba(148, 163, 184, 0.4);
+  font-weight: 400;
+}
+.arc-star {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #fff;
+  font-weight: 600;
+}
+.arc-star svg {
+  color: #fbbf24;
+}
+.arc-link {
+  pointer-events: auto;
+  display: inline-block;
+  margin-top: 10px;
+  font: 600 12px/1 "Inter Tight", -apple-system, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a5b4fc !important;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(165, 180, 252, 0.4);
+  padding-bottom: 3px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.arc-link:hover {
+  color: #c084fc !important;
+  border-color: #c084fc;
 }
 
-.arc-card::before { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(90deg, rgba(10,18,40,calc(var(--tilt, 0) * -0.0035)), transparent 45%, rgba(10,18,40,calc(var(--tilt, 0) * 0.0035))); }
-.arc-stage { height: calc(var(--ch) * 1.9); transform: translateY(-48%); }
+@keyframes arcMeta {
+  from { opacity: 0; transform: translateX(var(--from, 18px)); }
+}
 
-/* ---- hover: cursor-driven 3D tilt, travelling spotlight + dot grid, spinning gradient ring, magnetic "Open" pill ---- */
-@property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
-.arc-card { cursor: pointer; --mx: 50%; --my: 50%; --rx: 0; --ry: 0; }
-.arc-img { transition: transform .5s cubic-bezier(.2,.8,.2,1); }
-.arc-card::after { transition: background .5s; }
-.arc-card figcaption { transition: transform .6s cubic-bezier(.2,.8,.2,1); }
-.arc-card figcaption::after { content: ""; display: block; height: 1.5px; margin-top: 6px; background: linear-gradient(90deg, #fff, rgba(255,255,255,0)); transform: scaleX(0); transform-origin: 0 50%; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
-.arc-num { transition: transform .6s cubic-bezier(.2,.8,.2,1); }
-.arc-spot, .arc-ring { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .45s; border-radius: inherit; }
-.arc-spot { z-index: 3; mix-blend-mode: soft-light;
-  background: radial-gradient(circle 190px at var(--mx) var(--my), rgba(255,255,255,.75), rgba(255,255,255,0) 70%); }
-.arc-spot::after { content: ""; position: absolute; inset: 0; opacity: .8;
-  background-image: radial-gradient(rgba(255,255,255,.9) 1px, transparent 1.6px); background-size: 13px 13px;
-  -webkit-mask-image: radial-gradient(circle 120px at var(--mx) var(--my), #000, transparent 100%); mask-image: radial-gradient(circle 120px at var(--mx) var(--my), #000, transparent 100%); }
-.arc-ring { z-index: 5; padding: 2px; background: conic-gradient(from var(--a), #2f5ff0, #8a5cff, #19d3ff, #ff7ad9, #ffc857, #2f5ff0);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-.arc-open { position: absolute; z-index: 6; left: 50%; top: 50%; display: inline-flex; align-items: center; gap: 8px; padding: 11px 17px; border-radius: 99px; background: rgba(255,255,255,.94); color: #101421;
-  font: 600 11px/1 "Inter Tight", Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; box-shadow: 0 12px 34px rgba(10,20,50,.35); white-space: nowrap; pointer-events: none;
-  opacity: 0; transform: translate(-50%, -20%) scale(.6) rotate(-6deg); transition: opacity .35s, transform .6s cubic-bezier(.2,1.4,.3,1); }
-.arc-open i { font-style: normal; display: inline-block; transition: transform .4s cubic-bezier(.2,.8,.2,1); }
-@keyframes arcRing { to { --a: 360deg; } }
-@keyframes arcPulse { 50% { box-shadow: 0 60px 100px -20px rgba(80,110,255,.7), 0 18px 40px -12px rgba(138,92,255,.5), 0 0 0 1px rgba(255,255,255,.6) inset; } }
+/* Dots navigation indicator */
+.arc-dots {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  bottom: clamp(26px, 5vh, 52px);
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.arc-dots button {
+  all: unset;
+  cursor: pointer;
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.16) !important;
+  transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s;
+}
+.arc-dots button:hover {
+  background: rgba(255, 255, 255, 0.4) !important;
+}
+.arc-dots button.is-on {
+  width: 26px;
+  background: linear-gradient(90deg, #818cf8, #c084fc) !important;
+  box-shadow: 0 0 12px rgba(129, 140, 248, 0.55);
+}
+
+/* Carousel Counter — Precision High-Contrast Glass Capsule */
+.arc-count {
+  position: absolute;
+  z-index: 6;
+  left: clamp(20px, 3.4vw, 52px);
+  bottom: clamp(20px, 4vh, 44px);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(10, 15, 30, 0.72) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(99, 102, 241, 0.18) !important;
+  font-size: clamp(28px, 2.8vw, 42px);
+  line-height: 1;
+  color: #ffffff !important;
+  font-family: "Inter Tight", -apple-system, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.arc-count b {
+  color: #ffffff !important;
+  text-shadow: 0 0 16px rgba(129, 140, 248, 0.75);
+}
+.arc-count span {
+  font-size: 0.44em;
+  color: rgba(226, 232, 240, 0.9) !important;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+/* Nav Orbs */
+.arc-nav {
+  position: absolute;
+  z-index: 6;
+  right: clamp(20px, 3.4vw, 52px);
+  bottom: clamp(20px, 4vh, 44px);
+  display: flex;
+  gap: 12px;
+}
+.arc-nav button {
+  all: unset;
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  font-size: 22px;
+  line-height: 1;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.25s, border-color 0.25s;
+}
+.arc-nav button:hover {
+  transform: translateY(-2px) scale(1.06);
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
+}
+.arc-nav button:active {
+  transform: scale(0.95);
+}
+
+/* Next Section Pill (bottom-right / bottom-center) */
+.arc-next {
+  position: absolute;
+  z-index: 6;
+  right: clamp(140px, 12vw, 190px);
+  bottom: clamp(20px, 4vh, 44px);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #e2e8f0;
+  font: 500 11px/1 "Inter Tight", -apple-system, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.arc-next em {
+  font-style: normal;
+  color: rgba(148, 163, 184, 0.6);
+}
+.arc-next b {
+  color: #f8fafc;
+  font-weight: 600;
+}
+.arc-next svg {
+  color: #818cf8;
+}
+
+/* Hover "Open" Pill */
+.arc-open {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0b0f19;
+  font: 700 11px/1 "Inter Tight", -apple-system, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -20%) scale(0.7);
+  transition: opacity 0.3s, transform 0.4s cubic-bezier(0.2, 1.2, 0.3, 1);
+}
+.arc-open i {
+  font-style: normal;
+}
 @media (hover: hover) {
-  .arc-card:hover { animation: arcPulse 2.2s ease-in-out infinite; }
-  .arc-card:hover .arc-img { transform: perspective(800px) rotateX(calc(var(--ry) * -6deg)) rotateY(calc(var(--rx) * 8deg)) translate(calc(var(--rx) * -9px), calc(var(--ry) * -9px)) scale(1.1); transition-duration: .25s; transition-timing-function: ease-out; }
-  .arc-card:hover::after { background: linear-gradient(180deg, rgba(8,14,30,.22) 0%, rgba(8,14,30,.7) 100%); }
-  .arc-card:hover .arc-spot, .arc-card:hover .arc-ring { opacity: 1; }
-  .arc-card:hover .arc-ring { animation: arcRing 3s linear infinite; }
-  .arc-card:hover figcaption { transform: translateY(-8px); }
-  .arc-card:hover figcaption::after { transform: scaleX(1); }
-  .arc-card:hover .arc-num { transform: translateY(-2px) scale(1.15); transform-origin: 0 0; }
-  .arc-card:hover .arc-open { opacity: 1; transform: translate(calc(-50% + var(--rx) * 16px), calc(-50% + var(--ry) * 16px)) scale(1) rotate(0); transition: opacity .35s, transform .35s cubic-bezier(.2,1.4,.3,1); }
-  .arc-card:hover .arc-open i { transform: translate(3px, -3px); }
-}
-@media (prefers-reduced-motion: reduce) { .arc-card:hover, .arc-card:hover .arc-ring { animation: none; } }
-
-/* themed backdrop: the landing's sky, with slow blue light, a cream glow, and water rings drifting behind the cards */
-.arc::before { content: ""; position: absolute; inset: -10%; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(38vmax 30vmax at 18% 26%, rgba(60,110,255,.34), transparent 70%),
-    radial-gradient(34vmax 28vmax at 84% 70%, rgba(40,160,255,.30), transparent 70%),
-    radial-gradient(30vmax 22vmax at 62% 12%, rgba(255,246,228,.75), transparent 70%),
-    radial-gradient(26vmax 22vmax at 30% 86%, rgba(255,244,226,.55), transparent 70%);
-  animation: arcSky 22s ease-in-out infinite alternate; will-change: transform; }
-.arc::after { content: ""; position: absolute; left: 50%; top: 60%; width: 130vmax; height: 130vmax; z-index: 0; pointer-events: none; transform: translate(-50%, -50%);
-  background: repeating-radial-gradient(circle at 50% 50%, transparent 0 42px, rgba(255,255,255,.22) 43px 45px, transparent 46px 96px);
-  -webkit-mask-image: radial-gradient(closest-side, #000 15%, transparent 72%); mask-image: radial-gradient(closest-side, #000 15%, transparent 72%);
-  animation: arcRings 14s linear infinite; }
-@keyframes arcSky { 0% { transform: translate3d(-3%, -2%, 0) scale(1); } 100% { transform: translate3d(4%, 3%, 0) scale(1.12); } }
-@keyframes arcRings { from { background-position: 0 0; transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.07); } }
-@media (prefers-reduced-motion: reduce) { .arc::before, .arc::after { animation: none; } }
-
-/* ================= designer pass ================= */
-.arc { --acc: #2f6bff; --acc2: #ff7ab8; --px: 0; --py: 0;
-  background:
-    radial-gradient(120% 70% at 50% 0%, #8fb7ee 0%, transparent 60%),
-    linear-gradient(180deg, #9fc1ec 0%, #c4daf5 48%, #f3e9e4 100%); }
-.arc-deco { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; --acc: #2f6bff; --acc2: #ff7ab8; }
-.arc-deco[data-acc="phones"] { --acc: #8b5cf6; --acc2: #ffb36b; }
-.arc-blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .75; mix-blend-mode: soft-light; transition: background 1s ease; will-change: transform; }
-.arc-blob--a { width: 46vw; height: 46vw; left: -8vw; top: 6%; background: var(--acc); transform: translate3d(calc(var(--px) * 40px), calc(var(--py) * 30px), 0); animation: arcFloat 14s ease-in-out infinite alternate; }
-.arc-blob--b { width: 38vw; height: 38vw; right: -6vw; bottom: -6%; background: var(--acc2); opacity: .7; transform: translate3d(calc(var(--px) * -50px), calc(var(--py) * -36px), 0); animation: arcFloat 17s ease-in-out infinite alternate-reverse; }
-.arc-blob--c { width: 24vw; height: 24vw; left: 40%; top: 30%; background: #fff; opacity: .55; animation: arcFloat 11s ease-in-out infinite alternate; }
-@keyframes arcFloat { to { margin: 4vh 3vw 0 0; scale: 1.12; } }
-.arc-grain { position: absolute; inset: -50%; opacity: .16; mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); animation: arcGrain 1.2s steps(6) infinite; }
-@keyframes arcGrain { 0%{transform:translate(0,0)} 20%{transform:translate(-3%,2%)} 40%{transform:translate(2%,-3%)} 60%{transform:translate(-2%,-1%)} 80%{transform:translate(3%,3%)} 100%{transform:translate(0,0)} }
-
-/* outlined marquee */
-.arc-marq { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-46%) rotate(-3deg); width: 120%; margin-left: -10%; overflow: hidden; white-space: nowrap; }
-.arc-marq > div { display: inline-flex; animation: arcMarq 46s linear infinite; }
-.arc-marq span { display: inline-flex; align-items: center; gap: .5em; padding-right: .5em; font: 400 italic clamp(90px, 15vw, 230px)/1 "Inter Tight", "Helvetica Neue", Arial, sans-serif; letter-spacing: -.03em; color: transparent; -webkit-text-stroke: 1.2px rgba(255,255,255,.7); text-transform: lowercase; }
-.arc-marq i { font: 400 .35em/1 "Inter Tight", sans-serif; -webkit-text-stroke: 0; color: rgba(255,255,255,.8); font-style: normal; }
-@keyframes arcMarq { to { transform: translateX(-50%); } }
-
-/* crop marks + captions */
-.arc-crop { position: absolute; width: 22px; height: 22px; border: 0 solid rgba(15,35,80,.55); }
-.arc-crop--tl { left: 22px; top: 22px; border-width: 1px 0 0 1px; } .arc-crop--tr { right: 22px; top: 22px; border-width: 1px 1px 0 0; }
-.arc-crop--bl { left: 22px; bottom: 22px; border-width: 0 0 1px 1px; } .arc-crop--br { right: 22px; bottom: 22px; border-width: 0 1px 1px 0; }
-.arc-side { position: absolute; top: 50%; font: 600 10px/1 "Inter Tight", Arial, sans-serif; letter-spacing: .32em; text-transform: uppercase; color: rgba(15,35,80,.6); white-space: nowrap; }
-.arc-side--l { left: 30px; transform: translateY(-50%) rotate(-90deg); transform-origin: left center; margin-top: 120px; }
-.arc-side--r { right: 30px; transform: translateY(-50%) rotate(90deg); transform-origin: right center; margin-top: 120px; }
-.arc-cross { position: absolute; left: 7%; top: 24%; width: 38px; fill: none; stroke: rgba(15,35,80,.45); stroke-width: 1; animation: arcSpin 30s linear infinite; }
-.arc-squig { position: absolute; right: 9%; top: 26%; width: 150px; fill: none; stroke: var(--acc); stroke-width: 2.4; stroke-linecap: round; opacity: .8; transform: translate(calc(var(--px) * 24px), calc(var(--py) * 14px)) rotate(-8deg); }
-@keyframes arcSpin { to { transform: rotate(360deg); } }
-
-/* rotating badge */
-.arc-badge { position: absolute; left: clamp(24px, 6vw, 96px); bottom: clamp(70px, 14vh, 150px); width: clamp(84px, 8vw, 118px); aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,.35); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.7); }
-.arc-badge svg { position: absolute; inset: 0; animation: arcSpin 18s linear infinite; }
-.arc-badge text { font: 700 10.5px "Inter Tight", Arial, sans-serif; letter-spacing: .17em; fill: #12295a; }
-.arc-badge b { font: 600 22px/1 "Inter Tight", sans-serif; color: var(--acc); animation: arcNudge 1.8s ease-in-out infinite; }
-@keyframes arcNudge { 50% { transform: translateX(5px); } }
-
-/* floating chips */
-.arc-chip { position: absolute; display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 999px; background: rgba(255,255,255,.62); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 10px 30px -10px rgba(20,50,120,.35); font: 600 11px/1 "Inter Tight", Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #12295a; animation: arcBob 6s ease-in-out infinite alternate; }
-.arc-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 0 4px color-mix(in srgb, var(--acc) 25%, transparent); }
-.arc-chip u { width: 18px; height: 10px; border-radius: 6px; background: linear-gradient(90deg, var(--acc), var(--acc2)); }
-.arc-chip--1 { left: 17%; top: 38%; transform: translate(calc(var(--px) * -30px), calc(var(--py) * -20px)); }
-.arc-chip--2 { right: 15%; top: 42%; animation-delay: -2s; transform: translate(calc(var(--px) * 36px), calc(var(--py) * 22px)); }
-.arc-chip--3 { right: 24%; bottom: 25%; animation-delay: -4s; }
-@keyframes arcBob { to { translate: 0 -12px; } }
-
-/* sharper type + stronger focal card */
-.arc-eyebrow { padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,.45); border: 1px solid rgba(255,255,255,.8); backdrop-filter: blur(8px); color: #1b3a78; }
-.arc-title { font-size: clamp(38px, 6vw, 92px); font-weight: 400; letter-spacing: -.035em; color: #0a1a3d; text-shadow: 0 1px 0 rgba(255,255,255,.6); }
-.arc-title em { font-style: italic; background: linear-gradient(100deg, var(--acc, #2f6bff) 0%, #ff7ab8 70%, #ffb36b 100%); -webkit-background-clip: text; background-clip: text; color: transparent; padding: 0 .06em; }
-.arc-ghost { color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,.55); }
-.arc-card { filter: drop-shadow(0 40px 50px rgba(18,45,110,.28)); }
-.arc-meta h3 { letter-spacing: -.02em; }
-.arc-nav button { background: rgba(255,255,255,.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.9); box-shadow: 0 10px 28px -10px rgba(20,50,120,.4); transition: transform .3s cubic-bezier(.2,.8,.2,1), background .3s; }
-.arc-nav button:hover { transform: scale(1.1); background: #fff; }
-.arc-dots button.is-on { background: var(--acc, #2f6bff); }
-
-@media (max-width: 820px) {
-  .arc-side, .arc-cross, .arc-squig, .arc-chip--1, .arc-chip--3 { display: none; }
-  .arc-badge { display: none; }
-  .arc-chip--2 { right: 18px; top: 31%; }
-  .arc-marq span { -webkit-text-stroke-width: 1px; }
-}
-@media (prefers-reduced-motion: reduce) { .arc-blob, .arc-grain, .arc-marq > div, .arc-cross, .arc-badge svg, .arc-badge b, .arc-chip { animation: none; } }
-
-/* =====================================================================
-   dark theme
-   Midnight ink ground, a pool of coloured light behind the active card, outlined type, glass chips, thin hairlines.
-   (delete from here down to go back to the light sky)
-   ===================================================================== */
-.arc { --acc: #7c8cff; --acc2: #ff7ab8; color: #eef1fb;
-  background: radial-gradient(120% 90% at 50% 38%, #0e1226 0%, #070a16 55%, #04050c 100%); }
-.arc::before { background:
-    radial-gradient(38vmax 30vmax at 16% 28%, rgba(106, 92, 255, .30), transparent 70%),
-    radial-gradient(34vmax 28vmax at 86% 72%, rgba(255, 138, 92, .20), transparent 70%),
-    radial-gradient(30vmax 24vmax at 64% 10%, rgba(60, 190, 255, .16), transparent 70%),
-    radial-gradient(26vmax 22vmax at 30% 90%, rgba(255, 90, 170, .14), transparent 70%); }
-.arc::after { background: repeating-radial-gradient(circle at 50% 50%, transparent 0 42px, rgba(160, 175, 255, .10) 43px 44px, transparent 45px 96px); }
-.arc-bg i { border-color: rgba(150, 165, 255, .10); }
-.arc-bg i:nth-child(2) { border-color: rgba(150, 165, 255, .06); } .arc-bg i:nth-child(3) { border-color: rgba(150, 165, 255, .04); }
-
-/* deco layer */
-.arc-blob { filter: none; mix-blend-mode: normal; opacity: .55; }
-.arc-blob--a { background: radial-gradient(closest-side, rgba(110, 96, 255, .55), transparent); }
-.arc-blob--b { background: radial-gradient(closest-side, rgba(255, 130, 90, .38), transparent); opacity: .5; }
-.arc-blob--c { background: radial-gradient(closest-side, rgba(70, 200, 255, .22), transparent); opacity: .6; }
-.arc-deco[data-acc="phones"] .arc-blob--a { background: radial-gradient(closest-side, rgba(180, 100, 255, .55), transparent); }
-.arc-grain { mix-blend-mode: normal; opacity: .07; filter: invert(1); }
-.arc-deco::after { content: ""; position: absolute; inset: 0; background: radial-gradient(90% 80% at 50% 48%, transparent 45%, rgba(2, 3, 8, .75) 100%); }
-.arc-marq span { -webkit-text-stroke: 1.2px rgba(170, 185, 255, .16); }
-.arc-marq i { color: rgba(170, 185, 255, .3); }
-.arc-crop { border-color: rgba(200, 210, 255, .45); }
-.arc-side { color: rgba(200, 210, 255, .55); }
-.arc-cross { stroke: rgba(200, 210, 255, .4); }
-.arc-squig { stroke: var(--acc); opacity: .9; }
-.arc-badge { background: rgba(255, 255, 255, .05); border-color: rgba(200, 210, 255, .22); }
-.arc-badge text { fill: #cdd5ff; }
-.arc-badge b { color: #fff; }
-.arc-chip { background: rgba(255, 255, 255, .06); border-color: rgba(200, 210, 255, .2); color: #e6eaff; box-shadow: 0 14px 34px -14px rgba(0, 0, 0, .8); }
-
-/* header */
-.arc-eyebrow { background: rgba(255, 255, 255, .05); border-color: rgba(200, 210, 255, .2); color: #b8c3f5; }
-.arc-eyebrow i { background: rgba(200, 210, 255, .35); }
-.arc-title { color: #f4f6ff; text-shadow: 0 2px 40px rgba(110, 120, 255, .35); }
-.arc-title em { background: linear-gradient(100deg, #9fb0ff 0%, #d79bff 50%, #ffb07a 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.arc-ghost { -webkit-text-stroke: 1.5px rgba(170, 185, 255, .14); }
-
-/* a pool of coloured light behind the focused card + a floor line it stands on */
-.arc-stage::before { content: ""; position: absolute; left: 50%; top: 50%; width: calc(var(--cw) * 2.3); height: calc(var(--ch) * 1.5); transform: translate(-50%, -50%); pointer-events: none; z-index: -1;
-  background: radial-gradient(closest-side, rgba(120, 130, 255, .45), rgba(120, 130, 255, .12) 55%, transparent 75%); animation: arcLight 5s ease-in-out infinite alternate; }
-@keyframes arcLight { from { opacity: .7; scale: .96; } to { opacity: 1; scale: 1.06; } }
-
-/* cards */
-.arc-card { background: #121830; filter: none;
-  box-shadow: 0 34px 60px -22px rgba(0, 0, 0, .9), 0 0 0 1px rgba(200, 210, 255, .14) inset; }
-.arc-card.is-on { box-shadow: 0 50px 90px -24px rgba(100, 100, 255, .65), 0 0 70px -14px rgba(130, 120, 255, .45), 0 0 0 1px rgba(220, 228, 255, .35) inset; }
-.arc-mock { background: radial-gradient(120% 90% at 30% 10%, #2a3a68 0%, #141c38 60%, #0a0f22 100%); }
-.arc-mock--ph { background: radial-gradient(120% 90% at 70% 10%, #4a3a86 0%, #1d1642 60%, #0e0a24 100%); }
-.arc-card::after { background: linear-gradient(180deg, rgba(4, 6, 16, 0) 52%, rgba(4, 6, 16, .72)); }
-.arc-glare { mix-blend-mode: screen; opacity: .35; }
-
-/* meta, dots, counter, nav */
-.arc-hint { color: rgba(200, 210, 255, .45); }
-.arc-meta h3 { color: #f4f6ff; }
-.arc-meta p { color: #b3bbd8; }
-.arc-meta b { color: #5a6385; }
-.arc-star { color: #fff; } .arc-star svg { color: #ffc857; }
-.arc-link { color: #a9b8ff; }
-.arc-dots button { background: rgba(200, 210, 255, .2); } .arc-dots button:hover { background: rgba(200, 210, 255, .5); }
-.arc-dots button.is-on { background: linear-gradient(90deg, #8a9bff, #d79bff); }
-.arc-count { color: #f4f6ff; } .arc-count span { color: #6b7396; }
-.arc-nav button { background: rgba(255, 255, 255, .07); color: #eef1fb; box-shadow: 0 10px 26px rgba(0, 0, 0, .5), 0 0 0 1px rgba(200, 210, 255, .18) inset; backdrop-filter: blur(10px); border: 0; }
-.arc-nav button:hover { background: rgba(255, 255, 255, .16); box-shadow: 0 14px 30px rgba(0, 0, 0, .6), 0 0 0 1px rgba(220, 228, 255, .35) inset; }
-@media (prefers-reduced-motion: reduce) { .arc-stage::before { animation: none; } }
-
-/* =====================================================================
-   type scale (one hierarchy, nothing under 11px)
-   display  : section title            clamp(40, 6vw, 96)
-   title    : active project name      clamp(24, 2.6vw, 38)
-   body     : card captions / meta     13 – 17
-   label    : eyebrow, hint, chips     11 – 13, tracked caps
-   ===================================================================== */
-.arc-eyebrow { font-size: clamp(11px, .9vw, 13px); letter-spacing: .28em; }
-.arc-title { font-size: clamp(40px, 6vw, 96px); line-height: 1; letter-spacing: -.035em; text-wrap: balance; }
-.arc-meta h3 { font-size: clamp(24px, 2.6vw, 38px); line-height: 1.08; letter-spacing: -.02em; margin-bottom: 10px; text-wrap: balance; }
-.arc-meta p { font-size: clamp(13px, 1vw, 16px); }
-.arc-hint { font-size: clamp(11px, .85vw, 12px); letter-spacing: .28em; color: rgba(200, 210, 255, .62); margin-bottom: 8px; }
-.arc-num { font-size: 11px; letter-spacing: .14em; }
-.arc-card figcaption { font-size: clamp(13px, 1.1vw, 17px); line-height: 1.22; letter-spacing: -.005em; text-wrap: balance; text-shadow: 0 1px 12px rgba(0, 0, 0, .75), 0 0 2px rgba(0, 0, 0, .5); }
-.arc-count { font-size: clamp(36px, 3.6vw, 56px); }
-.arc-count span { font-size: .36em; }
-.arc-side { font-size: 11px; letter-spacing: .3em; }
-.arc-chip { font-size: 12px; }
-.arc-badge text { font-size: 11px; }
-.arc-link { font-size: 12px; }
-@media (max-width: 820px) {
-  .arc-title { font-size: clamp(34px, 10vw, 52px); }
-  .arc-meta h3 { font-size: clamp(22px, 6.4vw, 28px); }
-  .arc-card figcaption { font-size: 14px; }
+  .arc-card:hover .arc-open {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
-/* ---- program cards ---- */
-.arc-img[data-kind="program"] { inset: 0; filter: none; }
-.pa { position: absolute; inset: 0; container-type: inline-size; overflow: hidden; color: #fff; text-align: center;
-  background: radial-gradient(120% 80% at 50% 0%, var(--c1) -40%, var(--c2) 78%), #0b1020; }
-.pa::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,12,28,0) 40%, rgba(8,12,28,.55)); }
-.pa-orb { position: absolute; border-radius: 50%; filter: blur(18px); opacity: .55; background: var(--c1); }
-.pa-orb--1 { width: 60cqw; height: 60cqw; right: -22cqw; top: -14cqw; }
-.pa-orb--2 { width: 46cqw; height: 46cqw; left: -18cqw; bottom: 10cqw; opacity: .3; }
-.pa-rings { position: absolute; left: 0; top: 0; width: 100%; height: auto; fill: none; stroke: rgba(255,255,255,.2); stroke-width: .35; }
-.pa-dur { position: absolute; right: 6cqw; top: 6cqw; font: 600 5.4cqw/1 "Inter Tight", Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; padding: 2.2cqw 3.4cqw; border-radius: 99px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); backdrop-filter: blur(6px); }
-.pa-tile { position: absolute; left: 50%; top: 22%; width: 38cqw; height: 38cqw; transform: translateX(-50%); border-radius: 22%; display: grid; place-items: center;
-  background: linear-gradient(145deg, rgba(255,255,255,.3), rgba(255,255,255,.08)); border: 1px solid rgba(255,255,255,.4); box-shadow: 0 6cqw 12cqw -3cqw rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.5); backdrop-filter: blur(8px); }
-.pa-svg { width: 56%; height: 56%; }
-.pa-txt { font: 700 15cqw/1 "Inter Tight", Arial, sans-serif; letter-spacing: -.02em; text-shadow: 0 .6cqw 3cqw rgba(0,0,0,.35); }
-.pa-txt.is-long { font-size: 10.5cqw; }
-.pa-org { position: absolute; left: 6cqw; right: 6cqw; top: 66%; margin: 0; font: 600 5.6cqw/1.25 "Inter Tight", Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; opacity: .92; text-wrap: balance; }
-.pa-when { position: absolute; left: 6cqw; right: 6cqw; top: calc(66% + 13cqw); margin: 0; font: 500 5.4cqw/1.2 "Inter Tight", Arial, sans-serif; opacity: .7; }
-.pa-badge { position: absolute; left: 50%; top: calc(22% + 38cqw - 3.2cqw); transform: translateX(-50%); white-space: nowrap; font: 700 4.6cqw/1 "Inter Tight", Arial, sans-serif; letter-spacing: .06em; padding: 1.9cqw 3.6cqw; border-radius: 99px; background: #fff; color: var(--c2); box-shadow: 0 2cqw 5cqw rgba(0,0,0,.35); }
-.arc-card .arc-img[data-kind="program"] ~ figcaption { font-size: clamp(13px, 1.15vw, 17px); line-height: 1.2; text-wrap: balance; }
-.pa-wide { width: 74%; height: auto; }
-/* real logos */
-.pa-tile img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
-.pa-tile.is-logo { background: rgba(255,255,255,.14); padding: 6cqw; }
-.pa-tile.is-logo img { width: 100%; height: 100%; filter: drop-shadow(0 1cqw 2.5cqw rgba(0,0,0,.35)); }
-.pa-tile.is-white { background: #fff; padding: 4.5cqw; border-color: rgba(255,255,255,.9); }
-.pa-tile.is-white img { width: 100%; height: 100%; }
-/* keep every logo inside its tile */
-.pa-tile { box-sizing: border-box; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.pa-tile img { width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; object-position: center; }
-.pa-tile.is-logo { padding: 5cqw; }
-.pa-tile.is-white { padding: 3.5cqw; border-radius: 22%; }
-.pa-tile.is-white img { border-radius: 12%; }
-/* the generic card-image parallax (.arc-img img) was shifting/cropping the logos - turn it off for logo tiles */
-.arc-img .pa-tile img { transform: none !important; transition: none; object-fit: contain; width: 100%; height: 100%; aspect-ratio: auto; }
-.pa-tile.is-white img { object-fit: contain; }
-
-/* ---- program card art v2: mesh gradient + signature motif + grain + sheen ---- */
-.pa { background:
-    radial-gradient(90% 60% at 12% 4%, color-mix(in srgb, var(--c1) 95%, #fff 10%) 0%, transparent 62%),
-    radial-gradient(80% 55% at 100% 38%, color-mix(in srgb, var(--c1) 55%, var(--c2)) 0%, transparent 60%),
-    radial-gradient(120% 70% at 30% 108%, color-mix(in srgb, var(--c2) 80%, #000) 0%, transparent 70%),
-    linear-gradient(165deg, color-mix(in srgb, var(--c1) 70%, var(--c2)) 0%, var(--c2) 58%, color-mix(in srgb, var(--c2) 40%, #05060f) 100%); }
-.pa::before { background: linear-gradient(180deg, rgba(6,9,22,0) 38%, rgba(6,9,22,.72) 100%); z-index: 3; }
-.pa > * { z-index: 2; }
-.pa-rings { display: none; }
-.pa-orb { z-index: 0; mix-blend-mode: screen; }
-.pa-orb--3 { width: 38cqw; height: 38cqw; left: 54cqw; top: 70%; background: color-mix(in srgb, var(--c1) 70%, #fff); opacity: .22; filter: blur(14px); }
-.pa-motif { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; opacity: .5; mix-blend-mode: soft-light; transform-origin: 50% 40%; transition: transform 1.2s cubic-bezier(.2,.8,.2,1), opacity .6s; }
-.arc-card:hover .pa-motif, .spot-media:hover .pa-motif { transform: scale(1.08) rotate(1.2deg); opacity: .7; }
-.pa-halo { position: absolute; z-index: 1; left: 50%; top: calc(22% + 19cqw); width: 74cqw; height: 74cqw; transform: translate(-50%, -50%); border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--c1) 80%, #fff) 0%, transparent 72%); opacity: .55; filter: blur(6px); }
-.pa-sheen { position: absolute; inset: -20% -40%; z-index: 4; pointer-events: none; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.16) 46%, rgba(255,255,255,.04) 52%, transparent 60%); transform: translateX(calc(var(--o, 0) * -8%)); }
-.pa-frame { position: absolute; inset: 3cqw; z-index: 4; border-radius: 6cqw; border: 1px solid rgba(255,255,255,.2); pointer-events: none;
-  -webkit-mask-image: linear-gradient(180deg, #000, transparent 55%, #000); mask-image: linear-gradient(180deg, #000, transparent 55%, #000); }
-.pa-grain { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: .16; mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
-.pa-tile { z-index: 6; box-shadow: 0 7cqw 14cqw -4cqw rgba(0,0,0,.55), 0 0 0 1.2cqw rgba(255,255,255,.08), inset 0 1px 0 rgba(255,255,255,.55); }
-.pa-dur, .pa-badge, .pa-org, .pa-when { z-index: 6; }
-.pa-org { text-shadow: 0 1px 8px rgba(0,0,0,.45); }
-
-/* ---- performance pass: nothing in a card may need re-blending / re-blurring while it moves ---- */
-.pa, .pa * { mix-blend-mode: normal !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-.pa-orb { filter: none !important; background: radial-gradient(closest-side, color-mix(in srgb, var(--c1) 80%, #fff) 0%, transparent 100%) !important; opacity: .4; }
-.pa-halo { filter: none; }
-.pa-motif { opacity: .22; transition: none !important; transform: none !important; }
-.arc-card:hover .pa-motif, .spot-media:hover .pa-motif { transform: none !important; opacity: .22; }
-.pa-grain { opacity: .07; }
-.pa-sheen { transform: none; }
-.pa-dur { background: rgba(255,255,255,.2); }
-.pa-tile { background: rgba(255,255,255,.2); box-shadow: 0 4cqw 8cqw -3cqw rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.5); }
-.pa-tile.is-white { background: #fff; }
-/* promote each card once, keep the hover tilt cheap */
-.arc-card { will-change: transform, opacity; backface-visibility: hidden; }
-.arc-card:hover { animation: none !important; }
-.arc-card:hover .arc-img { transform: none !important; transition: none; }
-.arc-card .arc-img { filter: none !important; }
-.arc-spot, .arc-ring { display: none !important; }
-
-/* bare logos: no box, just the mark, sharp and centred */
-.pa-tile.pa-bare { background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; overflow: visible; border-radius: 0; width: 44cqw; height: 44cqw; top: 20%; }
-.pa-tile.pa-bare img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3cqw 5cqw rgba(0,0,0,.4)); image-rendering: auto; }
-.pa-tile.pa-bare.is-mono img { width: 118%; height: 118%; max-width: none; margin: -9%; }   /* white wordmark / emblem a touch larger */
-.pa-tile.pa-bare.is-ms img { width: 82%; height: 82%; }
-.pa-halo { top: calc(20% + 22cqw); }
-
-/* floating chips live in the free corners around the headline / footer, never over the card band */
-.arc-chip--1 { left: 9%; top: 15%; }
-.arc-chip--2 { right: 9%; top: 13%; }
-.arc-chip--3 { right: 27%; bottom: 9%; }
-.arc-squig { top: 27%; right: 8%; }
-
-/* ---- typography pass: one clear hierarchy per card (org -> title -> date), aligned to the same left edge ---- */
-.arc-card .pa-org, .arc-card .pa-when { display: none; }
-.arc-card .arc-img[data-kind="program"] ~ figcaption { left: 5cqw; left: 6%; right: 6%; bottom: 6%; display: grid; gap: 5px; text-align: left; transform: none; }
-.arc-card figcaption .cap-org { font: 700 10px/1.1 "Inter Tight", Arial, sans-serif; font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.78); }
-.arc-card figcaption .cap-title { font-size: clamp(15px, 1.3vw, 20px); line-height: 1.14; letter-spacing: -.01em; color: #fff; text-wrap: balance; }
-.arc-card figcaption .cap-when { font: 500 11.5px/1.1 "Inter Tight", Arial, sans-serif; letter-spacing: .02em; color: rgba(255,255,255,.7); }
-.arc-card figcaption::after { margin-top: 2px; }
-/* number + duration chip share one baseline and the same inset */
-.arc-card .arc-num { left: 6%; top: 20px; transform: translateY(-50%); font-size: 11px; }
-.arc-card:hover .arc-num { transform: translateY(-50%); }
-.pa-dur { top: 3.4cqw; right: 6cqw; font-size: 4.6cqw; padding: 2.4cqw 3.4cqw; line-height: 1; }
-/* logo block sits optically centred above the text block */
-.pa-tile.pa-bare { top: 17%; width: 42cqw; height: 42cqw; }
-.pa-halo { top: calc(17% + 21cqw); }
-/* meta line under the carousel: even separators */
-.arc-meta p { gap: 0; }
-.arc-meta p span { display: inline-flex; align-items: center; }
-.arc-meta p b { padding: 0 .75em; font-weight: 400; }
-.arc-meta h3 { text-wrap: balance; }
-/* the chips are redundant with the card text and collided with the title: keep the top two, drop the footer one */
-.arc-chip--3 { display: none; }
-.arc-chip { font-size: 11px; padding: 9px 15px; }
-
-/* ---- smoothness: decor animations only run while the section is on screen ---- */
-.arc:not(.is-live) *, .arc:not(.is-live) *::before, .arc:not(.is-live) *::after { animation-play-state: paused !important; }
-.arc-card { transition: none; }
-.arc-card.is-on { transition: box-shadow .35s ease; }
-.arc-deco, .arc-bg { contain: layout paint style; }
-.arc-stage { contain: layout style; }
-.arc-marq { will-change: transform; }
-.arc-card figcaption, .arc-card .arc-num { will-change: auto; }
-.arc-card::before { display: none; }          /* per-frame edge shading was the last var()-driven paint */
-.arc-glare { display: none; }
-
-/* =====================================================================
-   LIGHT THEME - same warm paper as "Where I've Worked" (#f1f1ee), so the two sections read as one continuous page.
-   Pastel colour glows instead of midnight ink; cards keep their saturated art and float on soft shadows.
-   ===================================================================== */
-.arc { --acc: #4f63ff; --acc2: #ff7a45; color: #0d0d0f; background: #f1f1ee; }
-.arc::before { background:
-    radial-gradient(40vmax 30vmax at 14% 30%, rgba(120, 140, 255, .20), transparent 70%),
-    radial-gradient(36vmax 28vmax at 88% 70%, rgba(255, 170, 120, .22), transparent 70%),
-    radial-gradient(30vmax 24vmax at 62% 8%, rgba(150, 210, 255, .22), transparent 70%),
-    radial-gradient(26vmax 22vmax at 28% 92%, rgba(230, 170, 255, .16), transparent 70%); }
-.arc::after { background: repeating-radial-gradient(circle at 50% 52%, transparent 0 42px, rgba(60, 80, 150, .07) 43px 44px, transparent 45px 96px); }
-.arc-bg i, .arc-bg i:nth-child(2), .arc-bg i:nth-child(3) { border-color: rgba(60, 80, 150, .08); }
-
-/* seamless edges: the section dissolves into the paper above and below */
-.arc-deco::after { background: linear-gradient(180deg, #f1f1ee 0%, rgba(241, 241, 238, 0) 14%, rgba(241, 241, 238, 0) 86%, #f1f1ee 100%); }
-
-.arc-blob { opacity: .6; }
-.arc-blob--a { background: radial-gradient(closest-side, rgba(110, 125, 255, .38), transparent); }
-.arc-blob--b { background: radial-gradient(closest-side, rgba(255, 150, 100, .34), transparent); opacity: .6; }
-.arc-blob--c { background: radial-gradient(closest-side, rgba(90, 200, 255, .26), transparent); opacity: .7; }
-.arc-deco[data-acc="phones"] .arc-blob--a { background: radial-gradient(closest-side, rgba(180, 120, 255, .36), transparent); }
-.arc-grain { filter: none; opacity: .05; }
-.arc-marq span { -webkit-text-stroke: 1.2px rgba(40, 60, 130, .10); }
-.arc-marq i { color: rgba(40, 60, 130, .2); }
-.arc-crop { border-color: rgba(20, 30, 70, .35); }
-.arc-side { color: rgba(20, 30, 70, .5); }
-.arc-cross { stroke: rgba(20, 30, 70, .3); }
-.arc-squig { stroke: var(--acc); opacity: .85; }
-.arc-badge { background: rgba(255, 255, 255, .7); border-color: rgba(20, 30, 70, .12); box-shadow: 0 12px 30px -14px rgba(30, 40, 90, .35); }
-.arc-badge text { fill: #34407a; }
-.arc-badge b { color: #0d0d0f; }
-.arc-chip { background: rgba(255, 255, 255, .78); border-color: rgba(20, 30, 70, .1); color: #1b2650; box-shadow: 0 14px 32px -16px rgba(30, 40, 90, .45); }
-
-.arc-eyebrow { background: rgba(255, 255, 255, .7); border-color: rgba(20, 30, 70, .12); color: #3b4670; }
-.arc-eyebrow i { background: rgba(20, 30, 70, .3); }
-.arc-title { color: #0d0d0f; text-shadow: none; }
-.arc-title em { background: linear-gradient(100deg, #3f55ff 0%, #9b4dff 52%, #ff7a45 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.arc-ghost { -webkit-text-stroke: 1.5px rgba(40, 60, 130, .10); }
-
-.arc-stage::before { background: radial-gradient(closest-side, rgba(110, 125, 255, .30), rgba(110, 125, 255, .08) 55%, transparent 75%); }
-
-.arc-card { background: #fff; box-shadow: 0 34px 56px -26px rgba(30, 40, 100, .5), 0 0 0 1px rgba(20, 30, 70, .06); }
-.arc-card.is-on { box-shadow: 0 50px 80px -28px rgba(70, 85, 210, .55), 0 0 0 1px rgba(255, 255, 255, .6) inset, 0 0 0 1px rgba(20, 30, 70, .08); }
-
-.arc-hint { color: rgba(20, 30, 70, .5); }
-.arc-meta h3 { color: #0d0d0f; }
-.arc-meta p { color: #4a5270; }
-.arc-meta b { color: #a3a9bf; }
-.arc-star { color: #0d0d0f; } .arc-star svg { color: #f2a900; }
-.arc-link { color: #2f4bff; }
-.arc-dots button { background: rgba(20, 30, 70, .16); } .arc-dots button:hover { background: rgba(20, 30, 70, .4); }
-.arc-dots button.is-on { background: linear-gradient(90deg, #4f63ff, #b04dff); }
-.arc-count { color: #0d0d0f; } .arc-count span { color: #8a90a8; }
-.arc-nav button { background: rgba(255, 255, 255, .85); color: #0d0d0f; box-shadow: 0 12px 26px -12px rgba(30, 40, 90, .45), 0 0 0 1px rgba(20, 30, 70, .08); }
-.arc-nav button:hover { background: #fff; box-shadow: 0 16px 30px -12px rgba(30, 40, 90, .55), 0 0 0 1px rgba(20, 30, 70, .14); }
-
-/* ---- performance root causes ----
-   1. backdrop-filter on chips / eyebrow / badge / arrows: the backdrop is the moving 3D carousel, so every one of them had to be re-blurred every frame.
-   2. the outlined marquee: a ~25,000px-wide stroked-text layer, nearly invisible on the light theme.
-   3. keyframes that animate filter: blur() (ghost number, caption) re-rasterise a large layer on every frame. */
-.arc *, .arc *::before, .arc *::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-.arc-chip { background: rgba(255, 255, 255, .92); }
-.arc-badge { background: rgba(255, 255, 255, .85); }
-.arc-nav button { background: rgba(255, 255, 255, .95); }
-.arc-eyebrow { background: rgba(255, 255, 255, .85); }
-.arc-marq { display: none; }
-@keyframes arcGhost { from { opacity: 0; transform: translateY(30px) scale(.94); } }
-@keyframes arcMeta { from { opacity: 0; transform: translateX(var(--from, 18px)); } }
-
-
-/* =====================================================================
-   Mobile pass (<= 720px)
-   One calm column: eyebrow + title, the 3-D arc (bigger, nudged up into the gap), the active project's caption,
-   dots, then a bottom bar (counter left, arrows centred so the corner mascot never covers them).
-   ===================================================================== */
-@media (max-width: 720px) {
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
   .arc { min-height: 640px; }
-  .arc-head { top: clamp(26px, 6.5vh, 54px); padding: 0 14px; }
-  .arc-eyebrow { white-space: nowrap; gap: 10px; padding: 8px 14px; font-size: 10.5px; letter-spacing: .2em; }
-  .arc-eyebrow i { width: 14px; flex: none; }
-  .arc-title { font-size: clamp(34px, 10.4vw, 48px); line-height: 1.02; }
-  /* the floating info chip landed on the title: the same info is in the caption below, so it goes */
-  .arc-chip { display: none; }
-  .arc-stage { top: 47%; }
-  .arc-ghost { top: 52%; font-size: 64vw; }
-  .arc-hint { bottom: 204px; font-size: 10.5px; letter-spacing: .24em; }
-  .arc-meta { bottom: 108px; padding: 0 20px; }
-  .arc-meta h3 { font-size: clamp(22px, 6.2vw, 27px); }
-  .arc-meta p { gap: 7px 9px; font-size: 12.5px; }
-  .arc-dots { bottom: 72px; }
-  .arc-count { left: 20px; bottom: 20px; font-size: 30px; }
-  .arc-nav { left: 50%; right: auto; transform: translateX(-50%); bottom: 14px; gap: 14px; }
-  .arc-nav button { width: 44px; height: 44px; }
-  .arc-crop--bl, .arc-crop--br { display: none; }
-}
-/* short phones (iPhone SE class): tighten the vertical rhythm so nothing touches */
-@media (max-width: 720px) and (max-height: 700px) {
-  .arc-head { top: 22px; }
-  .arc-title { font-size: clamp(30px, 9vw, 38px); }
-  .arc-stage { top: 46%; }
-  .arc-hint { display: none; }
-  .arc-meta { bottom: 98px; }
-  .arc-dots { bottom: 66px; }
+  .arc-title { font-size: clamp(32px, 8.5vw, 48px); }
+  .arc-head { top: 28px; }
+  .arc-side, .arc-cross, .arc-crop { display: none; }
+  .arc-next { display: none; }
+  .arc-count { bottom: 20px; left: 16px; font-size: 26px; }
+  .arc-nav { bottom: 14px; right: 14px; gap: 8px; }
+  .arc-nav button { width: 42px; height: 42px; font-size: 18px; }
+  .arc-meta { bottom: 94px; padding: 0 16px; }
+  .arc-meta h3 { font-size: clamp(20px, 5.5vw, 26px); }
+  .arc-dots { bottom: 64px; }
+  .arc-hint { bottom: clamp(140px, 20vh, 180px); }
 }
 
-
-/* ---- section extras: programme tally + "next: My Arsenal" cue (the cue is the first beat of the hand-off into the Arsenal) ---- */
-.arc-tally { position: absolute; z-index: 4; left: clamp(110px, 8.6vw, 170px); bottom: clamp(30px, 6.4vh, 64px); display: flex; flex-direction: column; gap: 9px; pointer-events: none;
-  font: 600 clamp(9px, .72vw, 11px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(11, 20, 36, .6); }
-.arc-tally b { color: #0b1424; font-weight: 700; margin-right: 6px; }
-.arc-tally u { display: block; width: clamp(120px, 12vw, 190px); height: 2px; border-radius: 2px; background: rgba(11, 20, 36, .14); overflow: hidden; text-decoration: none; }
-.arc-tally u i { display: block; height: 100%; width: 100%; transform-origin: 0 50%; border-radius: 2px; background: linear-gradient(90deg, #3d6df0, #8f7bff); transition: transform .7s cubic-bezier(.2, .8, .2, 1); }
-.arc-next { position: absolute; z-index: 4; right: clamp(28px, 3.4vw, 64px); bottom: 15vh; display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; border-radius: 999px; pointer-events: none;
-  background: linear-gradient(160deg, rgba(255, 255, 255, .6), rgba(255, 255, 255, .22)); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
-  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(255, 255, 255, .7), 0 14px 30px -12px rgba(30, 60, 140, .45); color: #0b1424; font: 600 clamp(9px, .72vw, 11px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .18em; text-transform: uppercase; }
-.arc-next em { font-style: normal; opacity: .55; } .arc-next b { font-weight: 700; }
-.arc-next svg { animation: arcNextBob 1.6s ease-in-out infinite; }
-.arc-next-dots { display: inline-flex; }
-.arc-next-dots i { width: 14px; height: 14px; border-radius: 50%; margin-left: -4px; border: 1.5px solid #fff; box-shadow: 0 2px 6px rgba(20, 40, 100, .35); }
-.arc-next-dots i:nth-child(1) { margin-left: 0; background: radial-gradient(circle at 35% 30%, #fff, #6c47ff 60%); }
-.arc-next-dots i:nth-child(2) { background: radial-gradient(circle at 35% 30%, #fff, #ee4c2c 60%); }
-.arc-next-dots i:nth-child(3) { background: radial-gradient(circle at 35% 30%, #fff, #2b5b84 60%); }
-@keyframes arcNextBob { 50% { transform: translateY(3px); } }
-@media (max-width: 760px) { .arc-tally, .arc-next { display: none; } }
-@media (prefers-reduced-motion: reduce) { .arc-next svg { animation: none; } }
-
-
-/* =====================================================================
-   PERFORMANCE PASS  (visuals unchanged; only costs removed)
-
-   1. The card box-shadows (and the .is-on shadow transition) were clipped away by each card's own clip-path, so they never showed -
-      but they were still painted, and re-painted on every card change. Gone.
-   2. The three background blobs animated `margin`, which forces a re-layout of the section on every frame. They now animate transform properties only.
-   3. A 200%-wide animated film-grain layer (opacity .05 - invisible) and a 130vmax masked ring layer that scaled forever: both stopped / removed.
-   4. Cards on the far side of the ring (invisible anyway) are now visibility:hidden, so ~7 of the 16 card layers are released from the GPU.
-   5. Decorative loops stand still while the page scrolls or the carousel moves.
-   ===================================================================== */
-.arc-card, .arc-card.is-on { box-shadow: none; transition: none; }
-.arc-card.is-far { visibility: hidden; }
-
-@keyframes arcFloat { to { translate: 0 3vh; scale: 1.1; } }
-.arc-grain { display: none; }
-.arc::after { animation: none; }
-.arc-stage::before { animation: none; opacity: 0.85; }
-
-html.is-scrolling .arc::before,
-html.is-scrolling .arc-blob,
-html.is-scrolling .arc-chip,
-html.is-scrolling .arc-badge svg,
-html.is-scrolling .arc-badge b,
-html.is-scrolling .arc-cross,
-html.is-scrolling .arc-next svg,
-.arc.is-moving::before,
-.arc.is-moving .arc-blob,
-.arc.is-moving .arc-chip,
-.arc.is-moving .arc-badge svg,
-.arc.is-moving .arc-badge b,
-.arc.is-moving .arc-cross,
-.arc.is-moving .arc-next svg { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) {
+  .arc-ghost span, .arc-meta { animation: none; }
+}
