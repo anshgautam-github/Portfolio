@@ -4,12 +4,31 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { isSettled, whenSettled } from "./loader.js";
 
-const SMOOTH_TOUCH = true;
+// Phones scroll natively: JS-driven touch scrolling (Lenis syncTouch) re-runs the scroll position every frame on the main thread,
+// which makes pinned/scrubbed sections jitter and re-fire play/reverse triggers (the fade-out / fade-in flicker). Desktop keeps Lenis.
+const IS_TOUCH_DEVICE = typeof window !== "undefined" && window.matchMedia && (window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(max-width: 820px)").matches);
+const SMOOTH_TOUCH = false;
 let lenis = null;
+
+/* While the page is scrolling, <html> carries .is-scrolling. The section stylesheets use it to freeze purely decorative loops
+   (drifting aurora, sparks, marquee, orbits...) so every frame of a scroll / transition goes to the content that is actually moving. */
+let scrollFlag = false;
+function trackScrolling() {
+  const root = document.documentElement;
+  let timer = 0;
+  const stop = () => { scrollFlag = false; root.classList.remove("is-scrolling"); };
+  window.addEventListener("scroll", () => {
+    if (!scrollFlag) { scrollFlag = true; root.classList.add("is-scrolling"); }
+    clearTimeout(timer);
+    timer = setTimeout(stop, 140);
+  }, { passive: true });
+}
 
 export function initSmoothScroll() {
   if (lenis || typeof window === "undefined") return lenis;
+  trackScrolling();
   if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return null;
+  if (IS_TOUCH_DEVICE) return null;   // native momentum scrolling on phones / tablets
   lenis = new Lenis({
     duration: 1.7,                                              // longer glide = the "buttery" agency feel (try 1.2 for snappier)
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),   // expo-out: fast start, long soft landing

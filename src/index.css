@@ -6,8 +6,8 @@
   --color-ink: #272a1e;
   --color-olive: #b7c944;
   --font-display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
-  --font-cond: "Barlow Condensed", "Arial Narrow", sans-serif;
-  --font-serif: "Gloock", Georgia, serif;
+  --font-cond: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
 }
 
 html,
@@ -152,3 +152,32 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
 .lenis.lenis-smooth iframe { pointer-events: none; }
+
+
+/* ------------------------------------------------------------------
+   Phone GPU budget + flicker guard
+   - backdrop-filter re-blurs everything behind it on every scrolled frame: off on phones (the assistant window keeps one layer).
+   - permanent will-change / backface-visibility promote hundreds of tiny layers (every split letter!). Past the GPU memory budget the
+     browser drops and re-rasterises tiles mid-scroll, which shows up as sections fading out and back in. Off on phones: the browser
+     still promotes an element for the duration of a real transform animation.
+   ------------------------------------------------------------------ */
+html.is-mobile {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+html.is-mobile *:not(.ted-mon):not(.ted-bubble),
+html.is-mobile *:not(.ted-mon):not(.ted-bubble)::before,
+html.is-mobile *:not(.ted-mon):not(.ted-bubble)::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html.is-mobile *:not(canvas):not(video):not(.ted-mon) {
+  will-change: auto !important;
+}
+html.is-mobile [data-word],
+html.is-mobile [data-letter],
+html.is-mobile [data-nav],
+html.is-mobile [data-fade] {
+  -webkit-backface-visibility: visible;
+  backface-visibility: visible;
+}

@@ -167,7 +167,7 @@ export default function Hero() {
             }}
           >
             {t.image ? (
-              <img src={t.image} alt="" className="h-full w-full object-cover" draggable="false" />
+              <img decoding="async" src={t.image} alt="" className="h-full w-full object-cover" draggable="false" />
             ) : (
               <CardArt pattern={t.pattern} palette={t.palette} />
             )}

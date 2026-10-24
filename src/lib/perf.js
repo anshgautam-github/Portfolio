@@ -49,3 +49,31 @@ if (typeof window !== "undefined" && window.requestAnimationFrame && !IS_MOBILE)
   // start measuring after the initial load burst so startup hitches don't trigger it
   setTimeout(() => requestAnimationFrame(probe), 6000);
 }
+
+
+/**
+ * Stable viewport height on touch devices.
+ * Mobile browsers resize window.innerHeight every time the URL bar collapses / expands, so every pin, clip-path, transition offset
+ * and canvas that reads it shifts by 60-100px *during* the scroll: that is the sections that "flash out and back in". We pin
+ * innerHeight to the small-viewport height (100svh, constant while scrolling) and only re-measure on a real width change (rotation).
+ */
+if (IS_TOUCH && typeof document !== "undefined" && typeof CSS !== "undefined" && CSS.supports && CSS.supports("height", "100svh")) {
+  try {
+    const probe = document.createElement("div");
+    probe.setAttribute("aria-hidden", "true");
+    probe.style.cssText = "position:fixed;left:0;top:0;width:0;height:100svh;visibility:hidden;pointer-events:none";
+    document.documentElement.appendChild(probe);
+    let h = probe.offsetHeight || window.innerHeight;
+    let w = window.innerWidth;
+    Object.defineProperty(window, "innerHeight", { configurable: true, get: () => h });
+    const remeasure = () => {
+      const nw = window.innerWidth;
+      if (nw === w) return;           // height-only resize = URL bar, ignore
+      w = nw;
+      const v = probe.offsetHeight;
+      if (v > 0) h = v;
+    };
+    window.addEventListener("resize", remeasure, { passive: true });
+    window.addEventListener("orientationchange", () => setTimeout(remeasure, 250), { passive: true });
+  } catch (e) { /* keep the native value */ }
+}

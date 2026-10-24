@@ -6,7 +6,7 @@
 .ted-dock,
 .ted-wrap {
   --ted-gap: 18px;
-  --ted-h: min(500px, calc(100vh - 190px)); /* leaves room above the window for the bear to stand on it */
+  --ted-h: min(500px, calc(100svh - 190px)); /* leaves room above the window for the bear to stand on it */
 }
 
 .ted-dock {
@@ -1056,7 +1056,7 @@
   resize: none;
   background: transparent;
   color: #3a2f12;
-  font: 500 var(--fs, 18px)/1.1 "Caveat", "Bradley Hand", "Segoe Script", cursive;
+  font: 500 var(--fs, 18px)/1.1 "Inter Tight", "Helvetica Neue", Arial, sans-serif;
   caret-color: #3a2f12;
 }
 .ted-note textarea::placeholder {
@@ -1068,7 +1068,7 @@
   .ted-dock,
   .ted-wrap {
     --ted-gap: 8px;
-    --ted-h: calc(100vh - 130px);
+    --ted-h: calc(100svh - 130px);
   }
   .ted-dock.is-open {
     width: 72px;
@@ -1213,7 +1213,7 @@
    ========================================================================== */
 .ted-wrap.is-desk,
 .ted-dock.is-open.is-desk {
-  --ted-h: min(740px, calc(100vh - 190px));
+  --ted-h: min(740px, calc(100svh - 190px));
 }
 .ted-wrap.is-desk {
   width: min(calc(var(--ted-h) * 1.34), calc(100vw - 2 * var(--ted-gap)));
@@ -1942,7 +1942,7 @@
   padding: 6px;
   text-align: center;
   color: #3a2f12;
-  font: 500 clamp(15px, 1.7vw, 19px) / 1.05 "Caveat", "Bradley Hand", cursive;
+  font: 500 clamp(15px, 1.7vw, 19px) / 1.05 "Inter Tight", "Helvetica Neue", Arial, sans-serif;
   border-radius: 2px;
   box-shadow: 0 8px 12px rgba(0, 0, 0, 0.35);
   pointer-events: auto;
@@ -2010,10 +2010,10 @@
     right: 24px;
   }
   .ted-wrap.is-desk {
-    --ted-h: calc(100vh - 130px);
+    --ted-h: calc(100svh - 130px);
   }
   .ted-dock.is-open.is-desk {
-    --ted-h: calc(100vh - 130px);
+    --ted-h: calc(100svh - 130px);
   }
 }
 
@@ -2040,7 +2040,7 @@
    ========================================================================== */
 .ted-wrap.is-desk,
 .ted-dock.is-open.is-desk {
-  --ted-h: min(560px, calc(100vh - 210px));
+  --ted-h: min(560px, calc(100svh - 210px));
 }
 .ted-wrap.is-desk {
   width: min(calc(var(--ted-h) * 1.3), calc(100vw - 2 * var(--ted-gap) - 16px));
@@ -2164,7 +2164,7 @@
 @media (max-width: 700px) {
   .ted-wrap.is-desk,
   .ted-dock.is-open.is-desk {
-    --ted-h: calc(100vh - 150px);
+    --ted-h: calc(100svh - 150px);
   }
   .ted-wrap.is-desk {
     width: calc(100vw - 2 * var(--ted-gap) - 12px);
@@ -2270,7 +2270,7 @@
 /* boot / splash live inside the monitor now - and the monitor is smaller */
 .ted-wrap.is-desk,
 .ted-dock.is-open.is-desk {
-  --ted-h: min(460px, calc(100vh - 250px));
+  --ted-h: min(460px, calc(100svh - 250px));
 }
 .ted-bootscreen {
   position: absolute;
@@ -2287,7 +2287,7 @@
 /* final sizing: compact but with room for the terminal */
 .ted-wrap.is-desk,
 .ted-dock.is-open.is-desk {
-  --ted-h: min(520px, calc(100vh - 230px));
+  --ted-h: min(520px, calc(100svh - 230px));
 }
 .ted-desk .ted-desknote.l1,
 .ted-desk .ted-desknote.l2,
@@ -2864,7 +2864,7 @@
   text-shadow: none;
 }
 .ted-globe { stroke: var(--t); opacity: 0.8; }
-.ted-press { letter-spacing: 0.34em; font-family: "JetBrains Mono", ui-monospace, monospace; }
+.ted-press { letter-spacing: 0.34em; font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; }
 
 /* ---- stickers + desk notes: same family as the landing stickers ---- */
 .ted-desk .stk { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.4)); }

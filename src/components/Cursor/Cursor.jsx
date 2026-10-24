@@ -48,6 +48,7 @@ export default function Cursor() {
     let state = "idle", magnet = null, mood = "idle", lastMove = performance.now();
     let scaleT = 1, scale = 1, look = { x: 0, y: 0 }, ang = 0;
     const sparks = [];
+    let drewSparks = false;
     // the "capture plate": a springy sticker frame that snaps around small links / buttons
     const pl = { x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, vw: 0, vh: 0, a: 0, on: false, r: "12px", seeded: false };
     let heartAt = 0;
@@ -208,6 +209,9 @@ export default function Cursor() {
       if (reduce) return;
       // star sparkles when it zooms around
       if (sp > 9 && Math.random() < 0.45) sparks.push({ x: h.x, y: h.y, vx: (Math.random() - 0.5) * 1.5 - v.x * 0.08, vy: (Math.random() - 0.5) * 1.5 - v.y * 0.08, life: 1, s: 2 + Math.random() * 4, c: ["#d7ff3b", "#ff8fb4", "#7fe7ff"][(Math.random() * 3) | 0] });
+      // the spark canvas covers the whole viewport: touching it every frame (even to clear nothing) makes the browser re-composite
+      // the entire screen at the display's refresh rate. Only draw while there are sparks, plus one last clear.
+      if (!sparks.length && !drewSparks) return;
       ctx.clearRect(0, 0, W, H);
       for (let i = sparks.length - 1; i >= 0; i--) {
         const s = sparks[i];
@@ -228,6 +232,7 @@ export default function Cursor() {
         ctx.quadraticCurveTo(s.x, s.y, s.x, s.y - q * 1.7); ctx.fill();
       }
       ctx.globalAlpha = 1;
+      drewSparks = sparks.length > 0;
     };
     gsap.ticker.add(tick);
 

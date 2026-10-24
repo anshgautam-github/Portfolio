@@ -1,6 +1,6 @@
 .spot { --ink: #101421; --blue: #2f5ff0; --e: cubic-bezier(.2,.8,.2,1);
   position: fixed; inset: 0; z-index: 9990; color: var(--ink); outline: none; overflow: hidden;
-  font-family: "Newsreader", "Gloock", Georgia, serif; }
+  font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; }
 .spot *, .spot *::before, .spot *::after { box-sizing: border-box; }
 .spot-veil { position: absolute; inset: 0; background: radial-gradient(110% 90% at 30% 40%, rgba(255,255,255,.94), rgba(238,243,250,.92) 60%, rgba(226,233,245,.94));
   opacity: 0; backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); transition: opacity .6s var(--e), backdrop-filter .7s var(--e), -webkit-backdrop-filter .7s var(--e); }
@@ -216,7 +216,7 @@
 .spot-roles span { font-size: 13.5px; line-height: 1.45; opacity: .8; }
 
 /* programs: keep long content inside the viewport, clear of the dock */
-.spot[data-prog] .spot-text { max-height: calc(100vh - 230px); overflow-y: auto; overscroll-behavior: contain; padding: 4px 8px 28px 0; scrollbar-width: thin; scrollbar-color: rgba(16,20,33,.25) transparent;
+.spot[data-prog] .spot-text { max-height: calc(100vh - 230px); max-height: calc(100svh - 230px); overflow-y: auto; overscroll-behavior: contain; padding: 4px 8px 28px 0; scrollbar-width: thin; scrollbar-color: rgba(16,20,33,.25) transparent;
   -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 34px), transparent); }
 .spot[data-prog] .spot-text > .spot-title { font-size: clamp(30px, 3.5vw, 56px); line-height: 1.02; letter-spacing: -.02em; text-wrap: balance; margin-bottom: 12px; }
 .spot[data-prog] .spot-top { margin-bottom: clamp(10px, 2vh, 18px); }

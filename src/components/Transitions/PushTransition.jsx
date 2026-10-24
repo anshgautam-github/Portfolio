@@ -2,6 +2,7 @@ import { useLayoutEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { createIris } from "./iris.js";
+import { IS_MOBILE } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,7 +34,7 @@ export default function PushTransition({ from = ".kimi .last-layer", to = "[data
       if (cv && cv.isConnected) return cv;
       cv = document.createElement("div");
       cv.setAttribute("aria-hidden", "true");
-      cv.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:38;pointer-events:none;display:none;overflow:hidden";
+      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;z-index:38;pointer-events:none;display:none;overflow:hidden";
       cv.innerHTML =
         '<div data-sh="1" style="position:absolute;top:0;bottom:0;width:140px;margin-left:-140px;background:linear-gradient(90deg,rgba(0,0,0,0),rgba(0,0,0,.28));will-change:transform"></div>' +
         '<div data-ln="1" style="position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.9);will-change:transform"></div>' +
@@ -65,11 +66,12 @@ export default function PushTransition({ from = ".kimi .last-layer", to = "[data
       const edge = W * (1 - e);                              // viewport x of the reveal edge
       const tx = (1 - e) * W * 0.035;                        // projects drift in a touch against the sweep
 
-      A.style.willChange = "transform, filter";
+      A.style.willChange = IS_MOBILE ? "transform" : "transform, filter";
       A.style.pointerEvents = "none";
       A.style.transformOrigin = "50% 100%";
       A.style.transform = `translate3d(0, ${(H * sp).toFixed(2)}px, 0) scale(${(1 - 0.03 * e).toFixed(4)})`;
-      A.style.filter = `brightness(${(1 - 0.35 * e).toFixed(3)})`;
+      // a filter on a whole section is re-rasterised every frame: far too heavy for phones (the dim is cosmetic there)
+      if (!IS_MOBILE) A.style.filter = `brightness(${(1 - 0.35 * e).toFixed(3)})`;
 
       B.style.willChange = "transform, clip-path";
       B.style.zIndex = "40";

@@ -5,10 +5,10 @@
   --paper: #efe7d3;
   --ink: #2a241b;
   --red: #c4372d;
-  --type: "Special Elite", "Courier New", monospace;
-  --marker: "Permanent Marker", "Caveat", cursive;
-  --hand: "Caveat", "Segoe Script", cursive;
-  --sans: "Archivo", "Inter Tight", Arial, sans-serif;
+  --type: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --marker: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --hand: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
   position: relative;
   box-sizing: border-box;
   min-height: 100vh;

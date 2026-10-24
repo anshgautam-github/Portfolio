@@ -709,16 +709,8 @@ export function createGlassScene(canvas, opts = {}) {
     const bhh = bw * (MASK_H / MASK_W);
     let cy = 0.51;
     if (aspect < 0.7) {
-      // portrait phones: the copy takes the top, so the lettering sits lower - and never lands on the About card
-      cy = 0.585;
-      const now = performance.now();
-      if (now - cardT > 400) {
-        cardT = now;
-        const card = canvas.parentElement && canvas.parentElement.querySelector(".ll-c3");
-        const cr = card && card.getBoundingClientRect(), pr = canvas.getBoundingClientRect();
-        cardBottom = cr && pr.height ? (cr.bottom - pr.top) / pr.height : 0;
-      }
-      if (cardBottom) cy = Math.max(0.5, Math.min(0.72, Math.max(cy, cardBottom + bhh / 2 + 0.03)));
+      // portrait phones: role line sits at the top and the headline at the bottom, so the lettering takes the optical centre between them
+      cy = 0.47;
     }
     const cx = 0.495 * aspect;
     return [cx - bw / 2, cy - bhh / 2, bw, bhh];

@@ -11,13 +11,13 @@ import "./frame.css";
  */
 function read(el) {
   const cs = getComputedStyle(el);
-  const n = (v, d) => parseFloat(cs.getPropertyValue(v)) || d;
+  const n = (v, d) => { const x = parseFloat(cs.getPropertyValue(v)); return Number.isNaN(x) ? d : x; };   // 0 is a valid value (phones: no side margins)
   return { m: n("--fr-m", 14), r: n("--fr-r", 30), nw: n("--fr-nw", 340), nh: n("--fr-nh", 50), nr: n("--fr-nr", 26) };
 }
 
 function build(W, H, { m, r, nw, nh, nr }) {
   const x0 = m, y0 = m, x1 = W - m, y1 = H - m;
-  r = Math.min(r * 0.7, (x1 - x0) / 2, (y1 - y0) / 2);   // corners are straight chamfers now
+  r = Math.min(r, (x1 - x0) / 2, (y1 - y0) / 2);   // simple rounded corners
   nr = Math.max(nr, 0);
   const cx = W / 2;
   nw = Math.min(nw, W - 2 * (m + r + Math.max(nr, nh)) - 8);
@@ -29,21 +29,26 @@ function build(W, H, { m, r, nw, nh, nr }) {
   const ch = Math.min(Math.max(d * 0.28, 0), hw);   // bottom chamfer
   if (d < 1) return { ring: `M0 0H${W}V${H}H0Z${`M${x0} ${y0}H${x1}V${y1}H${x0}Z`}`, edge: `M${x0} ${y0}H${x1}V${y1}H${x0}Z` };               // rounded bottom corners of the tab
   const outer = `M0 0H${W}V${H}H0Z`;
+  const q = Math.min(12, d * 0.45), qd = q * 0.7071;   // softness of the notch shoulders
   const inner = [
     `M${x0 + r} ${y0}`,
-    `H${cx - hw - d}`,
-    // one clean slant from the top edge straight down to the tab floor (45deg, no vertical, no break)
-    `L${cx - hw} ${y0 + d}`,
-    `H${cx + hw}`,
-    `L${cx + hw + d} ${y0}`,
+    `H${cx - hw - d - q}`,
+    // tab notch: 45deg slant with softly rounded shoulders
+    `Q${cx - hw - d} ${y0} ${cx - hw - d + qd} ${y0 + qd}`,
+    `L${cx - hw - qd} ${y0 + d - qd}`,
+    `Q${cx - hw} ${y0 + d} ${cx - hw + q} ${y0 + d}`,
+    `H${cx + hw - q}`,
+    `Q${cx + hw} ${y0 + d} ${cx + hw + qd} ${y0 + d - qd}`,
+    `L${cx + hw + d - qd} ${y0 + qd}`,
+    `Q${cx + hw + d} ${y0} ${cx + hw + d + q} ${y0}`,
     `H${x1 - r}`,
-    `L${x1} ${y0 + r}`,
+    `A${r} ${r} 0 0 1 ${x1} ${y0 + r}`,
     `V${y1 - r}`,
-    `L${x1 - r} ${y1}`,
+    `A${r} ${r} 0 0 1 ${x1 - r} ${y1}`,
     `H${x0 + r}`,
-    `L${x0} ${y1 - r}`,
+    `A${r} ${r} 0 0 1 ${x0} ${y1 - r}`,
     `V${y0 + r}`,
-    `L${x0 + r} ${y0}Z`,
+    `A${r} ${r} 0 0 1 ${x0 + r} ${y0}Z`,
   ].join("");
   return { ring: `${outer}${inner}`, edge: inner };
 }

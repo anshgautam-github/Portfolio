@@ -217,7 +217,7 @@ export default function Outro() {
               <span className="outro-tg-green" />
               <span className="outro-tg-ring" data-ring />
               <span className="outro-tg-knob">
-                {o.avatar ? <img src={o.avatar} alt="" draggable="false" /> : <span className="outro-av" data-i={o.initials} />}
+                {o.avatar ? <img decoding="async" src={o.avatar} alt="" draggable="false" /> : <span className="outro-av" data-i={o.initials} />}
               </span>
             </button>
           </span>

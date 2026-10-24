@@ -751,3 +751,52 @@
   .ff-eyebrow { display: none; }
   .ff-title { font-size: clamp(28px, 6vw, 44px); }
 }
+
+
+/* =====================================================================
+   PERFORMANCE PASS  (visuals unchanged; only costs removed)
+
+   1. `transition: --glow` on .ff animated an INHERITED custom property for 0.9s on every card change, so the browser re-resolved styles for the
+      whole subtree (hundreds of nodes, plus every cloned shard) and repainted every gradient that reads var(--glow), on every frame of the
+      scroll. The colour now switches instantly and only the three big colour pools glide, as a plain background-colour transition.
+   2. blur() filters on the aurora / glow layers: their gradients already fade to transparent, so the blur added nothing but a full-layer GPU pass per frame.
+   3. box-shadows on the cards were clipped away by the cards' own clip-path (never visible) but still painted.
+   4. backdrop-filter on the chips, tags and ticker re-blurred what sat behind them every frame.
+   5. rotating a perfectly round, uniformly bordered ring changes nothing on screen.
+   ===================================================================== */
+.ff { transition: none; }
+
+.ff-glow {
+  filter: none;
+  background: var(--glow);
+  -webkit-mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.08) 60%, transparent);
+  mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.08) 60%, transparent);
+  transition: background-color 0.9s ease;
+}
+@media (min-width: 901px) and (pointer: fine) {
+  .ff-aur { filter: none; transition: background-color 0.9s ease; }
+  .ff-aur--a { background: var(--glow); -webkit-mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.42), transparent); mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.42), transparent); }
+  .ff-aur--b { background: var(--glow); -webkit-mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.36), transparent); mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.36), transparent); }
+}
+
+.ff-card, .ff-card--job { box-shadow: none; }
+.ff-chip, .ff-card--job .ff-tag, .ff-ticker { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.ff-ring--a, .ff-ring--b { animation: none; }
+@keyframes ff-num { from { transform: translateY(-110%); opacity: 0; } }     /* no animated blur on the counter */
+
+/* the break: pieces are small flat copies, so none of the card's own effects are needed inside them */
+.ff-shards .ff-shardcard, .ff-shards .ff-shardcard * { will-change: auto !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.ff-shards .ff-motif { filter: none; }
+.ff-cracks line { filter: none; }                                           /* one glow for the whole crack layer instead of one filter per line */
+.ff-cracks { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8)); }
+
+/* decorative loops stand still while the page is scrolling or a transition is running (see lib/smooth.js) */
+html.is-scrolling .ff-aur,
+html.is-scrolling .ff-spark,
+html.is-scrolling .ff-orb,
+html.is-scrolling .ff-ticker-t,
+html.is-scrolling .ff-ghost-word,
+html.is-scrolling .ff-fall .ff-letter,
+html.is-scrolling .ff-streak,
+html.is-scrolling .ff-dot::after,
+html.is-scrolling .ff-index button.is-on .ff-ix-n::after { animation-play-state: paused !important; }

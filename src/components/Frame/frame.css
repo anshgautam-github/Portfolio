@@ -8,7 +8,10 @@
   --fr-nr: 28px;    /* shoulder curve into the tab */
 }
 @media (max-width: 1024px) { :root { --fr-m: 11px; --fr-r: 26px; --fr-nw: 270px; --fr-nh: 46px; --fr-nr: 22px; } }
-@media (max-width: 640px)  { :root { --fr-m: 7px;  --fr-r: 20px; --fr-nw: 196px; --fr-nh: 38px; --fr-nr: 16px; } }
+/* phones: no side / top / bottom margins and no chamfered corners — the page runs edge to edge (only the brand tab remains) */
+@media (max-width: 640px)  { :root { --fr-nw: 196px; --fr-nh: 38px; --fr-nr: 16px; } }
+/* phones + tablets + touch devices: no margins, no cut corners (edge to edge) */
+@media (max-width: 1024px), (pointer: coarse) { :root { --fr-m: 0px; --fr-r: 0px; } }
 
 html, body { background: var(--fr-bg); }
 
@@ -21,7 +24,7 @@ html, body { background: var(--fr-bg); }
 .fr-brand {
   all: unset; box-sizing: border-box; pointer-events: auto; cursor: pointer;
   position: absolute; left: 50%; top: var(--fr-m); height: var(--fr-nh); transform: translateX(-50%);
-  display: flex; align-items: center; justify-content: center; max-width: calc(var(--fr-nw) - 24px);
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; align-content: center; max-width: calc(var(--fr-nw) - 24px);
   white-space: nowrap; color: #0b0b0b;
   font-family: "Archivo", "Inter Tight", Arial, sans-serif; font-stretch: 125%; font-weight: 800;
   font-size: clamp(13px, 1.5vw, 22px); letter-spacing: .01em;
@@ -33,4 +36,4 @@ html, body { background: var(--fr-bg); }
 /* the landing logo is hidden only while the frame tab shows it; the tab melts away on scroll, so keep it hidden only in the hero */
 .ll-logo { visibility: hidden; }
 
-.fr-brand .fr-tag { margin-left: .35em; font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-stretch: 100%; font-weight: 500; font-size: .55em; letter-spacing: .04em; opacity: .55; align-self: flex-end; padding-bottom: .55em; }
+.fr-brand .fr-tag { margin-left: .35em; font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; font-stretch: 100%; font-weight: 500; font-size: .55em; letter-spacing: .04em; opacity: .55; align-self: baseline; padding-bottom: 0; }

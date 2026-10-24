@@ -128,7 +128,11 @@ export default function ArcCarousel({
       raf = requestAnimationFrame(draw);
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       // nothing is moving: don't touch the DOM at all (this is what keeps scrolling past the section smooth)
-      const idle = !autoplay && !S.drag && S.intro >= 1 && Math.abs(S.target - S.pos) < 4e-4 && Math.abs(S.vel) < 2e-3;
+      // (before the section has ever been on screen there is nothing to animate either: the cards are posed once, then the loop sleeps
+      //  - it used to rewrite all 16 cards' styles on every frame for as long as you were still scrolling down to this section)
+      const idle = !autoplay && !S.drag && (S.intro >= 1 || !S.started) && Math.abs(S.target - S.pos) < 4e-4 && Math.abs(S.vel) < 2e-3;
+      // while the carousel moves, the section's decorative loops stand still (see arc-carousel.css)
+      if (idle === !!S.moving) { S.moving = !idle; if (root.current) root.current.classList.toggle("is-moving", !idle); }
       if (idle && S.rested) return;
       S.rested = idle;
       // intro: the arc fans open and spins in the first time it scrolls into view
@@ -154,10 +158,10 @@ export default function ArcCarousel({
         const o = wrap(i - posv, N);
         const a = Math.abs(o);
         if (a > 4.6 && S.intro >= 1) {                                // far side of the ring: invisible, leave it alone
-          if (!c._off) { c._off = true; c.style.opacity = "0"; c.style.pointerEvents = "none"; c.style.zIndex = "0"; c.classList.remove("is-on"); }
+          if (!c._off) { c._off = true; c._on = false; c.style.opacity = "0"; c.style.pointerEvents = "none"; c.style.zIndex = "0"; c.classList.remove("is-on"); c.classList.add("is-far"); }   // is-far: visibility hidden, so its GPU layer is released
           continue;
         }
-        c._off = false;
+        if (c._off) { c._off = false; c.classList.remove("is-far"); }
         const th = clamp(o * dth * spread, -1.25, 1.25);           // angle around the cylinder
         const x = R * Math.sin(th);                                 // true circle: sideways...
         const z = R * (1 - Math.cos(th));                           // ...and toward the viewer, so the arc is concave
@@ -335,6 +339,11 @@ export default function ArcCarousel({
           onIndex={(k) => { api.current.to?.(k); swapHidden(k); }} onClose={closeSpot} />
       )}
 
+      <div className="arc-next" aria-hidden="true">
+        <span className="arc-next-dots"><i /><i /><i /></span>
+        <em>Next</em><b>My Arsenal</b>
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v10M4 9l4 4 4-4" /></svg>
+      </div>
       <div className="arc-count"><b>{pad(active + 1)}</b><span> / {pad(n)}</span></div>
       <div className="arc-nav">
         <button type="button" aria-label="Previous project" onClick={() => api.current.go?.(-1)}>&lsaquo;</button>

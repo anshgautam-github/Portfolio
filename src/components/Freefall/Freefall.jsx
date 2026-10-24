@@ -136,8 +136,9 @@ const makeShatter = (SH_C, SH_R) => {
   });
   return { shards, edges };
 };
-/* phones get a coarser break (3x3 = 18 shards instead of 32) so it stays smooth on a mobile GPU */
-const SHATTER = makeShatter(4, 4), SHATTER_LITE = makeShatter(3, 3);
+/* every card carries its own set of cloned shards, so the break is kept coarse everywhere (3x3 = 18 pieces instead of 32):
+   it reads just as clearly as glass, but the page holds ~70 cloned cards instead of ~130 and the first frame of a break paints far fewer layers */
+const SHATTER = makeShatter(3, 3), SHATTER_LITE = SHATTER;
 
 export default function Freefall() {
   const root = useRef(null);
@@ -151,7 +152,9 @@ export default function Freefall() {
     const el = root.current;
     const deck = deckRef.current;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const lite = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;   // phones: lighter shatter (fewer shards), quicker scrub
+    const liteMQ = window.matchMedia("(max-width: 900px), (pointer: coarse)");
+    const lite = liteMQ.matches;
+    const isLite = () => liteMQ.matches; // live, so resizing / device emulation after load is honoured   // phones: lighter shatter (fewer shards), quicker scrub
     const cleanups = [];
 
     const ctx = gsap.context(() => {
@@ -182,7 +185,7 @@ export default function Freefall() {
           box.style.cssText = `left:${(sh.bx * 100).toFixed(3)}%;top:${(sh.by * 100).toFixed(3)}%;width:${(sh.bw * 100).toFixed(3)}%;height:${(sh.bh * 100).toFixed(3)}%;clip-path:${sh.poly};transform-origin:${sh.ox};display:none`;
           const n = cards[i].cloneNode(true);
           // a clean, light copy of the card: no heavy texture / animated layers, captions fully on, art at rest
-          n.querySelectorAll(".ff-grain,.ff-streak,[data-sheen],.ff-ring").forEach((x) => x.remove());
+          n.querySelectorAll(".ff-grain,.ff-streak,[data-sheen],.ff-ring,.ff-beam").forEach((x) => x.remove());
           const ca = n.querySelector("[data-cap]"), ar = n.querySelector("[data-art]"), sd = n.querySelector("[data-shade]");
           if (ca) ca.style.opacity = "1"; if (sd) sd.style.opacity = "0"; if (ar) ar.style.transform = "scale(1.12)";
           n.removeAttribute("data-card"); n.removeAttribute("aria-label"); n.removeAttribute("style");
@@ -210,9 +213,16 @@ export default function Freefall() {
       let idleId = 0, nextBuild = 0;
       const ric = window.requestIdleCallback || ((f) => setTimeout(f, 300));
       const cic = window.cancelIdleCallback || clearTimeout;
-      const prebuild = () => { if (nextBuild < N && !reduce) { if (!wraps[nextBuild]) wraps[nextBuild] = buildShards(nextBuild); nextBuild++; idleId = ric(prebuild); } };
-      idleId = ric(() => { idleId = ric(prebuild); });
-      cleanups.push(() => cic(idleId));
+      const prebuild = () => { if (nextBuild < N && !reduce && !isLite()) { if (!wraps[nextBuild]) wraps[nextBuild] = buildShards(nextBuild); nextBuild++; idleId = ric(prebuild); } };
+      // ...but only once the section is within ~1.5 screens of the viewport: until then the page stays free of ~70 hidden card clones
+      // (every one of them is restyled on each class / custom-property change anywhere inside the section, and cloned again by the glass transition)
+      let nearIO = null;
+      const startPrebuild = () => { if (nearIO) { nearIO.disconnect(); nearIO = null; } idleId = ric(prebuild); };
+      if (typeof IntersectionObserver === "function") {
+        nearIO = new IntersectionObserver(([x]) => { if (x.isIntersecting) startPrebuild(); }, { rootMargin: "150% 0px" });
+        nearIO.observe(el);
+      } else startPrebuild();
+      cleanups.push(() => { if (nearIO) nearIO.disconnect(); cic(idleId); });
 
       const layout = () => {
         H = el.clientHeight;
@@ -267,7 +277,7 @@ export default function Freefall() {
             z = 500 - i;
           } else {
             const u = -d;
-            if (!reduce) {
+            if (!reduce && !isLite()) {
               /* brittle break: the card holds, shudders, cracks, then bursts into shards that tumble away under gravity */
               y = 0; s = 1 + 0.012 * Math.min(1, u / BREAK_AT); rx = 0; z = 700 - i;
               const pre = clamp(u / BREAK_AT, 0, 1);
@@ -304,10 +314,12 @@ export default function Freefall() {
               caps[i].style.opacity = "1"; shades[i].style.opacity = "0";
               continue;
             }
-            y = H * (0.26 * u + 0.5 * u * u); // reduced motion: the old simple drop
-            s = 1 + 0.14 * u;
-            rx = 4 + 8 * u;
-            op = 1 - sstep(0.9, 1.05, u);
+            // reduced motion / phones: no shards, the card just lifts away and fades (no layout shake)
+            if (c.style.visibility === "hidden" && wraps[i]) wraps[i].w.style.display = "none";
+            y = H * 0.18 * u;
+            s = 1 + 0.05 * u;
+            rx = 0;
+            op = 1 - sstep(0.0, 0.55, u);
             z = 700 - i;
           }
           // the whole deck drops in from above on first view
@@ -354,7 +366,7 @@ export default function Freefall() {
             start: "top top",
             end: () => `+=${Math.round((N - 1) * window.innerHeight * 0.85 + window.innerHeight * 0.25)}`,
             pin: true,
-            scrub: lite ? 0.25 : 0.7,
+            scrub: lite ? 0.2 : 0.35,       // Lenis already glides the scroll itself; a long scrub on top only adds trailing latency
             anticipatePin: 1,
             invalidateOnRefresh: true,
             onRefreshInit: layout,
@@ -602,7 +614,7 @@ export default function Freefall() {
             {card.company ? (
               <div className="ff-cap ff-cap--job" data-cap>
                 <div className="ff-org">
-                  <img className={`ff-logo${card.sq ? " ff-logo--sq" : ""}`} src={`${BASE}freefall/${card.logo}`} alt="" draggable="false" />
+                  <img decoding="async" className={`ff-logo${card.sq ? " ff-logo--sq" : ""}`} src={`${BASE}freefall/${card.logo}`} alt="" draggable="false" />
                   <div>
                     <b>{card.company}</b>
                     <small>{card.kind} &middot; {card.when}</small>{card.place && <small className="ff-place">{card.place}</small>}

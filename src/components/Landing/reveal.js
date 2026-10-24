@@ -1,5 +1,6 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { capDpr } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -70,17 +71,17 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
       <div class="rv-row" data-row="a">${[0, 1, 2].map(() => `<span class="rv-seg">${seg(c.stripA)}</span>`).join("")}</div>
       <div class="rv-row" data-row="b">${[0, 1, 2].map(() => `<span class="rv-seg">${seg(c.stripB)}</span>`).join("")}</div>
     </div>
-    <div class="rv-card" data-card><section class="rv-slot" id="top"></section></div>
+    <div class="rv-card" data-card><section class="rv-slot" id="top"></section><i class="rv-frost" data-frost aria-hidden="true"></i></div>
     <svg class="rv-sig" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       <defs>
-        <linearGradient id="rvInk" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#6b9bff"/><stop offset="1" stop-color="#2f5fe0"/>
+        <linearGradient id="rvInk" gradientUnits="userSpaceOnUse" x1="120" y1="0" x2="900" y2="560">
+          <stop offset="0" stop-color="#6a2cf0"/><stop offset=".55" stop-color="#b5239f"/><stop offset="1" stop-color="#ee5a6f"/>
         </linearGradient>
       </defs>
       ${["main", "g", "bar", "tick", "under"].map((k) => `
         <path data-sig="${k}" d="${SIG[k]}" fill="none" stroke="url(#rvInk)" stroke-width="${k === "main" || k === "g" ? 11 : k === "under" ? 8 : 7}" stroke-linecap="round" stroke-linejoin="round"/>
         <path data-sigs="${k}" d="${SIG[k]}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="translate(-3 -4)"/>`).join("")}
-      <circle data-pen r="9" cx="110" cy="340" fill="#fff" stroke="#2f5fe0" stroke-width="4" opacity="0"/>
+      <circle data-pen r="9" cx="110" cy="340" fill="#fff" stroke="#b5239f" stroke-width="4" opacity="0"/>
     </svg>
 </div>
   `;
@@ -133,6 +134,11 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
     tl.to(card, { rotation: -2.2, scale: small * 0.92, duration: 0.26, ease: "sine.inOut" }, 0.32);
     // the card (the website preview) stays on screen until the signature is finished; it leaves with the pinned scene when the pin releases
 
+    // as the pen starts to sign, the website card melts into frosted glass: the blur radius and a soft luminous tint ramp up together
+    // (a backdrop-filter layer that is fully hidden at rest, so the landing costs nothing until the signature begins)
+    const blurMax = window.innerWidth < 700 ? 7 : 12;
+    tl.fromTo($("[data-frost]"), { autoAlpha: 0, "--rv-blur": "0px" }, { autoAlpha: 1, "--rv-blur": blurMax + "px", duration: 0.22, ease: "power2.out" }, 0.1);
+
     // strips slide past (scroll-driven), fade in and out
     tl.fromTo($('[data-row="a"]'), { xPercent: 0 }, { xPercent: -33.333, duration: END }, 0);
     tl.fromTo($('[data-row="b"]'), { xPercent: -33.333 }, { xPercent: 0, duration: END }, 0);
@@ -176,10 +182,13 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
     const g = cv.getContext("2d");
     const P = Array.from({ length: 70 }, () => ({ x: Math.random(), y: Math.random(), r: 0.6 + Math.random() * 1.8, v: 0.015 + Math.random() * 0.05, p: Math.random() * 6.28 }));
     let W = 0, H = 0, last = 0;
-    const size = () => { const d = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * d; cv.height = H * d; g.setTransform(d, 0, 0, d, 0, 0); };
+    const size = () => { const d = capDpr(2, 1.25); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * d; cv.height = H * d; g.setTransform(d, 0, 0, d, 0, 0); };
     size(); window.addEventListener("resize", size);
+    // the dust (70 glowing dots, each drawn with a canvas shadow blur) only runs while the landing is on screen; it used to run for the whole life of the page
+    let dustVis = true;
     const tick = (t) => {
-      if (stopDust) return;
+      raf = 0;
+      if (stopDust || !dustVis) return;
       raf = requestAnimationFrame(tick);
       if (t - last < 33) return; last = t;
       g.clearRect(0, 0, W, H);
@@ -191,8 +200,12 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
         g.arc(p.x * W, p.y * H, p.r, 0, 6.283); g.fill();
       }
     };
+    const dio = typeof IntersectionObserver === "function"
+      ? new IntersectionObserver(([en]) => { dustVis = en.isIntersecting; if (dustVis && !raf && !stopDust) raf = requestAnimationFrame(tick); }, { rootMargin: "80px" })
+      : null;
+    if (dio) dio.observe(cv);
     raf = requestAnimationFrame(tick);
-    offDust = () => { stopDust = true; cancelAnimationFrame(raf); window.removeEventListener("resize", size); };
+    offDust = () => { stopDust = true; cancelAnimationFrame(raf); if (dio) dio.disconnect(); window.removeEventListener("resize", size); };
   }
 
   const api = {

@@ -44,7 +44,6 @@ export function mountLanding(root, content = landingContent, options = {}) {
     <div class="ll-t ll-col ll-c1">
       <div class="ll-ch ll-d2"><i>01</i><span>${esc(c.cols?.[0] || "Role")}</span></div>
       <h3 class="ll-role ll-rise ll-d2">${c.label.map(esc).join("<br>")}</h3>
-      <div class="ll-status ll-rise ll-d4"><b></b>${esc(c.status || "Available")}</div>
     </div>
     <div class="ll-t ll-col ll-c2">
       <div class="ll-ch ll-d3"><i>02</i><span>${esc(c.cols?.[1] || "Approach")}</span></div>
@@ -55,6 +54,7 @@ export function mountLanding(root, content = landingContent, options = {}) {
       <p class="ll-bio ll-rise ll-d4">${esc(c.bio)}</p>
       <div class="ll-ctas ll-rise ll-d5">${(c.cta || []).map((b, i) => `<button type="button" class="ll-cta${i ? " is-ghost" : ""}" data-nav="${esc(b.target)}"><span>${esc(b.label)}</span><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>`).join("")}</div>
     </div>
+    <div class="ll-t ll-mq ll-rise ll-d5" aria-hidden="true"><div class="ll-mq-track">${[0, 1].map(() => (c.marquee || []).map((m) => `<span>${esc(m)}</span><i></i>`).join("")).join("")}</div></div>
     <h1 class="ll-t ll-h1" aria-label="${esc(c.headline.join(" "))}">${c.headline.map((l) => `<span class="ll-ln" aria-hidden="true"><span>${esc(l)}</span></span>`).join("")}</h1>
     <div class="ll-t ll-mono ll-foot ll-clock ll-rise ll-d5" data-clock></div>
     <div class="ll-t ll-mono ll-foot ll-coords ll-rise ll-d5" data-coords>0000 X 0000 Y</div>
@@ -207,6 +207,8 @@ export function mountLanding(root, content = landingContent, options = {}) {
     const r = b.getBoundingClientRect();
     b.style.setProperty("--mx", ((e.clientX - r.left - r.width / 2) * 0.22).toFixed(1) + "px");
     b.style.setProperty("--my", ((e.clientY - r.top - r.height / 2) * 0.3).toFixed(1) + "px");
+    b.style.setProperty("--lx", ((e.clientX - r.left) / r.width * 100).toFixed(1) + "%");
+    b.style.setProperty("--ly", ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%");
   };
   const ctaOut = (e) => { const b = e.target.closest && e.target.closest(".ll-cta"); if (b) { b.style.setProperty("--mx", "0px"); b.style.setProperty("--my", "0px"); } };
   root.addEventListener("pointermove", ctaMove);

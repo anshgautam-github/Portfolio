@@ -33,7 +33,7 @@ export default function ProgramArt({ d }) {
       <i className="pa-halo" /><i className="pa-sheen" /><i className="pa-frame" /><i className="pa-grain" />
       <span className="pa-dur">{d.duration}</span>
       <div className={"pa-tile pa-bare" + (ON_WHITE.has(d.logo) ? " is-mono" : "") + (d.logo === "microsoft" ? " is-ms" : "")}>
-        <img src={LOGOS[d.logo]} alt={d.org + " logo"} draggable="false" />
+        <img decoding="async" src={LOGOS[d.logo]} alt={d.org + " logo"} draggable="false" />
       </div>
       <p className="pa-org">{d.short || d.org}</p>
       <p className="pa-when">{d.year}</p>

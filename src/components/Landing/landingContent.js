@@ -13,5 +13,6 @@ export const landingContent = {
   tagline: ["From first principles.", "To working systems."],
   bio: "I'm a computer science engineer focused on AI, machine learning, and building useful software. From training language models from scratch to developing AI-powered products, I enjoy taking ideas from experimentation to implementation.",
   headline: ["I BUILD", "AI SYSTEMS", "THAT MATTER"],
+  marquee: ["AI", "Machine learning", "Software engineering", "LLMs from scratch", "Research", "Mentoring"],
   footnote: "AI • ML • SOFTWARE ENGINEERING",   // static: no fake live clock / weather
 };

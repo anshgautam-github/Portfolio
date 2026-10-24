@@ -1,0 +1,498 @@
+diff -ruN pf-orig/src/components/ArcCarousel/ArcCarousel.jsx pf/src/components/ArcCarousel/ArcCarousel.jsx
+--- pf-orig/src/components/ArcCarousel/ArcCarousel.jsx	2026-10-24 00:47:52.625679503 +0000
++++ pf/src/components/ArcCarousel/ArcCarousel.jsx	2026-10-24 00:59:02.825385970 +0000
+@@ -128,7 +128,11 @@
+       raf = requestAnimationFrame(draw);
+       const dt = Math.min(0.05, (now - last) / 1000); last = now;
+       // nothing is moving: don't touch the DOM at all (this is what keeps scrolling past the section smooth)
+-      const idle = !autoplay && !S.drag && S.intro >= 1 && Math.abs(S.target - S.pos) < 4e-4 && Math.abs(S.vel) < 2e-3;
++      // (before the section has ever been on screen there is nothing to animate either: the cards are posed once, then the loop sleeps
++      //  - it used to rewrite all 16 cards' styles on every frame for as long as you were still scrolling down to this section)
++      const idle = !autoplay && !S.drag && (S.intro >= 1 || !S.started) && Math.abs(S.target - S.pos) < 4e-4 && Math.abs(S.vel) < 2e-3;
++      // while the carousel moves, the section's decorative loops stand still (see arc-carousel.css)
++      if (idle === !!S.moving) { S.moving = !idle; if (root.current) root.current.classList.toggle("is-moving", !idle); }
+       if (idle && S.rested) return;
+       S.rested = idle;
+       // intro: the arc fans open and spins in the first time it scrolls into view
+@@ -154,10 +158,10 @@
+         const o = wrap(i - posv, N);
+         const a = Math.abs(o);
+         if (a > 4.6 && S.intro >= 1) {                                // far side of the ring: invisible, leave it alone
+-          if (!c._off) { c._off = true; c.style.opacity = "0"; c.style.pointerEvents = "none"; c.style.zIndex = "0"; c.classList.remove("is-on"); }
++          if (!c._off) { c._off = true; c._on = false; c.style.opacity = "0"; c.style.pointerEvents = "none"; c.style.zIndex = "0"; c.classList.remove("is-on"); c.classList.add("is-far"); }   // is-far: visibility hidden, so its GPU layer is released
+           continue;
+         }
+-        c._off = false;
++        if (c._off) { c._off = false; c.classList.remove("is-far"); }
+         const th = clamp(o * dth * spread, -1.25, 1.25);           // angle around the cylinder
+         const x = R * Math.sin(th);                                 // true circle: sideways...
+         const z = R * (1 - Math.cos(th));                           // ...and toward the viewer, so the arc is concave
+diff -ruN pf-orig/src/components/ArcCarousel/arc-carousel.css pf/src/components/ArcCarousel/arc-carousel.css
+--- pf-orig/src/components/ArcCarousel/arc-carousel.css	2026-10-24 00:47:52.626719996 +0000
++++ pf/src/components/ArcCarousel/arc-carousel.css	2026-10-24 00:59:11.421386481 +0000
+@@ -568,3 +568,37 @@
+ @keyframes arcNextBob { 50% { transform: translateY(3px); } }
+ @media (max-width: 760px) { .arc-tally, .arc-next { display: none; } }
+ @media (prefers-reduced-motion: reduce) { .arc-next svg { animation: none; } }
++
++
++/* =====================================================================
++   PERFORMANCE PASS  (visuals unchanged; only costs removed)
++
++   1. The card box-shadows (and the .is-on shadow transition) were clipped away by each card's own clip-path, so they never showed -
++      but they were still painted, and re-painted on every card change. Gone.
++   2. The three background blobs animated `margin`, which forces a re-layout of the section on every frame. They now animate transform properties only.
++   3. A 200%-wide animated film-grain layer (opacity .05 - invisible) and a 130vmax masked ring layer that scaled forever: both stopped / removed.
++   4. Cards on the far side of the ring (invisible anyway) are now visibility:hidden, so ~7 of the 16 card layers are released from the GPU.
++   5. Decorative loops stand still while the page scrolls or the carousel moves.
++   ===================================================================== */
++.arc-card, .arc-card.is-on { box-shadow: none; transition: none; }
++.arc-card.is-far { visibility: hidden; }
++
++@keyframes arcFloat { to { translate: 0 3vh; scale: 1.1; } }
++.arc-grain { display: none; }
++.arc::after { animation: none; }
++.arc-stage::before { animation: none; opacity: 0.85; }
++
++html.is-scrolling .arc::before,
++html.is-scrolling .arc-blob,
++html.is-scrolling .arc-chip,
++html.is-scrolling .arc-badge svg,
++html.is-scrolling .arc-badge b,
++html.is-scrolling .arc-cross,
++html.is-scrolling .arc-next svg,
++.arc.is-moving::before,
++.arc.is-moving .arc-blob,
++.arc.is-moving .arc-chip,
++.arc.is-moving .arc-badge svg,
++.arc.is-moving .arc-badge b,
++.arc.is-moving .arc-cross,
++.arc.is-moving .arc-next svg { animation-play-state: paused !important; }
+diff -ruN pf-orig/src/components/Cursor/Cursor.jsx pf/src/components/Cursor/Cursor.jsx
+--- pf-orig/src/components/Cursor/Cursor.jsx	2026-10-24 00:47:52.624069482 +0000
++++ pf/src/components/Cursor/Cursor.jsx	2026-10-24 00:58:13.549383041 +0000
+@@ -48,6 +48,7 @@
+     let state = "idle", magnet = null, mood = "idle", lastMove = performance.now();
+     let scaleT = 1, scale = 1, look = { x: 0, y: 0 }, ang = 0;
+     const sparks = [];
++    let drewSparks = false;
+     // the "capture plate": a springy sticker frame that snaps around small links / buttons
+     const pl = { x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, vw: 0, vh: 0, a: 0, on: false, r: "12px", seeded: false };
+     let heartAt = 0;
+@@ -208,6 +209,9 @@
+       if (reduce) return;
+       // star sparkles when it zooms around
+       if (sp > 9 && Math.random() < 0.45) sparks.push({ x: h.x, y: h.y, vx: (Math.random() - 0.5) * 1.5 - v.x * 0.08, vy: (Math.random() - 0.5) * 1.5 - v.y * 0.08, life: 1, s: 2 + Math.random() * 4, c: ["#d7ff3b", "#ff8fb4", "#7fe7ff"][(Math.random() * 3) | 0] });
++      // the spark canvas covers the whole viewport: touching it every frame (even to clear nothing) makes the browser re-composite
++      // the entire screen at the display's refresh rate. Only draw while there are sparks, plus one last clear.
++      if (!sparks.length && !drewSparks) return;
+       ctx.clearRect(0, 0, W, H);
+       for (let i = sparks.length - 1; i >= 0; i--) {
+         const s = sparks[i];
+@@ -228,6 +232,7 @@
+         ctx.quadraticCurveTo(s.x, s.y, s.x, s.y - q * 1.7); ctx.fill();
+       }
+       ctx.globalAlpha = 1;
++      drewSparks = sparks.length > 0;
+     };
+     gsap.ticker.add(tick);
+ 
+diff -ruN pf-orig/src/components/Freefall/Freefall.jsx pf/src/components/Freefall/Freefall.jsx
+--- pf-orig/src/components/Freefall/Freefall.jsx	2026-10-24 00:47:52.623259403 +0000
++++ pf/src/components/Freefall/Freefall.jsx	2026-10-24 00:58:33.301384215 +0000
+@@ -136,8 +136,9 @@
+   });
+   return { shards, edges };
+ };
+-/* phones get a coarser break (3x3 = 18 shards instead of 32) so it stays smooth on a mobile GPU */
+-const SHATTER = makeShatter(4, 4), SHATTER_LITE = makeShatter(3, 3);
++/* every card carries its own set of cloned shards, so the break is kept coarse everywhere (3x3 = 18 pieces instead of 32):
++   it reads just as clearly as glass, but the page holds ~70 cloned cards instead of ~130 and the first frame of a break paints far fewer layers */
++const SHATTER = makeShatter(3, 3), SHATTER_LITE = SHATTER;
+ 
+ export default function Freefall() {
+   const root = useRef(null);
+@@ -184,7 +185,7 @@
+           box.style.cssText = `left:${(sh.bx * 100).toFixed(3)}%;top:${(sh.by * 100).toFixed(3)}%;width:${(sh.bw * 100).toFixed(3)}%;height:${(sh.bh * 100).toFixed(3)}%;clip-path:${sh.poly};transform-origin:${sh.ox};display:none`;
+           const n = cards[i].cloneNode(true);
+           // a clean, light copy of the card: no heavy texture / animated layers, captions fully on, art at rest
+-          n.querySelectorAll(".ff-grain,.ff-streak,[data-sheen],.ff-ring").forEach((x) => x.remove());
++          n.querySelectorAll(".ff-grain,.ff-streak,[data-sheen],.ff-ring,.ff-beam").forEach((x) => x.remove());
+           const ca = n.querySelector("[data-cap]"), ar = n.querySelector("[data-art]"), sd = n.querySelector("[data-shade]");
+           if (ca) ca.style.opacity = "1"; if (sd) sd.style.opacity = "0"; if (ar) ar.style.transform = "scale(1.12)";
+           n.removeAttribute("data-card"); n.removeAttribute("aria-label"); n.removeAttribute("style");
+@@ -213,8 +214,15 @@
+       const ric = window.requestIdleCallback || ((f) => setTimeout(f, 300));
+       const cic = window.cancelIdleCallback || clearTimeout;
+       const prebuild = () => { if (nextBuild < N && !reduce && !isLite()) { if (!wraps[nextBuild]) wraps[nextBuild] = buildShards(nextBuild); nextBuild++; idleId = ric(prebuild); } };
+-      idleId = ric(() => { idleId = ric(prebuild); });
+-      cleanups.push(() => cic(idleId));
++      // ...but only once the section is within ~1.5 screens of the viewport: until then the page stays free of ~70 hidden card clones
++      // (every one of them is restyled on each class / custom-property change anywhere inside the section, and cloned again by the glass transition)
++      let nearIO = null;
++      const startPrebuild = () => { if (nearIO) { nearIO.disconnect(); nearIO = null; } idleId = ric(prebuild); };
++      if (typeof IntersectionObserver === "function") {
++        nearIO = new IntersectionObserver(([x]) => { if (x.isIntersecting) startPrebuild(); }, { rootMargin: "150% 0px" });
++        nearIO.observe(el);
++      } else startPrebuild();
++      cleanups.push(() => { if (nearIO) nearIO.disconnect(); cic(idleId); });
+ 
+       const layout = () => {
+         H = el.clientHeight;
+@@ -358,7 +366,7 @@
+             start: "top top",
+             end: () => `+=${Math.round((N - 1) * window.innerHeight * 0.85 + window.innerHeight * 0.25)}`,
+             pin: true,
+-            scrub: lite ? 0.25 : 0.7,
++            scrub: lite ? 0.2 : 0.35,       // Lenis already glides the scroll itself; a long scrub on top only adds trailing latency
+             anticipatePin: 1,
+             invalidateOnRefresh: true,
+             onRefreshInit: layout,
+diff -ruN pf-orig/src/components/Freefall/freefall.css pf/src/components/Freefall/freefall.css
+--- pf-orig/src/components/Freefall/freefall.css	2026-10-24 00:47:52.623325703 +0000
++++ pf/src/components/Freefall/freefall.css	2026-10-24 00:58:45.499066034 +0000
+@@ -751,3 +751,52 @@
+   .ff-eyebrow { display: none; }
+   .ff-title { font-size: clamp(28px, 6vw, 44px); }
+ }
++
++
++/* =====================================================================
++   PERFORMANCE PASS  (visuals unchanged; only costs removed)
++
++   1. `transition: --glow` on .ff animated an INHERITED custom property for 0.9s on every card change, so the browser re-resolved styles for the
++      whole subtree (hundreds of nodes, plus every cloned shard) and repainted every gradient that reads var(--glow), on every frame of the
++      scroll. The colour now switches instantly and only the three big colour pools glide, as a plain background-colour transition.
++   2. blur() filters on the aurora / glow layers: their gradients already fade to transparent, so the blur added nothing but a full-layer GPU pass per frame.
++   3. box-shadows on the cards were clipped away by the cards' own clip-path (never visible) but still painted.
++   4. backdrop-filter on the chips, tags and ticker re-blurred what sat behind them every frame.
++   5. rotating a perfectly round, uniformly bordered ring changes nothing on screen.
++   ===================================================================== */
++.ff { transition: none; }
++
++.ff-glow {
++  filter: none;
++  background: var(--glow);
++  -webkit-mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.08) 60%, transparent);
++  mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.08) 60%, transparent);
++  transition: background-color 0.9s ease;
++}
++@media (min-width: 901px) and (pointer: fine) {
++  .ff-aur { filter: none; transition: background-color 0.9s ease; }
++  .ff-aur--a { background: var(--glow); -webkit-mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.42), transparent); mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.42), transparent); }
++  .ff-aur--b { background: var(--glow); -webkit-mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.36), transparent); mask-image: radial-gradient(closest-side, rgba(0, 0, 0, 0.36), transparent); }
++}
++
++.ff-card, .ff-card--job { box-shadow: none; }
++.ff-chip, .ff-card--job .ff-tag, .ff-ticker { -webkit-backdrop-filter: none; backdrop-filter: none; }
++.ff-ring--a, .ff-ring--b { animation: none; }
++@keyframes ff-num { from { transform: translateY(-110%); opacity: 0; } }     /* no animated blur on the counter */
++
++/* the break: pieces are small flat copies, so none of the card's own effects are needed inside them */
++.ff-shards .ff-shardcard, .ff-shards .ff-shardcard * { will-change: auto !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
++.ff-shards .ff-motif { filter: none; }
++.ff-cracks line { filter: none; }                                           /* one glow for the whole crack layer instead of one filter per line */
++.ff-cracks { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8)); }
++
++/* decorative loops stand still while the page is scrolling or a transition is running (see lib/smooth.js) */
++html.is-scrolling .ff-aur,
++html.is-scrolling .ff-spark,
++html.is-scrolling .ff-orb,
++html.is-scrolling .ff-ticker-t,
++html.is-scrolling .ff-ghost-word,
++html.is-scrolling .ff-fall .ff-letter,
++html.is-scrolling .ff-streak,
++html.is-scrolling .ff-dot::after,
++html.is-scrolling .ff-index button.is-on .ff-ix-n::after { animation-play-state: paused !important; }
+diff -ruN pf-orig/src/components/Landing/reveal.js pf/src/components/Landing/reveal.js
+--- pf-orig/src/components/Landing/reveal.js	2026-10-24 00:47:52.623040885 +0000
++++ pf/src/components/Landing/reveal.js	2026-10-24 00:58:07.989382710 +0000
+@@ -183,8 +183,11 @@
+     let W = 0, H = 0, last = 0;
+     const size = () => { const d = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * d; cv.height = H * d; g.setTransform(d, 0, 0, d, 0, 0); };
+     size(); window.addEventListener("resize", size);
++    // the dust (70 glowing dots, each drawn with a canvas shadow blur) only runs while the landing is on screen; it used to run for the whole life of the page
++    let dustVis = true;
+     const tick = (t) => {
+-      if (stopDust) return;
++      raf = 0;
++      if (stopDust || !dustVis) return;
+       raf = requestAnimationFrame(tick);
+       if (t - last < 33) return; last = t;
+       g.clearRect(0, 0, W, H);
+@@ -196,8 +199,12 @@
+         g.arc(p.x * W, p.y * H, p.r, 0, 6.283); g.fill();
+       }
+     };
++    const dio = typeof IntersectionObserver === "function"
++      ? new IntersectionObserver(([en]) => { dustVis = en.isIntersecting; if (dustVis && !raf && !stopDust) raf = requestAnimationFrame(tick); }, { rootMargin: "80px" })
++      : null;
++    if (dio) dio.observe(cv);
+     raf = requestAnimationFrame(tick);
+-    offDust = () => { stopDust = true; cancelAnimationFrame(raf); window.removeEventListener("resize", size); };
++    offDust = () => { stopDust = true; cancelAnimationFrame(raf); if (dio) dio.disconnect(); window.removeEventListener("resize", size); };
+   }
+ 
+   const api = {
+diff -ruN pf-orig/src/components/Transitions/ShatterTransition.jsx pf/src/components/Transitions/ShatterTransition.jsx
+--- pf-orig/src/components/Transitions/ShatterTransition.jsx	2026-10-24 00:47:52.627377391 +0000
++++ pf/src/components/Transitions/ShatterTransition.jsx	2026-10-24 01:00:17.885390432 +0000
+@@ -19,9 +19,11 @@
+ 
+ // every shard is a full copy of the section, so the copies drop the costly paint effects (blurs, noise filters, blend modes, backdrop blur);
+ // the soft gradients underneath carry the same look at a fraction of the cost
++// (clones also run no animations and request no will-change layers: with ~14 headline letters, 4 cards and the decor per piece, those used to
++//  add up to hundreds of extra GPU layers while the glass was on screen. Moving loops are frozen at their snapshot value instead - see prepare())
+ const LITE_CSS = `.sh-clone .ff-bg::after,.sh-clone .ff-grain{display:none!important}
+-.sh-clone .ff-aur,.sh-clone .ff-glow,.sh-clone .ff-beam{filter:none!important;animation:none!important}
+-.sh-clone *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;mix-blend-mode:normal!important;animation-play-state:paused!important}`;
++.sh-clone .ff-aur,.sh-clone .ff-glow,.sh-clone .ff-beam,.sh-clone .ff-motif{filter:none!important}
++.sh-clone,.sh-clone *,.sh-clone *::before,.sh-clone *::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;mix-blend-mode:normal!important;animation:none!important;transition:none!important;will-change:auto!important}`;
+ const ensureCss = () => {
+   if (document.getElementById("sh-lite-css")) return;
+   const st = document.createElement("style"); st.id = "sh-lite-css"; st.textContent = LITE_CSS; document.head.appendChild(st);
+@@ -34,12 +36,13 @@
+ 
+     let A = null, B = null, st = null, st2 = null, st3 = null, root = null, flash = null, shards = null, sw = 0, sh = 0, hidden = false;
+     let cur = 0, tgt = 0, raf = 0, lt = 0, boot = 0;
++    let wantBack = false;          // the visitor is scrolling back up towards the glass: it is worth having it ready again
+ 
+     /* ---------- geometry: a radial crack pattern around the impact point ---------- */
+     const makeShards = (W, H) => {
+       const ix = W * (W < H ? 0.5 : 0.54), iy = H * 0.5;
+       const RAYS = lite ? 7 : 9;
+-      const rings = lite ? [0.2] : [0.12, 0.3];
++      const rings = lite ? [0.2] : [0.22];       // one ring of cracks: 18 shards (was 27) read just as clearly as glass at far lower cost
+       const maxD = Math.hypot(Math.max(ix, W - ix), Math.max(iy, H - iy));
+       const rays = [];
+       for (let k = 0; k < RAYS; k++) {
+@@ -107,16 +110,27 @@
+       root.style.cssText = `position:fixed;left:0;top:0;width:${W}px;height:${H}px;z-index:41;pointer-events:none;opacity:.01;will-change:opacity;perspective:${Math.round(W * 0.9)}px;perspective-origin:${geo.ix}px ${geo.iy}px;overflow:hidden`;
+       document.body.appendChild(root);
+ 
+-      const origAll = [A, ...A.querySelectorAll("*")];
+-      const idxOf = new Map(); origAll.forEach((n, i) => idxOf.set(n, i));
+-      const anims = [];
++      // ONE frozen, pruned copy of the section. Every shard clones this small template: cloning the live section once per shard (together with
++      // the ~70 hidden card clones the deck carries) was a multi-hundred-millisecond hitch right when the glass cracked.
++      const tpl = A.cloneNode(true);
++      const liveAll = [A, ...A.querySelectorAll("*")], tplAll = [tpl, ...tpl.querySelectorAll("*")];
++      // CSS loops (ticker, orbit, sparks, headline wave...) are frozen at the instant of the snapshot by writing their current value inline
+       try {
+         for (const an of A.getAnimations({ subtree: true })) {
+           const t = an.effect && an.effect.target;
+-          const idx = t ? idxOf.get(t) : -1;
+-          if (idx !== undefined && idx >= 0 && an.animationName) anims.push({ idx, name: an.animationName, time: an.currentTime });
++          if (!t || !an.animationName || an.effect.pseudoElement) continue;
++          const i = liveAll.indexOf(t);
++          if (i < 0) continue;
++          const cs = getComputedStyle(t), d = tplAll[i].style;
++          d.transform = cs.transform; d.translate = cs.translate; d.rotate = cs.rotate; d.scale = cs.scale; d.opacity = cs.opacity;
+         }
+-      } catch (e) { /* older engines: shards just start their loops from the top */ }
++      } catch (e) { /* older engines: the clones simply show their loops at rest */ }
++      tpl.querySelectorAll(".ff-shards").forEach((n) => n.remove());      // the card-break pieces are display:none: not part of the picture
++      tpl.removeAttribute("style");
++      tpl.removeAttribute("data-wtx");
++      tpl.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
++      tpl.setAttribute("aria-hidden", "true");
++      tpl.classList.add("sh-clone");
+       lastSig = sig();
+       ensureCss();
+       const ab = A.getBoundingClientRect();
+@@ -124,7 +138,7 @@
+       const deckEl = A.querySelector(".ff-deck");
+       const shown = (n) => { const c = getComputedStyle(n); return c.display !== "none" && c.visibility !== "hidden" && parseFloat(c.opacity) > 0.02; };
+       bld = {
+-        geo, W, H, anims, i: 0, glow: A.style.getPropertyValue("--glow"),
++        geo, W, H, tpl, i: 0, glow: A.style.getPropertyValue("--glow"),
+         top: [...A.children].map(relRect), deckIdx: deckEl ? [...A.children].indexOf(deckEl) : -1,
+         cards: deckEl ? [...deckEl.children].map((n) => ({ ...relRect(n), on: shown(n) })) : [],
+       };
+@@ -144,7 +158,7 @@
+     };
+ 
+     const makeShard = (s) => {
+-      const { W, H, anims, glow, top, deckIdx, cards } = bld;
++      const { W, H, tpl, glow, top, deckIdx, cards } = bld;
+       const hit = (r, x0, y0, x1, y1) => r.r > x0 && r.l < x1 && r.b > y0 && r.t < y1;
+       let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+       s.poly.forEach((p) => { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); });
+@@ -153,13 +167,7 @@
+       const el = document.createElement("div");
+       el.style.cssText = `position:absolute;left:${x0}px;top:${y0}px;width:${w}px;height:${h}px;overflow:hidden;contain:strict;transform-origin:${(s.cx - x0).toFixed(1)}px ${(s.cy - y0).toFixed(1)}px;` +
+         `clip-path:polygon(${s.poly.map((p) => `${(p[0] - x0).toFixed(1)}px ${(p[1] - y0).toFixed(1)}px`).join(",")})`;
+-      const clone = A.cloneNode(true);
+-      [clone, ...clone.querySelectorAll("*")].forEach((n, i) => { n._oi = i; });   // each node's place in the original, for the animation sync
+-      clone.removeAttribute("style");
+-      clone.removeAttribute("data-wtx");
+-      clone.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
+-      clone.setAttribute("aria-hidden", "true");
+-      clone.classList.add("sh-clone");
++      const clone = tpl.cloneNode(true);
+       // prune parts that are entirely outside this shard (decor that fills the screen is kept)
+       [...clone.children].forEach((k, ki) => {
+         const r = top[ki]; if (!r) return;
+@@ -170,27 +178,19 @@
+       el.appendChild(clone);
+       const svg = document.createElementNS(NS, "svg");
+       svg.setAttribute("width", w); svg.setAttribute("height", h);
+-      svg.style.cssText = "position:absolute;left:0;top:0;pointer-events:none;overflow:visible";
++      // the crack outline and the sheen fade on every frame: each is its own compositor layer (will-change: opacity) and the fade is set on the
++      // element itself, so the piece's picture (a whole copy of the page) is painted once instead of being re-painted on every frame of the break
++      svg.style.cssText = "position:absolute;left:0;top:0;pointer-events:none;overflow:visible;opacity:0;will-change:opacity";
+       const pg = document.createElementNS(NS, "polygon");
+       pg.setAttribute("points", s.poly.map((p) => `${(p[0] - x0).toFixed(1)},${(p[1] - y0).toFixed(1)}`).join(" "));
+       pg.setAttribute("fill", "none"); pg.setAttribute("stroke", "#fff"); pg.setAttribute("stroke-width", "1.6"); pg.setAttribute("stroke-linejoin", "round");
+-      pg.setAttribute("opacity", "0");
+       svg.appendChild(pg);
+       const sheen = document.createElement("i");
+-      sheen.style.cssText = "position:absolute;inset:0;pointer-events:none;opacity:0;background:linear-gradient(120deg,rgba(255,255,255,.55),rgba(255,255,255,0) 45%,rgba(120,150,255,.28))";
++      sheen.style.cssText = "position:absolute;inset:0;pointer-events:none;opacity:0;will-change:opacity;background:linear-gradient(120deg,rgba(255,255,255,.55),rgba(255,255,255,0) 45%,rgba(120,150,255,.28))";
+       el.appendChild(sheen);
+       el.appendChild(svg);
+       root.appendChild(el);
+-      if (anims.length) {
+-        try {
+-          for (const an of clone.getAnimations({ subtree: true })) {
+-            const t = an.effect && an.effect.target; const idx = t ? t._oi : -1;
+-            const o = anims.find((x) => x.idx === idx && x.name === an.animationName);
+-            if (o) { an.pause(); an.currentTime = o.time; } else an.pause();
+-          }
+-        } catch (e) { /* ignore */ }
+-      }
+-      return { ...s, el, edge: pg, sheen, clone, w, h };
++      return { ...s, el, edge: svg, sheen, clone, w, h };
+     };
+ 
+     // build shards until the time budget is spent; true once every shard exists
+@@ -213,6 +213,7 @@
+     let pre = 0;
+     const prebuild = () => {
+       if (pre) return;
++      if (tgt >= 1 && cur >= 1 && !wantBack) return;      // already past the glass: nothing to prepare unless the visitor heads back up
+       if (root && !bld) return;                // already built
+       if (!prepare()) return;
+       const go = () => { pre = 0; if (!bld) return; if (!step(8)) pre = requestAnimationFrame(go); };
+@@ -240,7 +241,7 @@
+     const clear = () => {
+       if (A) { A.style.visibility = ""; }
+       hidden = false;
+-      if (B) { B.style.transform = ""; B.style.transformOrigin = ""; B.style.zIndex = ""; B.style.pointerEvents = ""; B.removeAttribute("data-tx"); }
++      if (B) { B.style.transform = ""; B.style.transformOrigin = ""; B.style.zIndex = ""; B.style.pointerEvents = ""; B.style.willChange = ""; B.removeAttribute("data-tx"); }
+       if (root) root.style.opacity = ".01";
+       if (flash) flash.style.display = "none";
+     };
+@@ -252,7 +253,9 @@
+       if (!A || !B) return;
+       const sp = st ? st.progress : p;
+       if (p <= 0 && sp <= 0) { clear(); return; }                 // the snapshot is kept for reuse; it is dropped when the viewer leaves the last card
+-      if (p >= 1 && sp >= 1) { clear(); return; }
++      // the glass is done and the next section is in place: release all of its layers now (they used to stay resting at 1% opacity over the
++      // whole page for another ~1600px of scrolling, i.e. on top of the carousel); it is rebuilt in idle slices if the visitor scrolls back up
++      if (p >= 1 && sp >= 1) { clear(); wantBack = false; if (root) teardown(); return; }
+       // if the last card is still settling when the glass cracks (a fast flick), retake the snapshot until it has - cracks are barely visible by then
+       if (root && !bld && p < 0.05 && sig() !== lastSig) teardown();
+       if (bld) { cancelPre(); step(0); }                          // the slices were not finished in time: finish them now
+@@ -268,6 +271,8 @@
+       B.style.zIndex = "40";
+       B.style.pointerEvents = "none";
+       B.style.transformOrigin = `50% 50%`;
++      // without this hint the browser re-rasterises the whole next section (3-D cards, gradients, grain) at every new scale as it settles from 1.1x to 1x
++      B.style.willChange = "transform";
+       B.style.transform = `translate3d(0, ${(-H * (1 - sp)).toFixed(2)}px, 0) scale(${(1 + 0.1 * (1 - eo)).toFixed(4)})`;
+ 
+       // the impact: a flash, two shock rings and a little judder before anything lets go
+@@ -308,7 +313,7 @@
+           ? "none"
+           : `translate3d(${tx.toFixed(1)}px, ${(ty - lift).toFixed(1)}px, ${tz.toFixed(1)}px) rotateX(${rx.toFixed(1)}deg) rotateY(${ry.toFixed(1)}deg) rotateZ(${rz.toFixed(1)}deg)`;
+         s.el.style.opacity = (1 - smoother(clamp01((q - 0.6) / 0.4))).toFixed(3);
+-        s.edge.setAttribute("opacity", (Math.min(crack, 1) * (0.9 - 0.4 * q)).toFixed(3));
++        s.edge.style.opacity = (Math.min(crack, 1) * (0.9 - 0.4 * q)).toFixed(3);
+         s.sheen.style.opacity = (Math.min(1, q * 5) * (1 - q) * 0.9).toFixed(3);
+       }
+     };
+@@ -352,7 +357,7 @@
+       st3 = ScrollTrigger.create({
+         trigger: B, start: "top top", end: "+=1600", invalidateOnRefresh: true,
+         onLeave: () => { if (tgt >= 1 && cur >= 1) teardown(); },
+-        onEnterBack: () => prebuild(),
++        onEnterBack: () => { wantBack = true; prebuild(); },
+       });
+     };
+     // the clones are a snapshot, so drop them whenever the page is re-measured; they are rebuilt (fresh) the next time the glass is needed
+diff -ruN pf-orig/src/components/Transitions/ToolkitTransition.jsx pf/src/components/Transitions/ToolkitTransition.jsx
+--- pf-orig/src/components/Transitions/ToolkitTransition.jsx	2026-10-24 00:47:52.627081429 +0000
++++ pf/src/components/Transitions/ToolkitTransition.jsx	2026-10-24 01:00:28.257391048 +0000
+@@ -59,7 +59,7 @@
+ 
+     const clear = () => {
+       if (A) { A.style.transform = ""; A.style.pointerEvents = ""; }
+-      if (B) { B.style.transform = ""; B.style.transformOrigin = ""; B.style.clipPath = ""; B.style.zIndex = ""; B.style.pointerEvents = ""; B.style.opacity = ""; B.removeAttribute("data-tx"); }
++      if (B) { B.style.transform = ""; B.style.transformOrigin = ""; B.style.clipPath = ""; B.style.zIndex = ""; B.style.pointerEvents = ""; B.style.opacity = ""; B.style.willChange = ""; B.removeAttribute("data-tx"); }
+       if (badge) badge.style.visibility = "";
+       if (cv) cv.style.display = "none";
+       if (veil) veil.style.display = "none";
+@@ -145,6 +145,7 @@
+       A.style.transform = `translate3d(0, ${(H * sp + beyond).toFixed(2)}px, 0)`;
+       B.setAttribute("data-tx", "1");
+       B.style.zIndex = "40"; B.style.pointerEvents = "none";
++      B.style.willChange = "transform, clip-path, opacity";   // the section scales 1.1x -> 1x while a circle opens on it: keep it on one fixed-scale layer instead of re-rasterising it on every frame
+       B.style.transformOrigin = `${cxp}px ${cyp}px`;
+       B.style.transform = `translate3d(0, ${(-H * (1 - sp) + beyond).toFixed(2)}px, 0) scale(${(1 + 0.1 * (1 - eo)).toFixed(4)})`;
+       B.style.clipPath = `circle(${R.toFixed(1)}px at ${cxp}px ${cyp}px)`;
+diff -ruN pf-orig/src/components/Warp/flowField.js pf/src/components/Warp/flowField.js
+--- pf-orig/src/components/Warp/flowField.js	2026-10-24 00:47:52.625512569 +0000
++++ pf/src/components/Warp/flowField.js	2026-10-24 00:58:05.217382546 +0000
+@@ -12,8 +12,11 @@
+   const ang = (x, y, t) => Math.sin(x * 0.0023 + t * 0.00018) * 2.2 + Math.cos(y * 0.0031 - t * 0.00023) * 2.0 + Math.sin((x + y) * 0.0012 + t * 0.0001) * 1.4;
+   const seed = (p) => { p.x = Math.random() * W; p.y = Math.random() * H; p.l = 0; p.h = 205 + Math.random() * 60; };
+   P.forEach((p) => { p.h = 205 + Math.random() * 60; });
++  // the canvas only animates while it is on (or next to) the screen: it used to keep drawing ~30 frames a second for the whole life of the page
++  let vis = true;
+   const tick = (t) => {
+-    if (dead) return;
++    raf = 0;
++    if (dead || !vis) return;
+     raf = requestAnimationFrame(tick);
+     if (t - last < 30) return; last = t;
+     // fade previous frame to leave trails
+@@ -36,6 +39,10 @@
+     }
+   };
+   if (reduce) return () => {};
++  const io = typeof IntersectionObserver === "function"
++    ? new IntersectionObserver(([en]) => { vis = en.isIntersecting; if (vis && !raf && !dead) raf = requestAnimationFrame(tick); }, { rootMargin: "80px" })
++    : null;
++  if (io) io.observe(canvas);
+   raf = requestAnimationFrame(tick);
+-  return () => { dead = true; cancelAnimationFrame(raf); window.removeEventListener("resize", size); window.removeEventListener("pointermove", move); };
++  return () => { dead = true; cancelAnimationFrame(raf); if (io) io.disconnect(); window.removeEventListener("resize", size); window.removeEventListener("pointermove", move); };
+ }
+diff -ruN pf-orig/src/lib/smooth.js pf/src/lib/smooth.js
+--- pf-orig/src/lib/smooth.js	2026-10-24 00:47:52.628487621 +0000
++++ pf/src/lib/smooth.js	2026-10-24 00:58:01.889382348 +0000
+@@ -7,8 +7,23 @@
+ const SMOOTH_TOUCH = true;
+ let lenis = null;
+ 
++/* While the page is scrolling, <html> carries .is-scrolling. The section stylesheets use it to freeze purely decorative loops
++   (drifting aurora, sparks, marquee, orbits...) so every frame of a scroll / transition goes to the content that is actually moving. */
++let scrollFlag = false;
++function trackScrolling() {
++  const root = document.documentElement;
++  let timer = 0;
++  const stop = () => { scrollFlag = false; root.classList.remove("is-scrolling"); };
++  window.addEventListener("scroll", () => {
++    if (!scrollFlag) { scrollFlag = true; root.classList.add("is-scrolling"); }
++    clearTimeout(timer);
++    timer = setTimeout(stop, 140);
++  }, { passive: true });
++}
++
+ export function initSmoothScroll() {
+   if (lenis || typeof window === "undefined") return lenis;
++  trackScrolling();
+   if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return null;
+   lenis = new Lenis({
+     duration: 1.7,                                              // longer glide = the "buttery" agency feel (try 1.2 for snappier)

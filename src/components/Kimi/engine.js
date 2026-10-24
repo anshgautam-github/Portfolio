@@ -30,7 +30,7 @@ export function mountKimi(root) {
   if (!document.querySelector("link[data-kimi-fonts]")) {
     const l = document.createElement("link");
     l.rel = "stylesheet";
-    l.href = "https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap";
+    l.href = "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;700;800&display=swap";
     l.setAttribute("data-kimi-fonts", "");
     document.head.appendChild(l);
   }
@@ -45,6 +45,7 @@ const ASSET_BASE_URL = "https://storage.getlayers.ai/assets/kimi-04a9449ab2";
 const A = (p) => `${ASSET_BASE_URL}/${p}`;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const mq = (q) => window.matchMedia(q).matches;
+const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
 const $ = (s, r = root) => r.querySelector(s);
 const $$ = (s, r = root) => Array.from(r.querySelectorAll(s));
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
@@ -57,7 +58,7 @@ function fail(url) {
     banner = document.createElement("div");
     banner.setAttribute("role", "alert");
     banner.style.cssText =
-      "position:fixed;left:0;right:0;bottom:0;z-index:100;background:#ff6b00;color:#090a0b;padding:.75rem 1rem;font:500 13px/1.35 'Space Grotesk',system-ui,sans-serif;max-height:30vh;overflow:auto";
+      "position:fixed;left:0;right:0;bottom:0;z-index:100;background:#ff6b00;color:#090a0b;padding:.75rem 1rem;font:500 13px/1.35 'Inter Tight',system-ui,sans-serif;max-height:30vh;overflow:auto";
     document.body.appendChild(banner);
     cleanups.push(() => { banner && banner.remove(); banner = null; });
   }
@@ -257,6 +258,7 @@ function trigger(el, { start, end }, cb) {
 const lerp = (a, b, t) => a + (b - a) * t;
 
 /* ---- text engine ---- */
+const EMPH = /^(curiosity|complex|problems|ideas|engineering|better|build|building|mentoring|research|experimentation|language|model)[.,]?$/i;
 function revealText(host, text, o = {}) {
   const unit = o.unit || "word";
   const cfg = o.cfg || CFG.REVEAL;
@@ -282,6 +284,7 @@ function revealText(host, text, o = {}) {
     if (unit === "word") {
       const u = document.createElement("span");
       u.className = "u"; u.textContent = word; u.style.opacity = "0";
+      if (EMPH.test(word)) u.classList.add("em");
       wrap.appendChild(u); units.push(u);
     } else {
       const w = document.createElement("span");
@@ -2100,7 +2103,7 @@ function chequer(host) {
   const render = () => {
     const width = host.clientWidth, height = host.clientHeight;
     if (!width || !height) return;
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const ratio = Math.min(window.devicePixelRatio || 1, coarsePointer ? 1.5 : 2);
     const bw = Math.round(width * ratio), bh = Math.round(height * ratio);
     if (canvas.width !== bw || canvas.height !== bh) { canvas.width = bw; canvas.height = bh; }
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -2345,7 +2348,7 @@ function contour(canvas, colourToken, host) {
   };
   const size = () => {
     width = canvas.clientWidth; height = canvas.clientHeight;
-    ratio = Math.min(window.devicePixelRatio || 1, 2);
+    ratio = Math.min(window.devicePixelRatio || 1, coarsePointer ? 1.5 : 2);
     canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
     draw();
   };
@@ -2721,6 +2724,8 @@ const ARROW_SVG = `<svg viewBox="0 0 13.7071 10.7071" aria-hidden="true"><path d
   /* engineering journey: selecting a stage moves the cyan marker/bracket and rewrites the meet block + intro */
   const meetEls = [$("[data-m0]", pad), $("[data-m1]", pad), $("[data-m2]", pad)];
   const introEl = $("[data-intro]", pad);
+  const tagIntro = (i) => { if (introEl.parentElement) introEl.parentElement.setAttribute("data-k", `0${i + 1} / 05  ·  ${stages[i].t}`); };
+  tagIntro(ACTIVE0);
   let active = ACTIVE0;
   let picked = false;
   const setActive = (i) => {
@@ -2728,6 +2733,7 @@ const ARROW_SVG = `<svg viewBox="0 0 13.7071 10.7071" aria-hidden="true"><path d
     if (!picked) { picked = true; lvCtl.play(0); }
     active = i;
     const st = stages[i];
+    tagIntro(i);
     cardEls.forEach((c, k) => { c.classList.toggle("live", k === i); c.setAttribute("aria-pressed", String(k === i)); });
     mkEls.forEach((m, k) => { m.innerHTML = mkSvg(k === i); });
     pulse = $("[data-pulse]", cal);

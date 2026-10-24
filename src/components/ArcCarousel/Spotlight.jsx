@@ -14,7 +14,7 @@ function Art({ d }) {
       {d.kind === "program" ? (
         <ProgramArt d={d} />
       ) : d.image ? (
-        <img src={d.image} alt="" draggable="false" />
+        <img decoding="async" src={d.image} alt="" draggable="false" />
       ) : d.kind === "phones" ? (
         <div className="arc-mock arc-mock--ph"><div className="arc-ph"><TrackerScreen /></div></div>
       ) : (

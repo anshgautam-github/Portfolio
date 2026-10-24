@@ -2,7 +2,7 @@ html.is-loading { overflow: hidden; scrollbar-gutter: stable; }
 /* hold the landing's CSS intro until the curtain opens */
 html.is-loading .ll, html.is-loading .ll * { animation-play-state: paused !important; }
 
-.ld { position: fixed; inset: 0; z-index: 100000; color: #e6eeff; font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; pointer-events: all; touch-action: none; }
+.ld { position: fixed; inset: 0; z-index: 100000; color: #e6eeff; font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; pointer-events: all; touch-action: none; }
 .ld-panel { position: absolute; left: 0; right: 0; height: 50.2%; background: linear-gradient(135deg, #050a18, #0f1d3d 55%, #050a18); background-size: 100% 200%; transition: transform .95s cubic-bezier(.77, 0, .18, 1) .22s; will-change: transform; }
 .ld-top { top: 0; background-position: 0 0; }
 .ld-bot { bottom: 0; background-position: 0 100%; }
@@ -49,7 +49,7 @@ html.is-loading .ll, html.is-loading .ll * { animation-play-state: paused !impor
 .ld-stars i { position: absolute; border-radius: 50%; background: #cfe0ff; opacity: .15; animation: ldTwinkle ease-in-out infinite; }
 @keyframes ldTwinkle { 50% { opacity: .9; transform: scale(1.5); } }
 .ld-story { position: relative; width: min(88vw, 760px); height: clamp(64px, 11vh, 110px); margin-top: 30px; text-align: center; }
-.ld-line { position: absolute; left: 0; right: 0; top: 50%; margin: 0; translate: 0 -50%; font-family: "Newsreader", "Gloock", Georgia, serif; font-style: italic; font-weight: 400;
+.ld-line { position: absolute; left: 0; right: 0; top: 50%; margin: 0; translate: 0 -50%; font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; font-style: italic; font-weight: 400;
   font-size: clamp(22px, 3.6vw, 44px); line-height: 1.12; letter-spacing: .12em; color: #fff; opacity: 0; filter: blur(14px); transform: translate3d(0, 22px, 0) scale(1.04);
   transition: opacity .9s cubic-bezier(.2, .7, .2, 1), filter .9s cubic-bezier(.2, .7, .2, 1), transform 1.1s cubic-bezier(.2, .7, .2, 1), letter-spacing 1.6s cubic-bezier(.2, .7, .2, 1); will-change: transform, opacity, filter; }
 .ld-line.on { opacity: 1; filter: blur(0); transform: none; letter-spacing: -.005em; text-shadow: 0 0 30px rgba(110, 150, 255, .55); }

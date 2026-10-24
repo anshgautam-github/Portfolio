@@ -14,6 +14,10 @@ const SHOW_INTRO = false;
 import Showcase from "./components/Showcase/Showcase.jsx";
 import ArcCarousel from "./components/ArcCarousel/ArcCarousel.jsx";
 import WorkTransition from "./components/Transitions/WorkTransition.jsx";
+import RevealTransition from "./components/Transitions/RevealTransition.jsx";
+import ShatterTransition from "./components/Transitions/ShatterTransition.jsx";
+import ToolkitTransition from "./components/Transitions/ToolkitTransition.jsx";
+import ArcHold from "./components/Transitions/ArcHold.jsx";
 import Freefall from "./components/Freefall/Freefall.jsx";
 import Toolkit from "./components/Toolkit/Toolkit.jsx";
 import Collab from "./components/Collab/Collab.jsx";
@@ -35,14 +39,21 @@ export default function App() {
 
   useEffect(() => {
     let last = document.documentElement.scrollHeight;
+    let lastW = window.innerWidth;
     let t;
+    const touch = window.matchMedia("(pointer: coarse)").matches;
     const refresh = () => ScrollTrigger.refresh();
     const onResize = () => {
       clearTimeout(t);
       t = setTimeout(() => {
         const h = document.documentElement.scrollHeight;
-        if (Math.abs(h - last) > 2) {
+        const w = window.innerWidth;
+        // phones: the URL bar collapsing nudges the height by ~60-100px mid-scroll. Re-measuring pins then makes sections jump / flash,
+        // so only refresh on a real change (width change = rotation, or a big height change = content/fonts loaded).
+        const real = touch ? (w !== lastW || Math.abs(h - last) > 160) : Math.abs(h - last) > 2;
+        if (real) {
           last = h;
+          lastW = w;
           refresh();
         }
       }, 150);
@@ -68,13 +79,17 @@ export default function App() {
       {SHOW_INTRO && <Journey />}
       {/* Act 2: the landing */}
       <Reveal />
+      <RevealTransition />
       {/* Act 2b: the Kimi Antonelli driver block, straight after the landing */}
       <KimiAntonelli />
       <Warp />
       <PushTransition />
       <WorkTransition />
       <Freefall />
+      <ShatterTransition />
       <ArcCarousel />
+      <ArcHold />
+      <ToolkitTransition />
       <Toolkit />
       {/* hidden for now - flip SHOW_DIARY to bring it back (sits after Toolkit) */}
       {SHOW_DIARY && <Diary />}

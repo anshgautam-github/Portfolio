@@ -1,6 +1,6 @@
 /* Closing CTA — "Want to see how I enable companies?" */
 .outro {
-  --serif: "Newsreader", "Tiempos Headline", "Times New Roman", Georgia, serif;
+  --serif: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
   --ease: cubic-bezier(0.7, 0, 0.2, 1);
   position: relative;
   isolation: isolate;

@@ -1,4 +1,5 @@
 /* Flow field: hundreds of fine light threads drift along a slowly shifting current; the pointer parts the stream like a stone in water. */
+import { capDpr } from "../../lib/perf.js";
 export function startFlow(canvas) {
   const g = canvas.getContext("2d");
   const reduce = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -6,14 +7,17 @@ export function startFlow(canvas) {
   let W = 0, H = 0, raf = 0, dead = false, last = 0;
   const m = { x: -9999, y: -9999, vx: 0, vy: 0 };
   const P = Array.from({ length: N }, () => ({ x: Math.random(), y: Math.random(), l: 0, h: 0 }));
-  const size = () => { const d = Math.min(devicePixelRatio || 1, 2); W = canvas.clientWidth; H = canvas.clientHeight; canvas.width = W * d; canvas.height = H * d; g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, W, H); };
+  const size = () => { const d = capDpr(2, 1.25); W = canvas.clientWidth; H = canvas.clientHeight; canvas.width = W * d; canvas.height = H * d; g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, W, H); };
   const move = (e) => { const r = canvas.getBoundingClientRect(); const x = e.clientX - r.left, y = e.clientY - r.top; m.vx = x - m.x; m.vy = y - m.y; m.x = x; m.y = y; };
   size(); window.addEventListener("resize", size); window.addEventListener("pointermove", move, { passive: true });
   const ang = (x, y, t) => Math.sin(x * 0.0023 + t * 0.00018) * 2.2 + Math.cos(y * 0.0031 - t * 0.00023) * 2.0 + Math.sin((x + y) * 0.0012 + t * 0.0001) * 1.4;
   const seed = (p) => { p.x = Math.random() * W; p.y = Math.random() * H; p.l = 0; p.h = 205 + Math.random() * 60; };
   P.forEach((p) => { p.h = 205 + Math.random() * 60; });
+  // the canvas only animates while it is on (or next to) the screen: it used to keep drawing ~30 frames a second for the whole life of the page
+  let vis = true;
   const tick = (t) => {
-    if (dead) return;
+    raf = 0;
+    if (dead || !vis) return;
     raf = requestAnimationFrame(tick);
     if (t - last < 30) return; last = t;
     // fade previous frame to leave trails
@@ -36,6 +40,10 @@ export function startFlow(canvas) {
     }
   };
   if (reduce) return () => {};
+  const io = typeof IntersectionObserver === "function"
+    ? new IntersectionObserver(([en]) => { vis = en.isIntersecting; if (vis && !raf && !dead) raf = requestAnimationFrame(tick); }, { rootMargin: "80px" })
+    : null;
+  if (io) io.observe(canvas);
   raf = requestAnimationFrame(tick);
-  return () => { dead = true; cancelAnimationFrame(raf); window.removeEventListener("resize", size); window.removeEventListener("pointermove", move); };
+  return () => { dead = true; cancelAnimationFrame(raf); if (io) io.disconnect(); window.removeEventListener("resize", size); window.removeEventListener("pointermove", move); };
 }

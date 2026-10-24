@@ -109,7 +109,7 @@ export function MacbookScroll({ src, showGradient = true, title, badge }) {
             </div>
             <div className="mb-face">
               <div className="mb-notch" />
-              {src ? <img ref={img} src={src} alt="" className="mb-img" draggable="false" /> : <div ref={img} className="mb-img" />}
+              {src ? <img decoding="async" ref={img} src={src} alt="" className="mb-img" draggable="false" /> : <div ref={img} className="mb-img" />}
             </div>
           </div>
 
@@ -137,7 +137,7 @@ export function MacbookScroll({ src, showGradient = true, title, badge }) {
         </div>
 
         {/* the picture that comes out of the screen */}
-        <div ref={pop} className="mb-pop">{src ? <img src={src} alt="" draggable="false" /> : null}</div>
+        <div ref={pop} className="mb-pop">{src ? <img decoding="async" src={src} alt="" draggable="false" /> : null}</div>
       </div>
     </div>
   );

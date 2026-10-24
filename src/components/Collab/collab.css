@@ -38,7 +38,7 @@
 .cb-kicker { font: 500 12px/1 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: .3em; color: #ffc45c; margin-bottom: 14px; text-shadow: 0 0 20px rgba(255,170,70,.7); }
 .cb-h { margin: 0; font: 800 clamp(34px, 6vw, 96px)/.98 "Archivo", "Inter Tight", "Helvetica Neue", Arial, sans-serif; font-stretch: 112%; letter-spacing: -.035em; text-transform: uppercase; text-shadow: 0 6px 40px rgba(0,0,0,.65); }
 .cb-h span { display: block; }
-.cb-h em { font-family: "Gloock", Georgia, serif; font-style: normal; font-weight: 400; text-transform: none; color: #ffd08c; letter-spacing: -.01em; }
+.cb-h em { font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; font-style: normal; font-weight: 400; text-transform: none; color: #ffd08c; letter-spacing: -.01em; }
 .cb-cta { display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: clamp(16px, 3vh, 30px); flex-wrap: wrap; }
 .cb.is-done .cb-kicker, .cb.is-done .cb-h span, .cb.is-done .cb-cta { opacity: 1; transform: none; filter: blur(0); }
 .cb.is-done .cb-kicker { transition-delay: .55s; }
@@ -83,7 +83,7 @@
 .cb-vert--r { right: 30px; transform: translate(50%, -50%) rotate(90deg); margin-right: 5px; }
 
 .cb-title { position: absolute; z-index: 3; left: clamp(26px, 4.2vw, 74px); top: clamp(86px, 14vh, 150px); margin: 0; pointer-events: none; color: #fff;
-  font: 400 clamp(30px, 4.6vw, 76px)/.98 "Newsreader", "Gloock", Georgia, serif; letter-spacing: -.03em; text-shadow: 0 2px 30px rgba(12,34,80,.45);
+  font: 400 clamp(30px, 4.6vw, 76px)/.98 "Inter Tight", "Helvetica Neue", Arial, sans-serif; letter-spacing: -.03em; text-shadow: 0 2px 30px rgba(12,34,80,.45);
   transition: opacity .7s, transform .9s cubic-bezier(.2,.8,.2,1), filter .7s; }
 .cb-title span { display: block; }
 .cb-title em { font-style: italic; background: linear-gradient(100deg, #fff 0%, #ffe3b5 55%, #ffc2dc 100%); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; filter: drop-shadow(0 2px 20px rgba(12,34,80,.35)); }

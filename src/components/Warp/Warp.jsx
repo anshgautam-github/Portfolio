@@ -73,6 +73,7 @@ export default function Warp({
   const flow = useRef(null);
   useEffect(() => (flow.current ? startFlow(flow.current) : undefined), []);
   const limeRef = useRef(null);
+  const builtRef = useRef(null); // the word "built" in the intro headline: the cursor starts hidden right behind it
   const coordRef = useRef(null);
   const clockRef = useRef(null);
   const state = useRef(initialState());
@@ -123,6 +124,21 @@ export default function Warp({
     const S = state.current;
     const el = root.current;
     const engine = createWarpEngine(canvas.current, S);
+
+    /* where the cursor starts: dead centre on the word "built", wherever that lands on this screen (laptop, tablet, phone).
+       Measured from layout offsets (not getBoundingClientRect) so the headline's entrance transforms can't skew it. */
+    const anchor = () => {
+      const b = builtRef.current;
+      if (!b || !el.clientWidth || !el.clientHeight) return null;
+      let x = 0, y = 0, n = b;
+      while (n && n !== el) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+      if (n !== el) return null;
+      x += b.offsetWidth / 2;
+      y += b.offsetHeight / 2;
+      return { cx: x / el.clientWidth - 0.5, cy: y / el.clientHeight - 0.5 };
+    };
+    const a0 = anchor();
+    if (a0) { S.cx = a0.cx; S.cy = a0.cy; }
     let active = true;
 
     const ro = new ResizeObserver(() => engine.resize());
@@ -222,9 +238,18 @@ export default function Warp({
           enter.to(b2, { autoAlpha: 0, duration: 0.25 }, 0.8);
         }
         enter.fromTo(q("[data-i]"), { y: 110, autoAlpha: 0, scale: 1.12 }, { y: 0, autoAlpha: 1, scale: 1, stagger: 0.07, duration: 0.3, ease: "power3.out" }, 0.66);
+        /* the cursor is parked behind "built" at the spot where the headline finally rests, so it only fades in as the lines land
+           (otherwise it sits ~100px off the still-rising text while the section slides in) */
+        enter.fromTo(S, { cAlpha: 0 }, { cAlpha: 1, ease: "none", duration: 0.2 }, Math.max(0, enter.duration() - 0.2));
 
         /* 1-4 · the cursor swells, tilts, swallows the screen, then the streaks take over */
-        to({ cs: 3.4, cr: 16, tilt: 1, cx: 0.17, cy: -0.02, density: 0.2, ease: "power1.inOut" }, 0, 1.6);
+        /* the start values are functions, so they are re-measured on every refresh (resize, rotate, fonts loading) */
+        tl.fromTo(
+          S,
+          { cx: () => (anchor() || { cx: S.cx }).cx, cy: () => (anchor() || { cy: S.cy }).cy },
+          { cs: 3.4, cr: 16, tilt: 1, cx: 0.17, cy: -0.02, density: 0.2, ease: "power1.inOut", duration: 1.6 },
+          0
+        );
         to({ cs: 9, cr: 44, cx: 0.05, cy: -0.03, inside: 1, density: 0.4, tilt: 0.4, ease: "power1.inOut" }, 1.5, 1.5);
         to({ cs: 36, cr: 68, cx: 0, cy: 0, density: 0.6, cMix: 1, tilt: 0, ease: "power2.in" }, 2.9, 1.3);
         to({ cAlpha: 0, inside: 0, outside: 1, bg: 1, density: 0.75, hue: 0.4 }, 4.1, 1.0);
@@ -425,7 +450,7 @@ export default function Warp({
         >
           Things I have
           <br />
-          designed &amp; <span style={{ color: "#8db4ff" }}>built</span>
+          designed &amp; <span ref={builtRef} style={{ color: "#8db4ff" }}>built</span>
         </h2>
         <p data-i className="mt-6 max-w-[620px] text-pretty text-[clamp(14px,1.15vw,18px)] leading-[1.65] text-white/70" style={{ fontFamily: "'Inter Tight', 'Inter', system-ui, sans-serif" }}>
           From AI-powered platforms to language models built from scratch, these projects reflect how I turn complex ideas into working systems. Scroll to explore the thinking, engineering, and experimentation behind each build.

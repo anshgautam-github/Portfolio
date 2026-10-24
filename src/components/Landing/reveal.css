@@ -23,7 +23,7 @@
 .rv-row { display: flex; width: max-content; white-space: nowrap; will-change: transform; }
 .rv-seg { display: inline-block; padding-right: .1em; text-transform: uppercase; }
 .rv-seg b { font-weight: 800; font-stretch: 125%; letter-spacing: -.02em; color: var(--rv-ink); opacity: .92; }
-.rv-seg em { font-family: "Gloock", Georgia, serif; font-style: normal; font-weight: 400; color: var(--rv-blue); letter-spacing: -.01em; }
+.rv-seg em { font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; font-style: normal; font-weight: 400; color: var(--rv-blue); letter-spacing: -.01em; }
 .rv-row[data-row="b"] .rv-seg b { color: transparent; -webkit-text-stroke: 2px var(--rv-ink); opacity: .75; }
 
 .rv-eyebrow { position: absolute; z-index: 2; top: 9vh; left: 50%; transform: translateX(-50%); opacity: 0; text-align: center; white-space: nowrap; }
@@ -41,7 +41,7 @@
 .rv-ln > span { display: block; will-change: transform; }
 .rv-w { display: inline-block; }
 .rv-ln:first-child > span > .rv-w:first-child::first-letter { text-transform: uppercase; }
-.rv-ln em, .rv-ln em.rv-w { position: relative; display: inline-block; font-family: "Newsreader", "Gloock", Georgia, serif; font-style: italic; font-weight: 400; font-size: 1.07em; letter-spacing: -.03em; color: #101828; }
+.rv-ln em, .rv-ln em.rv-w { position: relative; display: inline-block; font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; font-style: italic; font-weight: 400; font-size: 1.07em; letter-spacing: -.03em; color: #101828; }
 .rv-ul { position: absolute; left: -2%; bottom: -.05em; width: 104%; height: .22em; overflow: visible; pointer-events: none; }
 .rv-ul path { fill: none; stroke: #2f5fe0; stroke-width: 3px; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
 .rv-foot { position: absolute; left: 9vw; right: 9vw; bottom: 7vh; display: flex; align-items: center; gap: 22px; opacity: 0; color: rgba(11,20,36,.62); text-transform: uppercase; }
@@ -129,7 +129,7 @@
 .rv-gl.g4 { width: 20vmin; height: 9vmin; right: 12%; bottom: 13%; rotate: 8deg; border-radius: 999px; animation: rvFloatA 12s ease-in-out infinite alternate; }
 @keyframes rvFloatA { to { translate: 1.6vmin -2.4vmin; } }
 @keyframes rvFloatB { to { translate: -2vmin 2vmin; } }
-.rv-lab { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-size: clamp(9px, .72vw, 12px); letter-spacing: .16em; color: rgba(11, 20, 36, .55); }
+.rv-lab { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; font-size: clamp(9px, .72vw, 12px); letter-spacing: .16em; color: rgba(11, 20, 36, .55); }
 .rv-lab.l1 { left: 4.2vw; top: 5.2vh; }
 .rv-lab.l2 { right: 4.2vw; top: 5.2vh; }
 .rv-lab.l3 { left: 4.2vw; bottom: 6.4vh; }
@@ -138,7 +138,7 @@
 @media (prefers-reduced-motion: reduce) { .rv-art * { animation: none !important; } }
 
 /* ---- glass cards with real content (replaces the empty boxes) ---- */
-.rv-art > .rv-gl { position: absolute; font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; color: rgba(11, 20, 36, .8); overflow: hidden; }
+.rv-art > .rv-gl { position: absolute; font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; color: rgba(11, 20, 36, .8); overflow: hidden; }
 .rv-art .rv-gl.g1 { width: 25vmin; height: auto; left: 5.5%; top: 14%; rotate: -5deg; border-radius: 16px; padding: 0; font-size: max(8px, 1.05vmin); }
 .rv-gl .gl-bar { display: flex; align-items: center; gap: .55em; padding: .9em 1.1em; border-bottom: 1px solid rgba(63, 114, 238, .16); background: rgba(255, 255, 255, .45); font-size: .95em; letter-spacing: .08em; color: rgba(11, 20, 36, .55); }
 .rv-gl .gl-bar b { width: .85em; height: .85em; border-radius: 50%; background: #ff8f9e; }
@@ -231,3 +231,28 @@
 .rv-gl.g3 .puff { fill: rgba(255, 255, 255, .85); animation: rvPuff 2.4s ease-out infinite; }
 .rv-gl.g3 .pf2 { animation-delay: -.8s; } .rv-gl.g3 .pf3 { animation-delay: -1.6s; }
 @keyframes rvPuff { from { translate: 0 0; opacity: .9; scale: .6; } to { translate: -14px 22px; opacity: 0; scale: 1.8; } }
+
+/* frosted-glass layer over the website card while the signature is being written (animated from reveal.js) */
+.rv-frost {
+  position: absolute; inset: 0; z-index: 60; pointer-events: none; visibility: hidden; opacity: 0; --rv-blur: 0px;
+  -webkit-backdrop-filter: blur(var(--rv-blur)) saturate(1.3) brightness(1.08);
+  backdrop-filter: blur(var(--rv-blur)) saturate(1.3) brightness(1.08);
+  background:
+    radial-gradient(120% 90% at 50% 38%, rgba(235, 244, 255, .20), rgba(170, 200, 255, .10) 55%, rgba(110, 150, 235, .18)),
+    linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, 0) 40%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .30), inset 0 1px 0 rgba(255, 255, 255, .45), inset 0 0 70px rgba(150, 190, 255, .22);
+  border-radius: inherit;
+}
+
+/* phones: bring the planet, layer stack and cube back so the open areas above and below the card are not bare */
+@media (max-width: 700px) {
+  .rv-art .rv-gl.g1, .rv-art > .rv-gl.g2, .rv-art > .rv-gl.g4 { display: block !important; }
+  .rv-art .rv-gl.g1 { width: 27vmin; left: 3%; top: 11%; }
+  .rv-art > .rv-gl.g2 { width: 25vmin; right: 3%; top: 10%; }
+  .rv-art .rv-gl.g4 { width: 17vmin; height: 17vmin; right: 9%; bottom: 17%; }
+  .rv-gl .cube { --s: 11vmin; }
+  .rv-gl .cube .f b { font-size: 7px; }
+  .rv-gl.g2 .lb text { font-size: 6px; }
+  .rv-art .rv-gl.g3 { left: 8%; bottom: 11%; width: 21vmin; height: 21vmin; }
+  .rv-sp.sp4 { top: 36%; right: 6%; } .rv-sp.sp5 { left: 5%; top: 40%; }
+}

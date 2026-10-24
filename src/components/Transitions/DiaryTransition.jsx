@@ -21,7 +21,7 @@ export default function DiaryTransition({ from = "[data-warp-wrap]", to = "#diar
       if (cv && cv.isConnected) return cv;
       cv = document.createElementNS(NS, "svg");
       cv.setAttribute("aria-hidden", "true");
-      cv.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:38;pointer-events:none;display:none;overflow:visible";
+      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;z-index:38;pointer-events:none;display:none;overflow:visible";
       cv.innerHTML =
         '<rect data-dim="1" width="100%" height="100%" fill="#000" opacity="0"/>' +
         '<circle data-g="1" fill="none" stroke="rgba(255,236,200,.28)" stroke-width="22"/>' +

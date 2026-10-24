@@ -122,7 +122,7 @@ export function Laptop({ image, screen }) {
               <div className="pj-mb-display">
                 <span className="pj-mb-dnotch" />
                 <div className="pj-mb-screen">
-                  {image ? <img src={image} alt="" draggable={false} /> : <BuilderScreen {...screen} />}
+                  {image ? <img decoding="async" src={image} alt="" draggable={false} /> : <BuilderScreen {...screen} />}
                 </div>
                 <div className="pj-mb-sheen" />
               </div>
@@ -159,8 +159,8 @@ export function Phones({ images }) {
     <Fit w={720} h={720}>
       <div className="pj-ph-stage" ref={stage}>
         <div className="pj-ph-scene">
-          <Phone cls="back">{images?.[0] ? <img src={images[0]} alt="" draggable={false} /> : <LoginScreen />}</Phone>
-          <Phone cls="front">{images?.[1] ? <img src={images[1]} alt="" draggable={false} /> : <TrackerScreen />}</Phone>
+          <Phone cls="back">{images?.[0] ? <img decoding="async" src={images[0]} alt="" draggable={false} /> : <LoginScreen />}</Phone>
+          <Phone cls="front">{images?.[1] ? <img decoding="async" src={images[1]} alt="" draggable={false} /> : <TrackerScreen />}</Phone>
         </div>
         <div className="pj-ph-shadow" />
       </div>

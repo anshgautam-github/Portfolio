@@ -87,8 +87,8 @@ html.kimi-menu-open { overflow: hidden; }
   --duration-fast: 150ms; --duration-normal: 250ms; --duration-plate: 700ms;
   --ease-entrance: cubic-bezier(0.2, 0, 0, 1);
   --ease-plate: cubic-bezier(0.33, 0, 0, 1);
-  --font-sans: "Space Grotesk", system-ui, sans-serif;
-  --font-display: "Oswald", Impact, sans-serif;
+  --font-sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
 }
 @media (min-width: 1441px) and (max-width: 1920px){.kimi [data-hero] { --hero-base: calc(1920 / 1440);
     --type-impact: calc(calc(6 * var(--rem)) * var(--hero-base)); --type-display-lg: calc(calc(4.375 * var(--rem)) * var(--hero-base));
@@ -794,4 +794,127 @@ html.kimi-menu-open { overflow: hidden; }
   .kimi .pad .cal { padding-left: 48px; }
   .kimi .pad .cal::before { left: 48px; }
   .kimi .pad-panels [data-stats] { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* =====================================================================
+   MOBILE / TABLET: quiet editorial treatment (hairlines, one accent, no glow)
+   ===================================================================== */
+@media (max-width: 1023px) {
+  .kimi .pad { --ink-line: rgba(255,255,255,.14); --acc: #8db4ff; }
+
+  /* intro: plain, with a thin rule */
+  .kimi .pad-intro { margin: 0 24px; padding: 0 0 0 16px; max-width: none; border-left: 1px solid var(--ink-line); }
+  .kimi .pad-intro p { font-size: 15px; line-height: 1.75; color: #cfd7e6; }
+  .kimi .pad-intro p:first-child { color: #f2f5fb; }
+
+  /* stats: one ruled 2x2 table, no card chrome */
+  .kimi .pad-panels { padding: 34px 24px 6px; }
+  .kimi .pad-panels [data-stats] { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0;
+    border-top: 1px solid var(--ink-line); border-bottom: 1px solid var(--ink-line); }
+  .kimi .stat-row { position: relative; min-width: 0; gap: 0; padding: 20px 4px 22px 0; border: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible; }
+  .kimi .stat-row:nth-child(3), .kimi .stat-row:nth-child(7) { padding-left: 18px; border-left: 1px solid var(--ink-line); }
+  .kimi .stat-row:nth-child(5), .kimi .stat-row:nth-child(7) { border-top: 1px solid var(--ink-line); }
+  .kimi .stat-row:nth-child(1), .kimi .stat-row:nth-child(3), .kimi .stat-row:nth-child(5), .kimi .stat-row:nth-child(7) { grid-column: auto; flex-direction: column; align-items: flex-start; }
+  .kimi .stat-row:nth-child(5) { padding-right: 4px; }
+  .kimi .stat-row::before, .kimi .stat-row::after { content: none; }
+  .kimi .stat-row .stat-ic { box-sizing: border-box; width: 22px; height: 22px; padding: 0; margin: 0 0 18px; color: var(--acc); stroke: var(--acc); stroke-width: 2.6; background: none; box-shadow: none; filter: none; border-radius: 0; opacity: .9; }
+  .kimi .stat-row .stat-ic circle { fill: var(--acc); }
+  .kimi .stat-row .lb { font-size: 10px; letter-spacing: .14em; line-height: 1.4; color: rgba(255,255,255,.5); opacity: 1; }
+  .kimi .stat-row .fg { margin-top: 8px; font-size: 28px; line-height: 1.05; letter-spacing: -.025em; color: #fff; background: none; -webkit-text-fill-color: #fff; }
+  .kimi .stat-row .fg.fg-sm { font-size: 18px; margin-top: 10px; letter-spacing: -.01em; }
+  .kimi .stat-row:nth-child(7) .fg.fg-sm { font-size: 18px; }
+
+  /* stage rail: flat cards, hairline border, selected one picks up the accent */
+  .kimi .pad .cal { padding: 38px 24px 36px; gap: 10px; margin-top: 22px; border-top: 0; background: none; }
+  .kimi .pad .cal::before { top: 12px; left: 24px; padding-left: 0; color: rgba(255,255,255,.45); }
+  .kimi .pad .cal::after { content: none; }
+  .kimi .cal .card { overflow: visible; width: 172px !important; padding: 14px 14px 16px; gap: 6px; border: 1px solid var(--ink-line); border-radius: 10px; background: rgba(255,255,255,.025); box-shadow: none; transform: none; transition: border-color .25s, background .25s; }
+  .kimi .cal .card::before, .kimi .cal .card::after { content: none !important; }
+  .kimi .cal .card .rd { align-self: flex-start; padding: 0; border-radius: 0; background: none; box-shadow: none; font-size: 10px; letter-spacing: .16em; color: rgba(255,255,255,.45); }
+  .kimi .cal .card .nm { margin-top: 4px; font-size: 13.5px; line-height: 1.25; color: #fff; }
+  .kimi .cal .card .dt { font-size: 10.5px; letter-spacing: .08em; color: rgba(255,255,255,.5); }
+  .kimi .cal .card.live { background: rgba(141,180,255,.07); border-color: var(--acc); box-shadow: none; transform: none; }
+  .kimi .cal .card.live .rd { color: var(--acc); background: none; box-shadow: none; }
+  .kimi .cal .card.live .nm, .kimi .cal .card.live .dt { color: #fff; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kimi .pad-intro { margin: 0 48px; }
+  .kimi .pad-panels { padding-left: 48px; padding-right: 48px; }
+  .kimi .pad-panels [data-stats] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kimi .pad .cal::before { left: 48px; }
+}
+
+
+/* =====================================================================
+   Intro copy on phones / tablets: an editorial "note" card
+   stage label (mono) -> large opening quote -> readable sans copy with the key words lit in the accent colour
+   ===================================================================== */
+@media (max-width: 1023px) {
+  .kimi .pad-intro {
+    position: relative; margin: 6px 20px 0; padding: 46px 22px 24px 24px; max-width: none; border: 0; border-radius: 22px; overflow: hidden;
+    background: linear-gradient(160deg, rgba(141,180,255,.14), rgba(141,180,255,.03) 46%, rgba(255,255,255,.02));
+    box-shadow: inset 0 0 0 1px rgba(160,190,255,.18), 0 22px 44px -24px rgba(0,0,0,.7);
+  }
+  /* glowing spine */
+  .kimi .pad-intro::after { content: ""; position: absolute; left: 0; top: 18px; bottom: 18px; width: 3px; border-radius: 3px;
+    background: linear-gradient(180deg, #8db4ff, #b69cff 55%, rgba(182,156,255,0)); box-shadow: 0 0 18px rgba(141,180,255,.55); }
+  /* stage label */
+  .kimi .pad-intro::before { content: attr(data-k); position: absolute; left: 24px; top: 18px; right: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font: 500 10.5px/1 "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .16em; text-transform: uppercase; color: #8db4ff; }
+  /* oversized quote mark */
+  .kimi .pad-intro p { position: relative; font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; font-size: 17px; line-height: 1.62; letter-spacing: -.005em; color: #c9d3e6; }
+  .kimi .pad-intro p .k-rv { column-gap: .27em; row-gap: .08em; }
+  .kimi .pad-intro p .u.em { color: #fff; font-weight: 600;
+    background: linear-gradient(100deg, #cfe0ff, #9db8ff 45%, #c7b3ff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .kimi .pad-intro p:first-child { color: #c9d3e6; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kimi .pad-intro { margin: 6px 48px 0; padding: 54px 34px 30px 36px; }
+  .kimi .pad-intro::before { left: 36px; top: 22px; font-size: 11.5px; }
+  .kimi .pad-intro p { font-size: 20px; }
+}
+
+/* =====================================================================
+   Stages: all five visible at once - a compact vertical timeline instead of a sideways swipe rail
+   ===================================================================== */
+@media (max-width: 1023px) {
+  .kimi .pad .cal { display: flex; flex-direction: column; gap: 10px; overflow: visible; scroll-snap-type: none; padding: 40px 20px 30px; position: relative; }
+  .kimi .pad .cal::before { content: "Tap a stage"; left: 20px; top: 14px; }
+  .kimi .cal .card, .kimi .cal .card.hide-phone {
+    display: grid !important; width: 100% !important; flex: none; scroll-snap-align: none;
+    grid-template-columns: 78px 1fr; grid-template-areas: "rd nm" "rd dt"; column-gap: 12px; row-gap: 3px; align-items: center; justify-items: start;
+    padding: 14px 16px; text-align: left; white-space: normal;
+  }
+  .kimi .cal .card .rd { grid-area: rd; align-self: center; margin: 0; font-size: 10.5px; letter-spacing: .14em; white-space: nowrap; }
+  .kimi .cal .card .nm { grid-area: nm; margin: 0; font-size: 14px; line-height: 1.2; }
+  .kimi .cal .card .dt { grid-area: dt; font-size: 11px; line-height: 1.4; letter-spacing: .06em; white-space: normal; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kimi .pad .cal { padding: 44px 48px 36px; }
+  .kimi .pad .cal::before { left: 48px; }
+  .kimi .cal .card, .kimi .cal .card.hide-phone { grid-template-columns: 96px 1fr; padding: 16px 20px; }
+}
+
+/* Intro copy, toned down: plain reading text, one hairline, nothing glowing or gradient */
+@media (max-width: 1023px) {
+  .kimi .pad-intro { margin: 8px 24px 0; padding: 0 0 0 18px; border: 0; border-left: 1px solid rgba(255,255,255,.18); border-radius: 0; background: none; box-shadow: none; overflow: visible; }
+  .kimi .pad-intro::after { content: none; }
+  .kimi .pad-intro::before { position: static; display: block; margin: 0 0 12px; font: 400 11px/1.2 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: .08em; text-transform: none; color: rgba(255,255,255,.45); }
+  .kimi .pad-intro p { font-size: 16px; line-height: 1.7; letter-spacing: 0; color: #d3dae8; }
+  .kimi .pad-intro p .u.em { background: none; -webkit-text-fill-color: currentColor; color: inherit; font-weight: inherit; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kimi .pad-intro { margin: 8px 48px 0; padding: 0 0 0 24px; }
+  .kimi .pad-intro::before { position: static; }
+  .kimi .pad-intro p { font-size: 18px; }
+}
+
+/* phones: the stage list is removed (the intro copy above stands on its own) */
+@media (max-width: 639px) {
+  .kimi .pad .cal { display: none !important; }
+}
+
+/* phones: the stage counter is meaningless without the stage list - the note is simply labelled */
+@media (max-width: 639px) {
+  .kimi .pad-intro::before { content: "About me"; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.5); }
 }

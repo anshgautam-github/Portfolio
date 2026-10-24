@@ -366,7 +366,7 @@ export default function Showcase() {
         {showcase.images.map((src, i) => (
           <div key={i} ref={(el) => (items.current[i] = el)} className="absolute left-0 top-0 will-change-transform">
             <div ref={(el) => (inners.current[i] = el)} className="h-full w-full will-change-transform">
-              <img src={src} alt="" draggable="false" className="block h-full w-full object-cover" style={{ borderRadius: "29%" }} />
+              <img decoding="async" src={src} alt="" draggable="false" className="block h-full w-full object-cover" style={{ borderRadius: "29%" }} />
             </div>
           </div>
         ))}

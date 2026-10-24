@@ -160,7 +160,7 @@ function WarpProjects() {
                     <em><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7.1L12 17.6 5.7 21.3l1.7-7.1L2 9.5l7.1-.6z" /></svg>Featured on</em>
                     <div>
                       {p.featured.map((f) => (
-                        <span key={f.n}><i>{f.logo ? <img src={f.logo} alt="" draggable={false} /> : f.i}</i><b>{f.n}</b></span>
+                        <span key={f.n}><i>{f.logo ? <img decoding="async" src={f.logo} alt="" draggable={false} /> : f.i}</i><b>{f.n}</b></span>
                       ))}
                     </div>
                   </div>

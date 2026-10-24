@@ -309,7 +309,7 @@ export default function Socials() {
               }}
             >
             <div data-art className={"absolute inset-0" + (IS_MOBILE ? "" : " will-change-transform")} style={{ borderRadius: u(64 * c.s) }}>
-              {c.image ? <img src={c.image} alt="" className="h-full w-full object-cover" /> : <CardArt pattern={c.pattern} palette={c.palette} />}
+              {c.image ? <img decoding="async" src={c.image} alt="" className="h-full w-full object-cover" /> : <CardArt pattern={c.pattern} palette={c.palette} />}
             </div>
 
             {/* light that follows the pointer */}

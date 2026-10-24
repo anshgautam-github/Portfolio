@@ -1,7 +1,7 @@
 .arc {
   position: relative; width: 100%; height: 100vh; height: 100svh; min-height: 680px; overflow: hidden; isolation: isolate;
   background: linear-gradient(180deg, #a9c8ee 0%, #c6dcf4 45%, #dfeaf8 100%); color: #0b1424;
-  font-family: "Newsreader", "Gloock", Georgia, serif;
+  font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
 }
 .arc *, .arc *::before, .arc *::after { box-sizing: border-box; }
 .arc-head { position: absolute; z-index: 5; left: 0; right: 0; top: clamp(34px, 7vh, 80px); text-align: center; pointer-events: none; padding: 0 20px; }
@@ -53,7 +53,7 @@
 .arc-dots button:focus-visible { outline: 2px solid #2f5ff0; outline-offset: 3px; }
 
 .arc-count { position: absolute; z-index: 4; left: clamp(20px, 3.4vw, 52px); bottom: clamp(26px, 5vh, 52px); font-size: clamp(34px, 3.4vw, 50px); line-height: 1; }
-.arc-count span { font-size: .38em; color: #9aa1af; font-family: "Inter Tight", Arial, sans-serif; }
+.arc-count span { font-size: .38em; color: #9aa1af; font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; }
 .arc-nav { position: absolute; z-index: 6; right: clamp(20px, 3.4vw, 52px); bottom: clamp(20px, 4vh, 44px); display: flex; gap: 12px; }
 .arc-nav button { all: unset; cursor: pointer; width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; background: #fff; box-shadow: 0 8px 22px rgba(30, 50, 90, .14), 0 0 0 1px rgba(30, 50, 90, .06); font-size: 24px; line-height: 1; transition: transform .25s cubic-bezier(.2, .8, .2, 1), box-shadow .25s; }
 .arc-nav button:hover { transform: translateY(-2px) scale(1.06); box-shadow: 0 14px 28px rgba(30, 50, 90, .2), 0 0 0 1px rgba(30, 50, 90, .08); }
@@ -172,7 +172,7 @@
 /* outlined marquee */
 .arc-marq { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-46%) rotate(-3deg); width: 120%; margin-left: -10%; overflow: hidden; white-space: nowrap; }
 .arc-marq > div { display: inline-flex; animation: arcMarq 46s linear infinite; }
-.arc-marq span { display: inline-flex; align-items: center; gap: .5em; padding-right: .5em; font: 400 italic clamp(90px, 15vw, 230px)/1 "Newsreader", Georgia, serif; letter-spacing: -.03em; color: transparent; -webkit-text-stroke: 1.2px rgba(255,255,255,.7); text-transform: lowercase; }
+.arc-marq span { display: inline-flex; align-items: center; gap: .5em; padding-right: .5em; font: 400 italic clamp(90px, 15vw, 230px)/1 "Inter Tight", "Helvetica Neue", Arial, sans-serif; letter-spacing: -.03em; color: transparent; -webkit-text-stroke: 1.2px rgba(255,255,255,.7); text-transform: lowercase; }
 .arc-marq i { font: 400 .35em/1 "Inter Tight", sans-serif; -webkit-text-stroke: 0; color: rgba(255,255,255,.8); font-style: normal; }
 @keyframes arcMarq { to { transform: translateX(-50%); } }
 
@@ -547,3 +547,58 @@
   .arc-meta { bottom: 98px; }
   .arc-dots { bottom: 66px; }
 }
+
+
+/* ---- section extras: programme tally + "next: My Arsenal" cue (the cue is the first beat of the hand-off into the Arsenal) ---- */
+.arc-tally { position: absolute; z-index: 4; left: clamp(110px, 8.6vw, 170px); bottom: clamp(30px, 6.4vh, 64px); display: flex; flex-direction: column; gap: 9px; pointer-events: none;
+  font: 600 clamp(9px, .72vw, 11px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(11, 20, 36, .6); }
+.arc-tally b { color: #0b1424; font-weight: 700; margin-right: 6px; }
+.arc-tally u { display: block; width: clamp(120px, 12vw, 190px); height: 2px; border-radius: 2px; background: rgba(11, 20, 36, .14); overflow: hidden; text-decoration: none; }
+.arc-tally u i { display: block; height: 100%; width: 100%; transform-origin: 0 50%; border-radius: 2px; background: linear-gradient(90deg, #3d6df0, #8f7bff); transition: transform .7s cubic-bezier(.2, .8, .2, 1); }
+.arc-next { position: absolute; z-index: 4; right: clamp(28px, 3.4vw, 64px); bottom: 15vh; display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; border-radius: 999px; pointer-events: none;
+  background: linear-gradient(160deg, rgba(255, 255, 255, .6), rgba(255, 255, 255, .22)); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(255, 255, 255, .7), 0 14px 30px -12px rgba(30, 60, 140, .45); color: #0b1424; font: 600 clamp(9px, .72vw, 11px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .18em; text-transform: uppercase; }
+.arc-next em { font-style: normal; opacity: .55; } .arc-next b { font-weight: 700; }
+.arc-next svg { animation: arcNextBob 1.6s ease-in-out infinite; }
+.arc-next-dots { display: inline-flex; }
+.arc-next-dots i { width: 14px; height: 14px; border-radius: 50%; margin-left: -4px; border: 1.5px solid #fff; box-shadow: 0 2px 6px rgba(20, 40, 100, .35); }
+.arc-next-dots i:nth-child(1) { margin-left: 0; background: radial-gradient(circle at 35% 30%, #fff, #6c47ff 60%); }
+.arc-next-dots i:nth-child(2) { background: radial-gradient(circle at 35% 30%, #fff, #ee4c2c 60%); }
+.arc-next-dots i:nth-child(3) { background: radial-gradient(circle at 35% 30%, #fff, #2b5b84 60%); }
+@keyframes arcNextBob { 50% { transform: translateY(3px); } }
+@media (max-width: 760px) { .arc-tally, .arc-next { display: none; } }
+@media (prefers-reduced-motion: reduce) { .arc-next svg { animation: none; } }
+
+
+/* =====================================================================
+   PERFORMANCE PASS  (visuals unchanged; only costs removed)
+
+   1. The card box-shadows (and the .is-on shadow transition) were clipped away by each card's own clip-path, so they never showed -
+      but they were still painted, and re-painted on every card change. Gone.
+   2. The three background blobs animated `margin`, which forces a re-layout of the section on every frame. They now animate transform properties only.
+   3. A 200%-wide animated film-grain layer (opacity .05 - invisible) and a 130vmax masked ring layer that scaled forever: both stopped / removed.
+   4. Cards on the far side of the ring (invisible anyway) are now visibility:hidden, so ~7 of the 16 card layers are released from the GPU.
+   5. Decorative loops stand still while the page scrolls or the carousel moves.
+   ===================================================================== */
+.arc-card, .arc-card.is-on { box-shadow: none; transition: none; }
+.arc-card.is-far { visibility: hidden; }
+
+@keyframes arcFloat { to { translate: 0 3vh; scale: 1.1; } }
+.arc-grain { display: none; }
+.arc::after { animation: none; }
+.arc-stage::before { animation: none; opacity: 0.85; }
+
+html.is-scrolling .arc::before,
+html.is-scrolling .arc-blob,
+html.is-scrolling .arc-chip,
+html.is-scrolling .arc-badge svg,
+html.is-scrolling .arc-badge b,
+html.is-scrolling .arc-cross,
+html.is-scrolling .arc-next svg,
+.arc.is-moving::before,
+.arc.is-moving .arc-blob,
+.arc.is-moving .arc-chip,
+.arc.is-moving .arc-badge svg,
+.arc.is-moving .arc-badge b,
+.arc.is-moving .arc-cross,
+.arc.is-moving .arc-next svg { animation-play-state: paused !important; }

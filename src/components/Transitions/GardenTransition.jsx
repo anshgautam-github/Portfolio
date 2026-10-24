@@ -21,7 +21,7 @@ export default function GardenTransition({ from = "[data-warp-wrap]", to = "sect
       if (cv && cv.isConnected) return cv;
       cv = document.createElementNS(NS, "svg");
       cv.setAttribute("aria-hidden", "true");
-      cv.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:38;pointer-events:none;display:none;overflow:visible";
+      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;z-index:38;pointer-events:none;display:none;overflow:visible";
       cv.innerHTML =
         '<rect data-dim="1" width="100%" height="100%" fill="#000" opacity="0"/>' +
         '<circle data-g="1" fill="none" stroke="rgba(255,205,130,.55)" stroke-width="46"/>' +

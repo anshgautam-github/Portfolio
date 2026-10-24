@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import "./picked.css";
-import { capDpr, skipFrame } from "../../lib/perf.js";
+import { capDpr, skipFrame, IS_MOBILE } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -65,7 +65,7 @@ function Cover({ index, src }) {
       style={{ left: `calc(var(--c) * ${-index})`, width: "calc(var(--c) * 3)", height: "calc(var(--c) * 1.41)" }}
     >
       {src ? (
-        <img src={src} alt="" draggable="false" className="h-full w-full select-none object-cover" />
+        <img decoding="async" src={src} alt="" draggable="false" className="h-full w-full select-none object-cover" />
       ) : (
         <>
           <pre
@@ -213,7 +213,7 @@ export default function Picked() {
         });
 
         // 1 · heading clears up, panel settles
-        tl.fromTo(head.current, { opacity: 0.08, y: 26, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", ease: "power2.out", duration: 1.5 }, 0.1);
+        tl.fromTo(head.current, { opacity: 0.08, y: 26, ...(IS_MOBILE ? {} : { filter: "blur(8px)" }) }, { opacity: 1, y: 0, ...(IS_MOBILE ? {} : { filter: "blur(0px)" }), ease: "power2.out", duration: 1.5 }, 0.1);
         tl.fromTo(deck.current, { y: H * 0.08, scale: 1.04 }, { y: 0, scale: 1, ease: "power3.out", duration: 1.5 }, 0);
         tl.set(head.current, { clearProps: "filter" }, 1.7);
 
