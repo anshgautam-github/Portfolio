@@ -112,6 +112,7 @@ export function mountLanding(root, content = landingContent, options = {}) {
   let lastX = 0, lastY = 0, lastT = 0, hasLast = false;
   const rel = (e) => { const r = root.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, r]; };
   const onMove = (e) => {
+    if (e.pointerType === "touch" && !dragging) return;
     const [x, y, r] = rel(e);
     glass && glass.pointer(x, y, true);
     coordsEl.textContent = `${pad4(x)} X ${pad4(y)} Y`;
@@ -202,6 +203,7 @@ export function mountLanding(root, content = landingContent, options = {}) {
   };
   root.addEventListener("click", onClick);
   const ctaMove = (e) => {
+    if (e.pointerType === "touch") return;
     const b = e.target.closest && e.target.closest(".ll-cta");
     if (!b) return;
     const r = b.getBoundingClientRect();

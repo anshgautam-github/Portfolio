@@ -286,9 +286,11 @@ export default function Garden({ embedded = false, ctl = null }) {
       const unlock = () => audio();
       root.current.addEventListener("pointerdown", unlock);
       root.current.addEventListener("click", unlock);
-      root.current.addEventListener("pointermove", onMove);
-      root.current.addEventListener("pointerenter", onEnter);
-      root.current.addEventListener("pointerleave", onLeave);
+      if (fine) {
+        root.current.addEventListener("pointermove", onMove);
+        root.current.addEventListener("pointerenter", onEnter);
+        root.current.addEventListener("pointerleave", onLeave);
+      }
 
       /* ---------------- watering ---------------- */
       const toScreen = (X, Y) => {

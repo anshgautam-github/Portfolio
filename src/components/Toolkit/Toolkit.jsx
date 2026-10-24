@@ -526,12 +526,13 @@ export default function Toolkit() {
     const stop = () => { running = false; cancelAnimationFrame(raf); };
     const sp = spot.current;
     const onMove = (e) => {
+      if (!running || IS_MOBILE) return;
       const r = cv.getBoundingClientRect();
       const x = e.clientX - r.left, y = e.clientY - r.top;
       m.vx = (x - m.x) * 22; m.vy = (y - m.y) * 22;
       if (m.x < -900) { m.vx = m.vy = 0; }
       m.x = x; m.y = y;
-      if (!IS_MOBILE) { sp.style.setProperty("--mx", (x / W) * 100 + "%"); } if (!IS_MOBILE) sp.style.setProperty("--my", (y / H) * 100 + "%");
+      if (sp) { sp.style.setProperty("--mx", (x / W) * 100 + "%"); sp.style.setProperty("--my", (y / H) * 100 + "%"); }
     };
     const onDown = (e) => {
       if (e.target.closest?.("[data-card]")) return;
@@ -549,11 +550,11 @@ export default function Toolkit() {
     io.observe(cv);
     const ro = new ResizeObserver(size);
     ro.observe(cv);
-    window.addEventListener("pointermove", onMove, { passive: true });
+    if (!IS_MOBILE) window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerdown", onDown, { passive: true });
     window.addEventListener("pointerup", onUp, { passive: true });
     size();
-    return () => { stop(); io.disconnect(); ro.disconnect(); window.removeEventListener("pointermove", onMove); window.removeEventListener("pointerdown", onDown); window.removeEventListener("pointerup", onUp); document.body.style.userSelect = ""; };
+    return () => { stop(); io.disconnect(); ro.disconnect(); if (!IS_MOBILE) window.removeEventListener("pointermove", onMove); window.removeEventListener("pointerdown", onDown); window.removeEventListener("pointerup", onUp); document.body.style.userSelect = ""; };
   }, []);
 
   const tickW = ["0.8vw", "0.8vw", "1.9vw", "3.3vw", "1.9vw", "0.8vw"];

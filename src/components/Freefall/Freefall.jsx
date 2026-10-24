@@ -428,8 +428,10 @@ export default function Freefall() {
           onUpdate: () => (deck.style.perspectiveOrigin = `${po.x.toFixed(1)}% ${po.y.toFixed(1)}%`),
         });
       };
-      el.addEventListener("pointermove", onMove);
-      cleanups.push(() => el.removeEventListener("pointermove", onMove));
+      if (!mobile && window.matchMedia("(pointer: fine)").matches) {
+        el.addEventListener("pointermove", onMove);
+        cleanups.push(() => el.removeEventListener("pointermove", onMove));
+      }
 
       /* ---- the button: scroll to the next card ---- */
       api.current.step = (dir = 1) => {

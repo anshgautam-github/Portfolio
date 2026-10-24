@@ -2230,14 +2230,16 @@ $$("[data-chequer]").forEach(chequer);
 
   const stackEl = $("#stack");
   // render only while the hero is in view (+10 frames), the tab is visible, and scrollY is within reach
-  let inView = true, grace = 0;
+  let inView = false, grace = 0, covered = false;
   new IntersectionObserver((es) => { inView = es[es.length - 1].isIntersecting; if (!inView) grace = 10; }).observe(section);
+  if (stackEl) {
+    new IntersectionObserver(([e]) => {
+      covered = e.isIntersecting;
+    }, { rootMargin: "-115% 0px 0px 0px" }).observe(stackEl);
+  }
   subscribe((t) => {
-    if (!(inView || grace > 0)) return;
+    if (!(inView || grace > 0) || covered || document.hidden) return;
     if (!inView) grace--;
-    // the hero is sticky: it counts as covered once the stack has scrolled 1.15 viewports past it
-    // (measured from the stack's own top, since this block is not at the top of the page)
-    if (document.hidden || -stackEl.getBoundingClientRect().top > window.innerHeight * 1.15) return;
     scene.update(t);
   }, () => scene.tier.frameInterval);
 })();
@@ -2710,7 +2712,7 @@ const ARROW_SVG = `<svg viewBox="0 0 13.7071 10.7071" aria-hidden="true"><path d
     STEP_AT.forEach((t, i) => setStep(i, padOn && r >= t));
   };
   let stepQueued = false;
-  const onStepScroll = () => { if (stepQueued) return; stepQueued = true; requestAnimationFrame(() => { stepQueued = false; applySteps(); }); };
+  const onStepScroll = () => { if (stepQueued || !padOn) return; stepQueued = true; requestAnimationFrame(() => { stepQueued = false; if (padOn) applySteps(); }); };
   window.addEventListener("scroll", onStepScroll, { passive: true });
   window.addEventListener("resize", onStepScroll);
   if (mq("(hover: hover)")) {

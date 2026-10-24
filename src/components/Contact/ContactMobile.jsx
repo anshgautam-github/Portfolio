@@ -41,7 +41,16 @@ export default function ContactMobile() {
         .from(q("[data-fade]"), { y: 20, autoAlpha: 0, duration: 0.7, stagger: 0.06 }, 0.8)
         .from(q("[data-cta]"), { scale: 0.75, autoAlpha: 0, duration: 0.7, ease: "back.out(1.8)" }, 1);
 
-      const loop = gsap.to(marquee.current, { xPercent: -50, duration: 28, ease: "none", repeat: -1 });
+      const loop = gsap.to(marquee.current, { xPercent: -50, duration: 28, ease: "none", repeat: -1, paused: true });
+      ScrollTrigger.create({
+        trigger: root.current,
+        start: "top bottom",
+        end: "bottom top",
+        onEnter: () => loop.play(),
+        onLeave: () => loop.pause(),
+        onEnterBack: () => loop.play(),
+        onLeaveBack: () => loop.pause(),
+      });
       return () => loop.kill();
     });
     return () => mm.revert();

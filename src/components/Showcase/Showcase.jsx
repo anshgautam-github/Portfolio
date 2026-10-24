@@ -245,7 +245,9 @@ export default function Showcase() {
     };
     const start = () => { if (running || reduce) return; running = true; last = performance.now(); raf = requestAnimationFrame(loop); };
     const stop = () => { running = false; cancelAnimationFrame(raf); };
+    const fine = typeof window !== "undefined" && window.matchMedia("(pointer: fine)").matches;
     const onMove = (e) => {
+      if (!running) return;
       const r = cv.getBoundingClientRect();
       const x = e.clientX - r.left, y = e.clientY - r.top;
       m.vx = x - m.x; m.vy = y - m.y; if (m.x < -900) { m.vx = m.vy = 0; }
@@ -256,12 +258,13 @@ export default function Showcase() {
     const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0.05 });
     io.observe(cv);
     window.addEventListener("resize", size);
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => { stop(); io.disconnect(); window.removeEventListener("resize", size); window.removeEventListener("pointermove", onMove); };
+    if (fine) window.addEventListener("pointermove", onMove, { passive: true });
+    return () => { stop(); io.disconnect(); window.removeEventListener("resize", size); if (fine) window.removeEventListener("pointermove", onMove); };
   }, []);
 
-  // soft light on the paper that follows the pointer
+  // soft light on the paper that follows the pointer (desktop only)
   useEffect(() => {
+    if (!window.matchMedia("(pointer: fine)").matches) return undefined;
     const spot = bg.current?.querySelector(".sc-spot");
     if (!spot) return;
     const pos = { x: 50, y: 50 };

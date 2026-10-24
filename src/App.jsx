@@ -35,38 +35,52 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    let last = document.documentElement.scrollHeight;
     let lastW = window.innerWidth;
     let t;
     const touch = window.matchMedia("(pointer: coarse)").matches;
     const refresh = () => ScrollTrigger.refresh();
-    const onResize = () => {
+    const onWindowResize = () => {
       clearTimeout(t);
       t = setTimeout(() => {
-        const h = document.documentElement.scrollHeight;
         const w = window.innerWidth;
-        // phones: the URL bar collapsing nudges the height by ~60-100px mid-scroll. Re-measuring pins then makes sections jump / flash,
-        // so only refresh on a real change (width change = rotation, or a big height change = content/fonts loaded).
-        const real = touch ? (w !== lastW || Math.abs(h - last) > 160) : Math.abs(h - last) > 2;
-        if (real) {
-          last = h;
+        if (w !== lastW) {
           lastW = w;
           refresh();
         }
-      }, 150);
+      }, 200);
     };
+
     window.addEventListener("load", refresh);
+    window.addEventListener("resize", onWindowResize);
+    window.addEventListener("orientationchange", () => setTimeout(refresh, 300));
     document.fonts?.ready.then(() => setTimeout(refresh, 120));
     const t1 = setTimeout(refresh, 900);
     const t2 = setTimeout(refresh, 2200);
-    const ro = new ResizeObserver(onResize);
-    ro.observe(document.body);
+
+    let ro = null;
+    if (!touch) {
+      let lastH = document.documentElement.scrollHeight;
+      const onBodyResize = () => {
+        clearTimeout(t);
+        t = setTimeout(() => {
+          const h = document.documentElement.scrollHeight;
+          if (Math.abs(h - lastH) > 4) {
+            lastH = h;
+            refresh();
+          }
+        }, 150);
+      };
+      ro = new ResizeObserver(onBodyResize);
+      ro.observe(document.body);
+    }
+
     return () => {
       window.removeEventListener("load", refresh);
+      window.removeEventListener("resize", onWindowResize);
       clearTimeout(t);
       clearTimeout(t1);
       clearTimeout(t2);
-      ro.disconnect();
+      if (ro) ro.disconnect();
     };
   }, []);
 

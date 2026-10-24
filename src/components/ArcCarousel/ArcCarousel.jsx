@@ -120,21 +120,29 @@ export default function ArcCarousel({
     };
     measure();
 
-    const setTarget = (t) => { S.target = t; S.idleAt = performance.now(); };
+    const wake = () => {
+      S.rested = false;
+      if (!raf) {
+        last = performance.now();
+        raf = requestAnimationFrame(draw);
+      }
+    };
+    const setTarget = (t) => { S.target = t; S.idleAt = performance.now(); wake(); };
     const go = (d) => { setDir(d); setTarget(Math.round(S.target) + d); };
     api.current = { go, to: (i) => { const cur = Math.round(S.target); const d = wrap(i - mod(cur, n), n); setDir(d >= 0 ? 1 : -1); setTarget(cur + d); }, toSlot: (i) => { const cur = Math.round(S.target); const d = wrap(i - mod(cur, N), N); setDir(d >= 0 ? 1 : -1); setTarget(cur + d); } };
 
     const draw = (now) => {
-      raf = requestAnimationFrame(draw);
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       // nothing is moving: don't touch the DOM at all (this is what keeps scrolling past the section smooth)
-      // (before the section has ever been on screen there is nothing to animate either: the cards are posed once, then the loop sleeps
-      //  - it used to rewrite all 16 cards' styles on every frame for as long as you were still scrolling down to this section)
       const idle = !autoplay && !S.drag && (S.intro >= 1 || !S.started) && Math.abs(S.target - S.pos) < 4e-4 && Math.abs(S.vel) < 2e-3;
       // while the carousel moves, the section's decorative loops stand still (see arc-carousel.css)
       if (idle === !!S.moving) { S.moving = !idle; if (root.current) root.current.classList.toggle("is-moving", !idle); }
-      if (idle && S.rested) return;
+      if (idle && S.rested && !S.drag) {
+        raf = 0;
+        return;
+      }
       S.rested = idle;
+      raf = requestAnimationFrame(draw);
       // intro: the arc fans open and spins in the first time it scrolls into view
       if (S.started && S.intro < 1) { S.introT += dt / 1.5; S.intro = clamp(S.introT, 0, 1); }
       const ie = 1 - Math.pow(1 - S.intro, 3.2);
@@ -187,11 +195,13 @@ export default function ArcCarousel({
     const onDown = (e) => {
       if (e.button != null && e.button !== 0) return;
       S.drag = true; S.moved = 0; S.lastX = e.clientX; S.lastT = performance.now(); S.v = 0; S.vel = 0;
+      wake();
       el.setPointerCapture?.(e.pointerId);
       el.classList.add("is-drag");
     };
     const onMove = (e) => {
       if (!S.drag) return;
+      wake();
       const now = performance.now();
       const dx = e.clientX - S.lastX;
       S.moved += Math.abs(dx);
@@ -218,6 +228,7 @@ export default function ArcCarousel({
     const onWheel = (e) => {
       if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;            // vertical wheel keeps scrolling the page
       e.preventDefault();
+      wake();
       S.pos += e.deltaX / (spacing * 3.2); S.target = S.pos; S.vel = 0;
       clearTimeout(S.wt);
       S.wt = setTimeout(() => setTarget(Math.round(S.pos)), 110);
@@ -237,8 +248,8 @@ export default function ArcCarousel({
     el.addEventListener("wheel", onWheel, { passive: false });
     el.addEventListener("click", onClickCapture, true);
     window.addEventListener("keydown", onKey);
-    const ro = new ResizeObserver(measure); ro.observe(el); if (root.current) ro.observe(root.current);
-    const io = new IntersectionObserver(([en]) => { S.visible = en.isIntersecting && en.intersectionRatio > 0.35; if (en.isIntersecting) S.started = true; root.current && root.current.classList.toggle("is-live", en.isIntersecting); }, { threshold: [0, 0.35, 0.6] });
+    const ro = new ResizeObserver(() => { measure(); wake(); }); ro.observe(el); if (root.current) ro.observe(root.current);
+    const io = new IntersectionObserver(([en]) => { S.visible = en.isIntersecting && en.intersectionRatio > 0.35; if (en.isIntersecting) { S.started = true; wake(); } root.current && root.current.classList.toggle("is-live", en.isIntersecting); }, { threshold: [0, 0.35, 0.6] });
     io.observe(root.current);
     return () => {
       cancelAnimationFrame(raf); clearTimeout(S.wt);

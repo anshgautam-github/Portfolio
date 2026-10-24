@@ -90,15 +90,20 @@ function WarpProjects() {
       b.style.setProperty("--mx", `${((e.clientX - r.left) / r.width) * 100}%`);
     };
     const btnLeave = (e) => { e.currentTarget.style.translate = ""; };
+    const fine = typeof window !== "undefined" && window.matchMedia("(pointer: fine)").matches;
     const btns = Array.from(root.querySelectorAll(".wp-btn"));
-    btns.forEach((b) => { b.addEventListener("pointermove", btnMove); b.addEventListener("pointerleave", btnLeave); });
-    window.addEventListener("pointermove", move, { passive: true });
-    document.addEventListener("pointerleave", leave);
+    if (fine) {
+      btns.forEach((b) => { b.addEventListener("pointermove", btnMove); b.addEventListener("pointerleave", btnLeave); });
+      window.addEventListener("pointermove", move, { passive: true });
+      document.addEventListener("pointerleave", leave);
+    }
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("pointermove", move);
-      document.removeEventListener("pointerleave", leave);
-      btns.forEach((b) => { b.removeEventListener("pointermove", btnMove); b.removeEventListener("pointerleave", btnLeave); });
+      if (fine) {
+        window.removeEventListener("pointermove", move);
+        document.removeEventListener("pointerleave", leave);
+        btns.forEach((b) => { b.removeEventListener("pointermove", btnMove); b.removeEventListener("pointerleave", btnLeave); });
+      }
     };
   }, []);
 

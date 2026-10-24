@@ -152,6 +152,7 @@ export default function Warp({
     lime.x = lime.tx = S.px = r0.width / 2;
     lime.y = lime.ty = S.py = r0.height / 2;
 
+    const fine = typeof window !== "undefined" && window.matchMedia("(pointer: fine)").matches;
     const onMove = (e) => {
       const r = rect();
       const x = e.clientX - r.left;
@@ -166,7 +167,7 @@ export default function Warp({
         coordRef.current.textContent = `${pad4(x)} X ${pad4(y)} Y`;
       }
     };
-    window.addEventListener("pointermove", onMove, { passive: true });
+    if (fine) window.addEventListener("pointermove", onMove, { passive: true });
 
     /* one ticker drives everything */
     const flag = { on: false }; // true while the section is sliding in (cheap: half frame rate)
@@ -350,7 +351,7 @@ export default function Warp({
     return () => {
       active = false;
       gsap.ticker.remove(tick);
-      window.removeEventListener("pointermove", onMove);
+      if (fine) window.removeEventListener("pointermove", onMove);
       ro.disconnect();
       io.disconnect();
       ctx.revert();

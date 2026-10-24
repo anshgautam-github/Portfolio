@@ -155,24 +155,21 @@ html.lenis, html.lenis body { height: auto; }
 
 
 /* ------------------------------------------------------------------
-   Phone GPU budget + flicker guard
-   - backdrop-filter re-blurs everything behind it on every scrolled frame: off on phones (the assistant window keeps one layer).
-   - permanent will-change / backface-visibility promote hundreds of tiny layers (every split letter!). Past the GPU memory budget the
-     browser drops and re-rasterises tiles mid-scroll, which shows up as sections fading out and back in. Off on phones: the browser
-     still promotes an element for the duration of a real transform animation.
+   Phone GPU budget + smooth scrolling
+   - Replace expensive universal *:not() with targeted overrides
+   - Allow hardware-accelerated transforms on cards and animated sections
    ------------------------------------------------------------------ */
 html.is-mobile {
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
-html.is-mobile *:not(.ted-mon):not(.ted-bubble),
-html.is-mobile *:not(.ted-mon):not(.ted-bubble)::before,
-html.is-mobile *:not(.ted-mon):not(.ted-bubble)::after {
+html.is-mobile .ll-c3,
+html.is-mobile .rv-gl,
+html.is-mobile .ff-tag,
+html.is-mobile .ff-chip,
+html.is-mobile .gd-card {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
-}
-html.is-mobile *:not(canvas):not(video):not(.ted-mon) {
-  will-change: auto !important;
 }
 html.is-mobile [data-word],
 html.is-mobile [data-letter],

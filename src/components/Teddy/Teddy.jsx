@@ -88,6 +88,7 @@ export default function Teddy() {
 
   /* eyes + head follow the pointer (written straight to CSS vars, no re-renders) */
   useEffect(() => {
+    if (!window.matchMedia("(pointer: fine)").matches) return undefined;
     let raf = 0;
     let ev = null;
     const apply = () => {
@@ -98,6 +99,10 @@ export default function Teddy() {
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height * 0.4;
       const clamp = (v) => Math.max(-1, Math.min(1, v));
+      const dx = clamp((ev.clientX - cx) / Math.max(160, window.innerWidth * 0.35));
+      const dy = clamp((ev.clientY - cy) / Math.max(160, window.innerHeight * 0.35));
+      el.style.setProperty("--px", dx.toFixed(3));
+      el.style.setProperty("--py", dy.toFixed(3));
       el.style.setProperty("--lx", clamp((ev.clientX - cx) / 380).toFixed(3));
       el.style.setProperty("--ly", clamp((ev.clientY - cy) / 380).toFixed(3));
     };
