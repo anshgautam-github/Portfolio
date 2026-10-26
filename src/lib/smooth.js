@@ -26,7 +26,7 @@ function trackScrolling() {
 
 export function initSmoothScroll() {
   if (lenis || typeof window === "undefined") return lenis;
-  trackScrolling();
+  if (!IS_TOUCH_DEVICE) trackScrolling();   // phones: toggling a class on <html> mid-scroll restyles the page and pauses/resumes animations = visible hitches
   if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return null;
   if (IS_TOUCH_DEVICE) return null;   // native momentum scrolling on phones / tablets
   lenis = new Lenis({

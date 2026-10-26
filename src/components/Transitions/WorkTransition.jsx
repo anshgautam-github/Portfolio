@@ -35,7 +35,7 @@ export default function WorkTransition({ from = "[data-warp-wrap]", to = ".ff" }
       // projects' colour to the next page's colour with the turn, so no dark patch ever appears in between.
       back = document.createElement("div");
       back.setAttribute("aria-hidden", "true");
-      back.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;z-index:1;pointer-events:none;display:none";
+      back.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:1;pointer-events:none;display:none";
       document.body.appendChild(back);
     };
 

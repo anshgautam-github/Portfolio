@@ -38,7 +38,15 @@ export default function App() {
     let lastW = window.innerWidth;
     let t;
     const touch = window.matchMedia("(pointer: coarse)").matches;
-    const refresh = () => ScrollTrigger.refresh();
+    // re-measuring pins mid-scroll makes them un-pin / re-pin (a visible flash), so wait until scrolling has settled
+    let lastY = window.scrollY, lastMove = 0;
+    window.addEventListener("scroll", () => { lastMove = performance.now(); }, { passive: true });
+    let pending = 0;
+    const refresh = () => {
+      clearTimeout(pending);
+      if (performance.now() - lastMove < 250) { pending = setTimeout(refresh, 260); return; }
+      ScrollTrigger.refresh();
+    };
     const onWindowResize = () => {
       clearTimeout(t);
       t = setTimeout(() => {

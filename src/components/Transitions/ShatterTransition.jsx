@@ -146,7 +146,7 @@ export default function ShatterTransition({ from = ".ff", to = "section.arc" }) 
 
       flash = document.createElementNS(NS, "svg");
       flash.setAttribute("aria-hidden", "true");
-      flash.style.cssText = `position:fixed;left:0;top:0;width:100%;height:100%;z-index:42;pointer-events:none;display:none`;
+      flash.style.cssText = `position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:42;pointer-events:none;display:none`;
       flash.innerHTML = `<defs><radialGradient id="shFlash"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset=".35" stop-color="#cfd8ff" stop-opacity=".55"/><stop offset="1" stop-color="#6f8cff" stop-opacity="0"/></radialGradient></defs>` +
         `<circle data-f="1" cx="${geo.ix}" cy="${geo.iy}" r="10" fill="url(#shFlash)"/>` +
         `<g data-ring="1" fill="none" stroke="#fff"><circle cx="${geo.ix}" cy="${geo.iy}" r="10"/><circle cx="${geo.ix}" cy="${geo.iy}" r="10"/></g>`;

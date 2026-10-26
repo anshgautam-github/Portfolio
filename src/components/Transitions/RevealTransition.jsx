@@ -39,12 +39,12 @@ export default function RevealTransition({ from = "section[data-reveal]", to = "
       if (cv && cv.isConnected) return;
       cv = document.createElement("canvas");
       cv.setAttribute("aria-hidden", "true");
-      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;z-index:41;pointer-events:none;display:none";
+      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:41;pointer-events:none;display:none";
       document.body.appendChild(cv);
       ctx = cv.getContext("2d");
       veil = document.createElement("div");
       veil.setAttribute("aria-hidden", "true");
-      veil.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;z-index:37;pointer-events:none;display:none;background:#e9eff9";
+      veil.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:37;pointer-events:none;display:none;background:#e9eff9";
       document.body.appendChild(veil);
       cw = 0;
     };

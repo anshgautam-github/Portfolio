@@ -25,8 +25,10 @@ body,
   text-rendering: geometricPrecision;
   font-kerning: normal;
   font-synthesis: none;
-  overflow-x: hidden;
 }
+/* only <html> clips sideways: body / #root with overflow-x:hidden become nested scroll containers (iOS rubber-band + pin jitter) */
+html { overflow-x: hidden; }
+body, #root { overflow-x: clip; }
 
 /* Safari: keep GSAP-animated text on its own GPU layer so it doesn't re-rasterize blurry/distorted */
 [data-word],
@@ -178,3 +180,23 @@ html.is-mobile [data-fade] {
   -webkit-backface-visibility: visible;
   backface-visibility: visible;
 }
+
+
+/* ------------------------------------------------------------------
+   Flicker pass (phones): every one of these forces a full re-composite / re-raster while scrolling.
+   ------------------------------------------------------------------ */
+html.is-mobile *, html.is-mobile *::before, html.is-mobile *::after {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  mix-blend-mode: normal;
+}
+/* transient overlays keep their blur (they are not on screen while the page scrolls) */
+html.is-mobile .spot-veil, html.is-mobile .spot.is-in .spot-veil { -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+html.is-mobile .ted-bubble { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+/* always-on full-screen frame: no filter layer on top of the page */
+html.is-mobile .fr-svg { filter: none; }
+html.is-mobile .fr { contain: strict; }
+/* GPU layer hygiene: the page-wide decorative grain layers are not worth a layer on a phone */
+html.is-mobile .rv-grain, html.is-mobile .pk-grain, html.is-mobile .sc-grain, html.is-mobile .rv-art-grain { display: none; }
+/* scroll-linked images: decode off-thread, no tile flashes */
+html.is-mobile img { content-visibility: visible; image-rendering: auto; }

@@ -34,7 +34,7 @@ export default function PushTransition({ from = ".kimi .last-layer", to = "[data
       if (cv && cv.isConnected) return cv;
       cv = document.createElement("div");
       cv.setAttribute("aria-hidden", "true");
-      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;z-index:38;pointer-events:none;display:none;overflow:hidden";
+      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:38;pointer-events:none;display:none;overflow:hidden";
       cv.innerHTML =
         '<div data-sh="1" style="position:absolute;top:0;bottom:0;width:140px;margin-left:-140px;background:linear-gradient(90deg,rgba(0,0,0,0),rgba(0,0,0,.28));will-change:transform"></div>' +
         '<div data-ln="1" style="position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.9);will-change:transform"></div>' +
