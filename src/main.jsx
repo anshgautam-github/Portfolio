@@ -11,6 +11,7 @@ import App from "./App.jsx";
 import { initSmoothScroll } from "./lib/smooth.js";
 import { initOffscreenPause } from "./lib/offscreen.js";
 import { batchStartupRefresh } from "./lib/stRefresh.js";
+import { startFlickerProbe } from "./lib/flickerProbe.js";
 
 gsap.registerPlugin(ScrollTrigger);
 // merge the ~17 start-up ScrollTrigger.refresh() calls into one (see lib/stRefresh.js)
@@ -32,3 +33,4 @@ document.getElementById("static-identity")?.remove();
 
 // endless decorative loops sleep while their section is far off-screen (see lib/offscreen.js)
 initOffscreenPause();
+startFlickerProbe();   // no-op unless the URL has ?probe

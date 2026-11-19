@@ -279,3 +279,10 @@ html.is-mobile .fs-loader .fl-vig { transition: none; }
 /* phones: words in the loader are plain 2D-composited layers (no nested 3D contexts, no blurred shadow on moving text) */
 html.is-mobile .fs-loader .fs .wi { transform-style: flat; backface-visibility: visible; }
 html.is-mobile .fs-loader .fs .cap { text-shadow: 0 1px 8px rgba(0,0,0,.75); }
+
+/* phones: blurred / backdrop-filtered text and panels over a scene that repaints every frame are the classic "text pops in and out" case on mobile GPUs */
+html.is-mobile .fs-loader .fl-skip, html.is-mobile .fs-loader .fl-feed, html.is-mobile .fs-loader .fl-badge-core, html.is-mobile .fs-loader .fl-telem { -webkit-backdrop-filter: none; backdrop-filter: none; }
+html.is-mobile .fs-loader .fl-skip { background: rgba(8,8,10,.72); }
+html.is-mobile .fs-loader .fs .hud.is-swap .hud-place, html.is-mobile .fs-loader .fs .hud.is-swap .hud-sub { animation: fl-m-in .35s ease-out; }
+@keyframes fl-m-in { from { opacity: 0; } to { opacity: 1; } }
+html.is-mobile .fs-loader .fs .hud, html.is-mobile .fs-loader .fs .ladder { text-shadow: 0 1px 8px rgba(0,0,0,.75); }
