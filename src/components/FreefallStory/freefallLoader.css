@@ -291,3 +291,9 @@ html.is-mobile .fs-loader .fs .hud, html.is-mobile .fs-loader .fs .ladder { text
    when the stack exceeds it the browser drops the raster of the biggest text layers (the name, the captions): they vanish and come back.
    Fewer layers = nothing gets evicted. The grain was a 116%-of-screen layer for a barely visible 4% noise. */
 html.is-mobile .fs-loader .fl-grain { display: none; }
+
+/* ---- bisect switches for finding a phone-only flicker (open the site with ?x=a  ?x=b  ?x=c  ?x=d); inert unless that class is on <html> ---- */
+html.x-a .fs-loader #fs-earth, html.x-a .fs-loader #fs-campus, html.x-a .fs-loader #fs-rocket, html.x-a .fs-loader #fs-figure { visibility: hidden !important; }       /* a: the three scene canvases + figure */
+html.x-b .fs-loader .fl-hud, html.x-b .fs-loader .fl-scan, html.x-b .fs-loader .fl-vig, html.x-b .fs-loader .fl-corners, html.x-b .fs-loader .fl-svg, html.x-b .fs-loader .fl-grain, html.x-b .fs-loader::after { display: none !important; }   /* b: every HUD / overlay layer */
+html.x-c .fs-loader .world, html.x-c .fs-loader .caps, html.x-c .fs-loader .hud, html.x-c .fs-loader .ladder { visibility: hidden !important; }                       /* c: the flying words, captions, altitude readout */
+html.x-d .fs-loader #fs-film, html.x-d .fs-loader #fs-ambient { visibility: hidden !important; }                                                                          /* d: the film + ambient canvases */

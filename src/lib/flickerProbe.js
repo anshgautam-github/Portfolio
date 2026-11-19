@@ -1,6 +1,9 @@
 // Diagnostic only (open the site with ?probe): shows, on screen, which elements keep flipping visibility or reversing opacity
 // (that reversal is what the eye reads as flicker). Does nothing unless the URL has "probe".
 export function startFlickerProbe() {
+  // bisect switches: ?x=a,b,c,d adds html.x-a ... so one layer group at a time can be removed on a real phone (see freefallLoader.css, bottom)
+  const m = typeof location !== "undefined" && /[?&]x=([a-z,]+)/.exec(location.search);
+  if (m) m[1].split(",").forEach((k) => document.documentElement.classList.add("x-" + k));
   if (typeof window === "undefined" || !/[?&]probe\b/.test(location.search)) return;
   const st = new WeakMap(), score = new Map();
   const name = (el) => (el.tagName || "").toLowerCase() + (el.id ? "#" + el.id : "") + (typeof el.className === "string" && el.className ? "." + el.className.trim().split(/\s+/).slice(0, 2).join(".") : "");
