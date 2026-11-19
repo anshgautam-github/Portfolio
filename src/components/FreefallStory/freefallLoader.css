@@ -275,3 +275,7 @@ html.is-mobile .fs-loader .fl-grain { animation: none; will-change: auto; inset:
 html.is-mobile .fs-loader .fl-svg { filter: none; }
 html.is-mobile .fs-loader::after { box-shadow: none; background: radial-gradient(120% 100% at 50% 50%, transparent 62%, rgba(0,0,0,.5) 100%); }
 html.is-mobile .fs-loader .fl-vig { transition: none; }
+
+/* phones: words in the loader are plain 2D-composited layers (no nested 3D contexts, no blurred shadow on moving text) */
+html.is-mobile .fs-loader .fs .wi { transform-style: flat; backface-visibility: visible; }
+html.is-mobile .fs-loader .fs .cap { text-shadow: 0 1px 8px rgba(0,0,0,.75); }

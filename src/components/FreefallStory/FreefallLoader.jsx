@@ -49,7 +49,7 @@ export default function FreefallLoader() {
     const H = { scan: q(".fl-scan"), vig: q(".fl-vig"), telem: q(".fl-telem"), g: q(".fl-g"), log: Array.from(root.querySelectorAll(".fl-log li")), alt: q(".fl-alt"), vel: q(".fl-vel"), lat: q(".fl-lat"), lon: q(".fl-lon"), met: q(".fl-met"), lock: q(".fl-lock"), phase: q(".fl-phase span"), mark: q(".fl-mark"), markV: q(".fl-mark-v"), badge: q(".fl-badge-ring"), st: Array.from(root.querySelectorAll(".fl-st li")) };
     const memo = new Map();
     const put = (el, txt) => { if (el && memo.get(el) !== txt) { memo.set(el, txt); el.textContent = txt; } };
-    let gLast = -1, stIdx = -1, shaken = false, feedOn = false, fitN = 0, telemOff = false;
+    let gLast = -1, stIdx = -1, shaken = false, feedOn = false, fitN = 0, telemOff = false, telemWant = false, telemVotes = 0;
     let evN = -1;
     const hud = (p) => {
       const h = hudAt(p);
@@ -86,7 +86,8 @@ export default function FreefallLoader() {
           const sh = root.querySelector("#fs-hud");
           if (!clash && sh && getComputedStyle(sh).visibility !== "hidden" && parseFloat(getComputedStyle(sh).opacity) > 0.05) { const r = sh.getBoundingClientRect(); if (r.top < tr.bottom + 14 && r.bottom > tr.top && r.left < tr.right) clash = true; }
         }
-        if (clash !== telemOff) { telemOff = clash; H.telem.classList.toggle("is-yield", clash); }
+        // hysteresis: a caption drifting past the card must hold for two checks before the card moves, so it never blinks in and out
+        if (clash !== telemOff) { if (clash === telemWant) telemVotes++; else { telemWant = clash; telemVotes = 1; } if (telemVotes >= 2) { telemOff = clash; H.telem.classList.toggle("is-yield", clash); } } else { telemWant = telemOff; telemVotes = 0; }
       }
       const fd = p > 0.05;
       if (fd !== feedOn) { feedOn = fd; root.classList.toggle("is-feed", fd); }

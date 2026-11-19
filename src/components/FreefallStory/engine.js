@@ -332,8 +332,10 @@ export function mountFreefallStory(root, { base, mode }) {
 
   function placeWorld(p, travel, alpha, shockT) {
     const { W, H } = S;
-    const stretch = 1 + Math.min(Math.abs(S.vel), 70) * 0.004;
-    const skew = clamp(S.vel * 0.05, -5, 5);
+    // S.vel is a raw per-frame delta and jumps around when two clocks drive it (the loader's rAF vs the ticker), so on phones the words
+    // don't stretch/skew with it: that wobble made every word shimmer and drop in and out
+    const stretch = IS_MOBILE ? 1 : 1 + Math.min(Math.abs(S.vel), 70) * 0.004;
+    const skew = IS_MOBILE ? 0 : clamp(S.vel * 0.05, -5, 5);
     for (const it of items) {
       let a = alpha[it.set] || 0;
       let t;
