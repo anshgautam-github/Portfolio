@@ -4,6 +4,7 @@
 // and the person pushes off.  ENDING (p .395-.47): drogue, streamer, a staggered inflation with a snap, a swaying descent with a
 // gust, a flare, an upright landing that is not perfectly clean (a stumble), and the canopy collapsing behind.
 // Everything is a pure function of story progress p (+ time t for sway), so it scrubs both ways.
+import { IS_MOBILE } from '../../lib/perf.js';
 const clamp = (v, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
 const sstep = (a, b, v) => { const t = clamp((v - a) / (b - a)); return t * t * (3 - 2 * t); };
 const norm = (v, a, b) => clamp((v - a) / (b - a));
@@ -34,7 +35,7 @@ export function createRocket(canvas) {
   const api = { hatch: { x: 0, y: 0 }, dpr: 1 };
   let grain = null;
   api.resize = () => {
-    const d = Math.min(devicePixelRatio || 1, 1.75), w = Math.max(2, Math.round(canvas.clientWidth * d)), h = Math.max(2, Math.round(canvas.clientHeight * d));
+    const d = Math.min(devicePixelRatio || 1, IS_MOBILE ? 1.1 : 1.75), w = Math.max(2, Math.round(canvas.clientWidth * d)), h = Math.max(2, Math.round(canvas.clientHeight * d));
     if (w !== canvas.width || h !== canvas.height) { canvas.width = w; canvas.height = h; }
     api.dpr = d;
   };

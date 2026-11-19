@@ -80,7 +80,7 @@ export function mountFreefallStory(root, { base, mode }) {
       for (const s of [4, 2, 1]) for (let i = 0; i < count; i += s) push(i);
       // phones: a sliding window of ready-decoded bitmaps around the playhead, so scrubbing never decodes a frame mid-scroll (see frameCache.js)
       this.win = IS_MOBILE && typeof createImageBitmap === 'function'
-        ? createBitmapWindow({ count, stride, getImg: (i) => (this.ok[i] ? this.imgs[i] : null) })
+        ? createBitmapWindow({ count, stride, getImg: (i) => (this.ok[i] ? this.imgs[i] : null), back: 2, fwd: 4, keepBack: 3, keepFwd: 6 })   // small window: every decoded frame is GPU memory, and a high-res phone has little to spare
         : null;
     }
     src(i) { return this.win ? this.win.src(i, this.imgs[i]) : this.imgs[i]; }

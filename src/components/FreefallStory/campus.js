@@ -4,6 +4,7 @@
 // where you land. Building heights are illustrative (OSM has no heights here): derived from footprint size with a seeded jitter.
 // Data (c) OpenStreetMap contributors, ODbL. Files: public/freefall-story/earth/{chennai-city,srm-campus}.json
 import { toKm, SRM, CHENNAI } from './map.js';
+import { IS_MOBILE } from '../../lib/perf.js';
 
 const T = toKm(SRM.lon, SRM.lat).map((v) => v * 1000);                 // SRM in metres from the map origin
 // The SRM main gate stands where the entrance road leaves GST Road (the nearest trunk road to the campus, found from the map data), 563 m
@@ -73,7 +74,7 @@ export function createCampus(canvas, base) {
   };
 
   api.resize = () => {
-    const d = Math.min(devicePixelRatio || 1, 1.5), w = Math.max(2, Math.round(canvas.clientWidth * d)), h = Math.max(2, Math.round(canvas.clientHeight * d));
+    const d = Math.min(devicePixelRatio || 1, IS_MOBILE ? 1 : 1.5), w = Math.max(2, Math.round(canvas.clientWidth * d)), h = Math.max(2, Math.round(canvas.clientHeight * d));
     if (w !== canvas.width || h !== canvas.height) { canvas.width = w; canvas.height = h; }
     api.d = d;
   };

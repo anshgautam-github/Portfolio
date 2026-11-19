@@ -286,3 +286,8 @@ html.is-mobile .fs-loader .fl-skip { background: rgba(8,8,10,.72); }
 html.is-mobile .fs-loader .fs .hud.is-swap .hud-place, html.is-mobile .fs-loader .fs .hud.is-swap .hud-sub { animation: fl-m-in .35s ease-out; }
 @keyframes fl-m-in { from { opacity: 0; } to { opacity: 1; } }
 html.is-mobile .fs-loader .fs .hud, html.is-mobile .fs-loader .fs .ladder { text-shadow: 0 1px 8px rgba(0,0,0,.75); }
+
+/* phones: the loader already stacks ~15 full-screen layers (scene canvases, HUD, overlays). A high-resolution phone has a fixed GPU tile budget, and
+   when the stack exceeds it the browser drops the raster of the biggest text layers (the name, the captions): they vanish and come back.
+   Fewer layers = nothing gets evicted. The grain was a 116%-of-screen layer for a barely visible 4% noise. */
+html.is-mobile .fs-loader .fl-grain { display: none; }
