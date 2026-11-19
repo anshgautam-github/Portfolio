@@ -174,18 +174,25 @@ export const content = {
         no: "(01)",
         title: "Academic\nFoundation",
         lines: [
-          { t: "B.Tech Computer Science & Engineering", strong: true },
-          { t: "SRM Institute of Science and Technology" },
+          { t: "B.Tech Computer Science and Engineering", strong: true },
+          { t: "SRM Institute of Science and Technology, Chennai" },
         ],
-        big: { label: "CGPA", value: "9.01", suffix: "/ 10" },
+        desc: "B.Tech in Computer Science and Engineering at SRM Institute of Science and Technology, where I built my foundation in algorithms, systems, software engineering and intelligent computing.",
+        big: { label: "CGPA", value: "9.4", suffix: "/ 10" },
         bg: "radial-gradient(70% 55% at 85% 35%, #7fb35f 0%, transparent 70%), radial-gradient(60% 40% at 20% 20%, #e9e58f 0%, transparent 70%), linear-gradient(160deg, #dfe59a 0%, #c9dc8a 45%, #eef0b8 100%)",
       },
       {
         no: "(02)",
         title: "Experience &\nLeadership",
         entries: [
-          { n: "01", role: "Full Stack AI Intern", meta: "Genospark \u00b7 Dec 2025 \u2013 Mar 2026", text: "Built AI applications and backend systems using FastAPI, APIs, RBAC and database integration." },
-          { n: "02", role: "Technical Head \u00b7 Web App Domain", meta: "IEEE GRSS \u00b7 Mar 2025 \u2013 May 2026", text: "Led web development projects, guided team members and helped turn requirements into working applications." },
+          { n: "01", role: "Full Stack AI Intern", meta: "Genospark \u00b7 Dec 2025 \u2013 Mar 2026", kind: "Internship",
+            headline: "Built AI applications and the backend systems behind them.",
+            text: "Developed AI applications and backend systems with FastAPI, designing the APIs, role-based access control (RBAC) and database integration they depend on.",
+            skills: ["AI applications", "Backend systems", "API design", "Access control", "Databases"] },
+          { n: "02", role: "Technical Head \u00b7 Web App Domain", meta: "IEEE GRSS \u00b7 Mar 2025 \u2013 May 2026", kind: "Leadership",
+            headline: "Led the web domain from requirements to working applications.",
+            text: "Headed the Web App domain: led web development projects, guided team members and helped turn requirements into working applications.",
+            skills: ["Technical leadership", "Web development", "Team guidance", "Requirements"] },
         ],
         bg: "radial-gradient(60% 45% at 25% 25%, #ffd1e4 0%, transparent 70%), radial-gradient(70% 50% at 80% 85%, #f6a9cf 0%, transparent 70%), linear-gradient(170deg, #f7bfd8 0%, #f2b5d1 50%, #ffd3c2 100%)",
       },
@@ -206,8 +213,8 @@ export const content = {
 
   toolkit: {
     title: "My Arsenal",
-    mark: "jc",
-    finaleLabel: "Transition",
+    mark: "ag",
+    finaleLabel: "Let's grow an idea",
     hudLeft: "Tech Stack / 001",
     hudRight: "AI \u00b7 Engineering \u00b7 Product Development",
     endColor: "#ece7d3", // the panel that fills the screen at the end; matches the next section so the hand-off is seamless

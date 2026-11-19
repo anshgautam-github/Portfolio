@@ -13,6 +13,7 @@ export default function Collab() {
   const sec = useRef(null), cv = useRef(null), glc = useRef(null), ring = useRef(null), num = useRef(null), bar = useRef(null), tick = useRef(null);
   const ticks = useRef([]), bars = useRef([]), stat = useRef(null), crd = useRef(null), lnk = useRef(null), lastN = useRef(-1), lastS = useRef(""), lastP = useRef(-1), lastC = useRef("");
   const holding = useRef(false);
+  const ptr = useRef(null);
   const api = useRef(null);
   const [done, setDone] = useState(false);
 
@@ -42,6 +43,7 @@ export default function Collab() {
       raf = requestAnimationFrame(loop);
       if (!vis || !sc) return;
       if (skipFrame(now, last)) return;
+      if (ptr.current && sec.current) { const r = sec.current.getBoundingClientRect(); sc.st.mouseT = [((ptr.current[0] - r.left) / r.width - 0.5) * 2, -((ptr.current[1] - r.top) / r.height - 0.5) * 2]; ptr.current = null; }
       const dt = (now - last) / 1000; last = now;
       sc.frame(dt, holding.current);
       const p = Math.min(1, sc.st.shown), pct = Math.round(p * 100);
@@ -70,7 +72,7 @@ export default function Collab() {
     holding.current = true;
     sec.current.classList.add("is-holding");
   };
-  const move = (e) => { const r = sec.current.getBoundingClientRect(); if (api.current) api.current.st.mouseT = [((e.clientX - r.left) / r.width - 0.5) * 2, -((e.clientY - r.top) / r.height - 0.5) * 2]; };
+  const move = (e) => { ptr.current = [e.clientX, e.clientY]; };
   const up = () => { holding.current = false; sec.current && sec.current.classList.remove("is-holding"); };
   const key = (v) => (e) => {
     if (e.key === " " || e.key === "Enter") { e.preventDefault(); if (v && e.repeat) return; holding.current = v; sec.current.classList.toggle("is-holding", v); }

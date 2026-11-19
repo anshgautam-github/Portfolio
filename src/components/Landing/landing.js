@@ -3,8 +3,8 @@ import { createFallingStickers } from "./falling.js";
 import { bigArrowSvg } from "./stickers.js";
 import { landingContent } from "./landingContent.js";
 import { smoothScrollTo } from "../../lib/smooth.js";
+import { escapeHtml as esc } from "../../lib/escapeHtml.js";
 
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const pad4 = (n) => String(Math.max(0, Math.round(n))).padStart(4, "0");
 
 function tzLabel() {
@@ -34,7 +34,7 @@ export function mountLanding(root, content = landingContent, options = {}) {
       ${[33.7, 68.3].map((y) => `<i class="ll-h" style="top:${y}%"></i>`).join("")}
       ${[3.85, 34.65, 65.45, 96.25].flatMap((x) => [33.7, 68.3].map((y) => `<i class="ll-x" style="left:${x}%;top:${y}%"></i>`)).join("")}
     </div>
-    <div class="ll-t ll-logo ll-rise ll-d1">${esc(c.logo)}</div>
+    <h1 class="ll-t ll-logo ll-rise ll-d1">${esc(c.logo)}<span class="a11y-hidden">, AI Engineer, Researcher &amp; Builder</span></h1>
     <nav class="ll-t ll-nav ll-rise ll-d1" aria-label="Primary">
       ${c.nav.map((n, i) => `<button type="button" data-nav="${esc(n.target)}" data-i="${i}">${esc(n.label)}</button>`).join("")}
       <button type="button" data-theme-btn>THEME[<span data-theme-l>D</span>]</button>
@@ -43,7 +43,7 @@ export function mountLanding(root, content = landingContent, options = {}) {
     <div class="ll-spot" aria-hidden="true"></div>
     <div class="ll-t ll-col ll-c1">
       <div class="ll-ch ll-d2"><i>01</i><span>${esc(c.cols?.[0] || "Role")}</span></div>
-      <h3 class="ll-role ll-rise ll-d2">${c.label.map(esc).join("<br>")}</h3>
+      <h2 class="ll-role ll-rise ll-d2">${c.label.map(esc).join("<br>")}</h2>
     </div>
     <div class="ll-t ll-col ll-c2">
       <div class="ll-ch ll-d3"><i>02</i><span>${esc(c.cols?.[1] || "Approach")}</span></div>
@@ -55,10 +55,9 @@ export function mountLanding(root, content = landingContent, options = {}) {
       <div class="ll-ctas ll-rise ll-d5">${(c.cta || []).map((b, i) => `<button type="button" class="ll-cta${i ? " is-ghost" : ""}" data-nav="${esc(b.target)}"><span>${esc(b.label)}</span><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>`).join("")}</div>
     </div>
     <div class="ll-t ll-mq ll-rise ll-d5" aria-hidden="true"><div class="ll-mq-track">${[0, 1].map(() => (c.marquee || []).map((m) => `<span>${esc(m)}</span><i></i>`).join("")).join("")}</div></div>
-    <h1 class="ll-t ll-h1" aria-label="${esc(c.headline.join(" "))}">${c.headline.map((l) => `<span class="ll-ln" aria-hidden="true"><span>${esc(l)}</span></span>`).join("")}</h1>
+    <h2 class="ll-t ll-h1" aria-label="${esc(c.headline.join(" "))}">${c.headline.map((l) => `<span class="ll-ln" aria-hidden="true"><span>${esc(l)}</span></span>`).join("")}</h2>
     <div class="ll-t ll-mono ll-foot ll-clock ll-rise ll-d5" data-clock></div>
     <div class="ll-t ll-mono ll-foot ll-coords ll-rise ll-d5" data-coords>0000 X 0000 Y</div>
-    <div class="ll-t ll-scroll ll-rise ll-d6" aria-hidden="true"><span>Scroll</span><i></i></div>
     <div class="ll-globe ll-rise ll-d6" aria-hidden="true">
       <svg viewBox="0 0 40 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
         <ellipse cx="20" cy="12" rx="19" ry="11"/>
@@ -74,6 +73,21 @@ export function mountLanding(root, content = landingContent, options = {}) {
   const coordsEl = $("[data-coords]");
   const clockEl = $("[data-clock]");
   const arrowEl = $("[data-arrow]");
+
+  /* headline lockup: scale each line so all three share one measure (a clean block instead of a ragged stack) */
+  const headlineEl = $(".ll-h1");
+  const fitHeadline = () => {
+    if (!headlineEl) return;
+    const spans = Array.from(headlineEl.querySelectorAll(".ll-ln > span"));
+    spans.forEach((el) => { el.style.fontSize = ""; });
+    const widths = spans.map((el) => { const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width; });
+    if (!widths.length || widths.some((w) => !w)) return;
+    const target = widths[0] * 0.9;
+    spans.forEach((el, i) => { el.style.fontSize = `${((target / widths[i]) * 100).toFixed(2)}%`; });
+  };
+  fitHeadline();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeadline);
+  window.addEventListener("resize", fitHeadline);
 
   /* ---------- sound ---------- */
   let soundOn = false, actx = null, lastTick = 0;
@@ -234,6 +248,7 @@ export function mountLanding(root, content = landingContent, options = {}) {
   function destroy() {
     clearInterval(clockTimer);
     window.removeEventListener("keydown", onKey);
+    window.removeEventListener("resize", fitHeadline);
     root.removeEventListener("pointermove", onMove);
     root.removeEventListener("pointerleave", onLeave);
     root.removeEventListener("pointerdown", onDown);

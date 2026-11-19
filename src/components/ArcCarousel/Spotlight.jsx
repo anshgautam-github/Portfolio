@@ -148,12 +148,25 @@ export default function Spotlight({ items, index, from, getRect, onIndex, onClos
     const onKey = (e) => {
       if (e.key === "Escape") { e.preventDefault(); e.stopImmediatePropagation(); close(); }
       else if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); e.stopImmediatePropagation(); go(e.key === "ArrowRight" ? 1 : -1); }
+      else if (e.key === "Tab") {   // focus trap: Tab / Shift+Tab cycle inside the dialog and never reach the page behind it
+        const r = root.current; if (!r) return;
+        const f = [...r.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')].filter((el) => el.getClientRects().length > 0);
+        if (!f.length) { e.preventDefault(); return; }
+        const a = document.activeElement, first = f[0], last = f[f.length - 1];
+        if (!r.contains(a)) { e.preventDefault(); first.focus(); }
+        else if (e.shiftKey && (a === first || a === r)) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+      }
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
   });
 
-  useEffect(() => { root.current && root.current.focus({ preventScroll: true }); }, []);
+  useEffect(() => {   // move focus into the dialog, and hand it back to whatever opened it when it closes
+    const prev = document.activeElement;
+    root.current && root.current.focus({ preventScroll: true });
+    return () => { if (prev && prev !== document.body && prev.isConnected && prev.focus) prev.focus({ preventScroll: true }); };
+  }, []);
 
   // phones: a new project always starts at the top of its page
   useEffect(() => { if (grid.current) grid.current.scrollTop = 0; }, [idx]);
@@ -222,6 +235,7 @@ export default function Spotlight({ items, index, from, getRect, onIndex, onClos
           </p>
           <h2 className="spot-title"><Words text={d.title} /></h2>
           <p className="spot-desc">{d.text}</p>
+          {d.learned && <p className="spot-desc"><b>What I took from it.</b> {d.learned}</p>}
           <dl className="spot-spec">
             {isProg ? (<>
               <div><dt>Organisation</dt><dd>{d.short || d.org}</dd></div>

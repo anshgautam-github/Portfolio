@@ -1220,3 +1220,226 @@ html.is-scrolling .ff-fall .ff-letter,
 html.is-scrolling .ff-streak,
 html.is-scrolling .ff-dot::after,
 html.is-scrolling .ff-index button.is-on .ff-ix-n::after { animation-play-state: paused !important; }
+
+
+/* =====================================================================
+   DARK THEME  ("Where I've Worked")
+   Deep ink base, indigo / violet / cyan light pooling in from the edges, hairlines in white at low alpha,
+   luminous type. The original light version is kept as freefall.css.bak-light.
+   Everything below overrides the light rules above (same specificity, later in the file).
+   ===================================================================== */
+.ff {
+  --blue: #7390ff;
+  --ink: #f3f6ff;
+  --ink-soft: rgba(226, 232, 255, 0.72);
+  --line: rgba(255, 255, 255, 0.1);
+  background: #05070e;
+  color: var(--ink);
+  color-scheme: dark;
+}
+
+/* base: night sky with slow aurora pools */
+.ff-bg {
+  background:
+    radial-gradient(55vmax 45vmax at 80% 26%, rgba(99, 102, 241, 0.30) 0%, transparent 66%),
+    radial-gradient(50vmax 42vmax at 12% 18%, rgba(37, 99, 235, 0.28) 0%, transparent 70%),
+    radial-gradient(48vmax 40vmax at 90% 82%, rgba(168, 85, 247, 0.24) 0%, transparent 70%),
+    radial-gradient(44vmax 36vmax at 20% 88%, rgba(14, 165, 233, 0.16) 0%, transparent 68%),
+    linear-gradient(150deg, #070b1b 0%, #05070e 48%, #03040a 100%);
+}
+.ff-bg::after {
+  opacity: 0.07;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+/* soft vignette so the edges sink into black and the deck gets all the light */
+.ff::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(130% 95% at 58% 46%, transparent 52%, rgba(0, 0, 0, 0.55) 100%);
+}
+.ff-glow {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 36%, transparent), color-mix(in srgb, var(--glow) 13%, transparent) 55%, transparent) !important;
+  opacity: 0.95;
+}
+.ff-aur { opacity: 0.9; }
+.ff-aur--a { background: radial-gradient(closest-side, rgba(99, 102, 241, 0.34), transparent); }
+.ff-aur--b { background: radial-gradient(closest-side, rgba(56, 189, 248, 0.2), transparent); }
+@media (min-width: 901px) and (pointer: fine) {
+  .ff-aur--a { background: radial-gradient(closest-side, rgba(99, 102, 241, 0.3), transparent); }
+  .ff-aur--b { background: radial-gradient(closest-side, rgba(56, 189, 248, 0.18), transparent); }
+}
+.ff-dots {
+  background-image: radial-gradient(rgba(170, 190, 255, 0.2) 1px, transparent 1.4px);
+}
+.ff-spot {
+  background: radial-gradient(closest-side, rgba(110, 130, 255, 0.2) 0%, rgba(80, 110, 255, 0.08) 45%, transparent 70%);
+}
+.ff-tick-c { border-color: rgba(190, 205, 255, 0.28); }
+.ff-side { color: rgba(200, 212, 255, 0.4); }
+.ff-ghost-word { -webkit-text-stroke: 1.2px rgba(170, 190, 255, 0.075); }
+
+/* sparks: little embers of light */
+.ff-spark {
+  background: radial-gradient(circle, #ffffff 35%, var(--glow, #7390ff) 100%) !important;
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--glow, #7390ff) 70%, transparent), 0 0 20px 5px rgba(150, 170, 255, 0.25) !important;
+}
+
+/* wave stream + orbits */
+.ff-wave-stream { opacity: 1; mix-blend-mode: screen; }
+.ff-wave-path--1 { filter: drop-shadow(0 0 12px rgba(109, 140, 255, 0.7)); }
+.ff-wave-path--2 { filter: drop-shadow(0 0 10px rgba(129, 140, 248, 0.6)); }
+.ff-orb--a {
+  border-color: rgba(140, 165, 255, 0.34);
+  box-shadow: 0 0 70px rgba(99, 102, 241, 0.16), inset 0 0 50px rgba(99, 102, 241, 0.1);
+}
+.ff-orb--b {
+  border-color: rgba(167, 139, 250, 0.24);
+  box-shadow: 0 0 70px rgba(124, 58, 237, 0.12);
+}
+.ff-orb--c {
+  background: radial-gradient(closest-side, rgba(99, 112, 255, 0.2), rgba(60, 80, 200, 0.07) 62%, transparent);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.ff-orb u {
+  background: #9bb2ff;
+  box-shadow: 0 0 0 4px #05070e, 0 0 22px 6px rgba(120, 145, 255, 0.9);
+}
+.ff-orb--b u {
+  background: #7dd3fc;
+  box-shadow: 0 0 0 3.5px #05070e, 0 0 18px 5px rgba(56, 189, 248, 0.85);
+}
+
+/* headline */
+.ff-eyebrow { color: rgba(205, 216, 255, 0.62); }
+.ff-eyebrow i { background: rgba(190, 205, 255, 0.28); }
+.ff-eyebrow-pill {
+  background: rgba(115, 144, 255, 0.14);
+  border-color: rgba(130, 156, 255, 0.4);
+  color: #a9bcff;
+  box-shadow: 0 0 22px -4px rgba(99, 120, 255, 0.55), inset 0 0 12px rgba(115, 144, 255, 0.12);
+}
+.ff-in {
+  color: #f6f8ff;
+  background: linear-gradient(180deg, #ffffff 25%, #b4c2ee 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.ff-shimmer-letter {
+  background: linear-gradient(115deg, #6f8dff 0%, #8f8bff 25%, #c391ff 50%, #6fb6ff 75%, #6f8dff 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* a pool of light behind the headline so the title seems to glow without a per-frame text filter */
+.ff-left::before {
+  content: "";
+  position: absolute;
+  left: -8vw;
+  top: -6vh;
+  width: 56vw;
+  height: 46vh;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(99, 112, 255, 0.2), transparent 72%);
+}
+.ff-lede { color: rgba(214, 223, 250, 0.72); }
+.ff-cta { background: #f3f6ff; color: #060a18; box-shadow: 0 14px 34px -12px rgba(120, 145, 255, 0.55); }
+.ff-cta b { background: rgba(6, 10, 24, 0.1); }
+.ff-cta:hover { box-shadow: 0 20px 44px -12px rgba(130, 155, 255, 0.75); }
+.ff-cta:hover b { background: rgba(6, 10, 24, 0.18); }
+
+/* index */
+.ff-index { border-top-color: rgba(255, 255, 255, 0.1); }
+.ff-index li { border-bottom-color: rgba(255, 255, 255, 0.07); }
+.ff-index button::before { background: linear-gradient(90deg, #6d8cff 0%, #a78bfa 60%, transparent 100%); box-shadow: 0 0 14px rgba(109, 140, 255, 0.6); }
+.ff-index button::after {
+  background: linear-gradient(90deg, rgba(120, 145, 255, 0.16) 0%, rgba(120, 145, 255, 0.05) 85%, transparent 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.ff-ix-num { color: rgba(190, 205, 255, 0.38); }
+.ff-index button:hover .ff-ix-num, .ff-index button.is-on .ff-ix-num { color: #8fa8ff; }
+.ff-ix-name { color: rgba(226, 232, 255, 0.66); }
+.ff-index button:hover .ff-ix-name, .ff-index button.is-on .ff-ix-name { color: #ffffff; }
+.ff-ix-role { color: rgba(190, 205, 255, 0.4); }
+.ff-index button.is-on .ff-ix-role { color: #8fa8ff; }
+.ff-ix-meta { color: rgba(190, 205, 255, 0.4); }
+.ff-index button:hover .ff-ix-meta, .ff-index button.is-on .ff-ix-meta { color: #ffffff; }
+.ff-ix-arrow { color: #8fa8ff; }
+
+/* stats strip */
+.ff-stats-tag { color: rgba(190, 205, 255, 0.45); }
+.ff-stats-line { background: linear-gradient(90deg, rgba(255, 255, 255, 0.14), transparent); }
+.ff-stat-idx { color: rgba(190, 205, 255, 0.36); }
+.ff-stats dt { color: #ffffff; }
+.ff-stats dd b { color: rgba(240, 244, 255, 0.9); }
+.ff-stats dd small { color: rgba(190, 205, 255, 0.42); }
+.ff-stat-div { background: rgba(255, 255, 255, 0.1); }
+
+/* right rail */
+.ff-num { color: #ffffff; }
+.ff-num small { color: rgba(190, 205, 255, 0.45); }
+.ff-line { background: rgba(255, 255, 255, 0.1); }
+.ff-line-fill { background: linear-gradient(180deg, #8fa8ff, #6d8cff); box-shadow: 0 0 14px rgba(109, 140, 255, 0.75); }
+.ff-tick { background: rgba(190, 205, 255, 0.22); }
+.ff-dot { background: #8fa8ff; box-shadow: 0 0 0 5px rgba(115, 144, 255, 0.2), 0 0 20px rgba(115, 144, 255, 0.85); }
+.ff-name { color: rgba(205, 216, 255, 0.5); }
+
+/* deck: a coloured halo behind the stack (cards are clip-pathed, so a box-shadow on them can't glow) + deeper shadows */
+.ff-deck::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 92%;
+  height: 78%;
+  translate: -50% -50%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 30%, transparent), transparent 72%);
+  opacity: 0.85;
+}
+.ff-card, .ff-card--job {
+  background: #0b0d16;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 40px 90px -20px rgba(0, 0, 0, 0.85), 0 10px 30px -8px rgba(0, 0, 0, 0.6) !important;
+}
+.ff-card--job::before {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, color-mix(in srgb, var(--g) 80%, white) 22%, rgba(255, 255, 255, 0.04) 52%, color-mix(in srgb, var(--g) 85%, transparent) 100%);
+}
+.ff-art--job::after { background: radial-gradient(120% 90% at 50% 40%, transparent 50%, rgba(0, 0, 0, 0.5) 100%); }
+.ff-card--job .ff-cap--job { background: linear-gradient(180deg, transparent, rgba(3, 4, 9, 0.5) 38%, rgba(3, 4, 9, 0.72)); }
+.ff-chip { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); }
+.ff-card--job .ff-chip { background: rgba(255, 255, 255, 0.1); }
+.ff-card--job .ff-tag { background: rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.16); }
+.ff-skill-pill { background: rgba(255, 255, 255, 0.07); border-color: rgba(255, 255, 255, 0.16); }
+
+/* ticker + scroll cue */
+.ff-ticker {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(7, 10, 22, 0.62);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+}
+.ff-ticker em { color: rgba(226, 232, 255, 0.82); }
+.ff-ticker em b { color: rgba(190, 205, 255, 0.42); }
+.ff-ticker em::after { box-shadow: 0 0 10px rgba(115, 144, 255, 0.8); }
+.ff-cue { color: #f3f6ff; background: rgba(12, 16, 34, 0.7); box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1); }
+.ff-cue i { border-color: #f3f6ff; }
+
+/* the card-break flash was white-hot on a light page; keep it, but tint it so it doesn't blow out the dark base */
+.ff-flash { background: radial-gradient(60% 55% at 50% 30%, rgba(235, 240, 255, 0.9), rgba(140, 160, 255, 0.25) 55%, transparent 80%); }
+
+/* phones / touch */
+@media (max-width: 900px), (pointer: coarse) {
+  .ff-aur { background: radial-gradient(closest-side, rgba(99, 102, 241, 0.4), transparent 70%); opacity: 0.6; }
+  .ff-card { box-shadow: 0 16px 34px -12px rgba(0, 0, 0, 0.8) !important; }
+}
+@media (max-width: 900px) {
+  .ff-pager button::after { background: rgba(255, 255, 255, 0.22); }
+  .ff-pager button.is-on::after { background: #8fa8ff; box-shadow: 0 0 12px rgba(115, 144, 255, 0.8); }
+  .ff-left::before { left: -10vw; width: 90vw; height: 34vh; }
+}

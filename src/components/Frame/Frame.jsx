@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { landingContent } from "../Landing/landingContent.js";
-import { smoothScrollTo } from "../../lib/smooth.js";
+import { smoothScrollTo, onScrollFrame } from "../../lib/smooth.js";
 import "./frame.css";
 
 /**
@@ -62,15 +62,18 @@ export default function Frame() {
   useEffect(() => {
     const el = ref.current;
     let base = read(el), raf = 0;
+    // H is cached: reading clientHeight on every scroll frame forces a full style + layout flush, even once the frame is long gone
+    let H = el.clientHeight || window.innerHeight, gone = false;
     // the frame belongs to the hero only: as you scroll out of it the margins, corners and brand tab melt away (full-bleed below)
     const draw = () => {
       raf = 0;
-      const H = el.clientHeight || window.innerHeight;
       const t = Math.min(1, Math.max(0, (window.scrollY || 0) / (H * 0.75)));
+      if (t >= 1 && gone) return;                      // already hidden: no reads, no writes, nothing for the browser to recalc
       const e = t * t * (3 - 2 * t);
       const k = 1 - e;
-      el.style.visibility = t >= 1 ? "hidden" : "visible";
-      if (t >= 1) return;
+      gone = t >= 1;
+      el.style.visibility = gone ? "hidden" : "visible";
+      if (gone) return;
       const d = build(el.clientWidth, H, { m: base.m * k, r: base.r * k, nw: base.nw, nh: base.nh * k, nr: base.nr * k });
       ringRef.current?.setAttribute("d", d.ring);
       edgeRef.current?.setAttribute("d", d.edge);
@@ -81,15 +84,15 @@ export default function Frame() {
       el.style.opacity = String(1 - Math.max(0, e - 0.7) / 0.3);
     };
     const req = () => { if (!raf) raf = requestAnimationFrame(draw); };
-    const resize = () => { base = read(el); req(); };
+    const resize = () => { base = read(el); H = el.clientHeight || window.innerHeight; gone = false; req(); };
     draw();
-    window.addEventListener("scroll", req, { passive: true });
+    const offScroll = onScrollFrame(draw);              // same tick as ScrollTrigger, not a frame behind it
     const ro = new ResizeObserver(resize);
     ro.observe(el);
     window.addEventListener("orientationchange", resize);
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", req);
+      offScroll();
       window.removeEventListener("orientationchange", resize);
       ro.disconnect();
     };
@@ -108,3 +111,6 @@ export default function Frame() {
     </div>
   );
 }
+
+// the Freefall loader draws the very same curvy window (so the loader reads as the site's own frame, then lifts onto the real one)
+export { read as readFrameVars, build as buildFramePath };

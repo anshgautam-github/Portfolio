@@ -1,0 +1,181 @@
+/* <Hours />: a watch dial on warm paper. All sizes derive from --R (the dial radius) and --cy (the dial centre), set by Hours.jsx. */
+.hr { --ink: #0b0b0d; --orange: #ee6a37; --R: 560px; --cy: 520px; --mx: 0; --my: 0;
+  position: relative; height: 100vh; height: 100svh; overflow: hidden; background: #f4efe6; color: var(--ink); isolation: isolate; font-family: "Inter Tight", "Inter", system-ui, sans-serif; }
+.hr::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .5;
+  background: radial-gradient(60% 50% at 50% 62%, rgba(255,255,255,.75), transparent 70%); }
+
+.hr-top { position: absolute; left: clamp(18px, 2.6vw, 44px); top: clamp(22px, 4.4vh, 44px); z-index: 6; margin: 0; display: flex; align-items: center; gap: 10px;
+  font: 500 clamp(10px, .82vw, 12px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .24em; text-transform: uppercase; color: rgba(11,11,13,.62); }
+.hr-top i { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px rgba(238,106,55,.18); }
+
+/* dial */
+.hr-dial { position: absolute; left: 50%; top: var(--cy); width: calc(var(--R) * 2.0833); aspect-ratio: 1; translate: -50% -50%; z-index: 1; pointer-events: none; will-change: transform, opacity; }
+.hr-dial svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.hr-ring { fill: none; stroke: var(--orange); stroke-width: 3.4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.hr-tick { stroke: rgba(11,11,13,.2); stroke-width: 2.4; stroke-linecap: round; transition: stroke .25s ease; }
+.hr-tick.is-major { stroke: rgba(11,11,13,.42); stroke-width: 3.4; }
+.hr-tick.is-on { stroke: var(--orange); }
+.hr-lab { font: 500 15px "JetBrains Mono", ui-monospace, monospace; letter-spacing: .06em; fill: rgba(11,11,13,.4); }
+
+/* the counter: two rolling digits */
+.hr-num { position: absolute; left: 50%; top: calc(var(--cy) - var(--R) * .04); translate: -50% -50%; z-index: 2; display: flex; font-weight: 800; font-size: calc(var(--R) * 1.08); line-height: .8; letter-spacing: -.07em; font-variant-numeric: tabular-nums; pointer-events: none; will-change: transform, opacity; }
+.hr-dg { display: block; height: .8em; overflow: hidden; padding: 0 .07em; margin: 0 -.07em; }
+.hr-col { display: block; will-change: transform; }
+.hr-col b { display: block; height: .8em; line-height: .8em; font-weight: 800; }
+
+/* the hand */
+.hr-hand { position: absolute; left: 50%; top: var(--cy); width: 0; height: 0; z-index: 4; pointer-events: none; will-change: transform; transform: rotate(-125deg); }
+.hr-bar { position: absolute; left: calc(var(--R) * -.026); bottom: calc(var(--R) * -.14); width: calc(var(--R) * .052); height: calc(var(--R) * 1.04); background: linear-gradient(90deg, #f27f4e, var(--orange) 55%, #d85a28);
+  clip-path: polygon(34% 0, 66% 0, 100% 100%, 0 100%); border-radius: 0 0 99px 99px; filter: drop-shadow(0 calc(var(--R) * .02) calc(var(--R) * .03) rgba(180,70,20,.28)); }
+.hr-pin { position: absolute; left: calc(var(--R) * -.075); top: calc(var(--R) * -.075); width: calc(var(--R) * .15); height: calc(var(--R) * .15); border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #ff9d73, var(--orange) 55%, #cc4f20); box-shadow: 0 calc(var(--R) * .03) calc(var(--R) * .05) rgba(160,60,15,.35), inset 0 -3px 6px rgba(120,40,10,.25); }
+
+/* programs on the dial: layout wrapper -> gsap pop -> logo tile (button) with a ripple, a float and pointer lean */
+.hr-obj { position: absolute; left: calc(50% + var(--x, 0px)); top: calc(var(--cy) + var(--y, 0px)); width: calc(var(--R) * .2); translate: -50% -50%; z-index: 5; pointer-events: none; }
+.hr-pop { position: relative; display: grid; justify-items: center; will-change: transform, opacity; }
+.hr-tile { position: relative; display: block; width: 100%; aspect-ratio: 1; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: none; -webkit-tap-highlight-color: transparent; }
+.hr-obj.is-on .hr-tile { pointer-events: auto; }
+.hr.is-done .hr-tile { pointer-events: none; }
+.hr-float { position: absolute; inset: 0; display: block; animation: hrBob 5.6s ease-in-out infinite; translate: calc(var(--mx) * -8px) calc(var(--my) * -6px); transition: translate .5s ease-out; }
+.hr-obj:nth-of-type(odd) .hr-float { animation-delay: -2.6s; }
+@keyframes hrBob { 50% { transform: translateY(-6%) rotate(1.6deg); } }
+.hr-logo { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 27%; overflow: hidden;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--c1) 38%, #fff), color-mix(in srgb, var(--c1) 12%, #fff) 60%, #fff);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.07), 0 16px 26px -10px color-mix(in srgb, var(--c2) 55%, transparent), 0 4px 10px -4px rgba(0,0,0,.18), inset 0 1.5px 0 rgba(255,255,255,.9);
+  transition: transform .45s cubic-bezier(.2,.9,.25,1.2), box-shadow .35s ease; }
+.hr-logo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.7) 50%, transparent 62%); transform: translateX(-120%); }
+.hr-logo img { width: 62%; height: 62%; object-fit: contain; display: block; filter: drop-shadow(0 2px 3px rgba(0,0,0,.14)); }
+.hr-tile:hover .hr-logo, .hr-tile:focus-visible .hr-logo { transform: scale(1.13) rotate(-4deg); box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 26px 38px -12px color-mix(in srgb, var(--c2) 70%, transparent), inset 0 1.5px 0 rgba(255,255,255,.9); }
+.hr-tile:hover .hr-logo::after { transform: translateX(120%); transition: transform .8s ease; }
+.hr-tile:focus-visible { outline: 2px solid #0b0b0d; outline-offset: 6px; border-radius: 50%; }
+.hr-rip { position: absolute; inset: 0; border-radius: 30%; border: 2px solid var(--c1); opacity: 0; pointer-events: none; }
+.hr-obj.is-on .hr-rip { animation: hrRip 1.5s cubic-bezier(.2,.7,.2,1) both; }
+.hr-obj.is-on .hr-rip--2 { animation-delay: .22s; }
+.hr-obj.is-on .hr-logo::after { transform: translateX(120%); transition: transform 1.1s ease .1s; }
+@keyframes hrRip { from { opacity: .7; transform: scale(1); } to { opacity: 0; transform: scale(2.2); } }
+.hr-chip { margin-top: 12px; display: grid; justify-items: center; gap: 5px; max-width: calc(var(--R) * .5); text-align: center; transition: color .35s ease; color: rgba(11,11,13,.62); }
+.hr-chip b { font: 600 clamp(11px, .92vw, 14px)/1.18 "Inter Tight", system-ui, sans-serif; letter-spacing: -.01em; color: inherit; }
+.hr-chip em { font: 500 clamp(9px, .7vw, 11px)/1 "JetBrains Mono", ui-monospace, monospace; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: rgba(11,11,13,.62); transition: color .35s ease; }
+.hr-obj.is-on .hr-chip { color: var(--ink); }
+.hr-obj.is-on .hr-chip em { color: #c4491b; }
+.hr-mark { fill: #f4efe6; stroke: rgba(11,11,13,.25); stroke-width: 3; transition: fill .3s ease, stroke .3s ease; }
+.hr-mark.is-on { fill: var(--orange); stroke: var(--orange); }
+
+/* caption above the counter */
+.hr-cap { position: absolute; left: 50%; top: calc(var(--cy) - var(--R) * .62); translate: -50% -50%; z-index: 2; margin: 0; white-space: nowrap; pointer-events: none;
+  font: 500 clamp(9px, .75vw, 12px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .26em; text-transform: uppercase; color: rgba(11,11,13,.42); }
+
+/* the live note, bottom left */
+.hr-note { position: absolute; left: clamp(18px, 2.6vw, 44px); bottom: clamp(24px, 5vh, 52px); z-index: 6; margin: 0; max-width: min(34ch, 40vw); display: grid; gap: 10px; }
+.hr-note-k { font: 500 clamp(10px, .82vw, 12px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .24em; text-transform: uppercase; color: var(--orange); }
+.hr-note-t { font: 500 clamp(15px, 1.3vw, 21px)/1.3 "Inter Tight", system-ui, sans-serif; letter-spacing: -.01em; color: rgba(11,11,13,.82); }
+.hr-note-t { max-width: 34ch; }
+.hr-note.is-swap > span { animation: hrSwap .55s cubic-bezier(.2,.8,.2,1) both; } .hr-note.is-swap > span + span { animation-delay: .06s; }
+@keyframes hrSwap { from { opacity: 0; transform: translateY(10px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+
+/* the closing line */
+.hr-end { position: absolute; inset: 0; z-index: 7; display: grid; place-content: center; justify-items: center; gap: clamp(18px, 3.2vh, 34px); padding: 0 6vw; text-align: center; pointer-events: none; }
+.hr-end-h { margin: 0; font-weight: 700; font-size: clamp(38px, 6.4vw, 118px); line-height: .98; letter-spacing: -.055em; text-wrap: balance; }
+.hr-end-m { display: block; overflow: hidden; padding: .06em .1em .12em; margin: -.06em -.1em -.12em; }
+.hr-end-l { display: block; will-change: transform, opacity; }
+.hr-end-l em { font-family: "Newsreader", "Instrument Serif", serif; font-style: italic; font-weight: 500; letter-spacing: -.03em; color: var(--orange); }
+.hr-end-p { margin: 0; max-width: 36em; font: 400 clamp(15px, 1.25vw, 20px)/1.5 "Inter Tight", system-ui, sans-serif; color: rgba(11,11,13,.7); }
+.hr-end-a { display: flex; align-items: center; gap: 22px; pointer-events: auto; }
+.hr-btn { display: inline-flex; align-items: center; gap: 16px; padding: 8px 8px 8px 26px; border: 0; border-radius: 99px; background: var(--ink); color: #fff; cursor: pointer; font: 600 clamp(14px, 1.05vw, 17px)/1 "Inter Tight", system-ui, sans-serif; letter-spacing: -.01em; transition: transform .4s cubic-bezier(.2,.8,.2,1), background .3s; }
+.hr-btn i { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--orange); transition: transform .4s cubic-bezier(.2,.8,.2,1); }
+.hr-btn:hover { transform: translateY(-2px); } .hr-btn:hover i { transform: translateX(3px) rotate(-45deg); }
+.hr-link { border: 0; background: none; cursor: pointer; padding: 6px 0; font: 600 clamp(14px, 1.05vw, 17px)/1 "Inter Tight", system-ui, sans-serif; color: var(--ink); background-image: linear-gradient(currentColor, currentColor); background-size: 100% 1.5px; background-repeat: no-repeat; background-position: 0 100%; transition: background-size .4s ease; }
+.hr-link:hover { background-size: 0 1.5px; background-position: 100% 100%; }
+
+/* a small capsule that turns with the scroll */
+.hr-pill { position: absolute; right: clamp(18px, 3vw, 52px); bottom: clamp(24px, 5vh, 52px); z-index: 6; width: 20px; height: 54px; border-radius: 99px; will-change: transform;
+  background: linear-gradient(180deg, var(--ink) 0 50%, var(--orange) 50% 100%); box-shadow: inset 3px 0 5px rgba(255,255,255,.35), inset -3px 0 5px rgba(0,0,0,.25), 0 8px 14px -6px rgba(0,0,0,.35); }
+
+@media (max-width: 760px) {
+  .hr { --Rm: 1; }
+  .hr-note { max-width: 56vw; }
+  .hr-note-t { display: none; }
+  .hr-end-a { flex-direction: column; gap: 14px; }
+  .hr-pill { display: none; }
+  .hr-chip em { display: none; } .hr-cap { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hr.is-static .hr-pop { opacity: 1; } .hr.is-static .hr-float, .hr-note.is-swap > span { animation: none; }
+  .hr.is-static .hr-end { position: static; padding: 8vh 6vw; } .hr.is-static { height: auto; min-height: 100vh; }
+}
+
+/* --- overlap fixes: chips get a frosted plate and never wrap their date; the note moves to a clear strip at the bottom centre; the caption (duplicated by the top label) is dropped --- */
+.hr-cap { display: none; }
+.hr-chip { margin-top: 10px; gap: 4px; padding: 7px 11px 8px; border-radius: 12px; max-width: calc(var(--R) * .62); width: max-content;
+  background: rgba(255,255,255,.62); -webkit-backdrop-filter: blur(8px) saturate(1.2); backdrop-filter: blur(8px) saturate(1.2);
+  box-shadow: 0 0 0 1px rgba(11,11,13,.05), 0 8px 18px -10px rgba(11,11,13,.25); }
+.hr-chip b { text-wrap: balance; }
+.hr-chip em { white-space: nowrap; }
+.hr-note { left: 50%; translate: -50% 0; right: auto; bottom: clamp(18px, 4vh, 44px); max-width: min(62ch, 56vw); justify-items: center; text-align: center; gap: 8px; }
+.hr-note-k { white-space: nowrap; }
+.hr-note-t { max-width: 56ch; }
+@media (max-width: 760px) { .hr-note { max-width: 86vw; } }
+/* chip hangs below the tile without widening it */
+.hr-chip { position: absolute; top: 100%; left: 50%; translate: -50% 0; }
+.hr-chip { max-width: calc(var(--R) * .44); min-width: calc(var(--R) * .26); }
+
+/* --- participation story: lead line, tap hint, "+" affordance, note body --- */
+.hr-lead { position: absolute; left: 50%; top: calc(var(--cy) - var(--R) * .56); translate: -50% -50%; z-index: 3; display: grid; gap: 14px; justify-items: center; text-align: center; pointer-events: none; }
+.hr-lead span { font: 500 clamp(9px,.75vw,12px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .26em; text-transform: uppercase; color: var(--orange); }
+.hr-lead b { font: 600 clamp(22px, 2.9vw, 46px)/1.04 "Inter Tight", system-ui, sans-serif; letter-spacing: -.035em; color: var(--ink); }
+.hr-hint { position: absolute; top: clamp(18px, 3.2vh, 32px); right: clamp(18px, 2.6vw, 44px); z-index: 7; margin: 0; display: inline-flex; align-items: center; gap: 9px; padding: 9px 14px 9px 12px; border-radius: 999px;
+  background: rgba(255,255,255,.7); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 0 0 1px rgba(11,11,13,.07), 0 10px 24px -14px rgba(11,11,13,.35);
+  font: 500 clamp(10px,.8vw,12px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: rgba(11,11,13,.7);
+  opacity: 0; transform: translateY(-8px); transition: opacity .5s ease, transform .5s ease; pointer-events: none; }
+.hr-hint i { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 0 rgba(224,112,64,.5); animation: hrPulse 1.8s ease-out infinite; }
+@keyframes hrPulse { to { box-shadow: 0 0 0 10px rgba(224,112,64,0); } }
+.hr.has-start:not(.is-done):not(.has-opened) .hr-hint { opacity: 1; transform: none; }
+.hr-plus { position: absolute; top: -7px; right: -7px; z-index: 2; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--orange);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.9), 0 6px 12px -4px rgba(224,112,64,.7); transform: scale(0); transition: transform .5s cubic-bezier(.2,.9,.25,1.4) .25s, rotate .4s ease; }
+.hr-obj.is-on .hr-plus { transform: scale(1); }
+.hr-tile:hover .hr-plus, .hr-tile:focus-visible .hr-plus { rotate: 90deg; transform: scale(1.18); }
+.hr-chip { cursor: pointer; pointer-events: none; }
+.hr-obj.is-on .hr-chip { pointer-events: auto; }
+.hr.is-done .hr-chip { pointer-events: none; }
+.hr-chip .hr-go { display: none; color: var(--orange); white-space: nowrap; }
+.hr-tile:hover ~ .hr-chip .hr-yr, .hr-chip:hover .hr-yr { display: none; }
+.hr-tile:hover ~ .hr-chip .hr-go, .hr-chip:hover .hr-go { display: block; }
+.hr-tile:hover ~ .hr-chip, .hr-chip:hover { background: rgba(255,255,255,.9); color: var(--ink); }
+.hr-note-p { max-width: 54ch; font: 400 clamp(12px, .95vw, 14px)/1.45 "Inter Tight", system-ui, sans-serif; color: rgba(11,11,13,.55); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+@media (max-width: 760px) { .hr-note-p { display: none; } .hr-hint { top: auto; bottom: 86px; right: 50%; translate: 50% 0; } }
+.hr-lead { top: calc(var(--cy) - var(--R) * .78); z-index: 8; }
+
+
+/* =====================================================================
+   Phone pass - the programs dial
+   The dial is only ~340px wide, so the per-logo name plates (they collided with each other and the big number) are dropped: the logos
+   stay as clean tappable icons, and the live note at the bottom names the program the hand is on. The note had been clipped at the right edge;
+   it now spans the content width. The closing statement gets a size that fits.
+   ===================================================================== */
+@media (max-width: 760px) {
+  .hr-chip { display: none; }
+  .hr-obj { width: calc(var(--R) * .27); }
+  .hr-plus { width: 20px; height: 20px; top: -6px; right: -6px; }
+  .hr-plus svg { width: 10px; height: 10px; }
+
+  /* opening line above the dial */
+  .hr-lead { top: max(14vh, calc(var(--cy) - var(--R) * 1.5)); gap: 12px; width: calc(100% - 48px); }
+  .hr-lead span { font-size: 10px; letter-spacing: .22em; }
+  .hr-lead b { font-size: clamp(24px, 7vw, 30px); line-height: 1.1; letter-spacing: -.03em; }
+
+  /* tap hint: top centre */
+  .hr-hint { top: max(18px, env(safe-area-inset-top)); bottom: auto; left: 50%; right: auto; translate: -50% 0; font-size: 10px; padding: 8px 13px 8px 11px; white-space: nowrap; }
+
+  /* live note: full content width, centred, program name set as a proper title */
+  .hr-note { left: 24px; right: 24px; translate: none; width: auto; max-width: none; bottom: max(28px, env(safe-area-inset-bottom)); gap: 10px; justify-items: center; text-align: center; }
+  .hr-note-k { font-size: 10px; letter-spacing: .18em; white-space: normal; line-height: 1.5; }
+  .hr-note-t { display: block; max-width: 22em; font-size: 19px; line-height: 1.25; font-weight: 600; letter-spacing: -.02em; text-wrap: balance; }
+
+  /* closing statement */
+  .hr-end { padding: 0 24px; gap: 22px; }
+  .hr-end-h { font-size: clamp(30px, 9.2vw, 42px); line-height: 1.04; letter-spacing: -.04em; }
+  .hr-end-p { font-size: 15.5px; line-height: 1.55; max-width: 28em; text-wrap: pretty; }
+  .hr-end-a { width: 100%; align-items: center; }
+  .hr-btn { font-size: 15px; }
+  .hr-link { font-size: 15px; }
+}

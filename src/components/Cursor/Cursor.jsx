@@ -75,13 +75,21 @@ export default function Cursor() {
       mood = k;
       face.current.dataset.mood = k;
     };
+    let lastLabel = "";
     const setState = (c) => {
+      const changed = c.s !== state;
       state = c.s;
       magnet = c.el || null;
-      wrap.current.classList.toggle("cur-hide", state === "text");
-      orbit.current.classList.toggle("is-on", state === "link");
-      scaleT = state === "link" ? 0.9 : state === "drag" ? 1.7 : 1;
-      if (c.text) { label.current.textContent = c.text; label.current.classList.add("is-on"); } else label.current.classList.remove("is-on");
+      if (changed) {
+        wrap.current.classList.toggle("cur-hide", state === "text");
+        orbit.current.classList.toggle("is-on", state === "link");
+        scaleT = state === "link" ? 0.9 : state === "drag" ? 1.7 : 1;
+      }
+      const t = c.text || "";
+      if (t !== lastLabel) {
+        lastLabel = t;
+        if (t) { label.current.textContent = t; label.current.classList.add("is-on"); } else label.current.classList.remove("is-on");
+      }
     };
 
     const onMove = (e) => {
@@ -124,7 +132,10 @@ export default function Cursor() {
       let tgt = null;
       if (state === "link" && magnet) {
         const b = magnet.getBoundingClientRect();
-        if (b.width > 8 && b.width < 460 && b.height < 170) tgt = b;
+        // the page can move under a still pointer (scroll, slide transitions): only keep the plate while the pointer is really on / next to the element
+        const near = m.x > b.left - 24 && m.x < b.right + 24 && m.y > b.top - 24 && m.y < b.bottom + 24;
+        if (!magnet.isConnected || !near) setState({ s: "idle" });
+        else if (b.width > 8 && b.width < 460 && b.height < 170) tgt = b;
       }
       // the creature never sits ON the button's text: it hops onto the plate's top-right corner and peeks at the pointer
       let perch = false;
@@ -152,6 +163,8 @@ export default function Cursor() {
       } else {
         pl.a += (0 - pl.a) * 0.3;
       }
+      // the plate only ever frames a small link/button: if it ever grows past that (stale target), drop it at once
+      if (pl.w > 520 || pl.h > 210) { pl.a = 0; pl.seeded = false; pl.w = pl.h = 0; }
       const pe = plate.current;
       pe.style.opacity = pl.a.toFixed(3);
       pe.style.width = Math.max(pl.w, 0) + "px";

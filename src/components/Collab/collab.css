@@ -154,3 +154,15 @@
 .cb-ring::after, .cb-core { will-change: transform, opacity; }
 .cb:not(.is-live) *, .cb:not(.is-live) *::after { animation-play-state: paused !important; }
 .cb-gl, .cb-cv { contain: strict; }
+
+/* ===== NIGHT: the whole chapter by moonlight (the scene itself is graded in gl3d.js; this darkens the frame and the hands) ===== */
+.cb { background: #02040a; }
+.cb-scrim { background:
+  radial-gradient(120% 90% at 50% 46%, rgba(0,0,0,0) 38%, rgba(0,0,0,.62) 100%),
+  linear-gradient(180deg, rgba(2,4,10,.55) 0%, rgba(2,4,10,0) 22%, rgba(2,4,10,0) 66%, rgba(2,4,10,.62) 100%); }
+.cb-cv { opacity: .66; }   /* was a per-frame full-screen CSS filter; opacity is a free compositor blend */
+.cb-title { text-shadow: 0 2px 34px rgba(0,0,0,.7); }
+.cb-title em { filter: drop-shadow(0 2px 22px rgba(0,0,0,.55)); }
+.cb-vert { text-shadow: 0 1px 10px rgba(0,0,0,.7); color: rgba(239,231,218,.8); }
+.cb-chip { background: rgba(0,0,0,.45); border-color: rgba(239,231,218,.2); }
+.cb-frame i { border-color: rgba(239,231,218,.6); }

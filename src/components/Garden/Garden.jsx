@@ -126,7 +126,7 @@ export default function Garden({ embedded = false, ctl = null }) {
   const drops = useRef(null);
   const refs = useRef(PLANTS.map(() => ({})));
   const [label, setLabel] = useState(content.garden.hint);
-  const [night, setNight] = useState(false);
+  const night = true;   // night only: the daytime theme and its toggle were removed
   const [over, setOver] = useState(false);
   const [sound, setSound] = useState(true);
   const soundOn = useRef(true);
@@ -608,7 +608,7 @@ export default function Garden({ embedded = false, ctl = null }) {
   return (
     <section
       ref={root}
-      className={`gd relative h-screen min-h-[620px] w-full overflow-hidden bg-[#bcd8f2] ${night ? "text-[#f1ecff]" : "text-black"}`}
+      className={`gd relative h-screen min-h-[620px] w-full overflow-hidden bg-[#0b0f24] ${night ? "text-[#f1ecff]" : "text-black"}`}
       data-night={night ? "1" : "0"}
       style={{ cursor: "none", WebkitUserSelect: "none", userSelect: "none", WebkitTouchCallout: "none", WebkitTapHighlightColor: "transparent" }}
       onMouseDown={(e) => e.preventDefault()}
@@ -730,20 +730,6 @@ export default function Garden({ embedded = false, ctl = null }) {
       </svg>
 
       <Critters />
-
-      {/* ---------------- day / night ---------------- */}
-      <button
-        type="button"
-        className="gd-toggle font-display"
-        aria-pressed={night}
-        aria-label={night ? "Switch to daytime" : "Switch to night"}
-        onClick={() => setNight((n) => !n)}
-      >
-        <span className="gd-tg-track">
-          <i className="gd-tg-knob" />
-        </span>
-        <span className="gd-tg-label">{night ? "Night" : "Day"}</span>
-      </button>
 
       <button
         type="button"

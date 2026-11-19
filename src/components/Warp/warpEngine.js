@@ -35,8 +35,8 @@ const mixRGB = (a, b, t) => {
 const COOL = ["#7df9ff", "#6cd8ff", "#4f9bff", "#3f6bff", "#5a4bff", "#5ff2d0", "#9fe9ff"];
 const WARM = ["#ff4ff0", "#c26bff", "#a24bff", "#ff7ad9"];
 
-const BG_DARK = "#101211";
-const BG_NAVY = "#14355c";
+const BG_DARK = "#000000";   // pure black, the same as the story section above it
+const BG_NAVY = "#000000";   // no blue tint: pure black all the way
 const BG_BLACK = "#000000";
 const FACE_BRIGHT = "#4a9bf7";
 const FACE_DEEP = "#3577c3";

@@ -11,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
  *
  * 1. ENTER HOLD (landing -> paddock): the paddock is pinned at the very top while the landing's black mosaic dissolves
  *    into it, so it opens in place (see engine.js, which reads dataset.hold).
- * 2. LIQUID CURTAINS (paddock -> projects): three wavy-edged sheets sweep right -> left in sequence — a periwinkle ribbon,
+ * 2. CARD RISE (portrait -> projects): the projects section climbs from the bottom as a rounded card, then widens to fill the screen. (Old: three wavy-edged sheets sweep right -> left in sequence — a periwinkle ribbon,
  *    a navy band carrying a vertical "SELECTED WORK (03)" label, then the projects section itself, revealed through the
  *    same wave (clip-path) while it drifts against the sweep. The edges ripple hardest mid-sweep and flatten at both ends;
  *    the paddock leans away, softens and recedes. No tiles here — the mosaic is reserved for the landing hand-off.
@@ -34,19 +34,18 @@ export default function PushTransition({ from = ".kimi .last-layer", to = "[data
       if (cv && cv.isConnected) return cv;
       cv = document.createElement("div");
       cv.setAttribute("aria-hidden", "true");
-      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:38;pointer-events:none;display:none;overflow:hidden";
+      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:41;pointer-events:none;display:none;overflow:hidden";
       cv.innerHTML =
-        '<div data-sh="1" style="position:absolute;top:0;bottom:0;width:140px;margin-left:-140px;background:linear-gradient(90deg,rgba(0,0,0,0),rgba(0,0,0,.28));will-change:transform"></div>' +
-        '<div data-ln="1" style="position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.9);will-change:transform"></div>' +
-        '<div data-lb="1" style="position:absolute;left:0;top:50%;white-space:nowrap;font:500 11px/1 \'JetBrains Mono\',ui-monospace,monospace;letter-spacing:.42em;color:#fff;mix-blend-mode:difference;will-change:transform,opacity">( 03 )&nbsp;&nbsp;SELECTED WORK</div>';
+        '<div data-rg="1" style="position:absolute;left:0;top:0;box-sizing:border-box;border:1px solid rgba(255,255,255,.3);box-shadow:0 -26px 80px -12px rgba(0,0,0,.6),0 0 60px -10px rgba(111,149,242,.35);transform-origin:0 0;will-change:transform,opacity">' +
+        '<span data-lb="1" style="position:absolute;left:20px;top:-32px;white-space:nowrap;font:500 11px/1 \'JetBrains Mono\',ui-monospace,monospace;letter-spacing:.42em;color:#fff;will-change:opacity">( 03 )&nbsp;&nbsp;SELECTED WORK</span></div>';
       document.body.appendChild(cv);
-      cx = { sh: cv.querySelector('[data-sh]'), ln: cv.querySelector('[data-ln]'), lb: cv.querySelector('[data-lb]') };
+      cx = { rg: cv.querySelector('[data-rg]'), lb: cv.querySelector('[data-lb]') };
       return cv;
     };
 
     const clear = () => {
       if (A && A.dataset.hold === undefined) { A.style.transform = ""; A.style.filter = ""; A.style.willChange = ""; A.style.pointerEvents = ""; }
-      if (B) { B.style.transform = ""; B.style.clipPath = ""; B.style.willChange = ""; B.style.zIndex = ""; B.style.pointerEvents = ""; }
+      if (B) { if (B.dataset.bg !== undefined) { B.style.background = B.dataset.bg; delete B.dataset.bg; } B.style.transform = ""; B.style.transformOrigin = ""; B.style.clipPath = ""; B.style.willChange = ""; B.style.zIndex = ""; B.style.pointerEvents = ""; }
       if (cv) cv.style.display = "none";
     };
 
@@ -62,29 +61,43 @@ export default function PushTransition({ from = ".kimi .last-layer", to = "[data
       const H = window.innerHeight, W = window.innerWidth;
       ensureOverlay();
       cv.style.display = "block";
+      /* The projects section rises from the bottom edge as a rounded card (it scales up from a slightly narrower width as it climbs),
+         settles a little below the top, then widens, squares its corners and fills the screen. The portrait section is held in place behind it,
+         steps back and dims. */
       const e = smoother(clamp01(p));
-      const edge = W * (1 - e);                              // viewport x of the reveal edge
-      const tx = (1 - e) * W * 0.035;                        // projects drift in a touch against the sweep
+      const rise = smoother(clamp01(p / 0.64));
+      const grow = smoother(clamp01((p - 0.52) / 0.48));
+      const SIDE = Math.min(W * 0.05, 64), TOP = Math.min(H * 0.075, 72), R = Math.min(34, W * 0.03);
+      const s = 1 - (2 * SIDE / W) * (1 - grow);               // card width as a fraction of the screen
+      const yTop = H * (1 - rise) + TOP * rise * (1 - grow);   // viewport y of the card's top edge
+      const rad = R * (1 - grow);
 
       A.style.willChange = IS_MOBILE ? "transform" : "transform, filter";
       A.style.pointerEvents = "none";
       A.style.transformOrigin = "50% 100%";
-      A.style.transform = `translate3d(0, ${(H * sp).toFixed(2)}px, 0) scale(${(1 - 0.03 * e).toFixed(4)})`;
+      A.style.transform = `translate3d(0, ${(H * sp).toFixed(2)}px, 0) scale(${(1 - 0.05 * e).toFixed(4)})`;
       // a filter on a whole section is re-rasterised every frame: far too heavy for phones (the dim is cosmetic there)
-      if (!IS_MOBILE) A.style.filter = `brightness(${(1 - 0.35 * e).toFixed(3)})`;
+      if (!IS_MOBILE) A.style.filter = `brightness(${(1 - 0.5 * e).toFixed(3)})`;
 
+      // below the card's own content (the pin spacer) the wrap's light gradient would show: keep it dark while it is a card
+      if (B.dataset.bg === undefined) B.dataset.bg = B.style.background;
+      B.style.background = "#05070d";
       B.style.willChange = "transform, clip-path";
       B.style.zIndex = "40";
       B.style.pointerEvents = "none";
-      B.style.transform = `translate3d(${tx.toFixed(2)}px, ${(-H * (1 - sp)).toFixed(2)}px, 0)`;
-      const lx = (edge - tx).toFixed(2);
-      B.style.clipPath = `polygon(${lx}px 0px,${W + 200}px 0px,${W + 200}px ${H}px,${lx}px ${H}px)`;
+      B.style.transformOrigin = "0 0";
+      B.style.transform = `translate3d(${((W * (1 - s)) / 2).toFixed(2)}px, ${(-H * (1 - sp) + yTop).toFixed(2)}px, 0) scale(${s.toFixed(4)})`;
+      B.style.clipPath = `inset(0px round ${(rad / s).toFixed(2)}px)`;
 
-      cx.ln.style.transform = `translate3d(${edge.toFixed(2)}px,0,0)`;
-      cx.sh.style.transform = `translate3d(${edge.toFixed(2)}px,0,0)`;
-      cx.sh.style.opacity = String(Math.sin(Math.PI * e).toFixed(3));
-      cx.lb.style.transform = `translate3d(${(edge + 22).toFixed(2)}px,-50%,0)`;
-      cx.lb.style.opacity = String((Math.sin(Math.PI * clamp01((e - 0.05) / 0.9)) * 0.95).toFixed(3));
+      // a hairline ring, a soft glow and the label hug the card's edge while it is still a card
+      const cw = W * s, ch = Math.max(0, H - yTop) + 60;
+      const vis = clamp01(rise * 6) * (1 - clamp01((grow - 0.55) / 0.45));
+      cx.rg.style.width = cw.toFixed(1) + "px";
+      cx.rg.style.height = ch.toFixed(1) + "px";
+      cx.rg.style.borderRadius = rad.toFixed(1) + "px";
+      cx.rg.style.transform = `translate3d(${((W - cw) / 2).toFixed(2)}px, ${yTop.toFixed(2)}px, 0)`;
+      cx.rg.style.opacity = vis.toFixed(3);
+      cx.lb.style.opacity = (clamp01((rise - 0.35) / 0.4) * (1 - clamp01(grow * 3))).toFixed(3);
     };
 
     /* ENTER HOLD: while the paddock rises into the viewport after the landing's mosaic, keep it pinned at the very top

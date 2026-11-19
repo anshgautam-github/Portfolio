@@ -7,7 +7,7 @@
   min-height: 560px;
   overflow: hidden;
   isolation: isolate;
-  background: #c5dcf0;
+  background: #03050a;
   color: var(--rv-ink);
   font-family: "Archivo", "Inter Tight", "Helvetica Neue", Arial, sans-serif;
 }
@@ -256,3 +256,143 @@
   .rv-art .rv-gl.g3 { left: 8%; bottom: 11%; width: 21vmin; height: 21vmin; }
   .rv-sp.sp4 { top: 36%; right: 6%; } .rv-sp.sp5 { left: 5%; top: 40%; }
 }
+
+/* ================= DARK THEME for the transition (very dark bg, white text) ================= */
+.rv { --rv-ink: #fff; --rv-blue: #7ea2ff; }
+.rv-stage { background: #03050a; color: #fff; }
+.rv-card { background: #03050a; box-shadow: 0 40px 90px rgba(0, 0, 0, .75); }
+.rv-art { background: linear-gradient(180deg, #05070f 0%, #03050a 50%, #02030a 100%); }
+.rv-orb.o1 { background: radial-gradient(closest-side, rgba(90, 120, 255, .22), rgba(90, 120, 255, 0) 72%); }
+.rv-orb.o2 { background: radial-gradient(closest-side, rgba(60, 90, 220, .28), rgba(60, 90, 220, 0) 70%); }
+.rv-orb.o3 { background: radial-gradient(closest-side, rgba(130, 100, 255, .22), rgba(130, 100, 255, 0) 70%); }
+.rv-rays { mix-blend-mode: screen; opacity: .35; }
+.rv-gridx { background-image: linear-gradient(90deg, rgba(130, 160, 255, .09) 1px, transparent 1px), linear-gradient(0deg, rgba(130, 160, 255, .09) 1px, transparent 1px); }
+.rv-pl path { stroke: rgba(160, 185, 255, .3); }
+.rv-rings circle { stroke: rgba(130, 165, 255, .4); }
+.rv-rings .rr2 { stroke: rgba(150, 180, 255, .55); }
+.rv-rings .rr4 { stroke: rgba(130, 165, 255, .2); }
+.rv-orbit circle { fill: #7ea2ff; }
+.rv-orbit.ob2 circle { fill: #03050a; stroke: #9db8ff; }
+.rv-ticks line { stroke: rgba(255, 255, 255, .35); }
+.rv-reg path { stroke: rgba(255, 255, 255, .45); }
+.rv-lab { color: rgba(255, 255, 255, .7); }
+.rv-art-grain { mix-blend-mode: screen; opacity: .18; }
+.rv-seg b { color: #fff; opacity: .95; }
+.rv-seg em { color: #8aa9ff; }
+.rv-row[data-row="b"] .rv-seg b { -webkit-text-stroke: 2px rgba(255, 255, 255, .85); opacity: .85; }
+.rv-eyebrow, .rv-badge, .rv-foot { color: rgba(255, 255, 255, .75); }
+.rv-rule { background: rgba(255, 255, 255, .3); }
+.rv-statement h2, .rv-ln em { color: #fff; }
+.rv-sp { background: #fff; filter: drop-shadow(0 0 6px rgba(150, 180, 255, .9)); }
+/* artwork pieces: keep their glow off the dark bg, make labels white */
+.rv-gl.g1 svg, .rv-gl.g2 svg { filter: drop-shadow(0 18px 24px rgba(0, 0, 0, .6)); }
+.rv-gl.g1 .pshadow, .rv-gl.g2 .sh { fill: rgba(0, 0, 0, .55); }
+.rv-gl.g2 .lb path { stroke: rgba(255, 255, 255, .45); }
+.rv-gl.g2 .lb text { fill: rgba(255, 255, 255, .8); }
+.rv-gl.g2 .beam { stroke: rgba(150, 180, 255, .6); }
+.rv-gl.g2 .face { stroke: rgba(255, 255, 255, .55); }
+.rv-gl .cube .f { border-color: rgba(255, 255, 255, .45); background: linear-gradient(135deg, rgba(255, 255, 255, .14), rgba(110, 90, 255, .3)); box-shadow: inset 0 0 22px rgba(90, 130, 255, .35); }
+.rv-gl .cube .f b { color: #fff; }
+.rv-gl .cube-floor { background: radial-gradient(closest-side, rgba(0, 0, 0, .6), transparent 75%); }
+.rv-gl.g3 text { fill: rgba(255, 255, 255, .8); }
+.rv-gl .gl-t, .rv-gl .gl-prog em { color: rgba(255, 255, 255, .6); }
+/* frosted layer over the website card: dark tint instead of light */
+.rv-frost {
+  -webkit-backdrop-filter: blur(var(--rv-blur)) saturate(1.2) brightness(.8);
+  backdrop-filter: blur(var(--rv-blur)) saturate(1.2) brightness(.8);
+  background: radial-gradient(120% 90% at 50% 38%, rgba(30, 45, 90, .25), rgba(10, 20, 50, .2) 55%, rgba(5, 10, 30, .3));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14), inset 0 1px 0 rgba(255, 255, 255, .2), inset 0 0 70px rgba(60, 90, 200, .2);
+}
+
+/* ================= DESIGNER PASS: make the shrinking card separate from the dark stage ================= */
+/* 1. a soft indigo halo sitting behind the card, so it reads as a lit object, not a hole */
+.rv-stage::before {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; mix-blend-mode: screen;
+  background:
+    radial-gradient(34% 40% at 50% 50%, rgba(86, 112, 255, .34), rgba(86, 112, 255, .12) 45%, transparent 72%),
+    radial-gradient(60% 24% at 50% 100%, rgba(120, 90, 255, .18), transparent 70%);
+}
+/* 2. rim light + coloured glow on the card itself (follows the scale and radius that GSAP animates) */
+.rv-card {
+  box-shadow:
+    0 0 0 1px rgba(170, 195, 255, .40),
+    0 0 0 6px rgba(120, 150, 255, .07),
+    0 0 70px rgba(90, 120, 255, .38),
+    0 50px 100px rgba(0, 0, 0, .85);
+}
+/* 3. frosted glass that LIFTS the dark page into luminous periwinkle instead of darkening it further */
+.rv-frost {
+  -webkit-backdrop-filter: blur(var(--rv-blur)) saturate(1.5) brightness(1.55) contrast(.92);
+  backdrop-filter: blur(var(--rv-blur)) saturate(1.5) brightness(1.55) contrast(.92);
+  background:
+    linear-gradient(160deg, rgba(190, 210, 255, .26) 0%, rgba(120, 150, 255, .12) 38%, rgba(90, 80, 220, .16) 100%),
+    radial-gradient(90% 70% at 20% 0%, rgba(255, 255, 255, .18), transparent 60%);
+  box-shadow:
+    inset 0 0 0 1px rgba(200, 215, 255, .45),
+    inset 0 1px 0 rgba(255, 255, 255, .6),
+    inset 0 0 60px rgba(130, 160, 255, .28);
+}
+/* 4. the grey light beams were muddy: tint them to the same blue/violet as the glow */
+.rv-rays { opacity: .22; filter: sepia(1) hue-rotate(190deg) saturate(4) blur(2px); mix-blend-mode: screen; }
+
+/* ================= PURE BLACK BACKGROUND OVERRIDE (replaces the navy/blue tint) ================= */
+.rv-stage, .rv-card { background: #000; }
+.rv-art { background: #000; }
+.rv-orb.o1 { background: radial-gradient(closest-side, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 72%); }
+.rv-orb.o2 { background: radial-gradient(closest-side, rgba(255, 255, 255, .06), rgba(255, 255, 255, 0) 70%); }
+.rv-orb.o3 { background: radial-gradient(closest-side, rgba(255, 255, 255, .04), rgba(255, 255, 255, 0) 70%); }
+.rv-rays { filter: grayscale(1) blur(2px); opacity: .1; }
+.rv-gridx { background-image: linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px), linear-gradient(0deg, rgba(255, 255, 255, .06) 1px, transparent 1px); }
+.rv-stage::before {
+  background:
+    radial-gradient(34% 40% at 50% 50%, rgba(255, 255, 255, .07), rgba(255, 255, 255, .02) 45%, transparent 72%),
+    radial-gradient(60% 24% at 50% 100%, rgba(255, 255, 255, .04), transparent 70%);
+}
+.rv-card { box-shadow: 0 0 0 1px rgba(255, 255, 255, .22), 0 0 70px rgba(255, 255, 255, .08), 0 50px 100px rgba(0, 0, 0, .9); }
+.rv-b1 { background: radial-gradient(closest-side, rgba(255, 255, 255, .08), transparent 70%); }
+.rv-b2 { background: radial-gradient(closest-side, rgba(255, 255, 255, .06), transparent 70%); }
+.rv-b3 { background: radial-gradient(closest-side, rgba(255, 255, 255, .05), transparent 70%); }
+.rv-floor { background-image: linear-gradient(90deg, rgba(255, 255, 255, .14) 1px, transparent 1px), linear-gradient(0deg, rgba(255, 255, 255, .14) 1px, transparent 1px); }
+.rv-sweep { background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, .05) 50%, transparent 58%); }
+.rv-orbit.ob2 circle { fill: #000; }
+
+/* signature: ice-white → periwinkle → cyan ink with a soft blue glow, so it belongs to the site's blue palette */
+.rv-sig { filter: drop-shadow(0 0 14px rgba(90,140,255,.55)) drop-shadow(0 6px 22px rgba(20,40,120,.45)); }
+
+/* ================= live background behind the landing card (revealFx.js) ================= */
+.rv-art { --fx-mx: 62%; --fx-my: 45%; --fx-pw: .4; }
+.rv-art .rv-fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.rv-art .rv-neb { position: absolute; display: block; border-radius: 50%; mix-blend-mode: screen; will-change: transform; pointer-events: none; }
+.rv-art .rv-neb.n1 { width: 62vmax; height: 46vmax; left: -16vmax; top: -14vmax; background: radial-gradient(closest-side, rgba(70, 95, 235, .20), transparent 72%); animation: rvNeb1 30s ease-in-out infinite alternate; }
+.rv-art .rv-neb.n2 { width: 56vmax; height: 42vmax; right: -16vmax; bottom: -18vmax; background: radial-gradient(closest-side, rgba(125, 85, 235, .17), transparent 72%); animation: rvNeb2 36s ease-in-out infinite alternate; }
+.rv-art .rv-neb.n3 { width: 34vmax; height: 28vmax; left: 34%; top: 38%; background: radial-gradient(closest-side, rgba(50, 175, 235, .10), transparent 72%); animation: rvNeb3 42s ease-in-out infinite alternate; }
+@keyframes rvNeb1 { to { transform: translate3d(20vmax, 12vmax, 0) scale(1.18); } }
+@keyframes rvNeb2 { to { transform: translate3d(-22vmax, -10vmax, 0) scale(1.2); } }
+@keyframes rvNeb3 { to { transform: translate3d(-14vmax, 10vmax, 0) scale(1.35); } }
+.rv-art .rv-spot { position: absolute; inset: 0; display: block; mix-blend-mode: screen; pointer-events: none; background: radial-gradient(circle 380px at var(--fx-mx) var(--fx-my), rgba(130, 160, 255, calc(.04 + var(--fx-pw) * .07)), transparent 70%); }
+@media (prefers-reduced-motion: reduce) { .rv-art .rv-neb { animation: none; } }
+
+/* ---- decluttered stage: no ringed planet, no layer-stack diagram, no "scroll to explore" label, no bottom ruler ---- */
+.rv-art .rv-gl.g1, .rv-art > .rv-gl.g1, .rv-art .rv-gl.g2, .rv-art > .rv-gl.g2, .rv-lab.l2, .rv-ticks { display: none !important; }
+@media (max-width: 700px) { .rv-art .rv-gl.g1, .rv-art > .rv-gl.g2 { display: none !important; } }
+
+
+/* ================= PERFORMANCE PASS: nothing in here repaints while you scroll ================= */
+/* the signature glow is now two wide translucent underlay strokes (reveal.js) instead of drop-shadow filters, which were re-rasterised every frame as the stroke drew */
+.rv-sig { filter: none; }
+/* the animated SVG (rotating rings / orbits) gets its own compositor layer so its repaint never touches the rest of the stage */
+.rv-plsvg { opacity: 1; }
+.rv-animsvg { will-change: transform; transform: translateZ(0); }
+/* soft gradients are already soft: the extra blur() made every one of these an expensive filter layer */
+.rv-orb { filter: none; }
+/* decorative layers that were invisible or near-invisible but still cost a blended / filtered composite every frame */
+.rv-bg, .rv-rays { display: none !important; }
+.rv-stage::before { mix-blend-mode: normal; }
+.rv-art-grain { mix-blend-mode: normal; opacity: .07; }
+.rv-art .rv-neb { mix-blend-mode: normal; backface-visibility: hidden; }
+/* the pointer spotlight is a fixed-size layer moved with transform (was a gradient repainted every frame through CSS variables) */
+.rv-art .rv-spot { inset: auto; left: 0; top: 0; width: 760px; height: 760px; margin: -380px 0 0 -380px; mix-blend-mode: normal; will-change: transform;
+  background: radial-gradient(closest-side, rgba(130, 160, 255, .09), transparent 100%); }
+/* frosted layer: same look, one filter less to evaluate while the blur radius animates */
+.rv-frost { -webkit-backdrop-filter: blur(var(--rv-blur)) brightness(1.45); backdrop-filter: blur(var(--rv-blur)) brightness(1.45); will-change: backdrop-filter, opacity; }
+.rv-art .rv-fx { will-change: transform; }

@@ -20,6 +20,7 @@ float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); 
 float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
   return mix(mix(h21(i), h21(i+vec2(1,0)), f.x), mix(h21(i+vec2(0,1)), h21(i+vec2(1,1)), f.x), f.y); }
 float fbm(vec2 p){ float a = 0.5, s = 0.0; for(int i=0;i<5;i++){ s += a*vn(p); p = p*2.03 + 7.1; a *= 0.5; } return s; }
+float fbm3(vec2 p){ float a = 0.5, s = 0.0; for(int i=0;i<3;i++){ s += a*vn(p); p = p*2.03 + 7.1; a *= 0.5; } return s * 1.108; }   // 3 octaves are plenty for slow warps / shadows / rays
 
 // ---------------------------------------------------------------- sky / environment
 const vec2 SUN = vec2(0.80, 0.90);
@@ -76,11 +77,11 @@ vec3 liveScene(vec2 uv, float a){
   // parallax: near meadow slides more than the sky
   iuv += vec2(uMouse.x * 0.014, uMouse.y * 0.007) * grd - vec2(uMouse.x * 0.004, 0.0) * sky;
   // wind through the grass and flowers: long gust waves + fast flutter, strongest in the foreground
-  float gust = sin(iuv.x * 6.5 - t * 0.85 + fbm(iuv * 3.0 + t * 0.03) * 4.0);
+  float gust = sin(iuv.x * 6.5 - t * 0.85 + fbm3(iuv * 3.0 + t * 0.03) * 4.0);
   float flut = sin(iuv.x * 55.0 + iuv.y * 38.0 - t * 3.1) * vn(iuv * 30.0 + t * 0.4);
   iuv += vec2(gust * 0.0042 + flut * 0.0014, sin(iuv.x * 9.0 + t * 1.1) * 0.0012) * grd * (0.35 + 0.65 * grd);
   // clouds billow and drift: a low-frequency warp, only where there is cloud
-  vec2 wv = vec2(fbm(iuv * 3.2 + vec2(t * 0.035, 0.0)), fbm(iuv * 3.2 + vec2(9.0, -t * 0.03))) - 0.5;
+  vec2 wv = vec2(fbm3(iuv * 3.2 + vec2(t * 0.035, 0.0)), fbm3(iuv * 3.2 + vec2(9.0, -t * 0.03))) - 0.5;
   iuv += wv * 0.020 * cld + vec2(sin(t * 0.045) * 0.006, 0.0) * sky * (0.4 + cld);
   // the mirror ball floats
   vec2 BC = vec2(0.497, 0.692);
@@ -109,7 +110,7 @@ vec3 liveScene(vec2 uv, float a){
     col *= 1.0 - 0.10 * (1.0 - edge) * onBall;
   }
   // cloud shadows sliding across the valley
-  float shd = smoothstep(0.48, 0.72, fbm(vec2(iuv.x * 2.2 - t * 0.022, iuv.y * 3.0 + 4.0)));
+  float shd = smoothstep(0.48, 0.72, fbm3(vec2(iuv.x * 2.2 - t * 0.022, iuv.y * 3.0 + 4.0)));
   col *= 1.0 - 0.17 * shd * (1.0 - sky) * smoothstep(0.30, 0.55, iuv.y * -1.0 + 0.80);
   // dew / pollen glints in the foreground
   vec2 gq = floor(iuv * vec2(520.0, 360.0));
@@ -123,11 +124,21 @@ vec3 liveScene(vec2 uv, float a){
   float pulse = 0.82 + 0.18 * sin(t * 0.7) + 0.06 * sin(t * 2.3);
   col += vec3(1.0, 0.93, 0.80) * (exp(-sl * 9.0) * 0.42 + exp(-sl * 3.2) * 0.14) * pulse;
   float ang = atan(sv.y, sv.x);
-  float rays = pow(fbm(vec2(ang * 4.0, t * 0.05)), 2.6) * smoothstep(1.1, 0.05, sl);
+  float rays = pow(fbm3(vec2(ang * 4.0, t * 0.05)), 2.6) * smoothstep(1.1, 0.05, sl);
   col += vec3(1.0, 0.95, 0.84) * rays * 0.20 * (1.0 - 0.3 * (1.0 - sky)) * pulse;
   float ghost = exp(-length(sv * 2.0 + (SUNP - vec2(0.5)) * vec2(1.445, 1.0) * -1.2) * 14.0);
   col += vec3(0.9, 0.95, 1.0) * ghost * 0.06 * pulse;
-  return col;
+  // NIGHT GRADE: the same live scene by moonlight. Colour drains to cool silver, mids sink toward black, the sun flare reads as the moon,
+  // while the mirror facets, dew glints and the flare keep their sparkle. A thin lift keeps the sky from going flat black, and stars twinkle in it.
+  float L = dot(col, vec3(0.3, 0.59, 0.11));
+  vec3 nt = mix(vec3(L), col, 0.14) * vec3(0.86, 0.90, 1.0);
+  nt = pow(max(nt, vec3(0.0)), vec3(2.5)) * 1.1;
+  nt += vec3(0.010, 0.012, 0.020) * (0.4 + 0.6 * sky);
+  vec2 stq = floor(iuv * vec2(460.0, 320.0));
+  float sth = h21(stq + 5.0);
+  float star = step(0.9965, sth) * (0.35 + 0.65 * pow(max(sin(t * (0.9 + sth * 2.6) + sth * 70.0), 0.0), 2.0));
+  nt += vec3(0.82, 0.88, 1.0) * star * sky * (1.0 - cld * 0.9) * smoothstep(0.0, 0.35, 1.0 - iuv.y * 0.0 - 0.0) * 1.1;
+  return nt;
 }
 
 vec3 landscape(vec2 uv, float a){
@@ -294,8 +305,17 @@ void main(){
   vec3 ro = uCam;
   float focal = ro.z / uHv;
   vec3 rd = normalize(vec3((uv - 0.5) * vec2(a, 1.0), -focal) * vec3(1.0, 1.0, 1.0));
-  float t = uDbg > 0.5 ? 30.0 : 0.0, dmin = 1e5, tm = 0.0, id = -1.0; bool hit = false;
+  // cheap ray-vs-bounding-sphere test: most pixels (sky, meadow) never get near a hand, so they skip the whole march
+  bool near = uDbg > 0.5; float tS = 1e5;
+  for (int h2 = 0; h2 < 2; h2++) {
+    vec4 bA = uBB[h2 * 2], bB = uBB[h2 * 2 + 1];
+    vec3 oc = (bA.xyz + bB.xyz) * 0.5 - ro; float R = length(bB.xyz - bA.xyz) * 0.5 + max(bA.w, bB.w) + 0.7;
+    float pj = dot(oc, rd), d2 = dot(oc, oc) - pj * pj;
+    if (d2 < R * R) { near = true; tS = min(tS, max(0.0, pj - sqrt(R * R - d2))); }
+  }
+  float t = uDbg > 0.5 ? 30.0 : (near ? tS : 0.0), dmin = 1e5, tm = 0.0, id = -1.0; bool hit = false;
   for (int i = 0; i < 110; i++) {
+    if (!near) break;
     vec3 p = ro + rd * t;
     vec2 m = map(p);
     if (m.x < dmin) { dmin = m.x; tm = t; }
@@ -305,7 +325,7 @@ void main(){
   }
   if (hit) { for (int k = 0; k < 4; k++) t += map(ro + rd * t).x; }
   float px = (uHv / uRes.y) * (tm / ro.z) * 1.1;
-  float cov = hit ? 1.0 : 1.0 - smoothstep(0.0, px * (1.0 + dream * 5.0), dmin);
+  float cov = !near ? 0.0 : (hit ? 1.0 : 1.0 - smoothstep(0.0, px * (1.0 + dream * 5.0), dmin));
   if (cov > 0.001) {
     vec3 p = ro + rd * (hit ? t : tm);
     vec3 n = nrm(p);

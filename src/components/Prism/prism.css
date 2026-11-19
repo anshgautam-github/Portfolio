@@ -1,0 +1,163 @@
+/* <Prism />: a four-sided bar that rolls towards you as you scroll. Dark blue stage, ice-white wordmark faces, royal-blue project face, cyan numbers face. */
+.pr { position: relative; height: 100vh; height: 100svh; background: #070a12; color: #eaf1ff; }
+.pr-pin { position: relative; height: 100vh; overflow: hidden; contain: layout paint; --S: clamp(200px, 38vh, 430px); --L: min(74vw, calc(var(--S) * 3.5)); --hS: calc(var(--S) / 2); }
+
+/* ---------- stage ---------- */
+.pr-bg { position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(70% 55% at 50% 46%, #11204a 0%, #0a1126 52%, #070a12 100%); }
+.pr-grid { position: absolute; inset: 0;
+  background: linear-gradient(rgba(141,180,255,.07) 1px, transparent 1px) 0 0 / 84px 84px, linear-gradient(90deg, rgba(141,180,255,.07) 1px, transparent 1px) 0 0 / 84px 84px;
+  -webkit-mask-image: radial-gradient(75% 65% at 50% 50%, #000 20%, transparent 100%); mask-image: radial-gradient(75% 65% at 50% 50%, #000 20%, transparent 100%); }
+.pr-halo { position: absolute; left: 50%; top: 48%; width: 90vw; height: 56vh; translate: -50% -50%; border-radius: 50%; filter: blur(40px); opacity: .8;
+  background: radial-gradient(closest-side, rgba(70,120,255,.38), rgba(70,120,255,.1) 60%, transparent 78%); animation: prHalo 8s ease-in-out infinite alternate; }
+@keyframes prHalo { to { scale: 1.1 1.16; opacity: 1; } }
+.pr-sp { position: absolute; width: 14px; aspect-ratio: 1; background: #cfe0ff; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); filter: drop-shadow(0 0 8px rgba(141,180,255,.9)); animation: prTw 3.4s ease-in-out infinite; }
+.pr-sp.s1 { left: 9%; top: 24%; } .pr-sp.s2 { left: 86%; top: 20%; animation-delay: -1s; width: 10px; } .pr-sp.s3 { left: 15%; top: 72%; animation-delay: -2s; width: 9px; } .pr-sp.s4 { left: 91%; top: 68%; animation-delay: -.6s; } .pr-sp.s5 { left: 52%; top: 12%; animation-delay: -1.8s; width: 8px; }
+@keyframes prTw { 0%, 100% { opacity: .25; scale: .6; rotate: 0deg; } 50% { opacity: 1; scale: 1; rotate: 45deg; } }
+.pr-ghost { position: absolute; left: 0; right: 0; top: 50%; translate: 0 -50%; pointer-events: none; white-space: nowrap; overflow: hidden; }
+.pr-ghost span { display: inline-block; font: 900 clamp(120px, 24vw, 420px)/1 "Archivo", "Inter Tight", sans-serif; font-stretch: 125%; text-transform: uppercase; letter-spacing: -.03em; color: transparent; -webkit-text-stroke: 1.5px rgba(141,180,255,.14); }
+
+.pr-eyebrow { position: absolute; left: clamp(20px, 3.2vw, 56px); top: clamp(22px, 4.5vh, 48px); z-index: 6; display: flex; align-items: center; gap: 10px; font: 600 clamp(10px, .82vw, 12px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .24em; text-transform: uppercase; color: #8db4ff; }
+.pr-eyebrow i { width: 7px; height: 7px; border-radius: 50%; background: #8db4ff; box-shadow: 0 0 0 4px rgba(141,180,255,.2); animation: prBlip 2.2s ease-in-out infinite; }
+@keyframes prBlip { 50% { box-shadow: 0 0 0 8px rgba(141,180,255,0); } }
+
+/* ---------- the bar ---------- */
+.pr-scene { position: absolute; inset: 0; display: grid; place-items: center; perspective: 1900px; perspective-origin: 50% 40%; padding-bottom: 6vh; opacity: 0; }
+.pr-tilt { position: relative; width: var(--L); height: var(--S); transform-style: preserve-3d; transform: rotateX(-11deg) rotateY(-15deg); will-change: transform; }
+.pr-bar { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+.pr-f { position: absolute; left: 0; top: 0; width: var(--L); height: var(--S); overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  transform: rotateX(calc(var(--k) * -90deg)) translateZ(var(--hS)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+.pr-shade { position: absolute; inset: 0; z-index: 9; pointer-events: none; background: linear-gradient(180deg, #04070f, #0a1330); opacity: 0; }
+
+.pr-f--w { background: linear-gradient(180deg, #fbfdff 0%, #e4edff 100%); color: #0a1226; }
+.pr-f--b { background: radial-gradient(90% 120% at 15% 0%, #5f8dff 0%, transparent 60%), linear-gradient(160deg, #3c63f0 0%, #2342c9 60%, #1a2f9a 100%); }
+.pr-f--c { background: radial-gradient(90% 120% at 85% 0%, #b6f3ff 0%, transparent 55%), linear-gradient(160deg, #4fc8ee 0%, #2f8de0 55%, #2b55d4 100%); color: #03122e; }
+
+/* wordmark ticker */
+.pr-mq { position: absolute; inset: 0; display: flex; align-items: center; overflow: hidden; }
+.pr-mq-track { display: flex; width: max-content; will-change: transform; }
+.pr-mq-set { display: flex; flex: none; align-items: center; }
+.pr-mq-set span { padding: 0 .28em; font: 900 calc(var(--S) * .56)/1 "Archivo", "Inter Tight", sans-serif; font-stretch: 125%; font-variation-settings: "wdth" 125; text-transform: uppercase; letter-spacing: -.035em; white-space: nowrap; }
+.pr-mq-set span.is-paren { color: transparent; -webkit-text-stroke: calc(var(--S) * .006) #0a1226; }
+.pr-f--w::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2; background: linear-gradient(110deg, transparent 38%, rgba(120,160,255,.28) 50%, transparent 62%); animation: prGloss 5.5s ease-in-out infinite; }
+@keyframes prGloss { 0% { transform: translateX(-120%); } 60%, 100% { transform: translateX(120%); } }
+
+/* project screens */
+.pr-shots { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: calc(var(--S) * .1); padding: 0 4%; }
+.pr-shot { margin: 0; position: relative; height: calc(var(--S) * .68); display: grid; will-change: transform; }
+.pr-scr { height: 100%; border-radius: calc(var(--S) * .04); overflow: hidden; background: #05070d; border: calc(var(--S) * .012) solid #0b0f1a; box-shadow: 0 calc(var(--S) * .07) calc(var(--S) * .12) calc(var(--S) * -.04) rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.12); }
+.pr-scr img { display: block; height: 100%; width: auto; max-width: none; object-fit: cover; }
+.pr-lap .pr-scr { aspect-ratio: 1.6; } .pr-lap .pr-scr img { width: 100%; }
+.pr-ph { height: calc(var(--S) * .76); } .pr-ph .pr-scr { aspect-ratio: .46; border-radius: calc(var(--S) * .075); } .pr-ph .pr-scr img { width: 100%; object-position: top; }
+.pr-shot figcaption { position: absolute; left: 50%; bottom: calc(var(--S) * -.065); translate: -50% 0; white-space: nowrap; font: 600 calc(var(--S) * .036)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.92); }
+.pr-shot figcaption b { color: #bcd4ff; margin-right: .6em; }
+
+/* numbers */
+.pr-stats { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center; padding: 0 6%; gap: 7%; }
+.pr-stat { display: grid; gap: calc(var(--S) * .03); }
+.pr-stat b { font: 900 calc(var(--S) * .21)/.9 "Archivo", "Inter Tight", sans-serif; font-stretch: 112%; letter-spacing: -.04em; color: #fff; text-shadow: 0 calc(var(--S) * .02) 0 rgba(8,30,100,.35); }
+.pr-stat span { font: 600 calc(var(--S) * .05)/1.3 "Inter Tight", system-ui, sans-serif; max-width: 14em; color: rgba(3,18,46,.8); }
+
+/* end caps */
+.pr-cap { position: absolute; top: 0; left: calc(50% - var(--S) / 2); width: var(--S); height: var(--S); backface-visibility: hidden; overflow: hidden; display: grid; place-items: center; }
+.pr-cap--r { transform: rotateY(90deg) translateZ(calc(var(--L) / 2)); background: linear-gradient(155deg, #86adff, #3c63f0 60%, #1f3bb8); box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+.pr-cap--l { transform: rotateY(-90deg) translateZ(calc(var(--L) / 2)); background: #0a1126; }
+.pr-cap--r span { position: relative; z-index: 1; font: 900 calc(var(--S) * .42)/1 "Archivo", sans-serif; font-stretch: 112%; letter-spacing: -.05em; color: #fff; }
+.pr-cap--r svg { position: absolute; inset: 8%; width: 84%; height: 84%; fill: none; stroke: rgba(255,255,255,.5); stroke-width: .6; animation: prSpin 24s linear infinite; }
+.pr-cap--r svg circle:last-child { stroke-dasharray: 2 3; animation: prSpin 14s linear infinite reverse; transform-origin: 50% 50%; }
+@keyframes prSpin { to { transform: rotate(360deg); } }
+
+/* floor shadow */
+.pr-floor { position: absolute; left: 50%; top: 100%; width: calc(var(--L) * .86); height: calc(var(--S) * .34); margin-top: calc(var(--S) * .56); transform: translate(-50%, 0); border-radius: 50%; background: radial-gradient(closest-side, rgba(70,120,255,.5), rgba(70,120,255,.14) 60%, transparent 78%); filter: blur(12px); opacity: 0; pointer-events: none; }
+
+/* ---------- caption, progress, hint ---------- */
+.pr-caps { position: absolute; left: clamp(20px, 3.2vw, 56px); bottom: clamp(52px, 9vh, 96px); z-index: 6; width: min(60vw, 560px); height: 7.5em; }
+.pr-cap-i { position: absolute; left: 0; bottom: 0; opacity: 0; transform: translateY(18px); transition: opacity .55s ease, transform .7s cubic-bezier(.2,.8,.2,1); pointer-events: none; }
+.pr-cap-i.is-on { opacity: 1; transform: none; }
+.pr-cap-i em { display: block; margin-bottom: .8em; font: 600 clamp(10px, .85vw, 12px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .24em; color: #8db4ff; font-style: normal; }
+.pr-cap-i h3 { margin: 0 0 .35em; font: 800 clamp(26px, 3.4vw, 56px)/.98 "Archivo", "Inter Tight", sans-serif; font-stretch: 100%; text-transform: uppercase; letter-spacing: -.025em; background: linear-gradient(180deg, #fff 30%, #b9cdf6 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.pr-cap-i p { margin: 0; font: 500 clamp(13px, 1.15vw, 18px)/1.4 "Inter Tight", system-ui, sans-serif; color: rgba(214,226,255,.78); max-width: 34em; }
+.pr-ticks { position: absolute; left: 50%; translate: -50% 0; bottom: clamp(16px, 3.4vh, 36px); z-index: 6; display: flex; gap: 7px; align-items: center; }
+.pr-ticks::before, .pr-ticks::after { content: ""; width: 1px; height: 18px; background: rgba(255,255,255,.7); }
+.pr-ticks::before { margin-right: 10px; } .pr-ticks::after { margin-left: 10px; }
+.pr-tick { width: clamp(28px, 3.4vw, 52px); height: 16px; border-radius: 2px; border: 1px solid rgba(255,255,255,.3); position: relative; overflow: hidden; }
+.pr-tick::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #5b82f2, #79e4ff); transform: scaleX(0); transform-origin: left; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+.pr-tick.is-on { border-color: #fff; } .pr-tick.is-on::after { transform: none; }
+.pr-hint { position: absolute; right: clamp(20px, 3.2vw, 56px); bottom: clamp(16px, 3.4vh, 36px); z-index: 6; display: flex; align-items: center; gap: 12px; font: 500 10px/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(190,210,255,.6); }
+.pr-hint i { width: 1px; height: 22px; background: linear-gradient(#8db4ff, transparent); animation: prHint 1.8s ease-in-out infinite; transform-origin: top; }
+@keyframes prHint { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+
+/* ---------- phones ---------- */
+@media (max-width: 768px) {
+  .pr-pin { --S: min(30vh, 54vw); --L: 92vw; }
+  .pr-lap--3 { display: none; }
+  .pr-shots { gap: calc(var(--S) * .1); }
+  .pr-stats { grid-template-columns: 1fr 1fr; } .pr-stat:nth-child(3) { display: none; }
+  .pr-cap--r, .pr-cap--l { display: none; }
+  .pr-tilt { transform: rotateX(-10deg) rotateY(-9deg) !important; }
+  .pr-caps { width: calc(100vw - 40px); bottom: 72px; }
+  .pr-hint { display: none; }
+  .pr-mq-set span { font-size: calc(var(--S) * .5); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pr-pin { height: 100vh; }
+  .pr-halo, .pr-sp, .pr-eyebrow i, .pr-hint i, .pr-cap--r svg, .pr-f--w::after { animation: none; }
+}
+
+/* ===== full black stage: no blue wash, halo or tinted floor (continues the black story section above) ===== */
+.pr, .pr-pin { background: #000; }
+.pr-bg { background: #000; }
+.pr-halo { display: none; }
+.pr-grid { background: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px) 0 0 / 84px 84px, linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px) 0 0 / 84px 84px; }
+.pr-floor { display: none; }
+.pr-shade { background: #000; }
+
+/* ===== forced: nothing blue behind the bar, whatever else sets a background on these layers ===== */
+#prism, #prism .pr-pin, #prism .pr-bg { background: #000 !important; background-image: none !important; }
+#prism .pr-bg .pr-halo, #prism .pr-floor { display: none !important; }
+#prism .pr-bg .pr-grid { background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px) !important; background-size: 84px 84px, 84px 84px !important; }
+#prism .pr-ghost span { -webkit-text-stroke-color: rgba(255,255,255,.08) !important; }
+#prism .pr-pin::before, #prism .pr-pin::after, #prism::before, #prism::after { display: none !important; }
+#prism .pr-shade { background: #000 !important; }
+
+/* the drifting light threads (same canvas effect as the About manifesto), black background, no coloured glows */
+#prism .pr-bg .about-fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+#prism .pr-bg .about-fx .afx-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+
+/* ===== one continuous background with the About block above =====
+   The stage now carries exactly the same live layers as the About section (threads, the three soft drifting glows, the pointer lattice and
+   spotlight), so the two read as one surface. The About block fades its field out at its bottom edge; this one fades it in at its top edge,
+   so there is no visible seam where one canvas ends and the next begins. */
+#prism .pr-bg .about-fx {
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 100%);
+}
+/* the faint grid is a Prism detail: keep it, but subtler so it never fights the threads */
+#prism .pr-bg .pr-grid { opacity: .6; }
+
+/* ===== alignment: captions share the About block's left gutter, so text edges line up when you scroll from one to the other ===== */
+#prism .pr-caps { left: var(--gutter, clamp(16px, 2.2vw, 36px)); }
+#prism .pr-eyebrow { left: var(--gutter, clamp(16px, 2.2vw, 36px)); }
+
+/* ===== card rise: on the all-black page the incoming section needs a visible edge =====
+   While it climbs in, the stage reads as a card: rounded top corners, a bright hairline, a cool halo above it and a faint inner sheen, and it
+   starts a little narrower than the screen and widens to fill it. --pc is 1 at the start of the rise and 0 once it fills the screen (see render in Prism.jsx). */
+#prism { --pc: 0; }
+#prism .pr-pin {
+  border-radius: calc(var(--pc) * 48px) calc(var(--pc) * 48px) 0 0;
+  transform: scale(calc(1 - var(--pc) * .07)); transform-origin: 50% 100%;
+  box-shadow:
+    inset 0 1px 0 rgba(170, 198, 255, calc(var(--pc) * .75)),
+    inset 0 0 0 1px rgba(141, 180, 255, calc(var(--pc) * .22)),
+    inset 0 70px 90px -60px rgba(91, 140, 255, calc(var(--pc) * .38)),
+    0 -2px 0 rgba(141, 180, 255, calc(var(--pc) * .28)),
+    0 -34px 90px -18px rgba(91, 140, 255, calc(var(--pc) * .55));
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) { #prism .pr-pin { transform: none; box-shadow: none; border-radius: 0; } }
+
+/* ===== stacked hand-off: the section above stays stuck at the end of its scroll, and this one rises from the bottom over the top of it =====
+   The slot reaches back one screen so the Prism starts climbing exactly while the manifesto above (the sticky stage in Illusion.jsx, held for an extra screen)
+   is still pinned in place. */
+.fs .about-prism { position: relative; z-index: 6; margin-top: -100vh; margin-top: -100svh; }

@@ -53,6 +53,12 @@ const settleSubs = [];
 export const isSettled = () => settled;
 export function whenSettled(fn) { if (settled) fn(); else settleSubs.push(fn); }
 
+let lastInput = 0;
+if (typeof window !== "undefined") {
+  const mark = () => { lastInput = performance.now(); };
+  ["wheel", "touchmove", "keydown"].forEach((ev) => window.addEventListener(ev, mark, { passive: true, capture: true }));
+}
+
 export function release(instant) {
   if (released) return;
   released = true;
@@ -60,11 +66,18 @@ export function release(instant) {
     const cl = document.documentElement.classList;
     cl.add("is-settling");
     cl.remove("is-loading");
-    setTimeout(() => {
+    const unlock = () => {
+      // reset to the top BEFORE flagging the page as settled, so the scroll guard (lib/smooth.js) does not mistake this one for a stray jump
+      if (!instant) { try { window.scrollTo(0, 0); window.__lenis && window.__lenis.scrollTo(0, { immediate: true, force: true }); } catch (e) { /* ignore */ } }   // always unlock ON the landing page
       settled = true;
       cl.remove("is-settling");
       settleSubs.splice(0).forEach((f) => { try { f(); } catch (e) { /* ignore */ } });
-    }, instant ? 0 : SETTLE);
+    };
+    // do not unlock while the visitor is still scrolling (the loader is scrolled, and a trackpad keeps sending momentum for a second or two):
+    // wait for a quiet moment, so that leftover scrolling can never carry the landing page away
+    const t0 = performance.now();
+    const tryUnlock = () => { if (!instant && performance.now() - lastInput < 650 && performance.now() - t0 < SETTLE + 6000) setTimeout(tryUnlock, 120); else unlock(); };
+    setTimeout(tryUnlock, instant ? 0 : SETTLE);
   }
   subs.splice(0).forEach((f) => { try { f(); } catch (e) { /* ignore */ } });
 }

@@ -1,21 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { teddy } from "./teddyContent.js";
-
-const KEY = "teddy.notes.v1";
-const COLORS = ["yellow", "pink", "orange", "purple", "mint"];
-
-let nid = 0;
-const mk = (n) => ({ id: `n${++nid}-${Math.random().toString(36).slice(2, 6)}`, z: 1, ...n });
-
-function load() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(KEY));
-    if (Array.isArray(raw) && raw.length) return raw.map((n) => ({ ...n, id: n.id || mk({}).id }));
-  } catch (_) {
-    /* private mode / blocked storage */
-  }
-  return teddy.notes.map((n) => mk(n));
-}
+import { KEY, COLORS, MAX_NOTES, mk, cleanText, load } from "./notesStorage.js";
 
 const Notes = forwardRef(function Notes({ active, play }, ref) {
   const board = useRef(null);
@@ -90,7 +74,7 @@ const Notes = forwardRef(function Notes({ active, play }, ref) {
   };
 
   const add = () => {
-    if (notes.length >= 24) return;
+    if (notes.length >= MAX_NOTES) return;
     const n = mk({
       text: "",
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
@@ -146,7 +130,7 @@ const Notes = forwardRef(function Notes({ active, play }, ref) {
                     el.focus();
                   }
                 }}
-                onChange={(e) => patch(n.id, { text: e.target.value })}
+                onChange={(e) => patch(n.id, { text: cleanText(e.target.value) })}
                 onPointerDown={() => {
                   zTop.current += 1;
                   patch(n.id, { z: zTop.current });

@@ -1,0 +1,51 @@
+/* Illusion: sticky stage, scroll-driven. Uses the .fs font variables (it is portalled inside .fs). */
+.ill { position: relative; height: 560vh; background: #04070f; color: #fff; --ink: #0b0e14; }
+.ill-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #04070f; isolation: isolate; }
+.ill-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ill-grid { position: absolute; inset: 0; pointer-events: none; opacity: .5; mix-blend-mode: overlay;
+  background: linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px) 0 0 / 96px 96px, linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px) 0 0 / 96px 96px;
+  -webkit-mask-image: radial-gradient(60% 55% at 50% 52%, #000, transparent 100%); mask-image: radial-gradient(60% 55% at 50% 52%, #000, transparent 100%); }
+.ill.is-static .ill-stage { background: radial-gradient(60% 50% at 50% 50%, #000 0 14%, #7ea2ff 15%, #e98660 30%, #f4f1ec 60%); }
+
+.ill-top { position: absolute; left: var(--gutter, clamp(18px, 2.4vw, 40px)); top: clamp(22px, 4vh, 40px); z-index: 3; display: flex; align-items: center; gap: 10px;
+  font: 600 clamp(10px, .8vw, 12px)/1 var(--mono, ui-monospace, monospace); letter-spacing: .26em; text-transform: uppercase; color: #fff; mix-blend-mode: difference; }
+.ill-dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; }
+
+.ill-copy { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; pointer-events: none; padding: 0 6vw; }
+.ill-b { grid-area: 1 / 1; margin: 0; text-align: center; visibility: hidden; opacity: 0; will-change: transform, opacity, filter;
+  font: 300 clamp(44px, 8.4vw, 150px)/.98 var(--display, Archivo, Arial, sans-serif); letter-spacing: -.045em; text-wrap: balance; color: #fff;
+  text-shadow: 0 2px 50px rgba(0,0,0,.28), 0 0 2px rgba(0,0,0,.18); }
+.ill-b em { font-family: var(--serif, "Instrument Serif", serif); font-style: italic; font-weight: 400; letter-spacing: -.025em; font-size: 1.06em; }
+.ill-b.is-ink { color: var(--ink); text-shadow: 0 1px 40px rgba(255,255,255,.55); max-width: 13em; }
+.ill-sw { display: inline-grid; vertical-align: baseline; overflow: hidden; padding: .06em .12em .14em; margin: -.06em -.12em -.14em; }
+.ill-sw em { grid-area: 1 / 1; display: block; }
+.ill-w { visibility: hidden; opacity: 0; }
+
+.ill-end { display: grid; gap: .5em; }
+.ill-end-k { margin: 0; font: 600 clamp(11px, .95vw, 14px)/1 var(--mono, ui-monospace, monospace); letter-spacing: .3em; text-transform: uppercase; color: rgba(255,255,255,.62); text-shadow: none; }
+.ill-end-t { margin: 0; font: 300 clamp(40px, 7vw, 120px)/1 var(--display, Archivo, Arial, sans-serif); letter-spacing: -.045em; color: #fff; }
+.ill-end-t em { color: var(--molten, #ffb23f); }
+
+.ill-hud { position: absolute; left: var(--gutter, clamp(18px, 2.4vw, 40px)); right: var(--gutter, clamp(18px, 2.4vw, 40px)); bottom: clamp(22px, 4vh, 40px); z-index: 3; display: flex; align-items: flex-end; justify-content: space-between;
+  font: 600 clamp(10px, .8vw, 12px)/1 var(--mono, ui-monospace, monospace); letter-spacing: .24em; text-transform: uppercase; color: #fff; mix-blend-mode: difference; }
+.ill-layer b { font-weight: 600; margin-left: .6em; font-variant-numeric: tabular-nums; }
+.ill-bar { position: relative; width: 1px; height: clamp(54px, 9vh, 90px); background: rgba(255,255,255,.35); overflow: hidden; }
+.ill-bar i { position: absolute; inset: 0; background: #fff; transform-origin: top; transform: scaleY(0); }
+
+.ill-cue { position: absolute; left: 50%; bottom: clamp(26px, 5vh, 48px); translate: -50% 0; z-index: 3; margin: 0; display: grid; justify-items: center; gap: 12px;
+  font: 600 clamp(10px, .8vw, 12px)/1 var(--mono, ui-monospace, monospace); letter-spacing: .28em; text-transform: uppercase; color: #fff; mix-blend-mode: difference; }
+.ill-cue i { width: 1px; height: 38px; background: linear-gradient(#fff, transparent); animation: illCue 2.2s ease-in-out infinite; transform-origin: top; }
+@keyframes illCue { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+
+@media (max-width: 700px) { .ill { height: 480vh; } .ill-grid { background-size: 64px 64px; } }
+@media (prefers-reduced-motion: reduce) { .ill-cue i { animation: none; transform: none; } }
+
+/* the manifesto rises through the void (moved by Illusion.jsx as you scroll the tail of this section) */
+.ill-mf { position: absolute; left: 0; right: 0; top: 0; z-index: 2; pointer-events: none; will-change: transform; transform: translate3d(0, 110vh, 0); }
+.ill-mf a, .ill-mf button { pointer-events: auto; }
+.ill-top, .ill-hud { transition: opacity .6s ease; }
+.ill.is-tail .ill-top, .ill.is-tail .ill-hud { opacity: 0; }
+
+/* the "How I work" text is invisible until the fall is over (it only exists in the tail), so none of it can show through the tunnel */
+.ill .ill-mf { visibility: hidden; }
+.ill.is-tail .ill-mf { visibility: visible; }

@@ -32,6 +32,8 @@ export function mountKimi(root) {
     l.rel = "stylesheet";
     l.href = "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;700;800&display=swap";
     l.setAttribute("data-kimi-fonts", "");
+    // non-blocking: a stylesheet appended to <head> holds back first paint until the third-party CSS arrives (index.html already loads this family)
+    l.media = "print"; l.onload = () => { l.media = "all"; };
     document.head.appendChild(l);
   }
 
@@ -69,19 +71,18 @@ function fail(url) {
 window.__fail = fail;
 const guard = (url, promise) => promise.catch((e) => { fail(url); throw e; });
 
-/* ---------- libraries: three.js comes from the CDN through the import map in index.html ---------- */
+/* ---------- libraries: three.js is bundled from npm (code-split: only fetched when this block mounts) ---------- */
 let T = {};
 let DRACOLoader = null, GLTFLoader = null, mergeGeometries = null, HdrLoader = null;
-const bare = (name) => import(/* @vite-ignore */ name);
-try { T = await bare("three"); } catch (e) { fail("three (cdn.jsdelivr.net)"); }
+try { T = await import("three"); } catch (e) { fail("three"); }
 if (T.WebGLRenderer) {
   try {
-    DRACOLoader = (await bare("three/addons/loaders/DRACOLoader.js")).DRACOLoader;
-    GLTFLoader = (await bare("three/addons/loaders/GLTFLoader.js")).GLTFLoader;
-    mergeGeometries = (await bare("three/addons/utils/BufferGeometryUtils.js")).mergeGeometries;
-    try { HdrLoader = (await bare("three/addons/loaders/RGBELoader.js")).RGBELoader; } catch (e) {}
-    if (!HdrLoader) HdrLoader = (await bare("three/addons/loaders/HDRLoader.js")).HDRLoader;
-  } catch (e) { fail("three/addons (cdn.jsdelivr.net)"); }
+    DRACOLoader = (await import("three/addons/loaders/DRACOLoader.js")).DRACOLoader;
+    GLTFLoader = (await import("three/addons/loaders/GLTFLoader.js")).GLTFLoader;
+    mergeGeometries = (await import("three/addons/utils/BufferGeometryUtils.js")).mergeGeometries;
+    try { HdrLoader = (await import("three/addons/loaders/RGBELoader.js")).RGBELoader; } catch (e) {}
+    if (!HdrLoader) HdrLoader = (await import("three/addons/loaders/HDRLoader.js")).HDRLoader;
+  } catch (e) { fail("three/addons"); }
 }
 if (dead) return;
 const {
@@ -419,12 +420,12 @@ const getSceneTier = () => {
 };
 
 const SCENE_ASSETS = A("hero/scene");
-const DRACO_PATH = "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/libs/draco/gltf/";
+// Draco decoder: three.js ships it and Vite bundles it as same-origin hashed assets (no CDN, no setDecoderPath needed)
 
-const readToken = (token) => {
+const readToken = (token, host = root) => {
   const probe = document.createElement("span");
   probe.style.cssText = `position:absolute;visibility:hidden;color:var(${token})`;
-  root.appendChild(probe);
+  host.appendChild(probe);
   const resolved = getComputedStyle(probe).color;
   probe.remove();
   return resolved;
@@ -1133,7 +1134,6 @@ class HeroScene {
       }));
 
     const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath(DRACO_PATH);
     const gltfLoader = new GLTFLoader();
     gltfLoader.setDRACOLoader(dracoLoader);
     const [env, headMaps, helmetGltf, noise] = await Promise.all([
@@ -1961,7 +1961,9 @@ const DOTS = (() => {
     queued = true;
     requestAnimationFrame(() => { queued = false; apply(); });
   };
-  window.addEventListener("scroll", onScroll, { passive: true });
+  // with Lenis, run in the same tick that moved the page (the native scroll event + rAF lands a frame behind ScrollTrigger)
+  if (window.__lenis && window.__lenis.on) window.__lenis.on("scroll", apply);
+  else window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll);
   apply();
 })();
@@ -2296,7 +2298,7 @@ function scrub(el, start, end, apply, init = 0) {
 function contour(canvas, colourToken, host) {
   const LINE_SCALE = 3.8, LINE_COUNT = 2.5, WAVE_AMOUNT = 0.37, WAVE_SPEED = 1.66, LINE_OPACITY = 0.85, CELLS = 96;
   const ctx = canvas.getContext("2d");
-  const colour = readToken(colourToken);
+  const colour = readToken(colourToken, host || root);
   const start = performance.now();
   let width = 0, height = 0, ratio = 1;
   const field = (x, y, t) => {
@@ -2713,7 +2715,8 @@ const ARROW_SVG = `<svg viewBox="0 0 13.7071 10.7071" aria-hidden="true"><path d
   };
   let stepQueued = false;
   const onStepScroll = () => { if (stepQueued || !padOn) return; stepQueued = true; requestAnimationFrame(() => { stepQueued = false; if (padOn) applySteps(); }); };
-  window.addEventListener("scroll", onStepScroll, { passive: true });
+  if (window.__lenis && window.__lenis.on) window.__lenis.on("scroll", () => { if (padOn) applySteps(); });
+  else window.addEventListener("scroll", onStepScroll, { passive: true });
   window.addEventListener("resize", onStepScroll);
   if (mq("(hover: hover)")) {
     cardEls.forEach((c) => {

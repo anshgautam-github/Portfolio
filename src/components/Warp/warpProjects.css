@@ -349,3 +349,18 @@ html.is-mobile .wp-text h3 .acc { color: var(--a); animation: none; }
   .wp-impact div span { min-width: 0; padding-left: 16px; border-left: 1px solid rgba(255,255,255,.14); }
   .wp-impact div span:first-child { padding-left: 0; border-left: 0; }
 }
+
+/* the stage glow is a soft ellipse: clip it to one so its rectangular layer edge can never show as a box around the phones */
+.wp-glow { border-radius: 50%; border: 0; outline: 0; box-shadow: none; -webkit-mask-image: radial-gradient(closest-side, #000 60%, transparent 100%); mask-image: radial-gradient(closest-side, #000 60%, transparent 100%); }
+
+/* intro headline: the words are ALWAYS in their resting spot. The generic .wp-w reveal is driven by an inherited --p / --i (meant for the project
+   slides); if either is ever mid-way (Safari restyles inherited custom properties lazily) the words sit lower, blurred and overlap the paragraph,
+   and the cursor (anchored to the layout position of "built") ends up off the word. The intro never uses that reveal, so it is switched off here. */
+.wp-hl .wp-w { --wp: 1; opacity: 1 !important; transform: none !important; filter: none !important; }
+.wp-hl, [data-intro] > p, [data-intro] > [data-i] { transform: none; }
+
+/* ===== full black: the section background has no blue glow, aurora, rings or tinted washes (matches the black story section above) ===== */
+[data-warp-wrap] section[aria-label="Selected projects"] { background: #000 !important; }
+.wp-aur, .wa, .wa-sheen, .wa-ring, .wa-vig, .wp-orb, .wp-ring { display: none !important; }
+.wp-glow, .wp-plate { background: none !important; box-shadow: none !important; border-color: transparent !important; }
+.wp-spot { background: none !important; }

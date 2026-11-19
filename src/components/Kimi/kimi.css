@@ -918,3 +918,51 @@ html.kimi-menu-open { overflow: hidden; }
 @media (max-width: 639px) {
   .kimi .pad-intro::before { content: "About me"; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.5); }
 }
+
+/* ================= DARK THEME for the paddock ("Engineered through curiosity") ================= */
+.kimi .pad {
+  --accent: #7ea2ff;
+  --foreground: #ffffff;
+  --foreground-muted: rgba(255, 255, 255, .55);
+  --foreground-on-dark-muted: rgba(255, 255, 255, .6);
+  --paddock-contour: rgb(255 255 255 / 0.07);
+  background:
+    radial-gradient(58% 52% at 20% 16%, rgba(70, 100, 220, .22), transparent 70%),
+    radial-gradient(50% 46% at 90% 92%, rgba(60, 90, 230, .25), transparent 72%),
+    radial-gradient(38% 38% at 68% 18%, rgba(130, 100, 255, .16), transparent 70%),
+    linear-gradient(165deg, #070a14 0%, #04060d 52%, #02030a 100%);
+}
+.kimi .pad::before { --gl: rgba(150, 175, 255, .13); }
+.kimi .pad-h { color: #fff; }
+.kimi .pad-intro p, .kimi .pad-cue, .kimi .stat-row .fg { color: #fff; }
+.kimi .stat-row .lb, .kimi .pc-txt em { color: rgba(255, 255, 255, .6); }
+.kimi .stat-rule, .kimi .pc-line { background: rgba(255, 255, 255, .22); }
+.kimi .pc-mouse { border-color: #fff; }
+.kimi .pad-hud .h-lat ellipse, .kimi .pad-hud .h-wire ellipse { stroke: rgba(255, 255, 255, .18); }
+.kimi .pad-hud .h-ring { stroke: rgba(255, 255, 255, .3); }
+.kimi .pa-word { -webkit-text-stroke: 1.5px rgba(255, 255, 255, .10); }
+.kimi .pa-dots { background-image: radial-gradient(circle, rgba(255, 255, 255, .35) 1.1px, transparent 1.6px); }
+.kimi .pa-stripes { background: repeating-linear-gradient(115deg, rgba(255, 255, 255, .08) 0 .45cqw, transparent .45cqw 1.3cqw); }
+.kimi .pa-rail line, .kimi .pa-rail path, .kimi .pa-rail .plus path { stroke: rgba(255, 255, 255, .35); }
+.kimi .pa-rail .spine { stroke: rgba(255, 255, 255, .5); }
+.kimi .pa-rail text { fill: rgba(255, 255, 255, .6); }
+.kimi .pa-rail .cap { fill: rgba(255, 255, 255, .85); }
+.kimi .pa-rail .eye line, .kimi .pa-rail .eye circle { stroke: var(--accent); }
+.kimi .pa-rail .eye path, .kimi .pa-rail .eye text { fill: var(--accent); }
+.kimi .pad .btn-ds:hover .lbl { color: #0b1424; }
+@media (max-width: 1023px) {
+  .kimi .pad {
+    background:
+      radial-gradient(58% 52% at 20% 14%, rgba(70, 100, 220, .22), transparent 70%) 0 0 / 100% var(--hero) no-repeat,
+      radial-gradient(60% 46% at 92% 88%, rgba(60, 90, 230, .25), transparent 72%) 0 0 / 100% var(--hero) no-repeat,
+      linear-gradient(165deg, #070a14 0%, #04060d 52%, #02030a 100%) 0 0 / 100% var(--hero) no-repeat,
+      #0a0b0c;
+  }
+}
+
+/* ================= PURE BLACK paddock background (replaces the navy tint) ================= */
+.kimi .pad,
+.kimi #stack { background: #000; }
+@media (max-width: 1023px) { .kimi .pad { background: #000; } }
+.kimi .pad::before { --gl: rgba(255, 255, 255, .08); }
+.kimi .pa-halo, .kimi .pa-disc { filter: grayscale(1); }

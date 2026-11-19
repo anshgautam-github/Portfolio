@@ -53,8 +53,8 @@ const CARDS = [
     art: 1, theme: ["#e0453c", "#7b1623", "#0e1020"], glow: "#4267f5", tag: "ON-SITE", rail: "Railway", short: "East Central Railway", yr: "Dec 25", logo: "ecr.png",
     n: "Information Technology Intern",
     company: "East Central Railway", kind: "Internship", when: "Dec 2025 \u2013 Jan 2026 \u00b7 2 mos",
-    text: "Worked as an Information Technology Intern at East Central Railway, getting hands-on experience with enterprise IT systems and day to day technical operations.",
-    skills: ["Enterprise Systems", "Network Ops", "IT Infrastructure"],
+    text: "Worked with enterprise IT systems and day-to-day technical operations, gaining exposure to the infrastructure and processes that support large-scale public-sector operations.",
+    skills: ["Enterprise IT", "Network Operations", "IT Infrastructure"],
   },
   {
     art: 5, theme: ["#14b8a6", "#0f524d", "#091624"], glow: "#14b8a6", tag: "HYBRID", rail: "Seven Hills", short: "Seven Hills National", yr: "Dec 25", logo: "shn.png",
@@ -72,17 +72,18 @@ const CARDS = [
   },
   {
     art: 8, theme: ["#f59e0b", "#784b12", "#14110e"], glow: "#f59e0b", tag: "REMOTE", rail: "SDG Research", short: "SDG & Policy Research", yr: "Oct 25", logo: "iisppr.png", sq: true,
-    n: "Head of Research",
+    n: "Research Intern \u2192 Head of Research",
     company: "International Institute of SDG\u2019s and Public Policy Research", kind: "Internship", when: "Oct \u2013 Dec 2025 \u00b7 3 mos", place: "Remote \u00b7 Delhi, India",
-    text: "Started as a Research Intern, reading papers and digging into data, then got to lead an amazing team of 9 researchers.",
-    skills: ["Lead (9 Researchers)", "Data Analysis", "Public Policy"],
+    text: "Started as a Research Intern and progressed to Head of Research, leading a team of nine and contributing to research initiatives focused on sustainable development and public policy.",
+    skills: ["Research Leadership", "Team Management", "Public Policy"],
   },
 ];
+export const EXPERIENCES = CARDS;   // shared with the chapter cards in <FreefallStory /> (same roles, dates, logos)
 const N = CARDS.length;
 const LINE1 = "Where";
 const WORD = "I\u2019ve Worked".split("");
-// electric ultramarine -> royal indigo -> deep periwinkle
-const STOPS = ["#1224b8", "#223ae0", "#4032e6", "#5828e4", "#1b52ee"];
+// luminous periwinkle -> violet -> orchid -> sky (reads on the dark base)
+const STOPS = ["#6f8dff", "#8a8cff", "#a784ff", "#c08bff", "#6fb6ff"];
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const WORD_COLORS = WORD.map((_, i) => {
   const t = (i / (WORD.length - 1)) * (STOPS.length - 1), k = Math.min(STOPS.length - 2, Math.floor(t)), f = t - k;
@@ -532,16 +533,16 @@ export default function Freefall() {
         <svg className="ff-wave-stream" viewBox="0 0 1440 380" preserveAspectRatio="none" aria-hidden="true">
           <defs>
             <linearGradient id="ffWaveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#2563eb" stopOpacity="0" />
-              <stop offset="25%" stopColor="#2563eb" stopOpacity="0.45" />
-              <stop offset="55%" stopColor="#7c3aed" stopOpacity="0.5" />
-              <stop offset="80%" stopColor="#0284c7" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#0284c7" stopOpacity="0" />
+              <stop offset="0%" stopColor="#6d8cff" stopOpacity="0" />
+              <stop offset="25%" stopColor="#6d8cff" stopOpacity="0.7" />
+              <stop offset="55%" stopColor="#a78bfa" stopOpacity="0.75" />
+              <stop offset="80%" stopColor="#38bdf8" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
             </linearGradient>
             <linearGradient id="ffWaveGrad2" x1="100%" y1="0%" x2="0%" y2="0%">
               <stop offset="0%" stopColor="#38bdf8" stopOpacity="0" />
-              <stop offset="35%" stopColor="#38bdf8" stopOpacity="0.4" />
-              <stop offset="65%" stopColor="#4f46e5" stopOpacity="0.35" />
+              <stop offset="35%" stopColor="#7dd3fc" stopOpacity="0.55" />
+              <stop offset="65%" stopColor="#818cf8" stopOpacity="0.55" />
               <stop offset="100%" stopColor="#4f46e5" stopOpacity="0" />
             </linearGradient>
           </defs>

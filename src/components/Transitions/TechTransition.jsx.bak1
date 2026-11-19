@@ -1,0 +1,108 @@
+import { useLayoutEffect } from "react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+/**
+ * <TechTransition /> - projects -> the stack switch. "Lights on": the projects hold still (pinned at the bottom of their last frame)
+ * and dim a little, while the cream tech screen opens through a slit of light at the middle of the screen. The slit widens up and down
+ * until it fills the viewport; two hairlines with a soft blue spill ride its edges, and the new screen settles from a slight zoom.
+ * Fully reversible, and the eased value never trails real scroll by more than LAG, so nothing is left transformed once the section is in flow.
+ */
+const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
+const LAG = 0.18;
+
+export default function TechTransition({ from = "[data-warp-wrap]", to = "section.ts" }) {
+  useLayoutEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    let A = null, B = null, st = null, cv = null, cx = null, cur = 0, tgt = 0, raf = 0, lt = 0, boot = 0;
+
+    const overlay = () => {
+      if (cv && cv.isConnected) return cv;
+      cv = document.createElement("div");
+      cv.setAttribute("aria-hidden", "true");
+      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:41;pointer-events:none;display:none;overflow:hidden";
+      const line = "position:absolute;left:0;width:100%;height:1px;will-change:transform,opacity;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95) 18%,rgba(255,255,255,.95) 82%,rgba(255,255,255,0));box-shadow:0 0 22px 3px rgba(111,149,242,.65),0 0 90px 18px rgba(111,149,242,.28)";
+      cv.innerHTML =
+        '<div data-dim="1" style="position:absolute;inset:0;background:#000;opacity:0"></div>' +
+        '<div data-top="1" style="' + line + '"></div><div data-bot="1" style="' + line + '"></div>';
+      document.body.appendChild(cv);
+      cx = { dim: cv.querySelector("[data-dim]"), top: cv.querySelector("[data-top]"), bot: cv.querySelector("[data-bot]") };
+      return cv;
+    };
+
+    const clear = () => {
+      if (A) { A.style.transform = ""; A.style.willChange = ""; A.style.pointerEvents = ""; }
+      if (B) { B.style.transform = ""; B.style.transformOrigin = ""; B.style.clipPath = ""; B.style.willChange = ""; B.style.zIndex = ""; B.style.pointerEvents = ""; }
+      if (cv) cv.style.display = "none";
+    };
+
+    const apply = (p) => {
+      if (!A || !A.isConnected) { clear(); A = document.querySelector(from); }
+      if (!B || !B.isConnected) { clear(); B = document.querySelector(to); }
+      if (!A || !B) return;
+      const sp = st ? st.progress : p;                               // real progress: positional compensation follows it exactly
+      if ((p <= 0 && sp <= 0) || (p >= 1 && sp >= 1)) { clear(); return; }
+      const H = window.innerHeight;
+      overlay();
+      cv.style.display = "block";
+      const e = smoother(clamp01(p));
+      const half = (H / 2) * (1 - e);                                // the slit: this much is still closed above and below
+      const fade = Math.sin(Math.PI * clamp01(e));
+
+      A.style.willChange = "transform";
+      A.style.pointerEvents = "none";
+      A.style.transform = `translate3d(0, ${(H * sp).toFixed(2)}px, 0)`;
+      cx.dim.style.opacity = (0.5 * Math.min(1, e * 1.6)).toFixed(3);
+
+      B.style.willChange = "transform, clip-path";
+      B.style.zIndex = "40";
+      B.style.pointerEvents = "none";
+      B.style.transformOrigin = `50% ${(H / 2).toFixed(0)}px`;
+      B.style.transform = `translate3d(0, ${(-H * (1 - sp)).toFixed(2)}px, 0) scale(${(1.07 - 0.07 * e).toFixed(4)})`;
+      B.style.clipPath = `inset(${half.toFixed(1)}px 0px ${half.toFixed(1)}px 0px)`;
+
+      const o = Math.min(1, 0.25 + fade * 1.5).toFixed(3);
+      cx.top.style.transform = `translate3d(0, ${half.toFixed(1)}px, 0)`;
+      cx.bot.style.transform = `translate3d(0, ${(H - half - 1).toFixed(1)}px, 0)`;
+      cx.top.style.opacity = o; cx.bot.style.opacity = o;
+    };
+
+    const tick = (now) => {
+      const dt = Math.min(0.05, Math.max(0.001, (now - lt) / 1000)); lt = now;
+      cur = Math.min(tgt + LAG, Math.max(tgt - LAG, cur));
+      const d = tgt - cur;
+      if (Math.abs(d) < 0.0005) cur = tgt;
+      else { const v = d * (1 - Math.exp(-8 * dt)); const m = 1.8 * dt; cur += Math.max(-m, Math.min(m, v)); }
+      apply(cur);
+      raf = cur !== tgt ? requestAnimationFrame(tick) : 0;
+    };
+    const wake = () => { if (!raf) { lt = performance.now(); raf = requestAnimationFrame(tick); } };
+
+    const build = () => {
+      A = document.querySelector(from); B = document.querySelector(to);
+      if (!A || !B) return;
+      st = ScrollTrigger.create({
+        trigger: B, start: "top bottom", end: "top top", invalidateOnRefresh: true,
+        onUpdate: (self) => { tgt = self.progress; wake(); },
+        onLeave: () => { tgt = 1; cur = 1; wake(); },
+        onLeaveBack: () => { tgt = 0; cur = 0; wake(); },
+      });
+    };
+    const onInit = () => clear();
+    const onDone = () => { if (st) { cur = tgt = st.progress; apply(cur); } };
+    ScrollTrigger.addEventListener("refreshInit", onInit);
+    ScrollTrigger.addEventListener("refresh", onDone);
+    boot = requestAnimationFrame(() => { build(); ScrollTrigger.refresh(); });
+
+    return () => {
+      cancelAnimationFrame(boot); cancelAnimationFrame(raf);
+      ScrollTrigger.removeEventListener("refreshInit", onInit);
+      ScrollTrigger.removeEventListener("refresh", onDone);
+      if (st) st.kill();
+      clear();
+      if (cv) cv.remove();
+    };
+  }, [from, to]);
+
+  return null;
+}

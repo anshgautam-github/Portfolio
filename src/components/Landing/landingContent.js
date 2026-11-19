@@ -9,10 +9,10 @@ export const landingContent = {
   cols: ["Role", "Approach", "About"],
   status: "Building with AI",
   cta: [{ label: "View selected work", target: "projects" }, { label: "Get in touch", target: "end" }],
-  label: ["AI ENGINEER", "& BUILDER"],
-  tagline: ["From first principles.", "To working systems."],
-  bio: "I'm a computer science engineer focused on AI, machine learning, and building useful software. From training language models from scratch to developing AI-powered products, I enjoy taking ideas from experimentation to implementation.",
-  headline: ["I BUILD", "AI SYSTEMS", "THAT MATTER"],
+  label: ["AI ENGINEER", "RESEARCHER & BUILDER"],
+  tagline: ["Curiosity starts the work.", "Engineering makes it real."],
+  bio: "From India, building at the intersection of computer science, artificial intelligence, research, and human potential.",
+  headline: ["I QUESTION.", "I EXPERIMENT.", "I MAKE THINGS REAL."],
   marquee: ["AI", "Machine learning", "Software engineering", "LLMs from scratch", "Research", "Mentoring"],
   footnote: "AI • ML • SOFTWARE ENGINEERING",   // static: no fake live clock / weather
 };

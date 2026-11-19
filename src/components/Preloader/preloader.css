@@ -1,0 +1,14 @@
+/* the counter pre-loader: plain black, one big number, one hairline bar - deliberately almost free to render */
+.pl { position: fixed; inset: 0; z-index: 200000; background: #000; color: #eef2ff; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; transition: opacity .6s ease, visibility 0s linear .65s; }
+.pl.is-out { opacity: 0; visibility: hidden; pointer-events: none; }
+.pl::before { content: ""; position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; background: radial-gradient(closest-side, rgba(70, 95, 235, .16), transparent 72%); }
+.pl-count { position: relative; display: flex; align-items: flex-start; line-height: 1; font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif; font-weight: 600; letter-spacing: -.04em; }
+.pl-num { font-size: clamp(88px, 18vw, 240px); font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
+.pl-pct { font-size: clamp(22px, 4vw, 56px); margin: .35em 0 0 .15em; color: #8fa8ff; letter-spacing: 0; }
+.pl-top, .pl-bottom { position: absolute; left: 28px; right: 28px; display: flex; justify-content: space-between; align-items: center; gap: 24px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: rgba(205, 220, 255, .6); }
+.pl-top { top: 24px; }
+.pl-bottom { bottom: 26px; }
+.pl-bar { flex: 1; height: 1px; background: rgba(205, 220, 255, .18); overflow: hidden; }
+.pl-bar i { display: block; height: 100%; background: linear-gradient(90deg, #8fa8ff, #79e4ff); transform: scaleX(0); transform-origin: 0 50%; will-change: transform; }
+@media (max-width: 700px) { .pl-top, .pl-bottom { left: 18px; right: 18px; font-size: 10px; } }

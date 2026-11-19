@@ -1,2 +1,29 @@
 node_modules
 dist
+
+# environment files and secrets: never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# editor / OS / logs
+.DS_Store
+*.log
+.vscode/
+
+# local backups, snapshots and scratch work (keep them on disk, not in the public repo)
+*.tgz
+*.bak
+*.bak-*
+*.removed
+*.removed2
+_backup*/
+_to_delete/
+_work/
+_warp_test/
+Claude outputs/
+.recolor-backup*
+# a nested git clone of an older version of the portfolio
+freefall-portfolio/

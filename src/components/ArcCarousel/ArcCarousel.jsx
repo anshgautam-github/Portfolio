@@ -104,19 +104,16 @@ export default function ArcCarousel({
     const measure = () => {
       W = el.clientWidth;
       const phone = W < 720, tablet = W >= 720 && W < 1100;
-      // phones: as wide as the screen allows (neighbours still peek in), but never so tall that the card runs into the caption on short screens
-      const H = (root.current && root.current.clientHeight) || window.innerHeight;
-      cardW = phone ? Math.max(130, Math.min(W * 0.56, (H * 0.36) / 1.38)) : tablet ? clamp(W * 0.2, 150, 210) : clamp(W * 0.15, 170, 250);
-      // cards sit on a real cylinder (viewer at the centre of the circle): arc length between cards = spacing
-      spacing = cardW * (phone ? 1.12 : tablet ? 1.34 : 1.4);
-      dth = (phone ? 24 : tablet ? 19 : 17) * Math.PI / 180;     // angle between neighbouring cards
-      R = spacing / dth;                                          // cylinder radius
+      // landscape slabs on a rising line: the centre card is the big one, neighbours shrink away on either side
+      cardW = phone ? W * 0.72 : tablet ? W * 0.39 : clamp(W * 0.31, 300, 600);
+      spacing = cardW * (phone ? 0.98 : 0.99);                    // centre-to-centre distance of the first neighbours
+      R = 0; dth = 0;
       S.rested = false;
       el.style.setProperty("--cw", cardW + "px");
-      el.style.setProperty("--ch", cardW * 1.38 + "px");
-      el.style.setProperty("--persp", cardW * 5.2 + "px");
-      el.style.setProperty("--kl", ((cardW * 0.94) / 640).toFixed(4));   // laptop mock screen -> card width
-      el.style.setProperty("--kp", ((cardW * 0.56) / 268).toFixed(4));   // phone mock screen -> card width
+      el.style.setProperty("--ch", cardW * 0.62 + "px");
+      el.style.setProperty("--persp", cardW * 4.4 + "px");
+      el.style.setProperty("--kl", ((cardW * 0.94) / 640).toFixed(4));
+      el.style.setProperty("--kp", ((cardW * 0.56) / 268).toFixed(4));
     };
     measure();
 
@@ -134,9 +131,12 @@ export default function ArcCarousel({
     const draw = (now) => {
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       // nothing is moving: don't touch the DOM at all (this is what keeps scrolling past the section smooth)
-      const idle = !autoplay && !S.drag && (S.intro >= 1 || !S.started) && Math.abs(S.target - S.pos) < 4e-4 && Math.abs(S.vel) < 2e-3;
+      // slow continuous drift: the strip keeps gliding on its own until the pointer is over a card / control, a card is open, or it is dragged
+      const drift = !reduce && S.visible && S.intro >= 1 && !S.hover && !S.hold && !S.drag;
+      const idle = !drift && !autoplay && !S.drag && (S.intro >= 1 || !S.started) && Math.abs(S.target - S.pos) < 4e-4 && Math.abs(S.vel) < 2e-3;
       // while the carousel moves, the section's decorative loops stand still (see arc-carousel.css)
-      if (idle === !!S.moving) { S.moving = !idle; if (root.current) root.current.classList.toggle("is-moving", !idle); }
+      const fast = !idle && (S.drag || Math.abs(S.vel) > 0.5 || Math.abs(S.target - S.pos) > 0.2);
+      if (fast !== !!S.moving) { S.moving = fast; if (root.current) root.current.classList.toggle("is-moving", fast); }
       if (idle && S.rested && !S.drag) {
         raf = 0;
         return;
@@ -148,6 +148,7 @@ export default function ArcCarousel({
       const ie = 1 - Math.pow(1 - S.intro, 3.2);
       // spring toward the target (or follow the finger)
       if (!S.drag) {
+        if (drift) S.target += dt * 0.15;
         const k = 70, c = 2 * Math.sqrt(k) * 0.92;
         S.vel += ((S.target - S.pos) * k - S.vel * c) * dt;
         S.pos += S.vel * dt;
@@ -165,19 +166,21 @@ export default function ArcCarousel({
         if (!c) continue;
         const o = wrap(i - posv, N);
         const a = Math.abs(o);
-        if (a > 4.6 && S.intro >= 1) {                                // far side of the ring: invisible, leave it alone
+        if (a > 4.2 && S.intro >= 1) {                                // far side of the ring: invisible, leave it alone
           if (!c._off) { c._off = true; c._on = false; c.style.opacity = "0"; c.style.pointerEvents = "none"; c.style.zIndex = "0"; c.classList.remove("is-on"); c.classList.add("is-far"); }   // is-far: visibility hidden, so its GPU layer is released
           continue;
         }
         if (c._off) { c._off = false; c.classList.remove("is-far"); }
-        const th = clamp(o * dth * spread, -1.25, 1.25);           // angle around the cylinder
-        const x = R * Math.sin(th);                                 // true circle: sideways...
-        const z = R * (1 - Math.cos(th));                           // ...and toward the viewer, so the arc is concave
-        const y = (1 - ie) * 40 + (1 - Math.cos(th)) * cardW * 0.1;  // edges ride a touch higher, like a curved wall
-        const ry = (-th * 180) / Math.PI;                           // every card faces the centre of the circle
-        const fade = clamp(4 - a, 0, 1) * clamp(ie * 1.6, 0, 1);
-        const sc = 1 - (1 - fade) * 0.25;
-        c.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,${z.toFixed(1)}px) rotateY(${ry.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
+        const oo = o * spread;
+        const ao = Math.abs(oo);
+        const sgn = oo < 0 ? -1 : 1;
+        const x = sgn * spacing * (ao <= 1 ? ao : 1 + (ao - 1) * 0.45);       // first neighbours at full spacing, the rest tuck in
+        const y = -x * 0.158 + (1 - ie) * 46;                                    // the whole strip climbs to the right (about 9 degrees)
+        const ry = clamp(oo * 13, -28, 28);                                      // outer cards turn their far edge away
+        const z = -Math.min(ao, 3) * 70;
+        const fade = clamp(3.7 - a, 0, 1) * clamp(ie * 1.6, 0, 1);
+        const sc = (1 / (1 + 0.42 * Math.min(ao, 3.4))) * (1 - (1 - fade) * 0.2);
+        c.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,${z.toFixed(1)}px) rotateZ(-9deg) rotateY(${ry.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
         c.style.opacity = fade.toFixed(2);
         const zi = String(100 - Math.round(a * 10));
         if (c._z !== zi) { c._z = zi; c.style.zIndex = zi; }
@@ -241,6 +244,14 @@ export default function ArcCarousel({
     };
     const onClickCapture = (e) => { if (S.moved > 6) { e.stopPropagation(); e.preventDefault(); S.moved = 0; } };
 
+    api.current.hold = (v) => { S.hold = v; wake(); };
+    // hovering any card or control freezes the drift; leaving lets it glide on again
+    const HOVER = ".arc-card, .arc-dots button, .arc-nav button, .arc-link";
+    const onOver = (e) => { if (e.target.closest && e.target.closest(HOVER) && !S.hover) { S.hover = true; S.target = S.pos + S.vel * 0.12; } };
+    const onOut = (e) => { const t = e.relatedTarget; if (S.hover && !(t && t.closest && t.closest(HOVER))) { S.hover = false; wake(); } };
+    const rootEl = root.current;
+    rootEl.addEventListener("pointerover", onOver);
+    rootEl.addEventListener("pointerout", onOut);
     el.addEventListener("pointerdown", onDown);
     el.addEventListener("pointermove", onMove);
     el.addEventListener("pointerup", onUp);
@@ -256,7 +267,7 @@ export default function ArcCarousel({
       el.removeEventListener("pointerdown", onDown); el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp); el.removeEventListener("pointercancel", onUp);
       el.removeEventListener("wheel", onWheel); el.removeEventListener("click", onClickCapture, true);
-      window.removeEventListener("keydown", onKey); ro.disconnect(); io.disconnect();
+      window.removeEventListener("keydown", onKey); rootEl.removeEventListener("pointerover", onOver); rootEl.removeEventListener("pointerout", onOut); ro.disconnect(); io.disconnect();
     };
   }, [N, n, autoplay]);
 
@@ -266,6 +277,7 @@ export default function ArcCarousel({
     const k = slot % n;
     api.current.to?.(k);
     setSpot({ i: k, from: el.getBoundingClientRect() });
+    api.current.hold?.(true);
     el.style.visibility = "hidden";
     hidden.current = el;
   };
@@ -286,14 +298,14 @@ export default function ArcCarousel({
     return best;
   }, [n]);
   const swapHidden = (k) => { const c = cardFor(k); if (hidden.current) hidden.current.style.visibility = ""; if (c) c.style.visibility = "hidden"; hidden.current = c; };
-  const closeSpot = () => { if (hidden.current) hidden.current.style.visibility = ""; hidden.current = null; setSpot(null); };
+  const closeSpot = () => { if (hidden.current) hidden.current.style.visibility = ""; hidden.current = null; setSpot(null); api.current.hold?.(false); };
 
   useEffect(() => {
     const el = root.current; if (!el || matchMedia("(prefers-reduced-motion: reduce), (pointer: coarse)").matches) return;
     let raf = 0, tx = 0, ty = 0, cx = 0, cy = 0;
-    const deco = el.querySelector(".arc-deco") || el;     // parallax vars live on the decor layer only, so the cards never restyle
+    const deco = el.querySelector(".arc-deco") || el; const stg = el.querySelector(".arc-stage"); const bgl = el.querySelector(".arc-bg");   // the stage and grid are moved directly, so the cards never restyle
     const mv = (e) => { const r = el.getBoundingClientRect(); tx = (e.clientX - r.left) / r.width - .5; ty = (e.clientY - r.top) / r.height - .5; if (!raf) raf = requestAnimationFrame(tick); };
-    const tick = () => { cx += (tx - cx) * .08; cy += (ty - cy) * .08; deco.style.setProperty("--px", cx.toFixed(3)); deco.style.setProperty("--py", cy.toFixed(3)); raf = Math.abs(tx - cx) + Math.abs(ty - cy) > .002 ? requestAnimationFrame(tick) : 0; };
+    const tick = () => { cx += (tx - cx) * .08; cy += (ty - cy) * .08; deco.style.setProperty("--px", cx.toFixed(3)); deco.style.setProperty("--py", cy.toFixed(3)); if (stg) stg.style.translate = `${(-cx * 26).toFixed(1)}px ${(-cy * 14).toFixed(1)}px`; if (bgl) bgl.style.translate = `${(cx * 14).toFixed(1)}px ${(cy * 8).toFixed(1)}px`; raf = Math.abs(tx - cx) + Math.abs(ty - cy) > .002 ? requestAnimationFrame(tick) : 0; };
     el.addEventListener("pointermove", mv);
     return () => { el.removeEventListener("pointermove", mv); cancelAnimationFrame(raf); };
   }, []);
@@ -337,6 +349,7 @@ export default function ArcCarousel({
         <div className="arc-floor-orbit arc-floor-orbit--2"><span className="arc-orbit-dot" /></div>
         <div className="arc-floor-orbit arc-floor-orbit--3" />
         <i /><i /><i />
+        <span className="arc-scan" /><span className="arc-pool" />
       </div>
       <div className="arc-deco" aria-hidden="true" data-acc={items[active].kind}>
         <span className="arc-blob arc-blob--a" />
@@ -355,7 +368,7 @@ export default function ArcCarousel({
         {Array.from({ length: N }, (_, i) => (<Card key={i} d={items[i % n]} i={i} n={n} setRef={setCardRef} />))}
       </div>
 
-      <p className="arc-hint">Explore &middot; Discover &middot; Learn</p>
+      <p className="arc-hint">Programs, ambassadorships and open source:<br />the communities that shaped how I build.</p>
 
       <div className="arc-meta" key={active} data-dir={dir} aria-live="polite">
         <h3>{it.title}</h3>

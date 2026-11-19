@@ -6,15 +6,15 @@ export function startFlow(canvas) {
   const N = window.innerWidth < 700 ? 140 : 320;
   let W = 0, H = 0, raf = 0, dead = false, last = 0;
   const m = { x: -9999, y: -9999, vx: 0, vy: 0 };
+  let vis = true;
   const P = Array.from({ length: N }, () => ({ x: Math.random(), y: Math.random(), l: 0, h: 0 }));
   const size = () => { const d = capDpr(2, 1.25); W = canvas.clientWidth; H = canvas.clientHeight; canvas.width = W * d; canvas.height = H * d; g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, W, H); };
-  const move = (e) => { const r = canvas.getBoundingClientRect(); const x = e.clientX - r.left, y = e.clientY - r.top; m.vx = x - m.x; m.vy = y - m.y; m.x = x; m.y = y; };
+  const move = (e) => { if (!vis) return; const r = canvas.getBoundingClientRect(); const x = e.clientX - r.left, y = e.clientY - r.top; m.vx = x - m.x; m.vy = y - m.y; m.x = x; m.y = y; };
   size(); window.addEventListener("resize", size); window.addEventListener("pointermove", move, { passive: true });
   const ang = (x, y, t) => Math.sin(x * 0.0023 + t * 0.00018) * 2.2 + Math.cos(y * 0.0031 - t * 0.00023) * 2.0 + Math.sin((x + y) * 0.0012 + t * 0.0001) * 1.4;
   const seed = (p) => { p.x = Math.random() * W; p.y = Math.random() * H; p.l = 0; p.h = 205 + Math.random() * 60; };
   P.forEach((p) => { p.h = 205 + Math.random() * 60; });
   // the canvas only animates while it is on (or next to) the screen: it used to keep drawing ~30 frames a second for the whole life of the page
-  let vis = true;
   const tick = (t) => {
     raf = 0;
     if (dead || !vis) return;

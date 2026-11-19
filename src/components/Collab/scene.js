@@ -22,7 +22,7 @@ export function createScene(glCanvas, fxCanvas) {
 
   function resize() {
     const r = fxCanvas.getBoundingClientRect();
-    dpr = capDpr(2, 1.25);
+    dpr = capDpr(1, 1);   // soft sparks / petals do not need retina pixels
     W = Math.max(2, Math.round(r.width * dpr)); H = Math.max(2, Math.round(r.height * dpr));
     fxCanvas.width = W; fxCanvas.height = H;
     S = Math.max(W / 1750, H / 1050);
@@ -42,14 +42,19 @@ export function createScene(glCanvas, fxCanvas) {
   }
   const col = (c, a) => (c > 0.66 ? `rgba(255,200,130,${a})` : c > 0.33 ? `rgba(255,255,255,${a})` : `rgba(255,150,190,${a})`);
 
-  function petal(x, y, size, rot, c, alpha, blur) {
-    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = alpha;
-    if (blur) { ctx.shadowColor = "rgba(255,120,170,.8)"; ctx.shadowBlur = blur; }
-    const g = ctx.createLinearGradient(-size, 0, size, 0);
-    g.addColorStop(0, c > 0.5 ? "#ff7fb0" : "#ff9cc2"); g.addColorStop(0.55, "#ffc4da"); g.addColorStop(1, c > 0.5 ? "#e0457f" : "#f06a9c");
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.moveTo(-size, 0); ctx.bezierCurveTo(-size * 0.5, -size * 0.95, size * 0.8, -size * 0.8, size, 0); ctx.bezierCurveTo(size * 0.7, size * 0.7, -size * 0.55, size * 0.85, -size, 0); ctx.fill();
-    ctx.restore();
+  // two pre-rendered petal sprites: drawing one is a single drawImage (no per-frame gradients, no shadowBlur)
+  const sprites = [0, 1].map((k) => {
+    const c = document.createElement("canvas"); c.width = 64; c.height = 64; const g = c.getContext("2d"); g.translate(32, 32); const size = 28;
+    const gr = g.createLinearGradient(-size, 0, size, 0);
+    gr.addColorStop(0, k ? "#ff7fb0" : "#ff9cc2"); gr.addColorStop(0.55, "#ffc4da"); gr.addColorStop(1, k ? "#e0457f" : "#f06a9c");
+    g.fillStyle = gr; g.beginPath(); g.moveTo(-size, 0); g.bezierCurveTo(-size * 0.5, -size * 0.95, size * 0.8, -size * 0.8, size, 0); g.bezierCurveTo(size * 0.7, size * 0.7, -size * 0.55, size * 0.85, -size, 0); g.fill();
+    return c;
+  });
+  function petal(x, y, size, rot, c, alpha) {
+    const k = size / 28, cs = Math.cos(rot) * k, sn = Math.sin(rot) * k;
+    ctx.setTransform(cs, sn, -sn, cs, x, y); ctx.globalAlpha = alpha;
+    ctx.drawImage(sprites[c > 0.5 ? 1 : 0], -32, -32);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
   }
 
   function frame(dt, holding) {
@@ -75,10 +80,10 @@ export function createScene(glCanvas, fxCanvas) {
     const gap = last ? now - last : 0; last = now;
     if (gap > 0 && gap < 60 && now > cool) {
       acc += gap; nfr++;
-      if (nfr >= 30) {
+      if (nfr >= 24) {
         const ms = acc / nfr; acc = 0; nfr = 0;
-        if (ms > 22 && scale > 0.4) { scale = Math.max(0.4, scale - 0.1); sizeGL(); cool = now + 1500; }
-        else if (ms < 10 && scale < 0.8) { scale = Math.min(0.8, scale + 0.1); sizeGL(); cool = now + 4000; }
+        if (ms > 20 && scale > 0.38) { scale = Math.max(0.38, scale - 0.1); sizeGL(); cool = now + 1500; }
+        else if (ms < 10 && scale < 0.7) { scale = Math.min(0.7, scale + 0.1); sizeGL(); cool = now + 4000; }
       }
     } else { acc = 0; nfr = 0; }
 
@@ -95,7 +100,7 @@ export function createScene(glCanvas, fxCanvas) {
       const pull = (tension * 0.5 + p * 0.1) * q.z;
       const x = lerp(q.x * W, cx, pull), y = lerp(q.y * H, cy, pull);
       const sz = (3 + 6.5 * q.z * q.z) * dpr * (S * 0.8 + 0.2);
-      petal(x, y, sz, q.r + T * 0.3, q.c, 0.5 + 0.35 * (q.z - 0.35), q.z > 1.15 ? 4 : 0);
+      petal(x, y, sz, q.r + T * 0.3, q.c, 0.5 + 0.35 * (q.z - 0.35), 0);
     }
     // drifting dandelion seeds (parallax: nearer ones are bigger, faster and sharper)
     ctx.save(); ctx.lineCap = "round";

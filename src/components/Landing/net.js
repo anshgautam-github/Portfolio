@@ -108,6 +108,7 @@ export function createNet(canvas) {
     step(dt); draw();
   };
   const onMove = (e) => {
+    if (!running) { m.in = false; return; }
     const r = canvas.getBoundingClientRect();
     m.x = e.clientX - r.left; m.y = e.clientY - r.top;
     m.in = m.x > -60 && m.x < W + 60 && m.y > -60 && m.y < H + 60;
