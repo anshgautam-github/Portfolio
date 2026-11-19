@@ -4,6 +4,7 @@ import { mountFreefallStory } from "./engine.js";
 import { createClouds } from "./clouds.js";
 import { createCloudFx } from "./cloudFx.js";
 import { release, pendingTasks } from "../../lib/loader.js";
+import { IS_MOBILE } from "../../lib/perf.js";
 import { buildFramePath, readFrameVars } from "../Frame/Frame.jsx";
 import { hudAt, fmtAlt, fmtVel, fmtMet, fmtLat, fmtLon, fmtG, STAGES, EVENTS } from "./loaderHud.js";
 import "../Frame/frame.css";
@@ -69,7 +70,7 @@ export default function FreefallLoader() {
         });
       }
       // the picture shakes with the G-load (strongest through the entry burn and the chute shock), like a camera bolted to the capsule
-      const sh = Math.min(1, h.g / 7);
+      const sh = IS_MOBILE ? 0 : Math.min(1, h.g / 7);          // phones: no whole-scene shake (it re-rasters the 3D scene every frame and reads as flicker)
       if (sh > 0.02) { const t = performance.now(); host.style.transform = `translate3d(${(Math.sin(t * 0.071) + Math.sin(t * 0.173)) * sh * 1.7}px,${(Math.sin(t * 0.093) + Math.sin(t * 0.211)) * sh * 1.7}px,0) scale(${1 + sh * 0.012})`; shaken = true; }
       else if (shaken) { host.style.transform = ""; shaken = false; }
       const gq = Math.round(sh * 40) / 40;                      // quantised, and set only on the two overlays that read it: a custom property changed on the root restyles the whole story tree every frame
