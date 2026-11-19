@@ -1,6 +1,7 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { IS_MOBILE } from "../../lib/perf.js";
+import { createBitmapWindow } from "./frameCache.js";
 import { lossAt } from "./art.js";
 import { WAYPOINTS } from "./chapters.js";
 import { createEarth } from "./earth.js";
@@ -77,7 +78,14 @@ export function mountFreefallStory(root, { base, mode }) {
       push(count - 1);
       this.gate = this.order.length;
       for (const s of [4, 2, 1]) for (let i = 0; i < count; i += s) push(i);
+      // phones: a sliding window of ready-decoded bitmaps around the playhead, so scrubbing never decodes a frame mid-scroll (see frameCache.js)
+      this.win = IS_MOBILE && typeof createImageBitmap === 'function'
+        ? createBitmapWindow({ count, stride, getImg: (i) => (this.ok[i] ? this.imgs[i] : null) })
+        : null;
     }
+    src(i) { return this.win ? this.win.src(i, this.imgs[i]) : this.imgs[i]; }
+    prime(f) { if (this.win) this.win.prime(f); }
+    free() { if (this.win) this.win.free(); }
     load(conc, onTick) {
       let next = 0;
       let gateDone = false;
@@ -158,17 +166,20 @@ export function mountFreefallStory(root, { base, mode }) {
       const br = seq.bracket(f);
       if (!br) return null;
       const [ia, ib, t0] = br;
-      const a = seq.imgs[ia];
+      seq.prime(f);
+      const a = seq.src(ia);
       const t = Math.round(t0 * DISSOLVE_STEPS) / DISSOLVE_STEPS;   // phones: coarser steps = far fewer redraws while scrubbing
       const blend = t > 0.03 && ib !== ia;
       const key = ia + (blend ? '|' + ib + '|' + t : '');
       if (key === this.key) return a;
       this.key = key;
       ctx.globalAlpha = 1;
-      drawCover(ctx, a, c.width, c.height, this.ax, this.ay);
+      // a bitmap that was closed under us (never expected) must not take the film down: the <img> is always there as the fallback
+      const put = (s, i) => { try { drawCover(ctx, s, c.width, c.height, this.ax, this.ay); } catch (e) { drawCover(ctx, seq.imgs[i], c.width, c.height, this.ax, this.ay); } };
+      put(a, ia);
       if (blend) {
         ctx.globalAlpha = t;
-        drawCover(ctx, seq.imgs[ib], c.width, c.height, this.ax, this.ay);
+        put(seq.src(ib), ib);
         ctx.globalAlpha = 1;
       }
       return a;
@@ -1192,7 +1203,7 @@ export function mountFreefallStory(root, { base, mode }) {
     for (const [t, ev, fn, o] of offs) t.removeEventListener(ev, fn, o);
     ioEnter.disconnect(); ioLoad.disconnect();
     clearTimeout(idleT); clearTimeout(copyT); clearTimeout(measure.t);
-    fall.dead = true; portal.dead = true;
+    fall.dead = true; portal.dead = true; fall.free(); portal.free();
     if (earth) earth.destroy();
     if (Sound.ctx) Sound.ctx.close().catch(() => {});
   };
