@@ -52,6 +52,48 @@ if (typeof window !== "undefined" && window.requestAnimationFrame && !IS_MOBILE)
 
 
 /**
+ * Frame pacing for phones (one shared clock).
+ * Phones differ a lot: 60 / 90 / 120 / 144 Hz panels. The site runs ~20 independent requestAnimationFrame loops (loader, WebGL scenes, canvases,
+ * GSAP). On a 120-144 Hz screen they all fire every 7-8 ms with whatever phase they started in, so one layer updates, another does not, and the
+ * eye reads that as flicker / shimmer, while a 60 Hz phone happens to line them up. On a high-refresh phone we therefore replace
+ * requestAnimationFrame with ONE paced loop that delivers every callback together on every Nth vsync (about 60 fps, always the same cadence).
+ * 60-90 Hz phones are left untouched. Add ?nopace to the URL to switch it off.
+ */
+if (IS_MOBILE && typeof window !== "undefined" && window.requestAnimationFrame && !/[?&]nopace\b/.test(location.search)) {
+  const nativeRaf = window.requestAnimationFrame.bind(window), nativeCaf = window.cancelAnimationFrame.bind(window);
+  const q = new Map();
+  let next = 1e9, every = 1, tick = 0, live = false;
+  const loop = (t) => {
+    live = false;
+    if (++tick % every === 0 || every === 1) {
+      const batch = Array.from(q); q.clear();
+      for (const [, cb] of batch) { try { cb(t); } catch (e) { setTimeout(() => { throw e; }); } }
+    }
+    if (q.size && !live) { live = true; nativeRaf(loop); }
+  };
+  window.requestAnimationFrame = (cb) => {
+    const id = next++;
+    q.set(id, cb);
+    if (!live) { live = true; nativeRaf(loop); }
+    return id;
+  };
+  window.cancelAnimationFrame = (id) => { if (!q.delete(id)) nativeCaf(id); };
+  // measure the panel: the median gap between native frames over the first ~30 frames
+  const gaps = []; let prev = 0;
+  const measure = (t) => {
+    if (document.hidden) { prev = 0; nativeRaf(measure); return; }
+    if (prev) gaps.push(t - prev);
+    prev = t;
+    if (gaps.length < 30) { nativeRaf(measure); return; }
+    gaps.sort((a, b) => a - b);
+    const hz = 1000 / gaps[15];
+    every = hz >= 100 ? Math.max(1, Math.round(hz / 60)) : 1;
+    if (every > 1) document.documentElement.classList.add("is-paced");
+  };
+  nativeRaf(measure);
+}
+
+/**
  * Stable viewport height on touch devices.
  * Mobile browsers resize window.innerHeight every time the URL bar collapses / expands, so every pin, clip-path, transition offset
  * and canvas that reads it shifts by 60-100px *during* the scroll: that is the sections that "flash out and back in". We pin
