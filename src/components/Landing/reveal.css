@@ -396,3 +396,16 @@
 /* frosted layer: same look, one filter less to evaluate while the blur radius animates */
 .rv-frost { -webkit-backdrop-filter: blur(var(--rv-blur)) brightness(1.45); backdrop-filter: blur(var(--rv-blur)) brightness(1.45); will-change: backdrop-filter, opacity; }
 .rv-art .rv-fx { will-change: transform; }
+
+/* ================= SMOOTH TRANSITION ON PHONES ================= */
+@media (max-width: 1024px), (pointer: coarse) {
+  /* a live blur of the WebGL landing under a scaling card re-rasterises every frame: use a flat frosted tint instead (same look, no filter) */
+  .rv-frost { -webkit-backdrop-filter: none; backdrop-filter: none; will-change: opacity; background: linear-gradient(160deg, rgba(60, 80, 150, .55), rgba(20, 30, 80, .6)); }
+  /* one cheap shadow instead of three large blurred ones on a layer that scales */
+  .rv-card { box-shadow: 0 0 0 1px rgba(255, 255, 255, .22), 0 24px 48px rgba(0, 0, 0, .7); backface-visibility: hidden; }
+  .rv-sig { will-change: transform; transform: translateZ(0); }
+  .rv-strips { will-change: opacity, transform; }
+  .rv-stage::before { display: none; }
+}
+/* decorative loops sit still while the page is scrolling, so every frame goes to the shrink and the signature */
+html.is-mobile.is-scrolling .rv-art .rv-neb, html.is-mobile.is-scrolling .rv-animsvg *, html.is-mobile.is-scrolling .rv-art-grain { animation-play-state: paused !important; }

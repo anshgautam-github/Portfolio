@@ -1,6 +1,6 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { capDpr } from "../../lib/perf.js";
+import { capDpr, IS_MOBILE } from "../../lib/perf.js";
 import { mountRevealFx } from "./revealFx.js";
 import { escapeHtml as esc } from "../../lib/escapeHtml.js";
 
@@ -113,8 +113,8 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
         pinSpacer: root,          // our own wrapper: GSAP then never re-parents the stage, so the landing's CSS intro animations are not restarted on every refresh
         start: "top top",
         end: () => "+=" + Math.round(window.innerHeight * scrollLength * END),
-        scrub: 0.5,
-        anticipatePin: 1,
+        scrub: IS_MOBILE ? 0.2 : 0.5,   // phones: less smoothing lag behind the finger
+        anticipatePin: IS_MOBILE ? 0 : 1,   // anticipatePin pre-pins early on native touch scroll = visible jump
         invalidateOnRefresh: true,
         onUpdate: (self) => { card.style.pointerEvents = self.progress > 0.02 ? "none" : ""; api.onProgress && api.onProgress(self.progress); fx && fx.setProgress(self.progress); },
       },
@@ -188,7 +188,7 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
   let raf = 0, stopDust = false;
   if (cv && !(matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) {
     const g = cv.getContext("2d");
-    const P = Array.from({ length: 70 }, () => ({ x: Math.random(), y: Math.random(), r: 0.6 + Math.random() * 1.8, v: 0.015 + Math.random() * 0.05, p: Math.random() * 6.28 }));
+    const P = Array.from({ length: IS_MOBILE ? 30 : 70 }, () => ({ x: Math.random(), y: Math.random(), r: 0.6 + Math.random() * 1.8, v: 0.015 + Math.random() * 0.05, p: Math.random() * 6.28 }));
     let W = 0, H = 0, last = 0;
     const size = () => { const d = capDpr(2, 1.25); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * d; cv.height = H * d; g.setTransform(d, 0, 0, d, 0, 0); };
     size(); window.addEventListener("resize", size);
@@ -198,7 +198,8 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
       raf = 0;
       if (stopDust || !dustVis) return;
       raf = requestAnimationFrame(tick);
-      if (t - last < 33) return; last = t;
+      if (t - last < (IS_MOBILE ? 50 : 33)) return; last = t;
+      if (IS_MOBILE && document.documentElement.classList.contains("is-scrolling")) return;   // keep the last frame while the transition runs
       g.clearRect(0, 0, W, H);
       for (const p of P) {
         p.y -= p.v * 0.033; p.x += Math.sin(t / 2400 + p.p) * 0.0002;

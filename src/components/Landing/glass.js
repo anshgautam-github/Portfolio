@@ -916,7 +916,7 @@ export function createGlassScene(canvas, opts = {}) {
     setDark(v) { darkTarget = v ? 1 : 0; },
     /** 0 = full quality, 1 = reduced resolution, 2 = frozen (keeps showing the last frame) */
     setLoad(m) {
-      const rs = m === 1 ? 0.55 : IS_MOBILE ? 0.8 : 1;
+      const rs = IS_MOBILE ? 0.8 : m === 1 ? 0.75 : 1;   // never re-allocate the canvas on phones mid-scroll: that was the blank 'flip' as the shrink began
       if (rs !== renderScale) { renderScale = rs; qualityDirty = true; }
       paused = m === 2;
     },
