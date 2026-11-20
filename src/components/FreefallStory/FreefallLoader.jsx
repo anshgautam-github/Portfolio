@@ -150,9 +150,10 @@ export default function FreefallLoader() {
       root.classList.add("is-clouding");
       try { clouds = createClouds(cloudEl); } catch (e) { clouds = null; }
       try { cfx = clouds && createCloudFx(root.querySelector(".fl-fx")); } catch (e) { cfx = null; }   // mist, an airliner, glints and an altitude readout on top of the cloud
-      if (!clouds) { release(); root.classList.add("is-out"); finishT = setTimeout(() => { T.over = true; setGone(true); }, 1500); T.out = true; }   // no WebGL: plain fade
+      if (!clouds) { release(); root.classList.add("is-out"); finishT = setTimeout(() => { T.over = true; setGone(true); dispose(); }, 1500); T.out = true; }   // no WebGL: plain fade
     };
     const tick = (now) => {
+      if (T.over) return;                                               // the curtain is gone: the loop ends here (it used to run, and redraw the whole scene, for the rest of the session)
       raf = requestAnimationFrame(tick);
       const dt = Math.min(64, now - last); last = now;
       if (T.done) {
@@ -166,7 +167,7 @@ export default function FreefallLoader() {
         if (k > 0.4 && !T.released) { T.released = true; toTop(); release(); }
         // under the thickest cloud the descent is swapped for the (transparent) window onto the landing page
         host.style.opacity = String(1 - Math.min(1, Math.max(0, (k - 0.46) / 0.08)));
-        if (k >= 1) { T.out = true; T.unlock = now + LOCK_MS; toTop(); root.classList.add("is-out"); finishT = setTimeout(() => { T.over = true; setGone(true); }, 700); }
+        if (k >= 1) { T.out = true; T.unlock = now + LOCK_MS; toTop(); root.classList.add("is-out"); finishT = setTimeout(() => { T.over = true; setGone(true); dispose(); }, 700); }
         return;
       }
       if (T.skip) {                                                     // "Skip": a fast, accelerating plunge straight to the SRM flash and the landing page
@@ -230,12 +231,15 @@ export default function FreefallLoader() {
     window.addEventListener("keydown", onKey);
     skipBtn.addEventListener("click", onSkip);
 
-    return () => {
+    let disposed = false;
+    const dispose = () => {
+      if (disposed) return; disposed = true;
       cancelAnimationFrame(raf); clearTimeout(finishT); clearTimeout(preloadT); clearTimeout(enterT); clearTimeout(settleT); window.removeEventListener("pl:out", enter); clearTimeout(hudT); ro.disconnect(); if (clouds) clouds.destroy(); if (cfx) cfx.destroy();
       root.removeEventListener("wheel", onWheel); root.removeEventListener("touchstart", onTS); root.removeEventListener("touchmove", onTM);
       window.removeEventListener("keydown", onKey); skipBtn.removeEventListener("click", onSkip);
       destroy(); host.innerHTML = "";
     };
+    return dispose;
   }, []);
 
   if (gone) return null;

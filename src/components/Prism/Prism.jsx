@@ -136,9 +136,9 @@ export default function Prism() {
               {/* face 2: real project screens on royal blue */}
               <div className="pr-f pr-f--b" style={{ "--k": 1 }}>
                 <div className="pr-shots">
-                  <figure className="pr-shot pr-lap"><div className="pr-scr"><img src="/gpt2.jpg" alt="GPT-2 built from scratch" draggable="false" /></div><figcaption><b>01</b> GPT-2 from scratch</figcaption></figure>
-                  <figure className="pr-shot pr-ph"><div className="pr-scr"><img src="/cinemyst-2.jpg" alt="CineMyst iOS app" draggable="false" /></div><figcaption><b>02</b> CineMyst</figcaption></figure>
-                  <figure className="pr-shot pr-lap pr-lap--3"><div className="pr-scr"><img src="/ownmove.jpg" alt="OwnMove" draggable="false" /></div><figcaption><b>03</b> OwnMove</figcaption></figure>
+                  <figure className="pr-shot pr-lap"><div className="pr-scr"><img src="/gpt2.jpg" decoding="async" alt="GPT-2 built from scratch" draggable="false" /></div><figcaption><b>01</b> GPT-2 from scratch</figcaption></figure>
+                  <figure className="pr-shot pr-ph"><div className="pr-scr"><img src="/cinemyst-2.jpg" decoding="async" alt="CineMyst iOS app" draggable="false" /></div><figcaption><b>02</b> CineMyst</figcaption></figure>
+                  <figure className="pr-shot pr-lap pr-lap--3"><div className="pr-scr"><img src="/ownmove.jpg" decoding="async" alt="OwnMove" draggable="false" /></div><figcaption><b>03</b> OwnMove</figcaption></figure>
                 </div>
                 <i className="pr-shade" />
               </div>
