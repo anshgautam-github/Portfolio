@@ -112,7 +112,31 @@ export default function FreefallLoader() {
     try { destroy = mountFreefallStory(host, { base, mode: "loader" }); } catch (err) { console.error(err); release(true); setGone(true); return undefined; }
     try { destroy.render(performance.now()); } catch (e) { /* first frame is drawn by the first tick instead */ }
 
-    const preloadT = setTimeout(() => { try { destroy.preload(); } catch (e) { /* ignore */ } }, 1500);   // the ending needs the film frames: start fetching them early
+    // STARTUP ORDER. Mounting is heavy (markup, planet shader, canvases), so the name is not written the moment it is mounted (the animation would run its clock while the
+    // main thread is blocked, and jump). It starts when the counter begins to fade AND two clean frames have passed; the planet's uploads, the campus parse and the film frames
+    // wait until the name has played (or until the visitor first touches the page). One thing at a time = a smooth first impression.
+    let settled = false, enterT = 0, settleT = 0, entered = false;
+    const settle = () => { if (settled) return; settled = true; clearTimeout(settleT); try { destroy.settle(); } catch (e) { /* ignore */ } };
+    const enter = () => {
+      if (entered) return; entered = true; clearTimeout(enterT);
+      requestAnimationFrame(() => requestAnimationFrame(() => { host.classList.add("is-entered"); settleT = setTimeout(settle, 1900); }));
+    };
+    const pl = document.querySelector(".pl");
+    if (pl && !pl.classList.contains("is-out")) { window.addEventListener("pl:out", enter, { once: true }); enterT = setTimeout(enter, 4500); } else enter();
+    const preloadT = 0;
+    // fixed-width number: measure the widest digit once the font is ready, so the centred readout never shifts when a digit changes
+    const fixNum = () => {
+      try {
+        const probe = document.createElement("span");
+        probe.style.cssText = "position:absolute;visibility:hidden;white-space:pre;font:inherit;letter-spacing:inherit;font-feature-settings:inherit";
+        num.appendChild(probe);
+        let w = 0; for (let d = 0; d < 10; d++) { probe.textContent = String(d).repeat(3); w = Math.max(w, probe.getBoundingClientRect().width); }
+        num.removeChild(probe);
+        if (w > 0) num.style.width = Math.ceil(w + 1) + "px";
+      } catch (e) { /* the min-width fallback in the stylesheet stays */ }
+    };
+    fixNum(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fixNum);
+    let tabN = 0;
     const cloudEl = root.querySelector(".fl-cloud");
     const T = { p: 0, boost: 0, back: 0, skip: false, done: false, tc: 0, released: false, out: false };
     let clouds = null, cfx = null;
@@ -178,25 +202,28 @@ export default function FreefallLoader() {
       destroy.render(now);                                              // the scene is drawn in this very frame, so it, the HUD and the bar always show the same progress
       hud(T.p);
       bar.style.transform = `scaleX(${(T.p / END).toFixed(4)})`;
-      put(num, String(Math.round((T.p / END) * 100)).padStart(3, "0"));
-      const tt = T.p < 0.47 ? "% FALLING" : T.p < 0.685 ? "% LANDED" : T.p < 0.86 ? "% RISING" : "% READY";
-      if (tt !== tagTxt) { tagTxt = tt; tag.textContent = tt; }
+      // the readout is written at most every other frame on phones (a changing digit is a repaint over the live scene); it never lags by more than 33 ms
+      if (!IS_MOBILE || (tabN = (tabN + 1) % 2) === 0 || T.p >= END) {
+        put(num, String(Math.round((T.p / END) * 100)).padStart(3, "0"));
+        const tt = T.p < 0.47 ? "% FALLING" : T.p < 0.685 ? "% LANDED" : T.p < 0.86 ? "% RISING" : "% READY";
+        if (tt !== tagTxt) { tagTxt = tt; tag.textContent = tt; }
+      }
     };
     raf = requestAnimationFrame(tick);
 
     // input: scroll / swipe / keys scrub the descent (forward faster, back slower); it keeps falling by itself otherwise
     const locked = () => T.done && !(T.unlock && performance.now() >= T.unlock);   // the landing page stays still for half a second after the clouds part
-    const onWheel = (e) => { if (T.done && !locked()) return; e.preventDefault(); if (T.done) { e.stopPropagation(); return; } T.boost += e.deltaY * 0.00006; if (e.deltaY < 0) T.back = performance.now() + 1800; };
+    const onWheel = (e) => { settle(); if (T.done && !locked()) return; e.preventDefault(); if (T.done) { e.stopPropagation(); return; } T.boost += e.deltaY * 0.00006; if (e.deltaY < 0) T.back = performance.now() + 1800; };
     let ty = 0;
     const onTS = (e) => { ty = e.touches[0].clientY; };
-    const onTM = (e) => { if (T.done && !locked()) return; e.preventDefault(); if (T.done) { e.stopPropagation(); return; } const y = e.touches[0].clientY; T.boost += (ty - y) * 0.00014; if (y > ty) T.back = performance.now() + 1800; ty = y; };
+    const onTM = (e) => { settle(); if (T.done && !locked()) return; e.preventDefault(); if (T.done) { e.stopPropagation(); return; } const y = e.touches[0].clientY; T.boost += (ty - y) * 0.00014; if (y > ty) T.back = performance.now() + 1800; ty = y; };
     const onKey = (e) => {
       if (T.done && !T.over) { if (!locked()) return; if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "Home", "End"].includes(e.key)) e.preventDefault(); return; }
       if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { T.boost += 0.012; e.preventDefault(); }
       else if (e.key === "ArrowUp" || e.key === "PageUp") { T.boost -= 0.012; T.back = performance.now() + 1800; e.preventDefault(); }
       else if (e.key === "Escape") { T.skip = true; T.boost = 0; }
     };
-    const onSkip = () => { T.skip = true; T.boost = 0; };
+    const onSkip = () => { settle(); T.skip = true; T.boost = 0; };
     root.addEventListener("wheel", onWheel, { passive: false });
     root.addEventListener("touchstart", onTS, { passive: true });
     root.addEventListener("touchmove", onTM, { passive: false });
@@ -204,7 +231,7 @@ export default function FreefallLoader() {
     skipBtn.addEventListener("click", onSkip);
 
     return () => {
-      cancelAnimationFrame(raf); clearTimeout(finishT); clearTimeout(preloadT); clearTimeout(hudT); ro.disconnect(); if (clouds) clouds.destroy(); if (cfx) cfx.destroy();
+      cancelAnimationFrame(raf); clearTimeout(finishT); clearTimeout(preloadT); clearTimeout(enterT); clearTimeout(settleT); window.removeEventListener("pl:out", enter); clearTimeout(hudT); ro.disconnect(); if (clouds) clouds.destroy(); if (cfx) cfx.destroy();
       root.removeEventListener("wheel", onWheel); root.removeEventListener("touchstart", onTS); root.removeEventListener("touchmove", onTM);
       window.removeEventListener("keydown", onKey); skipBtn.removeEventListener("click", onSkip);
       destroy(); host.innerHTML = "";

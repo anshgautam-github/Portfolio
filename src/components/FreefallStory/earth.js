@@ -130,7 +130,7 @@ const dirOf = (lat, lon) => [Math.cos(lat) * Math.sin(lon), Math.sin(lat), Math.
 export const REGION1 = [62, 2, 98, 40];      // India and its seas
 export const REGION2 = [77.4, 10, 81.4, 14.2]; // Tamil Nadu coast, Chennai
 
-export function createEarth(canvas, base, { maxDpr = 1.5, regions = true, scale: scale0 = 1, adaptive = false, minScale = 0.45 } = {}) {
+export function createEarth(canvas, base, { maxDpr = 1.5, regions = true, hold = false, scale: scale0 = 1, adaptive = false, minScale = 0.45 } = {}) {
   const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance' });
   if (!gl) return null;
   const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
@@ -174,9 +174,10 @@ export function createEarth(canvas, base, { maxDpr = 1.5, regions = true, scale:
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
     if (mip) gl.generateMipmap(gl.TEXTURE_2D);
   };
-  const upQ = []; let upBusy = false;
+  const upQ = []; let upBusy = false, held = hold;
+  // `hold`: textures are fetched and decoded straight away, but the main-thread GPU uploads wait until E.release() (the loader's name is being written first)
   const pumpUp = () => {
-    if (upBusy || !upQ.length) return; upBusy = true;
+    if (held || upBusy || !upQ.length) return; upBusy = true;
     requestAnimationFrame(() => { const job = upQ.shift(); try { if (!E.dead) job(); } catch (e) { /* ignore */ } setTimeout(() => { upBusy = false; pumpUp(); }, 120); });
   };
   const load = (url, unit, mip, done, cors) => {
@@ -218,6 +219,7 @@ export function createEarth(canvas, base, { maxDpr = 1.5, regions = true, scale:
 
   // s: { lat, lon (deg), h (km), tilt (deg), roll (deg), fov (deg), heat, fog, detail, speed, exp, time }
   const rA = [0, 0];
+  E.release = () => { held = false; pumpUp(); };
   E.invalidate = () => { E.dirty = true; };
   E.draw = (s) => {
     if (E.dead || E.lost) return;

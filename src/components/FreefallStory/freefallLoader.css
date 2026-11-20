@@ -368,3 +368,24 @@ html.is-safari .fs-loader .fs .hero-skip { display: none; }
 .fs--loader .index-tiles:not(.is-live) * { animation-play-state: paused !important; }
 .fs-loader .fl-cloud, .fs-loader .fl-fx { visibility: hidden; }
 .fs-loader.is-clouding .fl-cloud, .fs-loader.is-clouding .fl-fx { visibility: visible; }
+
+
+/* =====================================================================================================
+   FIRST IMPRESSION + THE TOP-CENTRE READOUT
+   1) The name ("ANSH GAUTAM") used to tilt each letter in 3D inside a perspective box while the page was still mounting. On phones the letters now rise with a plain
+      translate + fade, and are promoted to their own layers BEFORE the animation starts (so nothing is re-rastered mid-way, which reads as a pop).
+   2) The "047 % FALLING" readout: its width changed with every digit (proportional digits) and with every label ("FALLING" / "LANDED" / "RISING" / "READY"), and the group is centred,
+      so the whole readout jiggled sideways by sub-pixels on every tick. The number now has a fixed width (measured in JS once the font is ready), the label a fixed width, and the
+      readout is its own compositor layer, so a changing digit repaints a 200px strip and never the full-screen layer under it.
+   ===================================================================================================== */
+html.is-mobile .fs--loader .hn { transform: translate3d(0, 70%, 0); transition: transform 1.05s cubic-bezier(.2,.9,.1,1), opacity .8s ease; will-change: transform, opacity; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+html.is-mobile .fs--loader.is-entered .hn { transform: translate3d(0, 0, 0); opacity: 1; }
+html.is-mobile .fs--loader .hero { perspective: none; }
+
+.fs-loader .fl-tab { transform: translate3d(-50%, 0, 0); will-change: transform; contain: layout style; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.fs-loader .fl-num { flex: none; display: inline-block; text-align: right; font-feature-settings: "tnum" 1; min-width: 0; }
+.fs-loader .fl-tag { flex: none; display: inline-block; width: 12ch; text-align: left; }
+
+/* every readout that changes while you fall is its own small layer, so updating its text never repaints (or re-rasters) the big shared layer under it */
+.fs-loader .fl-hud > * { will-change: transform, opacity; }
+.fs-loader .fs .hud { will-change: transform, opacity; }

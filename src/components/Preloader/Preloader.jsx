@@ -43,7 +43,7 @@ export default function Preloader({ onReady }) {
         finished = true;
         cancelAnimationFrame(raf);
         onReady && onReady();                                   // mount the main loader underneath
-        tFade = setTimeout(() => { if (rootRef.current) rootRef.current.classList.add("is-out"); }, HOLD_MS);
+        tFade = setTimeout(() => { if (rootRef.current) rootRef.current.classList.add("is-out"); window.dispatchEvent(new Event("pl:out")); }, HOLD_MS);   // the loader's name starts writing now, not behind the curtain
         tGone = setTimeout(() => setGone(true), HOLD_MS + 700);
       }
     };

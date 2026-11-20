@@ -397,7 +397,7 @@ export function mountFreefallStory(root, { base, mode }) {
     if (!FG.on) return;
     if (Math.hypot(e.clientX - FG.cx, e.clientY - FG.cy) < Math.max(70, FG.size * 0.95)) { fig.spin(); Sound.tick(); }
   }, { passive: true });
-  const earth = PAGE ? null : createEarth(earthEl, base, { maxDpr: IS_MOBILE ? 1 : 1.5, regions: !IS_MOBILE, scale: IS_MOBILE ? 0.7 : 1, adaptive: IS_MOBILE, minScale: 0.45 });
+  const earth = PAGE ? null : createEarth(earthEl, base, { maxDpr: IS_MOBILE ? 1 : 1.5, regions: !IS_MOBILE, hold: IS_MOBILE && LOADER, scale: IS_MOBILE ? 0.7 : 1, adaptive: IS_MOBILE, minScale: 0.55 });
   const campus = createCampus($('#fs-campus'), base);
   const rocket = createRocket($('#fs-rocket'));
   const rocketEl = $('#fs-rocket'); let rocketOn = true;   // a full-screen layer: out of the compositor as soon as the capsule is gone
@@ -1127,7 +1127,8 @@ export function mountFreefallStory(root, { base, mode }) {
 
   // ---------- entrance + frame loading ----------
   $$('.hn').forEach((el, i) => { el.style.transitionDelay = `${0.25 + i * 0.055}s`; });
-  const ioEnter = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) root.classList.add('is-entered'); }, { threshold: 0.02 });
+  // loader: the name is written when the loader decides (after the counter has faded and the main thread is calm), not the moment the markup is mounted
+  const ioEnter = new IntersectionObserver((es) => { if (!LOADER && es.some((e) => e.isIntersecting)) root.classList.add('is-entered'); }, { threshold: 0.02 });
   ioEnter.observe(root);
 
   // the ~22 MB of frames wait until the page has finished loading and the landing has had its moment. They start when the visitor has
@@ -1220,7 +1221,13 @@ export function mountFreefallStory(root, { base, mode }) {
   destroy.preload = () => startLoad();                                   // loader: start fetching the film frames early (the ending needs them)
   // loader: the map data of the campus is fetched early (it used to start only when the fall reached the campus, so on a phone connection the ground was a dark void
   // for seconds, then the parse froze the page). Idle time, spaced after the planet's textures have been asked for.
-  if (LOADER && !PAGE) { const kick = () => { try { campus.load(); } catch (e) { /* ignore */ } }; S.campusT = setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(kick, { timeout: 1500 }) : kick()), 700); }
+  // destroy.settle() is called once the intro (the name) has played: only then the planet's uploads, the campus parse and the film frames start
+  destroy.settle = () => {
+    if (earth && earth.release) earth.release();
+    const kick = () => { try { campus.load(); } catch (e) { /* ignore */ } };
+    S.campusT = setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(kick, { timeout: 1500 }) : kick()), 400);
+    startLoad();
+  };
   // how far the fall may go right now: it waits (briefly, the loader never traps anybody) for the planet and the campus to be ready, instead of showing black
   destroy.limit = () => (earth && !earth.ready && !earth.dead ? 0.03 : !campus.ready() ? 0.29 : 1);
   destroy.filmReady = () => fall.loaded >= fall.gate;                    // loader: the coarse set of frames has arrived, so the film can be scrubbed
