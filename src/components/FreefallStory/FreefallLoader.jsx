@@ -4,7 +4,7 @@ import { mountFreefallStory } from "./engine.js";
 import { createClouds } from "./clouds.js";
 import { createCloudFx } from "./cloudFx.js";
 import { release, pendingTasks } from "../../lib/loader.js";
-import { IS_MOBILE } from "../../lib/perf.js";
+import { IS_MOBILE, IS_SAFARI } from "../../lib/perf.js";
 import { buildFramePath, readFrameVars } from "../Frame/Frame.jsx";
 import { hudAt, fmtAlt, fmtVel, fmtMet, fmtLat, fmtLon, fmtG, STAGES, EVENTS } from "./loaderHud.js";
 import "../Frame/frame.css";
@@ -70,7 +70,7 @@ export default function FreefallLoader() {
         });
       }
       // the picture shakes with the G-load (strongest through the entry burn and the chute shock), like a camera bolted to the capsule
-      const sh = IS_MOBILE ? 0 : Math.min(1, h.g / 7);          // phones: no whole-scene shake (it re-rasters the 3D scene every frame and reads as flicker)
+      const sh = 0;   // no whole-scene camera shake: re-rastering the 3D scene every frame made the text and the planet shimmer; the G-load still reads in the telemetry          // phones: no whole-scene shake (it re-rasters the 3D scene every frame and reads as flicker)
       if (sh > 0.02) { const t = performance.now(); host.style.transform = `translate3d(${(Math.sin(t * 0.071) + Math.sin(t * 0.173)) * sh * 1.7}px,${(Math.sin(t * 0.093) + Math.sin(t * 0.211)) * sh * 1.7}px,0) scale(${1 + sh * 0.012})`; shaken = true; }
       else if (shaken) { host.style.transform = ""; shaken = false; }
       const gq = Math.round(sh * 40) / 40;                      // quantised, and set only on the two overlays that read it: a custom property changed on the root restyles the whole story tree every frame
@@ -107,6 +107,7 @@ export default function FreefallLoader() {
     host.innerHTML = markup(base);
     let destroy = null;
     try { destroy = mountFreefallStory(host, { base, mode: "loader" }); } catch (err) { console.error(err); release(true); setGone(true); return undefined; }
+    try { destroy.render(performance.now()); } catch (e) { /* first frame is drawn by the first tick instead */ }
 
     const preloadT = setTimeout(() => { try { destroy.preload(); } catch (e) { /* ignore */ } }, 1500);   // the ending needs the film frames: start fetching them early
     const cloudEl = root.querySelector(".fl-cloud");
@@ -128,7 +129,7 @@ export default function FreefallLoader() {
       raf = requestAnimationFrame(tick);
       const dt = Math.min(64, now - last); last = now;
       if (T.done) {
-        destroy.setProgress(END);
+        destroy.setProgress(END); destroy.render(now);
         if (!clouds || T.out) return;
         if (!T.out) toTop();                                            // nothing scrolled during the clouds may reach the landing page: it always opens from its very start
         const k = Math.min(1, (now - T.tc) / CLOUD_MS);
@@ -165,6 +166,7 @@ export default function FreefallLoader() {
         if (now - T.end0 > (T.skip ? 500 : DWELL)) finish();
       } else T.end0 = 0;
       destroy.setProgress(T.p);
+      destroy.render(now);                                              // the scene is drawn in this very frame, so it, the HUD and the bar always show the same progress
       hud(T.p);
       bar.style.transform = `scaleX(${(T.p / END).toFixed(4)})`;
       put(num, String(Math.round((T.p / END) * 100)).padStart(3, "0"));

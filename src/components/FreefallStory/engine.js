@@ -1,6 +1,6 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { IS_MOBILE } from "../../lib/perf.js";
+import { IS_MOBILE, IS_SAFARI } from "../../lib/perf.js";
 import { createBitmapWindow } from "./frameCache.js";
 import { lossAt } from "./art.js";
 import { WAYPOINTS } from "./chapters.js";
@@ -334,8 +334,8 @@ export function mountFreefallStory(root, { base, mode }) {
     const { W, H } = S;
     // S.vel is a raw per-frame delta and jumps around when two clocks drive it (the loader's rAF vs the ticker), so on phones the words
     // don't stretch/skew with it: that wobble made every word shimmer and drop in and out
-    const stretch = IS_MOBILE ? 1 : 1 + Math.min(Math.abs(S.vel), 70) * 0.004;
-    const skew = IS_MOBILE ? 0 : clamp(S.vel * 0.05, -5, 5);
+    const stretch = (IS_MOBILE || IS_SAFARI) ? 1 : 1 + Math.min(Math.abs(S.vel), 70) * 0.004;
+    const skew = (IS_MOBILE || IS_SAFARI) ? 0 : clamp(S.vel * 0.05, -5, 5);
     for (const it of items) {
       let a = alpha[it.set] || 0;
       let t;
@@ -612,7 +612,7 @@ export function mountFreefallStory(root, { base, mode }) {
     if (fl > 0) {
       flashWord.style.opacity = f2(bell(p, 0.466, CUT, 0.492));
       flashWord.style.transform = `scale(${f2(lerp(0.72, 1.28, norm(p, 0.44, 0.51)))})`;
-      stageInner.style.transform = fl > 0.6 && !reduce && !IS_MOBILE
+      stageInner.style.transform = fl > 0.6 && !reduce && !IS_MOBILE && !IS_SAFARI
         ? `translate(${f1((Math.random() - 0.5) * 18 * fl)}px,${f1((Math.random() - 0.5) * 18 * fl)}px)` : '';
     } else if (stageInner.style.transform) stageInner.style.transform = '';
 
@@ -709,7 +709,7 @@ export function mountFreefallStory(root, { base, mode }) {
       const fog = sstep(0.255, 0.318, p);
       const detail = clamp((Math.log(3500) - Math.log(h)) / (Math.log(3500) - Math.log(12)), 0, 1);
       earth.draw({
-        lat, lon: lon + S.smx * 0.7, h, tilt: tilt + S.smy * 1.2, fov: fov + Math.min(Math.abs(S.vel), 60) * 0.05, roll: roll + S.smx * 0.8 + Math.sin(S.t * 0.2) * 0.5,
+        lat, lon: lon + S.smx * 0.7, h, tilt: tilt + S.smy * 1.2, fov: fov + Math.min(Math.abs(S.vel), LOADER ? 30 : 60) * 0.05, roll: roll + S.smx * 0.8 + Math.sin(S.t * 0.2) * 0.5,
         heat, fog, detail, speed: sstep(0.17, 0.27, p) * (1 - sstep(0.30, 0.335, p)) * 0.45, exp: 1.18, time: S.t,
       });
     }
@@ -1174,7 +1174,9 @@ export function mountFreefallStory(root, { base, mode }) {
     if (IS_MOBILE && last && y === S.y && Math.abs(S.vel) < 0.05 && ms - last < 40) return;
     const dt = last ? Math.min(64, ms - last) : 16;
     last = ms;
-    S.vel = lerp(S.vel, y - S.y, 0.3);
+    // loader: the progress comes in uneven steps (wheel bursts, trackpad inertia, the idle cruise), so the raw per-frame delta pulses; the camera FOV, the words' stretch and the figure's dive all read it,
+    // which is what made the planet 'breathe' and the scene shimmer while falling. A slow ease keeps the speed feel without the pulsing.
+    S.vel = lerp(S.vel, y - S.y, LOADER ? 0.035 : 0.3);
     S.y = y;
     S.t = ms / 1000;
     // far above or below this block: nothing here is on screen, so nothing is updated
@@ -1197,10 +1199,13 @@ export function mountFreefallStory(root, { base, mode }) {
   }
   // after lib/smooth.js's ticker (it was added first), so Lenis has already moved the page this frame
   const tickFn = (time) => step(time * 1000);
-  gsap.ticker.add(tickFn);
+  // loader mode: ONE clock. The loader writes the progress in its own requestAnimationFrame; if this engine also redrew on gsap's ticker, a frame could
+  // draw before the new progress, twice, or not at all (the scene lags the readout, S.vel jumps, words/figure/camera shimmer). So the loader calls
+  // destroy.render(now) right after setProgress and the ticker is not used at all.
+  if (!LOADER) gsap.ticker.add(tickFn);
 
   const destroy = function destroy() {
-    gsap.ticker.remove(tickFn);
+    if (!LOADER) gsap.ticker.remove(tickFn);
     ScrollTrigger.removeEventListener('refresh', remeasure);
     for (const [t, ev, fn, o] of offs) t.removeEventListener(ev, fn, o);
     ioEnter.disconnect(); ioLoad.disconnect();
@@ -1210,6 +1215,7 @@ export function mountFreefallStory(root, { base, mode }) {
     if (Sound.ctx) Sound.ctx.close().catch(() => {});
   };
   destroy.setProgress = (v) => { S.vp = v; };
+  destroy.render = (ms) => step(ms);                                     // loader: draw exactly one frame for the progress just set (see above)
   destroy.preload = () => startLoad();                                   // loader: start fetching the film frames early (the ending needs them)
   destroy.filmReady = () => fall.loaded >= fall.gate;                    // loader: the coarse set of frames has arrived, so the film can be scrubbed
   return destroy;

@@ -7,6 +7,7 @@ const TAU = Math.PI * 2;
 const clamp = (v, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
 const lerp = (a, b, t) => a + (b - a) * t;
 const damp = (a, b, k, dt) => lerp(a, b, 1 - Math.exp(-k * dt));
+const compact = (a, ok) => { let n = 0; for (let i = 0; i < a.length; i++) { const v = a[i]; if (ok(v)) a[n++] = v; } a.length = n; };   // filter in place: no new array every frame
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 // the suit
@@ -59,9 +60,16 @@ export function createFigure(canvas, base) {
 
   F.sprite = () => (ready ? img : null);
   F.resize = (size) => {
-    const d = Math.min(devicePixelRatio || 1, 2), px = Math.round(size * 3.4 * d);
-    if (px !== canvas.width) { canvas.width = px; canvas.height = px; F.d = d; }
-    if (off.width !== px) { off.width = px; off.height = px; rim.width = px; rim.height = px; }
+    // Assigning canvas.width clears and re-allocates the bitmap (a GPU texture). The figure's size changes on nearly every frame while the visitor
+    // scrubs, so sizing the bitmap exactly meant three huge canvases were re-allocated per frame (that is the lag, and the blank frames read as flicker).
+    // So the bitmap only moves in quarter-octave steps (and is capped); drawing is relative to the bitmap (S = Z / 3.4 below), and the CSS (340%)
+    // scales it to the figure, so the picture is the same size as before.
+    const d = Math.min(devicePixelRatio || 1, 2);
+    const want = Math.max(64, size * 3.4 * d);
+    const px = Math.min(1536, Math.round(256 * Math.pow(2, Math.ceil(Math.log2(want / 256) * 4) / 4)));
+    F.d = d;
+    if (px !== canvas.width) { canvas.width = px; canvas.height = px; }
+    if (off.width !== px) { off.width = px; off.height = px; }
     F.size = size;
   };
   F.spin = () => {
@@ -159,7 +167,7 @@ export function createFigure(canvas, base) {
   F.frame = (o) => {
     const dt = Math.min(o.dt, 0.05), t = o.t;
     F.resize(o.size);
-    const dpr = F.d, Z = canvas.width, cx = Z / 2, cy = Z / 2, S = o.size * dpr;
+    const dpr = F.d, Z = canvas.width, cx = Z / 2, cy = Z / 2, S = Z / 3.4;
     const rx = o.px - o.baseX, ry = o.py - o.baseY, pd = Math.hypot(rx, ry);
     const pvel = Math.hypot(o.px - F.lastPx, o.py - F.lastPy); F.lastPx = o.px; F.lastPy = o.py;
     F.pv = damp(F.pv, pvel, 6, dt);
@@ -179,6 +187,10 @@ export function createFigure(canvas, base) {
     const rock = Math.sin(t * 0.62) * 0.075 + Math.sin(t * 1.55 + 1) * 0.025 + F.bank * 0.9;
     const P = pose(t, F.tuck * 0.9, F.hand, steer && Math.abs(tx) > 0.1 ? Math.sign(tx) : 0);
     const U = S * 1.18;
+    // the figure (and his glow) only ever covers the middle of the 3.4x canvas: clear / tint / copy just that box, not every pixel of it
+    const asp = img.naturalWidth / Math.max(1, img.naturalHeight);
+    const bh = Math.min(Z / 2, Math.ceil(Math.hypot(asp, 1) * S * 0.6 * 1.3 + S * 0.08)), bo = Math.floor(cx - bh), bw = Math.ceil(bh * 2);
+    const gr = Math.min(Z / 2, Math.ceil(S * 1.1));
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, Z, Z);
@@ -197,11 +209,11 @@ export function createFigure(canvas, base) {
     // the air heating up around him
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, S * 1.1);
     g.addColorStop(0, `rgba(255,160,70,${0.2 + heat * 0.35})`); g.addColorStop(1, 'rgba(255,90,20,0)');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, Z, Z);
+    ctx.fillStyle = g; ctx.fillRect(cx - gr, cy - gr, gr * 2, gr * 2);
     // embers rising off him when it is hot
     if (heat > 0.12 && Math.random() < heat * 0.9) F.embers.push({ x: (Math.random() - 0.5) * S * 0.7, y: (Math.random() - 0.5) * S * 0.4, vy: -(60 + Math.random() * 160), life: 1, r: 0.8 + Math.random() * 1.8 });
     for (const e of F.embers) { e.y += e.vy * dt * dpr; e.x += Math.sin(t * 6 + e.y * 0.02) * 0.4; e.life -= dt * 1.1; ctx.fillStyle = `rgba(255,${160 + e.life * 70},70,${Math.max(e.life, 0) * 0.9})`; ctx.beginPath(); ctx.arc(cx + e.x, cy + e.y, e.r * dpr, 0, TAU); ctx.fill(); }
-    F.embers = F.embers.filter((e) => e.life > 0);
+    compact(F.embers, (e) => e.life > 0);
 
     // him: the photograph, rocking on the air with a slight flex so the limbs seem to ride the wind
     const rot = rock + spinRot, k = pop;
@@ -235,20 +247,20 @@ export function createFigure(canvas, base) {
     const trail = clamp(0.2 + dive * 1.2 + heat * 0.7, 0, 1.4);
     const tint = heat > 0.15 ? 'rgb(255,120,40)' : 'rgb(255,190,110)';
     for (let j = 3; j >= 1; j--) place(() => draw(ctx, tint), 0.08 * trail / j, 0, -j * S * 0.085 * (0.5 + trail));
-    octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = 'source-over'; octx.clearRect(0, 0, Z, Z);
+    octx.setTransform(1, 0, 0, 1, 0, 0); octx.globalCompositeOperation = 'source-over'; octx.clearRect(bo, bo, bw, bw);
     octx.save(); octx.translate(cx, cy); octx.rotate(rot); octx.scale(k, k); draw(octx, null); octx.restore();
     octx.globalCompositeOperation = 'source-atop';                      // sunrise on one side, the cold of the earth on the other, and the heat of re-entry on top
     const wg = octx.createLinearGradient(cx - S * 0.5, cy - S * 0.5, cx + S * 0.4, cy + S * 0.5);
     wg.addColorStop(0, `rgba(255,170,90,${0.12 + heat * 0.3})`); wg.addColorStop(0.5, `rgba(255,140,60,${0.0 + heat * 0.16})`); wg.addColorStop(1, 'rgba(30,50,110,.16)');
-    octx.fillStyle = wg; octx.fillRect(0, 0, Z, Z); octx.globalCompositeOperation = 'source-over';
-    ctx.save(); ctx.drawImage(off, 0, 0); ctx.restore();
+    octx.fillStyle = wg; octx.fillRect(bo, bo, bw, bw); octx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(off, bo, bo, bw, bw, bo, bo, bw, bw);
 
     // spin burst
     for (const r of F.rings) r.t += dt / 0.7;
-    F.rings = F.rings.filter((r) => r.t < 1);
+    compact(F.rings, (r) => r.t < 1);
     for (const r of F.rings) { ctx.strokeStyle = `rgba(255,190,110,${(1 - r.t) * 0.8})`; ctx.lineWidth = dpr * 2; ctx.beginPath(); ctx.arc(cx, cy, S * (0.3 + ease(r.t) * 1.2), 0, TAU); ctx.stroke(); }
     for (const q of F.parts) { q.x += q.vx * dt * dpr; q.y += q.vy * dt * dpr; q.vx *= 0.97; q.vy *= 0.97; q.vy -= 40 * dt; q.life -= q.dec * dt; }
-    F.parts = F.parts.filter((q) => q.life > 0);
+    compact(F.parts, (q) => q.life > 0);
     for (const q of F.parts) { ctx.fillStyle = q.ember ? `rgba(255,${150 + 80 * (1 - q.life)},60,${q.life})` : `rgba(255,245,225,${q.life})`; ctx.beginPath(); ctx.arc(cx + q.x, cy + q.y, q.r * dpr * q.life + 0.4, 0, TAU); ctx.fill(); }
     return { ox: F.ox, oy: F.oy };
   };

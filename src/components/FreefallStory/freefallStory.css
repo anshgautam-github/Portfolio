@@ -516,6 +516,10 @@ html.is-mobile .fs .stage-inner.is-shake { animation: none; }
 .fs--page .story { display: none; }   /* the impact / noise / rise / index sequence now plays at the end of the loader (FreefallLoader.jsx) */
 .fs--page .hud, .fs--page .ladder, .fs--page .caps, .fs--page .earth, .fs--page .campus, .fs--page .rocket, .fs--page .figure, .fs--page .breach { display: none !important; }
 .fs--loader .work, .fs--loader .about, .fs--loader .services, .fs--loader .portal { display: none; }
+/* the "Where I've worked" title card and the Prism slot belong to the in-page story only. The loader shares the same markup, and an opaque black card
+   (min-height 100vh, with its own grid + glow) sat on top of the loader's scene: the film only showed above it through z-index stacking, and whenever the
+   stage's shake animation made .stage-inner its own stacking context, that card painted over the whole scene = a black flash with a faint grid. */
+.fs--loader .work-intro, .fs--loader .about-prism { display: none; }
 
 /* =====================================================================================================
    PHONE LAYOUT for the descent (loader + in-page story): a clear vertical rhythm, nothing shares a row.

@@ -80,7 +80,7 @@ export function createCampus(canvas, base) {
   };
 
   // v: { alt (m), tilt, yaw (rad), t, a (alpha), lock (0..1) }
-  api.draw = (v) => {
+  const render = (v) => {
     if (v.a <= 0.003) return;
     api.load();
     const W = canvas.width, H = canvas.height, c = ctx, dpr = api.d || 1;
@@ -114,7 +114,7 @@ export function createCampus(canvas, base) {
 
     // --- the ground: a patchwork of dry earth, scrub and paddy, so it reads as land and not as a black void
     {
-      const cell = clamp(Math.round(alt * 0.05 / 10) * 10, 30, 400), ext = Math.min(range, cell * 64);
+      const cell = clamp(Math.round(alt * 0.05 / 10) * 10, 30, 400), ext = Math.min(range, cell * 46);
       const gx0 = Math.floor((C[0] + f[0] * dist - ext) / cell), gx1 = Math.floor((C[0] + f[0] * dist + ext) / cell);
       const gy0 = Math.floor((C[1] + f[1] * dist - ext) / cell), gy1 = Math.floor((C[1] + f[1] * dist + ext) / cell);
       const tones = ['#2d3421', '#313822', '#353b24', '#3a3e27', '#3f4029', '#2b311f'];
@@ -166,7 +166,7 @@ export function createCampus(canvas, base) {
       for (const b of S.blds) {
         const dx = b.cx - C[0], dy = b.cy - C[1], dz = 10 - C[2], zc = dx * f[0] + dy * f[1] + dz * f[2];
         if (zc < near * 1.5 || Math.hypot(b.cx, b.cy) > range * 0.6) continue;
-        if ((b.r * focal) / zc < 0.7) continue;
+        if ((b.r * focal) / zc < 1.6) continue;
         vis.push([zc, b]);
       }
       vis.sort((a, b) => b[0] - a[0]);
@@ -323,6 +323,21 @@ export function createCampus(canvas, base) {
     c.fillStyle = hz; c.fillRect(0, 0, W, H * 0.6);
     const vg = c.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95);
     vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.5)'); c.fillStyle = vg; c.fillRect(0, 0, W, H);
+  };
+
+  // This is a full vector re-render of the city (ground tiles, roads, every building with shadows and window rows), far heavier than the other layers.
+  // It used to run on every single frame, so on a busy frame it held up everything else (the HUD, the figure, the scroll) and the fly-over lagged.
+  // Now it measures its own cost and, when a redraw is slow, redraws at ~45 or ~30 fps instead: the canvas keeps the last picture in between, and
+  // the camera moves a hair per frame anyway, so the eye does not see the gap but the frame budget gets freed.
+  let lastAt = -1, lastCost = 0, lastW = 0, lastH = 0;
+  api.draw = (v) => {
+    if (v.a <= 0.003) return;
+    const gap = lastCost > 11 ? 1 / 30 : lastCost > 6 ? 1 / 45 : 0;
+    if (gap && lastAt >= 0 && canvas.width === lastW && canvas.height === lastH && Math.abs(v.t - lastAt) < gap) return;
+    const t0 = performance.now();
+    render(v);
+    lastCost = lastCost * 0.7 + (performance.now() - t0) * 0.3;
+    lastAt = v.t; lastW = canvas.width; lastH = canvas.height;
   };
   return api;
 }

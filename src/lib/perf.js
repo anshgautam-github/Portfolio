@@ -8,6 +8,8 @@ const win = typeof window !== "undefined" ? window : {};
 export const IS_TOUCH = !!win.matchMedia && win.matchMedia("(pointer: coarse)").matches;
 export const IS_SMALL = !!win.matchMedia && win.matchMedia("(max-width: 820px)").matches;
 export const IS_MOBILE = IS_TOUCH || IS_SMALL;
+/** desktop Safari (and any WebKit that is not Chrome / Firefox / Edge): its compositor flickers over live canvases with blend modes and backdrop blur */
+export const IS_SAFARI = typeof navigator !== "undefined" && /^((?!chrome|chromium|crios|fxios|edg|android|opr).)*safari/i.test(navigator.userAgent || "");
 
 const cores = nav.hardwareConcurrency || 8;
 const mem = nav.deviceMemory || 8;
@@ -23,6 +25,7 @@ export const START_SCALE = IS_MOBILE ? 0.72 : IS_LOW_END ? 0.85 : 1;
 if (typeof document !== "undefined") {
   const c = document.documentElement.classList;
   if (IS_MOBILE) c.add("is-mobile");
+  if (IS_SAFARI) c.add("is-safari");
   if (IS_LOW_END) c.add("is-lite");
 }
 

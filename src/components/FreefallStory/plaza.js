@@ -279,7 +279,10 @@ export function createPlaza() {
     const g = P(CX, 0, CZ); if (!g || !A) return;
     const iw = A.naturalWidth || A.width, ih = A.naturalHeight || A.height; if (!iw) return;
     const figH = 2.5 * g.s, Hd = figH / 0.095, Wd = Hd * (iw / ih);
-    const lw = Math.min(640, Math.max(160, Math.round(Wd * 0.5))), lh = Math.round(lw * (ih / iw));
+    // the size follows the camera zoom, which changes on every redraw while the visitor scrolls. Assigning canvas.width re-allocates the bitmap, and that
+    // churn (several canvases per redraw) makes Safari purge canvas memory: the film canvas goes black for a moment, then comes back, then goes black again.
+    // So the scratch canvases only change size in coarse steps (a handful of times through the whole landing); the layer is simply drawn from them scaled.
+    const lw = Math.min(640, Math.max(192, Math.ceil(Wd * 0.5 / 64) * 64)), lh = Math.round(lw * (ih / iw));
     if (!FX.cv) { FX.cv = document.createElement('canvas'); FX.c2 = FX.cv.getContext('2d'); FX.tmp = document.createElement('canvas'); FX.t2 = FX.tmp.getContext('2d'); }
     if (FX.cv.width !== lw || FX.cv.height !== lh) { FX.cv.width = FX.tmp.width = lw; FX.cv.height = FX.tmp.height = lh; }
     const q = FX.c2, t2 = FX.t2;
@@ -310,7 +313,7 @@ export function createPlaza() {
       const hot = 0.4 * (1 - sstep(226, 262, fi)) + 0.07;                 // white-hot as he falls in, lit by the fire once down
       const fall = 1 - sstep(236, 264, fi), rot = -1.0 * fall * Math.sin(fi * 0.11) * 0.0 - 0.9 * fall + (fi > 286 ? Math.sin(fi * 0.05) * 0.02 : 0);
       if (!FX.sp) { FX.sp = document.createElement('canvas'); FX.s2 = FX.sp.getContext('2d'); }
-      const pw = Math.max(64, Math.round(sw * 1.6)), ph = Math.round(pw * (sp.naturalHeight / sp.naturalWidth));
+      const pw = Math.max(64, Math.ceil(sw * 1.6 / 32) * 32), ph = Math.round(pw * (sp.naturalHeight / sp.naturalWidth));
       if (FX.sp.width !== pw || FX.sp.height !== ph) { FX.sp.width = pw; FX.sp.height = ph; }
       const x2 = FX.s2; x2.globalCompositeOperation = 'source-over'; x2.clearRect(0, 0, pw, ph); x2.drawImage(sp, 0, 0, pw, ph);
       x2.globalCompositeOperation = 'source-atop'; x2.fillStyle = `rgba(255,196,120,${hot})`; x2.fillRect(0, 0, pw, ph);
