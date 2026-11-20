@@ -207,6 +207,7 @@ export default function Garden({ embedded = false, ctl = null }) {
       if (embedded) {
         // living inside another section's pinned scroll (Toolkit finale): that section drives the intro + the live flag
         let played = false;
+        root.current.dataset.live = "0";   // asleep until Toolkit says it is on screen (the CSS loops used to run from mount, before that flag was ever set)
         if (ctl) ctl.current = {
           intro: () => { if (!played) { played = true; intro(); } },
           live: (on) => { visible = on; if (root.current) root.current.dataset.live = on ? "1" : "0"; },

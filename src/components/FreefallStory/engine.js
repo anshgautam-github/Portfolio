@@ -392,6 +392,8 @@ export function mountFreefallStory(root, { base, mode }) {
   const fig = createFigure($("#fs-figureCanvas"), base), figHint = $('.figure-hint');
   figHint.textContent = fine ? 'Move to steer \u00b7 Click to spin' : 'Tap to spin';
   const FG = { cx: 0, cy: 0, size: 0, on: false, t: 0 };
+  let figBase = 0;
+  const figCanvas = $('#fs-figureCanvas');
   // click / tap on the falling figure: barrel roll + sparks
   on(window, 'pointerdown', (e) => {
     if (!FG.on) return;
@@ -729,8 +731,18 @@ export function mountFreefallStory(root, { base, mode }) {
       const r = fig.frame({ t: S.t, dt: dts, size, heat, vel: S.vel, baseX: bx, baseY: by, px: S.cx, py: S.cy, hasPtr: fine && (S.mx !== 0 || S.my !== 0), W, H });
       FG.cx = bx + r.ox; FG.cy = by + r.oy; FG.size = size; FG.on = true;
       figure.style.opacity = f2(fo);
-      figure.style.width = f1(size) + 'px'; figure.style.height = f1(size * 0.82) + 'px';
-      figure.style.transform = `translate3d(${f1(FG.cx - size / 2)}px,${f1(FG.cy - size * 0.41)}px,0) rotate(${f1(rot)}deg)`;
+      // The figure's size changes on every frame while scrubbing. Writing width/height here forced a layout of the figure + its 340% canvas each frame
+      // (and the browser reported it as layout shift: CLS ~0.2 while scrolling this scene). The box is now a constant FIG_BASE (the largest the figure
+      // ever gets) and the size is a transform: scale(), which only touches the compositor. The picture on screen is identical.
+      const fb = Math.round(H * 3.2) / 10;
+      if (fb !== figBase) {
+        figBase = fb;
+        figure.style.width = fb + 'px'; figure.style.height = f1(fb * 0.82) + 'px';
+      }
+      const sc = size / fb;
+      figure.style.transform = `translate3d(${f1(FG.cx - fb / 2)}px,${f1(FG.cy - fb * 0.41)}px,0) rotate(${f1(rot)}deg)`;
+      figCanvas.style.transform = `translate(-50%,-50%) scale(${sc.toFixed(4)})`;
+      figHint.style.transform = `translate(-50%,${f1(0.41 * (size - fb))}px)`;   // keeps the hint just under the (scaled) figure
       figure.style.visibility = 'visible';
       figHint.style.opacity = f2(fo * (fig.interacted ? 0 : 1) * (1 - sstep(0.2, 0.26, p)) * sstep(0.07, 0.1, p));
     } else { FG.on = false; if (figure.style.visibility !== 'hidden') { figure.style.visibility = 'hidden'; figure.style.opacity = '0'; } }

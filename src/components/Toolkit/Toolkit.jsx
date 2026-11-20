@@ -117,16 +117,9 @@ export default function Toolkit() {
     };
     window.addEventListener("resize", onResize);
 
-    let alive = true;
-    document.fonts?.ready.then(() => {
-      if (!alive) return;
-      ctx.revert();
-      build();
-      ScrollTrigger.refresh();
-    });
-
+    /* the build reads only the section's own box (h-screen), which fonts cannot change, so there is no rebuild on fonts.ready: it used to
+       tear down and recreate the pinned timeline a second time at load. App.jsx already refreshes ScrollTrigger once fonts are in. */
     return () => {
-      alive = false;
       clearTimeout(t);
       window.removeEventListener("resize", onResize);
       ctx.revert();

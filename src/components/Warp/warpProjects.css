@@ -98,6 +98,8 @@
 /* ---- performance ---- */
 /* slides that are not on screen must not keep animating */
 .wp-slide[style*="visibility: hidden"] :is(.wp-glow, .wp-orb, .wp-ring, .wp-chip) { animation-play-state: paused; }
+/* the intro headline / caption is faded out (visibility:hidden) for the rest of the pin: its per-letter colour + text-shadow loops are main-thread work with nothing to see */
+[data-intro][style*="visibility: hidden"] :is(.wp-ch, .acc), [data-intro][style*="visibility: hidden"] .wp-ch::before, [data-intro][style*="visibility: hidden"] .wp-ch::after { animation-play-state: paused; }
 /* these are all driven by --p / GSAP every frame: give them their own layers so a fade or move never repaints (and re-rasterises) their neighbours */
 .wp-slide, .wp-ghost, .wp-glow, .wp-floor, .wp-orb, .wp-ring { will-change: transform, opacity; }
 .pj-mb-glow, .pj-mb-shadow, .pj-ph-shadow { will-change: opacity; }

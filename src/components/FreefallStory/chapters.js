@@ -1,8 +1,8 @@
 // chapters.js - "Where I've worked": the cards that follow the manifesto, one per experience (data comes from the Where I've Worked component).
-import { EXPERIENCES } from '../Freefall/Freefall.jsx';
+import { EXPERIENCES } from '../Freefall/experiences.js';
 
 // "Where I've worked": the cards that follow the manifesto are the real experiences, read straight from the Where I've Worked component
-// (Freefall/Freefall.jsx), so the roles, dates and logos can never drift apart. Logos live in /public/freefall/.
+// (Freefall/experiences.js), so the roles, dates and logos can never drift apart. Logos live in /public/freefall/.
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
 const cap = (t) => t.charAt(0) + t.slice(1).toLowerCase();
 export const CHAPTERS = EXPERIENCES.map((e, i, all) => {

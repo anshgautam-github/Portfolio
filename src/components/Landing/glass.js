@@ -663,7 +663,10 @@ export function createGlassScene(canvas, opts = {}) {
     sky = makeTarget(gl, sw, sh, true);
   };
   let cssW = 1, cssH = 1, sizeDirty = true;
-  const ro = new ResizeObserver(() => { sizeDirty = true; });
+  // layout size (clientWidth/Height, unaffected by the card's scale transform), captured in the observer callback, which runs after layout:
+  // reading it there is free, whereas reading it inside the frame loop could force a layout flush every frame
+  let lw = canvas.clientWidth || 1, lh = canvas.clientHeight || 1;
+  const ro = new ResizeObserver(() => { sizeDirty = true; lw = canvas.clientWidth || 1; lh = canvas.clientHeight || 1; });
   ro.observe(canvas);
   let activeUntil = 3.5;
   let introT0 = -1;
@@ -814,7 +817,7 @@ export function createGlassScene(canvas, opts = {}) {
 
     if (sprites && !held) {
       // advance the sticker layer (piled physics + drifting paths) every frame
-      const cssH2 = canvas.clientHeight || 1, cssW2 = canvas.clientWidth || 1;
+      const cssH2 = lh, cssW2 = lw;
       sprites.step(opts.time != null ? opts.time : (now - t0) / 1000, cssW2, cssH2, mouse.x * cssH2, mouse.y * cssH2, mouse.act > 0.05 && mouse.has, dt);
     }
     if (opts.sceneFrom && frameCount < opts.sceneFrom) return;   // (test hook: simulate without drawing)

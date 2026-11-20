@@ -228,3 +228,6 @@
 @media (max-width: 360px) {
   .mf-body { font-size: 21px; }
 }
+
+/* embedded in the Illusion pin the page-level loop governor sees one big visible block: the text sleeps its own loops while it is off screen */
+.mf.mf-asleep *, .mf.mf-asleep *::before, .mf.mf-asleep *::after { animation-play-state: paused !important; }

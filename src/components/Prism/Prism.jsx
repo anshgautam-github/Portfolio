@@ -78,9 +78,11 @@ export default function Prism() {
         root.dataset.face = String(idx);
       }
     };
+    let lastTf = "";
     const tiltTick = () => {
       pt.cx += (pt.x - pt.cx) * 0.08; pt.cy += (pt.y - pt.cy) * 0.08;
-      tilt.style.transform = `rotateX(${(-11 + pt.cy * -3).toFixed(2)}deg) rotateY(${(-15 + pt.cx * 5).toFixed(2)}deg)`;
+      const tf = `rotateX(${(-11 + pt.cy * -3).toFixed(2)}deg) rotateY(${(-15 + pt.cx * 5).toFixed(2)}deg)`;
+      if (tf !== lastTf) { lastTf = tf; tilt.style.transform = tf; }   // once the pointer is still the value stops changing: no style write per frame
     };
     const fine = window.matchMedia("(pointer: fine)").matches;
     const onMove = (e) => { const r = root.getBoundingClientRect(); pt.x = ((e.clientX - r.left) / r.width) * 2 - 1; pt.y = ((e.clientY - r.top) / r.height) * 2 - 1; };

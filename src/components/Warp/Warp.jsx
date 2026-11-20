@@ -534,14 +534,6 @@ export default function Warp({
         <i className="wa-vig" />
       </div>
 
-      {/* intro aurora: slow drifting colour behind the threads, a rotating light sheen, orbiting rings, a soft vignette */}
-      <div data-introaur className="wp-aur pointer-events-none absolute inset-0 z-[1] overflow-hidden" aria-hidden="true">
-        <i className="wa wa1" /><i className="wa wa2" /><i className="wa wa3" /><i className="wa wa4" />
-        <i className="wa-sheen" /><i className="wa-ring wr1" /><i className="wa-ring wr2" />
-        <span className="wa-dust">{Array.from({ length: 22 }, (_, k) => <b key={k} style={{ "--x": `${(k * 37) % 100}%`, "--d": `${11 + (k * 5) % 12}s`, "--dl": `${-((k * 7) % 16)}s`, "--s": `${1 + (k % 3)}px` }} />)}</span>
-        <i className="wa-vig" />
-      </div>
-
 
       {/* intro backdrop: a current of fine light threads that parts around the pointer */}
       <canvas ref={flow} data-introbg className="pointer-events-none absolute inset-0 z-[1] h-full w-full" aria-hidden="true" />
