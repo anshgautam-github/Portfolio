@@ -397,7 +397,7 @@ export function mountFreefallStory(root, { base, mode }) {
     if (!FG.on) return;
     if (Math.hypot(e.clientX - FG.cx, e.clientY - FG.cy) < Math.max(70, FG.size * 0.95)) { fig.spin(); Sound.tick(); }
   }, { passive: true });
-  const earth = PAGE ? null : createEarth(earthEl, base, { maxDpr: IS_MOBILE ? 1 : 1.5 });
+  const earth = PAGE ? null : createEarth(earthEl, base, { maxDpr: IS_MOBILE ? 1 : 1.5, regions: !IS_MOBILE, scale: IS_MOBILE ? 0.7 : 1, adaptive: IS_MOBILE, minScale: 0.45 });
   const campus = createCampus($('#fs-campus'), base);
   const rocket = createRocket($('#fs-rocket'));
   const caps = $$('.cap').map((el) => { const [a, b] = el.dataset.w.split(',').map(Number); return { el, a, b, o: -1 }; });
@@ -701,7 +701,7 @@ export function mountFreefallStory(root, { base, mode }) {
     const eo = (earth && earth.ready ? 1 : 0) * (1 - sstep(0.315, 0.345, p));
     earthFade = lerp(earthFade, eo, 0.06);
     const showEarth = !!earth && p < 0.36 && earthFade > 0.003;
-    if (showEarth !== earthOn) { earthOn = showEarth; earthEl.style.visibility = showEarth ? 'visible' : 'hidden'; }
+    if (showEarth !== earthOn) { earthOn = showEarth; earthEl.style.visibility = showEarth ? 'visible' : 'hidden'; if (showEarth && earth) earth.invalidate(); }
     if (showEarth) {
       earthEl.style.opacity = f2(earthFade);
       const [lat, lon, tilt, fov, roll] = spline(CAM, p);
@@ -1209,7 +1209,7 @@ export function mountFreefallStory(root, { base, mode }) {
     ScrollTrigger.removeEventListener('refresh', remeasure);
     for (const [t, ev, fn, o] of offs) t.removeEventListener(ev, fn, o);
     ioEnter.disconnect(); ioLoad.disconnect();
-    clearTimeout(idleT); clearTimeout(copyT); clearTimeout(measure.t);
+    clearTimeout(idleT); clearTimeout(copyT); clearTimeout(measure.t); clearTimeout(S.campusT);
     fall.dead = true; portal.dead = true; fall.free(); portal.free();
     if (earth) earth.destroy();
     if (Sound.ctx) Sound.ctx.close().catch(() => {});
@@ -1217,6 +1217,11 @@ export function mountFreefallStory(root, { base, mode }) {
   destroy.setProgress = (v) => { S.vp = v; };
   destroy.render = (ms) => step(ms);                                     // loader: draw exactly one frame for the progress just set (see above)
   destroy.preload = () => startLoad();                                   // loader: start fetching the film frames early (the ending needs them)
+  // loader: the map data of the campus is fetched early (it used to start only when the fall reached the campus, so on a phone connection the ground was a dark void
+  // for seconds, then the parse froze the page). Idle time, spaced after the planet's textures have been asked for.
+  if (LOADER && !PAGE) { const kick = () => { try { campus.load(); } catch (e) { /* ignore */ } }; S.campusT = setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(kick, { timeout: 1500 }) : kick()), 700); }
+  // how far the fall may go right now: it waits (briefly, the loader never traps anybody) for the planet and the campus to be ready, instead of showing black
+  destroy.limit = () => (earth && !earth.ready && !earth.dead ? 0.03 : !campus.ready() ? 0.29 : 1);
   destroy.filmReady = () => fall.loaded >= fall.gate;                    // loader: the coarse set of frames has arrived, so the film can be scrubbed
   return destroy;
 }

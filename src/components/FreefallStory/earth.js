@@ -130,23 +130,32 @@ const dirOf = (lat, lon) => [Math.cos(lat) * Math.sin(lon), Math.sin(lat), Math.
 export const REGION1 = [62, 2, 98, 40];      // India and its seas
 export const REGION2 = [77.4, 10, 81.4, 14.2]; // Tamil Nadu coast, Chennai
 
-export function createEarth(canvas, base, { maxDpr = 1.5, regions = true } = {}) {
+export function createEarth(canvas, base, { maxDpr = 1.5, regions = true, scale: scale0 = 1, adaptive = false, minScale = 0.45 } = {}) {
   const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance' });
   if (!gl) return null;
   const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
-  const prog = gl.createProgram();
-  try {
-    gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
-    gl.bindAttribLocation(prog, 0, 'p'); gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
-  } catch (e) { console.warn('[earth]', e.message); return null; }
-  gl.useProgram(prog);
-  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-
   const U = {}; const u = (n) => (U[n] ??= gl.getUniformLocation(prog, n));
-  const E = { ready: false, regionAlpha: [0, 0], dead: false };
+  let prog = null;
+  // (re)builds the program + the full-screen triangle: called once now, and again if the GPU drops the context (phones do that under memory pressure)
+  const buildProgram = () => {
+    const pr = gl.createProgram();
+    try {
+      gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS));
+      gl.bindAttribLocation(pr, 0, 'p'); gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+    } catch (e) { console.warn('[earth]', e.message); return false; }
+    prog = pr;
+    for (const k in U) delete U[k];
+    gl.useProgram(prog);
+    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    return true;
+  };
+  if (!buildProgram()) return null;
+
+  const E = { ready: false, regionAlpha: [0, 0], dead: false, lost: false, dirty: true };
+  const texs = [];   // every texture + the image it holds, so a lost context can be rebuilt without fetching anything again
   let loaded = 0; const NEED = 4;
 
   const units = { uDay: 0, uNight: 1, uCloud: 2, uSpec: 3, uR1: 4, uR2: 5 };
@@ -171,12 +180,13 @@ export function createEarth(canvas, base, { maxDpr = 1.5, regions = true } = {})
     requestAnimationFrame(() => { const job = upQ.shift(); try { if (!E.dead) job(); } catch (e) { /* ignore */ } setTimeout(() => { upBusy = false; pumpUp(); }, 120); });
   };
   const load = (url, unit, mip, done, cors) => {
-    const tex = mkTex(unit, mip), img = new Image();
+    const rec = { unit, mip, tex: mkTex(unit, mip), img: null }, img = new Image();
+    texs.push(rec);
     if (cors) img.crossOrigin = 'anonymous';
     // decode off the main thread first, then upload one texture per spaced-out frame: a 2048px upload + mipmaps is a 30-80 ms hitch, and four of them
     // (or the sharper regional tiles landing mid-descent) used to arrive together
     img.onload = () => {
-      const go = () => { if (E.dead) return; upQ.push(() => { upload(tex, unit, img, mip); done && done(); }); pumpUp(); };
+      const go = () => { if (E.dead) return; upQ.push(() => { if (E.lost) { rec.img = img; done && done(); return; } upload(rec.tex, unit, img, mip); rec.img = img; E.dirty = true; done && done(); }); pumpUp(); };
       if (img.decode) img.decode().then(go, go); else go();
     };
     img.onerror = () => {};
@@ -187,7 +197,7 @@ export function createEarth(canvas, base, { maxDpr = 1.5, regions = true } = {})
   load(base + 'earth/earth_lights_2048.png', 1, false, tick);
   load(base + 'earth/earth_clouds_1024.png', 2, true, tick);
   load(base + 'earth/earth_specular_2048.jpg', 3, false, tick);
-  mkTex(4, true); mkTex(5, true);
+  texs.push({ unit: 4, mip: true, tex: mkTex(4, true), img: null }, { unit: 5, mip: true, tex: mkTex(5, true), img: null });
   gl.uniform4f(u('uB1'), ...REGION1); gl.uniform4f(u('uB2'), ...REGION2);
   if (regions) {
     // the sharper tiles are a bonus: they start loading once the globe is on screen and fade in when they land
@@ -196,19 +206,39 @@ export function createEarth(canvas, base, { maxDpr = 1.5, regions = true } = {})
       load(base + 'earth/india.jpg', 4, true, () => { E.regionAlpha[0] = 0.001; });
       load(base + 'earth/tamil.jpg', 5, true, () => { E.regionAlpha[1] = 0.001; });
     };
-  }
+  } else E.loadRegions = () => { E.regionsAsked = true; };   // phones skip the sharper tiles: two more big uploads mid-fall for detail a phone screen cannot show
+
+  let scale = scale0, slow = 0, ema = 0, lastDraw = 0, lastKey = '';
 
   E.resize = () => {
-    const d = Math.min(devicePixelRatio || 1, maxDpr);
+    const d = Math.min(devicePixelRatio || 1, maxDpr) * scale;
     const w = Math.max(2, Math.round(canvas.clientWidth * d)), h = Math.max(2, Math.round(canvas.clientHeight * d));
-    if (w !== canvas.width || h !== canvas.height) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); }
+    if (w !== canvas.width || h !== canvas.height) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); E.dirty = true; }
   };
 
   // s: { lat, lon (deg), h (km), tilt (deg), roll (deg), fov (deg), heat, fog, detail, speed, exp, time }
   const rA = [0, 0];
+  E.invalidate = () => { E.dirty = true; };
   E.draw = (s) => {
-    if (E.dead) return;
+    if (E.dead || E.lost) return;
+    // adaptive resolution (phones): the planet shader is per-pixel, so when frames run slow it renders at a lower resolution instead of stuttering. It only ever steps down.
+    if (adaptive) {
+      const now = performance.now();
+      if (lastDraw && now - lastDraw < 100) {
+        ema = ema ? ema * 0.9 + (now - lastDraw) * 0.1 : now - lastDraw;
+        slow = ema > 27 ? slow + 1 : 0;
+        if (slow > 40 && scale > minScale) { scale = Math.max(minScale, scale * 0.82); slow = 0; ema = 0; E.resize(); }
+      }
+      lastDraw = now;
+    }
     for (let i = 0; i < 2; i++) { rA[i] = E.regionAlpha[i] > 0 ? Math.min(1, rA[i] + 0.02) : 0; }
+    // nothing changed (the visitor is not scrolling): keep the picture on screen instead of re-running the shader for an identical frame
+    if (!(s.heat > 0) && !(s.speed > 0)) {
+      const key = [s.lat, s.lon, s.tilt, s.roll, s.fov, s.h].map((v) => Math.round((v || 0) * 100)).join() + '|' + [s.fog, s.detail, rA[0], rA[1]].map((v) => Math.round((v || 0) * 1000)).join() + '|' + Math.floor((s.time || 0) * 4);
+      if (!E.dirty && key === lastKey) return;
+      lastKey = key;
+    } else lastKey = '';
+    E.dirty = false;
     const lat = s.lat * D2R, lon = s.lon * D2R, tilt = s.tilt * D2R;
     const dir = dirOf(lat, lon), east = [Math.cos(lon), 0, -Math.sin(lon)], north = cross(dir, east);
     const fwd = norm3([-dir[0] * Math.cos(tilt) + north[0] * Math.sin(tilt), -dir[1] * Math.cos(tilt) + north[1] * Math.sin(tilt), -dir[2] * Math.cos(tilt) + north[2] * Math.sin(tilt)]);
@@ -232,6 +262,15 @@ export function createEarth(canvas, base, { maxDpr = 1.5, regions = true } = {})
     gl.uniform2f(u('uRA'), rA[0], rA[1]);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
+  canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); E.lost = true; });
+  canvas.addEventListener('webglcontextrestored', () => {
+    for (const k in U) delete U[k];
+    if (!buildProgram()) return;
+    gl.uniform4f(u('uB1'), ...REGION1); gl.uniform4f(u('uB2'), ...REGION2);
+    for (const r of texs) { r.tex = mkTex(r.unit, r.mip); if (r.img) upload(r.tex, r.unit, r.img, r.mip); }
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    E.lost = false; E.dirty = true;
+  });
   E.destroy = () => { E.dead = true; const x = gl.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); };
   return E;
 }

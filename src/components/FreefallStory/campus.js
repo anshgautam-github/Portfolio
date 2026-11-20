@@ -73,8 +73,10 @@ export function createCampus(canvas, base) {
     }).catch(() => { S.state = -1; });
   };
 
+  /** the map data has arrived (or failed for good): the fall waits for this before it reaches the campus, so the ground is never an empty dark void */
+  api.ready = () => S.state === 2 || S.state === -1;
   api.resize = () => {
-    const d = Math.min(devicePixelRatio || 1, IS_MOBILE ? 1 : 1.5), w = Math.max(2, Math.round(canvas.clientWidth * d)), h = Math.max(2, Math.round(canvas.clientHeight * d));
+    const d = Math.min(devicePixelRatio || 1, IS_MOBILE ? 1 : 1.5) * (IS_MOBILE ? 0.75 : 1), w = Math.max(2, Math.round(canvas.clientWidth * d)), h = Math.max(2, Math.round(canvas.clientHeight * d));
     if (w !== canvas.width || h !== canvas.height) { canvas.width = w; canvas.height = h; }
     api.d = d;
   };

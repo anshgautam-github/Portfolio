@@ -50,15 +50,18 @@ export default function FreefallLoader() {
     const memo = new Map();
     const put = (el, txt) => { if (el && memo.get(el) !== txt) { memo.set(el, txt); el.textContent = txt; } };
     let gLast = -1, stIdx = -1, shaken = false, feedOn = false, fitN = 0, telemOff = false, telemWant = false, telemVotes = 0;
-    let evN = -1;
+    let evN = -1, hudN = 0;
     const hud = (p) => {
       const h = hudAt(p);
       if (!SH.num) SH = { num: q(".hud-num"), unit: q(".hud-unit"), vel: q(".hud-vel"), clock: q(".hud-clock") };
       const sAlt = SH.num && SH.num.textContent ? (SH.num.textContent + " " + (SH.unit ? SH.unit.textContent : "km")).toUpperCase() : fmtAlt(h.alt);
       const sVel = SH.vel && SH.vel.textContent ? SH.vel.textContent + " M/S" : fmtVel(h.vel);
       const sMet = SH.clock && SH.clock.textContent ? "T+ " + SH.clock.textContent : fmtMet(h.sec);
+      // phones: the readout text refreshes every third frame (it is a repaint over the live scene each time it changes; the eye cannot tell at 20 Hz)
+      if (!IS_MOBILE || (hudN = (hudN + 1) % 3) === 0) {
       put(H.alt, sAlt); put(H.vel, sVel); put(H.lat, fmtLat(h.lat)); put(H.lon, fmtLon(h.lon)); put(H.g, fmtG(h.g));
       put(H.met, sMet); put(H.phase, h.phase); put(H.lock, String(Math.round(h.k * 100)).padStart(2, "0") + "% LOCK"); put(H.markV, sAlt);
+      }
       // mission log: the newest three events that have happened by now
       let n = 0; for (let i = 0; i < EVENTS.length; i++) if (p >= EVENTS[i][0]) n = i + 1;
       if (n !== evN) {
@@ -152,6 +155,12 @@ export default function FreefallLoader() {
       if (T.p < 0) T.p = 0;
       // at the end of the descent (just before the flash) wait for the landing scene below AND the film frames to finish loading - but never trap the visitor
       // (8 s at most), and when they are ready cross the flash by itself
+      // the planet's textures and the campus map must have arrived before the fall reaches them (a phone connection can be slow): wait for them rather than show a black
+      // scene, but never longer than 9 s in total
+      if (destroy.limit && !T.gateOff && !T.skip) {
+        const lim = destroy.limit();
+        if (T.p > lim) { T.p = lim; T.boost = 0; T.gw = (T.gw || 0) + dt; if (T.gw > 9000) T.gateOff = true; }
+      }
       if (T.p >= HOLD && !T.go) {
         if (!holdStart) holdStart = now;
         if ((pendingTasks() === 0 && destroy.filmReady()) || now - holdStart > 8000) T.go = true; else T.p = HOLD;
