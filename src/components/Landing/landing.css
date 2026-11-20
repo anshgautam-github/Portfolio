@@ -398,3 +398,18 @@
   .ll-c1 { top: 120px; }
   .ll-c2 { top: 238px; }
 }
+
+/* ================= STEADY NAME DURING THE SHRINK ================= */
+/* the accent line of the name is gradient-clipped text with an endless shimmer and a drop-shadow filter: while the card scales, that text is
+   re-rasterised through the clip + filter every frame, which is the flicker. Static gradient, no filter, no shimmer while the transition runs. */
+.ll-ln:nth-child(2) > span { filter: none; backface-visibility: hidden; }
+.rv-going .ll-ln:nth-child(2) > span { animation-play-state: running, paused; }
+.rv-going .ll-h1 { transition: none; }
+@media (max-width: 1024px), (pointer: coarse) {
+  .ll-ln:nth-child(2) > span { animation-play-state: running, paused; }
+  .ll-h1 { text-shadow: none; transition: none; }
+}
+/* the whole landing is one steady layer inside the card while it shrinks */
+.rv-going .rv-slot { backface-visibility: hidden; }
+/* endless decorative loops rest while the card shrinks (the one-shot intro animations are left alone so nothing freezes half-way) */
+.rv-going .ll-globe .ll-spin, .rv-going .ll-arrow-in, .rv-going .ll-glint, .rv-going .ll-status b::after, .rv-going .ll-scroll i::after, .rv-going .ll-mq-track { animation-play-state: paused !important; }

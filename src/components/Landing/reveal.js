@@ -101,6 +101,7 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
   const pen = $("[data-pen]");
   const mainLen = mainPath.getTotalLength();
 
+  let going = false;
   let offDust = null;
   let fx = null;   // the live background (revealFx.js), created right after the timeline
   const ctx = gsap.context(() => {
@@ -116,7 +117,7 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
         scrub: IS_MOBILE ? 0.2 : 0.5,   // phones: less smoothing lag behind the finger
         anticipatePin: IS_MOBILE ? 0 : 1,   // anticipatePin pre-pins early on native touch scroll = visible jump
         invalidateOnRefresh: true,
-        onUpdate: (self) => { card.style.pointerEvents = self.progress > 0.02 ? "none" : ""; api.onProgress && api.onProgress(self.progress); fx && fx.setProgress(self.progress); },
+        onUpdate: (self) => { const go = self.progress > 0.004; if (go !== going) { going = go; stage.classList.toggle("rv-going", go); } card.style.pointerEvents = self.progress > 0.02 ? "none" : ""; api.onProgress && api.onProgress(self.progress); fx && fx.setProgress(self.progress); },
       },
     });
 
@@ -222,6 +223,7 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
     onProgress: null,   // (progress 0..1) => void, set by the owner
     destroy() {
       ctx.revert();
+      stage.classList.remove("rv-going");
       offDust && offDust();
       fx && fx.destroy();
       root.innerHTML = "";
