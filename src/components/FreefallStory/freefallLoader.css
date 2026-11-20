@@ -389,3 +389,17 @@ html.is-mobile .fs--loader .hero { perspective: none; }
 /* every readout that changes while you fall is its own small layer, so updating its text never repaints (or re-rasters) the big shared layer under it */
 .fs-loader .fl-hud > * { will-change: transform, opacity; }
 .fs-loader .fs .hud { will-change: transform, opacity; }
+
+/* =====================================================================================================
+   THE NOTCH ON PHONES (top-centre readout that sometimes went blank / lost its number)
+   On phones and tablets the site frame has no margin and no rounded corners (--fr-m: 0), so the only visible part of the full-screen cream frame is the small notch at the
+   top. It was still a FULL-SCREEN vector layer, stacked with three more full-screen decorative layers (scan lines, vignette, edge shadow): at a phone's pixel density that is
+   ~40 MB of tiles the GPU has to keep alive, and when the phone is short of memory (many tabs, the 3D scene behind) it drops tiles at random: the cream notch vanishes for a
+   frame, or the digits go blank. Now: the notch is a small, promoted layer (just the top strip, redrawn never), and the decorative full-screen layers are gone on phones.
+   ===================================================================================================== */
+@media (max-width: 1024px), (pointer: coarse) {
+  .fs-loader .fl-svg { bottom: auto; height: calc(var(--fr-m, 0px) + var(--fr-nh, 46px) + 26px); overflow: hidden; will-change: transform; transform: translateZ(0); contain: layout paint; }
+  .fs-loader .fl-scan { display: none; }
+  .fs-loader .fl-vig { display: none; }
+  .fs-loader::after { display: none; }
+}
