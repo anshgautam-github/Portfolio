@@ -13,7 +13,7 @@ export function mountWorkFx(stage) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return () => {};
   const narrow = window.matchMedia("(max-width: 760px)");   // phones: the depth shifts are off in the stylesheet, so are not written here
   const cards = Array.from(stage.querySelectorAll(".screen")).map((el) => ({
-    el, title: el.querySelector(".screen-title"), disc: el.querySelector(".disc"), plate: el.querySelector(".logo-plate"), sx: "", sy: "", d: "",
+    el, gw: el.querySelector(".sb-gw"), grid: el.querySelector(".sb-grid"), spot: el.querySelector(".sb-spot"), title: el.querySelector(".screen-title"), disc: el.querySelector(".disc"), plate: el.querySelector(".logo-plate"), sx: "", sy: "", d: "",
   }));
   let tx = 0, ty = 0, px = 0, py = 0, cx = 0, cy = 0, lastMove = -1e9, has = false, vis = false, running = false, raf = 0, lastT = 0, lastDraw = 0;
 
@@ -53,8 +53,13 @@ export function mountWorkFx(stage) {
     for (let i = 0; i < shown.length; i++) {
       const c = shown[i], cr = rects[i];
       const sx = (cx - cr.left).toFixed(0) + "px", sy = (cy - cr.top).toFixed(0) + "px";
-      if (sx !== c.sx) { c.sx = sx; c.el.style.setProperty("--sx", sx); }
-      if (sy !== c.sy) { c.sy = sy; c.el.style.setProperty("--sy", sy); }
+      if (sx !== c.sx || sy !== c.sy) {
+        c.sx = sx; c.sy = sy;
+        const X = parseInt(sx, 10), Y = parseInt(sy, 10);   // inline translates: no custom property restyling the whole card
+        if (c.gw) c.gw.style.translate = `${X - 340}px ${Y - 340}px`;
+        if (c.grid) c.grid.style.translate = `${340 - X}px ${340 - Y}px`;
+        if (c.spot) c.spot.style.translate = `${X - 420}px ${Y - 420}px`;
+      }
       const key = fx + "|" + fy;
       if (key === c.d) continue;
       c.d = key;

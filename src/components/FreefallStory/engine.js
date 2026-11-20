@@ -400,6 +400,7 @@ export function mountFreefallStory(root, { base, mode }) {
   const earth = PAGE ? null : createEarth(earthEl, base, { maxDpr: IS_MOBILE ? 1 : 1.5, regions: !IS_MOBILE, scale: IS_MOBILE ? 0.7 : 1, adaptive: IS_MOBILE, minScale: 0.45 });
   const campus = createCampus($('#fs-campus'), base);
   const rocket = createRocket($('#fs-rocket'));
+  const rocketEl = $('#fs-rocket'); let rocketOn = true;   // a full-screen layer: out of the compositor as soon as the capsule is gone
   const caps = $$('.cap').map((el) => { const [a, b] = el.dataset.w.split(',').map(Number); return { el, a, b, o: -1 }; });
   if (earth && earth.loadRegions) earth.loadRegions();
   else stageFallback();
@@ -735,8 +736,8 @@ export function mountFreefallStory(root, { base, mode }) {
     } else { FG.on = false; if (figure.style.visibility !== 'hidden') { figure.style.visibility = 'hidden'; figure.style.opacity = '0'; } }
 
     // --- the capsule stack at the start, the parachute at the end
-    if (p < 0.17) { rocket.draw({ p, t: S.t, W, H, fig: FG, px: S.smx }); rocketDirty = true; }
-    else if (rocketDirty) { rocket.draw({ p: 1, t: S.t, W, H, fig: null }); rocketDirty = false; }
+    if (p < 0.17) { if (!rocketOn) { rocketOn = true; rocketEl.style.visibility = 'visible'; } rocket.draw({ p, t: S.t, W, H, fig: FG, px: S.smx }); rocketDirty = true; }
+    else if (rocketDirty) { rocket.draw({ p: 1, t: S.t, W, H, fig: null }); rocketDirty = false; if (rocketOn) { rocketOn = false; rocketEl.style.visibility = 'hidden'; } }
 
     // --- breaking through the cloud deck
     const br = bell(p, 0.292, 0.316, 0.345);

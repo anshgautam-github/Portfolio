@@ -64,9 +64,12 @@ export function createFigure(canvas, base) {
     // scrubs, so sizing the bitmap exactly meant three huge canvases were re-allocated per frame (that is the lag, and the blank frames read as flicker).
     // So the bitmap only moves in quarter-octave steps (and is capped); drawing is relative to the bitmap (S = Z / 3.4 below), and the CSS (340%)
     // scales it to the figure, so the picture is the same size as before.
-    const d = Math.min(devicePixelRatio || 1, 2);
+    // phones: a bitmap this big is the single largest allocation of the loader (1536 x 1536 x2 canvases = 19 MB of GPU memory), so it is capped lower and moves in
+    // half-octave steps: three or four re-allocations over the whole fall instead of seven in the first second
+    const MOB = typeof document !== 'undefined' && document.documentElement.classList.contains('is-mobile');
+    const d = Math.min(devicePixelRatio || 1, MOB ? 1.25 : 2);
     const want = Math.max(64, size * 3.4 * d);
-    const px = Math.min(1536, Math.round(256 * Math.pow(2, Math.ceil(Math.log2(want / 256) * 4) / 4)));
+    const px = Math.min(MOB ? 1024 : 1536, Math.round(256 * Math.pow(2, Math.ceil(Math.log2(want / 256) * (MOB ? 2 : 4)) / (MOB ? 2 : 4))));
     F.d = d;
     if (px !== canvas.width) { canvas.width = px; canvas.height = px; }
     if (off.width !== px) { off.width = px; off.height = px; }

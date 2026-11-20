@@ -355,3 +355,16 @@ html.is-safari .fs-loader .fs .hero-skip { display: none; }
 .fs-loader .fs .index-name { filter: none; color: rgba(239,231,218,.14); }
 .fs-loader .fs .fs-sound { -webkit-backdrop-filter: none; backdrop-filter: none; }
 @keyframes fl-m-in { from { opacity: 0; } to { opacity: 1; } }
+
+
+/* =====================================================================================================
+   LEAN LOADER (every device, decisive on phones)
+   Measured in a phone-sized view: the loader carried the WHOLE site's other sections underneath (work, about, services, portal, the marquee: ~950 elements,
+   ~120 will-change layers, a 7,000px marquee, a blurred animated glow), forty SVG animations that ran from the first second although the tiles only show at the very
+   end, and two full-screen canvases (cloud + fx) composited over everything long before the cloud transition. None of that is ever seen, and on a phone the GPU
+   tile budget it eats is what makes the visible layers drop out for a frame. Nothing here changes how the loader looks.
+   ===================================================================================================== */
+.fs--loader > :not(.story) { display: none !important; }
+.fs--loader .index-tiles:not(.is-live) * { animation-play-state: paused !important; }
+.fs-loader .fl-cloud, .fs-loader .fl-fx { visibility: hidden; }
+.fs-loader.is-clouding .fl-cloud, .fs-loader.is-clouding .fl-fx { visibility: visible; }
