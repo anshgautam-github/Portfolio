@@ -176,7 +176,7 @@ function Fx({ fx, t }) {
   return <span className={`mf-w mf-fx mf-${fx}`} data-w data-fx data-t={t} key={k}>{t}</span>;
 }
 
-export default function Manifesto({ embedded = false }) {
+export default function Manifesto({ embedded = false, native = false }) {
   const sec = useRef(null);
   const pillRef = useRef(null);
 
@@ -234,14 +234,15 @@ export default function Manifesto({ embedded = false }) {
     measure();
     update();
     // embedded (inside the Illusion's void) the section is moved by a transform, so it is driven by the ticker instead of by ScrollTrigger
-    const st = embedded ? null : ScrollTrigger.create({ trigger: root, start: "top bottom", end: "bottom top", onUpdate: update, onRefresh: () => { measure(); update(); } });
+    // native: the text sits in normal flow (phones), so the browser scrolls it and ScrollTrigger can drive the lighting like any other section
+    const st = embedded && !native ? null : ScrollTrigger.create({ trigger: root, start: "top bottom", end: "bottom top", onUpdate: update, onRefresh: () => { measure(); update(); } });
     // embedded (how the page uses it): driven from the ticker, but only while the text is actually on screen - it used to measure and walk every word on every frame for the whole life of the page
     let vis = !embedded, io = null;
     const tickUpdate = () => { if (vis) update(); };
     if (embedded) {
-      gsap.ticker.add(tickUpdate);
+      if (!native) gsap.ticker.add(tickUpdate);
       root.classList.add("mf-asleep");   // endless loops (signal lines, node pulses...) stay paused until the text is actually near the screen
-      io = new IntersectionObserver(([en]) => { if (en.isIntersecting !== vis) { vis = en.isIntersecting; root.classList.toggle("mf-asleep", !vis); update(); } }, { rootMargin: "120px 0px" });
+      io = new IntersectionObserver(([en]) => { if (en.isIntersecting !== vis) { vis = en.isIntersecting; root.classList.toggle("mf-asleep", !vis); if (vis || !native) update(); } }, { rootMargin: native ? "40px 0px" : "120px 0px" });
       io.observe(root);
     }
     const ro = new ResizeObserver(() => { measure(); update(); });
@@ -249,8 +250,8 @@ export default function Manifesto({ embedded = false }) {
     document.fonts && document.fonts.ready.then(() => { measure(); update(); });
     const t1 = setTimeout(() => { measure(); update(); }, 600);
     window.addEventListener("resize", update, { passive: true });
-    return () => { st && st.kill(); if (embedded) gsap.ticker.remove(tickUpdate); io && io.disconnect(); ro.disconnect(); clearTimeout(t1); window.removeEventListener("resize", update); };
-  }, [embedded]);
+    return () => { st && st.kill(); if (embedded && !native) gsap.ticker.remove(tickUpdate); io && io.disconnect(); ro.disconnect(); clearTimeout(t1); window.removeEventListener("resize", update); };
+  }, [embedded, native]);
 
   const goWork = () => {
     const t = document.querySelector("#fs-work-intro") || document.querySelector("#prism");

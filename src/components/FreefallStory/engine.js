@@ -161,11 +161,12 @@ export function mountFreefallStory(root, { base, mode }) {
       this.c.width = w; this.c.height = h;
       this.key = '';
     }
-    render(f) {
+    render(f, snap) {
       const { seq, ctx, c } = this;
       const br = seq.bracket(f);
       if (!br) return null;
-      const [ia, ib, t0] = br;
+      let [ia, ib, t0] = br;
+      if (snap && ib !== ia) { if (t0 >= 0.5) ia = ib; ib = ia; t0 = 0; }   // fast fling: one frame, one draw (the dissolve returns as soon as the scroll slows)
       seq.prime(f);
       const a = seq.src(ia);
       const t = Math.round(t0 * DISSOLVE_STEPS) / DISSOLVE_STEPS;   // phones: coarser steps = far fewer redraws while scrubbing
@@ -420,9 +421,10 @@ export function mountFreefallStory(root, { base, mode }) {
   }));
 
   const screens = $$('.screen').map((el) => ({
-    el, title: $('.screen-title span', el), ring: $('.disc-ring', el), vis: true, p: -1,
+    el, title: $('.screen-title span', el), ring: $('.disc-ring', el), dim: $('.screen-dim', el), disc: $('.disc', el), meta: $('.screen-meta', el), vis: true, p: -1, tf: '', tt: '', rt: '', dv: -1,
   }));
   const workStageEl = $('.work-stage');
+  const flatMQ = window.matchMedia('(max-width: 760px)');
   let workSkew = 0;  // eased lean of the big word while scrolling
   let workAI = -1;   // active card: its accent colour is mirrored onto the stage (--ac) so the stage glow changes with it
   // the loss curve along the bottom of the chapters: a ball rolls down it as the story goes on
@@ -447,7 +449,8 @@ export function mountFreefallStory(root, { base, mode }) {
   const arches = [];
   (() => {
     const words = ['step through', '', 'this way', '', 'come in', '', 'step through', '', 'almost there', ''];
-    words.forEach((w) => {
+    words.forEach((w, wi) => {
+      if (IS_MOBILE && wi % 2) return;   // phones: the unlabeled arches are skipped (half the glowing 3D layers; the tunnel still reads the same)
       const el = document.createElement('div');
       el.className = 'arch';
       if (w) { const s = document.createElement('span'); s.textContent = w; el.appendChild(s); }
@@ -504,6 +507,9 @@ export function mountFreefallStory(root, { base, mode }) {
       const el = $('#fs-' + id);
       layout[id] = { top: docTop(el), h: el.offsetHeight };
     }
+    if (workStageEl) layout.work.sh = workStageEl.offsetHeight || S.H;
+    const portalStage = $('.portal-stage');
+    if (portalStage) layout.portal.sh = portalStage.offsetHeight || S.H;   // pinned stage height (100lvh on phones)   // the pinned stage's real height (100lvh on phones: stable while the URL bar moves)
     filmFall.resize(); filmPortal.resize(); ambient.resize();
     if (earth) earth.resize();
     campus.resize(); rocket.resize();
@@ -829,7 +835,7 @@ export function mountFreefallStory(root, { base, mode }) {
   function updateWork() {
     const L = layout.work;
     if (S.y + S.H < L.top || S.y > L.top + L.h) return;
-    const w = clamp((S.y - L.top) / (L.h - S.H));
+    const w = clamp((S.y - L.top) / (L.h - (L.sh || S.H)));
     const n = screens.length;
     const k = norm(w, 0, 0.88) * (n - 1);
     updateRail(k / (n - 1), Math.round(k));
@@ -840,34 +846,46 @@ export function mountFreefallStory(root, { base, mode }) {
     
     // the giant word leans with scroll speed. S.vel is a raw per-frame delta (it jumps around when Lenis and the ticker
     // are a frame out of step), so the lean is eased separately, kept small and snapped to 0.1deg: no more shimmer
-    workSkew += (clamp(-S.vel * 0.06, -6, 6) - workSkew) * 0.12;
+    workSkew += ((IS_MOBILE || flatMQ.matches ? 0 : clamp(-S.vel * 0.06, -6, 6)) - workSkew) * 0.12;
     if (Math.abs(workSkew) < 0.05) workSkew = 0;
     workSkew = Math.round(workSkew * 10) / 10;
 
+    const flat = IS_MOBILE || flatMQ.matches;   // phones / tablets: a flat slide, no 3D flip
     screens.forEach((sc, i) => {
       const d = k - i;
-      if (d < -1 || d > 2.4) {
+      if (d < -1 || d > (flat ? 1.05 : 2.4)) {
         if (sc.vis) { sc.el.style.visibility = 'hidden'; sc.vis = false; }
         return;
       }
       if (!sc.vis) { sc.el.style.visibility = 'visible'; sc.vis = true; }
-      let ty = 0, tz = 0, rx = 0, rz = 0, dim = 0;
-      const side = i % 2 ? 1 : -1;
-      if (d < 0) {
-        const e = easeOut(d + 1);
-        ty = (1 - e) * 115; rx = (1 - e) * 24; rz = (1 - e) * 7 * side;
+      let tf, dim;
+      if (flat) {
+        if (d < 0) { const e = easeOut(d + 1); tf = `translate3d(0,${f1((1 - e) * 125)}%,0)`; dim = 0; }
+        else { tf = `translate3d(0,${f1(-d * 2.4)}%,0) scale(${(1 - d * 0.06).toFixed(3)})`; dim = Math.min(d, 1) * 0.55; }
       } else {
-        const r = d;
-        tz = -r * 420; ty = -r * 6; rz = -r * 2.6 * side; rx = r * 5;
-        dim = Math.min(r, 1.4) * 0.6;
+        let ty = 0, tz = 0, rx = 0, rz = 0;
+        const side = i % 2 ? 1 : -1;
+        if (d < 0) {
+          const e = easeOut(d + 1);
+          ty = (1 - e) * 115; rx = (1 - e) * 24; rz = (1 - e) * 7 * side;
+        } else {
+          const r = d;
+          tz = -r * 420; ty = -r * 6; rz = -r * 2.6 * side; rx = r * 5;
+          dim = Math.min(r, 1.4) * 0.6;
+        }
+        tf = `translate3d(0,${f2(ty)}%,${f1(tz)}px) rotateX(${f2(rx)}deg) rotateZ(${f2(rz)}deg)`;
       }
-      sc.el.style.transform = `translate3d(0,${f2(ty)}%,${f1(tz)}px) rotateX(${f2(rx)}deg) rotateZ(${f2(rz)}deg)`;
-      sc.el.style.setProperty('--dim', f2(dim));
+      if (tf !== sc.tf) { sc.tf = tf; sc.el.style.transform = tf; }
+      const dv = Math.round(dim * 50) / 50;
+      if (dv !== sc.dv) { sc.dv = dv; sc.dim.style.opacity = dv; }
       const local = clamp((d + 1) / 2.4);
-      sc.title.style.transform = `translate3d(${f2(lerp(4, -42, local))}%,0,0) skewX(${f2(workSkew)}deg)`;
+      const tt = flat ? `translate3d(${f1(lerp(4, -42, local))}%,0,0)` : `translate3d(${f2(lerp(4, -42, local))}%,0,0) skewX(${f2(workSkew)}deg)`;
+      if (tt !== sc.tt) { sc.tt = tt; sc.title.style.transform = tt; }
       const ap = Math.round((i === 0 ? norm(entry, 0.15, 1) : clamp((d + 0.85) / 1.2)) * 100) / 100;
-      if (ap !== sc.p) { sc.p = ap; sc.el.style.setProperty('--p', ap); }
-      sc.ring.style.transform = `rotate(${f1(-S.y * 0.05)}deg)`;
+      // --p only on the two subtrees that read it (the disc and the copy), not on the whole card: it no longer restyles every descendant
+      if (ap !== sc.p) { sc.p = ap; sc.disc.style.setProperty('--p', ap); sc.meta.style.setProperty('--p', ap); }
+      const rt = `rotate(${f1(-S.y * 0.05)}deg)`;
+      if (rt !== sc.rt) { sc.rt = rt; sc.ring.style.transform = rt; }
     });
   }
 
@@ -901,7 +919,12 @@ export function mountFreefallStory(root, { base, mode }) {
 
   // ---------- marquee: speeds up and flips with your scroll ----------
   let marqueeDir = 1;
+  const marqBlock = $('.marquee-row') && $('.marquee-row').parentElement;
+  let marqueeVis = true;
+  const ioMarq = marqBlock ? new IntersectionObserver(([en]) => { marqueeVis = en.isIntersecting; }, { rootMargin: '120px' }) : null;
+  if (ioMarq) ioMarq.observe(marqBlock);
   function updateMarquee(dt) {
+    if (!marqueeVis) return;   // off screen: nothing to move (it wrote two transforms every frame, from the first pixel of the page)
     if (Math.abs(S.vel) > 0.5) marqueeDir = S.vel > 0 ? 1 : -1;
     const held = document.documentElement.dataset.motion === 'paused';   // the page-wide "Pause motion" button: no self-running drift
     const speed = (reduce || held ? 0 : 0.7) + Math.min(Math.abs(S.vel), 80) * 0.35;
@@ -929,41 +952,57 @@ export function mountFreefallStory(root, { base, mode }) {
   }
 
   // ---------- portal: he walks out, the tunnel flies past you ----------
+  let pTf = '', pCam = '', pCta = -1, pCtaT = '', pDrift = 0, pLast = 0;
   function updatePortal() {
     const L = layout.portal;
     if (S.y + S.H < L.top || S.y > L.top + L.h) { S.portalOpen = 0; return; }
-    const w = clamp((S.y - L.top) / (L.h - S.H));
-    filmPortal.render(norm(w, 0.02, 0.76) * (PORTAL_N - 1));
+    const w = clamp((S.y - L.top) / (L.h - (L.sh || S.H)));
+    const fast = IS_MOBILE && Math.abs(S.vel) > 14;
+    filmPortal.render(norm(w, 0.02, 0.76) * (PORTAL_N - 1), fast);
 
     const push = sstep(0.76, 1, w);
-    portalCanvas.style.transform = `scale(${(1 + push * 0.32).toFixed(4)}) translate3d(${f1(S.smx * -10)}px,${f1(S.smy * -8)}px,0)`;
+    const k1 = 1 + push * 0.32;
+    const tf = `scale(${k1.toFixed(4)}) translate3d(${f1(S.smx * -10)}px,${f1(S.smy * -8)}px,0)`;
+    if (tf !== pTf) { pTf = tf; portalCanvas.style.transform = tf; }
     // the arches' vanishing point is the doorway, so it must drift and zoom exactly with the film (same shift, same push-in)
-    tunnelCam.style.transform = `translate3d(${f1(S.smx * -10 * (1 + push * 0.32))}px,${f1(S.smy * -8 * (1 + push * 0.32))}px,0)`;
+    const cam = `translate3d(${f1(S.smx * -10 * k1)}px,${f1(S.smy * -8 * k1)}px,0)`;
+    if (cam !== pCam) { pCam = cam; tunnelCam.style.transform = cam; }
 
     // the tunnel shows while the door opens, steps aside while he walks out,
     // then returns and speeds up as you push through the door yourself
     const open = Math.max(sstep(0.1, 0.24, w) * (1 - sstep(0.4, 0.52, w)), sstep(0.78, 0.9, w));
     S.portalOpen = Math.max(open, sstep(0.1, 0.3, w) * (1 - sstep(0.9, 1, w)));
     const rush = w * 2.4 + push * 3;
-    for (let i = 0; i < arches.length; i++) {
+    // the idle drift of the tunnel: desktop always; phones only while the page is moving (an idle phone then repaints nothing at all)
+    const nowS = S.t;
+    if (!IS_MOBILE || Math.abs(S.vel) > 0.3) pDrift += (nowS - (pLast || nowS)) * 0.012;
+    pLast = nowS;
+    const drift = IS_MOBILE ? pDrift : S.t * 0.012;
+    const n = arches.length;
+    for (let i = 0; i < n; i++) {
       const a = arches[i];
-      const z = -3600 + fract(i / arches.length + rush + S.t * 0.012) * 4300;
+      const z = -3600 + fract(i / n + rush + drift) * 4300;
       const o = open * sstep(-3600, -2300, z) * (1 - sstep(220, 680, z));
-      a.el.style.opacity = f2(o);
-      if (o > 0) a.el.style.transform = `translate3d(${f1(S.smx * -12)}px,${f1(S.smy * -8)}px,${f1(z)}px)`;
+      const os = f2(o);
+      if (os !== a.o) { a.o = os; a.el.style.opacity = os; }
+      if (o > 0) {
+        const t = `translate3d(${f1(S.smx * -12)}px,${f1(S.smy * -8)}px,${f1(z)}px)`;
+        if (t !== a.t) { a.t = t; a.el.style.transform = t; }
+      }
     }
 
     for (const l of portalLines) {
       const t = norm(w, l.a, l.b);
       const o = sstep(0, 0.25, t) * (1 - sstep(0.75, 1, t));
-      l.el.style.opacity = f2(o);
-      l.el.style.transform = `translate3d(-50%,${f1(lerp(50, -50, t))}px,0)`;
+      if (o <= 0 && l.o === '0.00') continue;   // fully faded out and still so: nothing to write
+      const os = f2(o), ts = `translate3d(-50%,${f1(lerp(50, -50, t))}px,0)`;
+      if (os !== l.o) { l.o = os; l.el.style.opacity = os; }
+      if (ts !== l.t) { l.t = ts; l.el.style.transform = ts; }
     }
 
     const c = sstep(0.8, 0.9, w);
-    portalCta.style.opacity = f2(c);
-    portalCta.style.transform = `translateY(${f1((1 - c) * 50)}px)`;
-    portalCta.classList.toggle('is-live', c > 0.5);
+    const cs = f2(c);
+    if (cs !== pCta) { pCta = cs; portalCta.style.opacity = cs; portalCta.style.transform = `translateY(${f1((1 - c) * 50)}px)`; portalCta.classList.toggle('is-live', c > 0.5); }
   }
 
   // ---------- magnetic buttons ----------
@@ -1222,7 +1261,7 @@ export function mountFreefallStory(root, { base, mode }) {
     if (!LOADER) gsap.ticker.remove(tickFn);
     ScrollTrigger.removeEventListener('refresh', remeasure);
     for (const [t, ev, fn, o] of offs) t.removeEventListener(ev, fn, o);
-    ioEnter.disconnect(); ioLoad.disconnect();
+    ioEnter.disconnect(); ioLoad.disconnect(); if (ioMarq) ioMarq.disconnect();
     clearTimeout(idleT); clearTimeout(copyT); clearTimeout(measure.t); clearTimeout(S.campusT);
     fall.dead = true; portal.dead = true; fall.free(); portal.free();
     if (earth) earth.destroy();

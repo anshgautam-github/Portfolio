@@ -449,3 +449,6 @@ html.is-mobile .tk-aurora-glow,
 html.is-mobile .tk-scan {
   display: none;
 }
+
+/* the scene that rises over the stage is opaque: once it has fully arrived the stage underneath is not drawn at all (set by Toolkit.jsx) */
+.tk-sec[data-covered="1"] .tk-bg { visibility: hidden; }

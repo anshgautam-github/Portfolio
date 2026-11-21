@@ -231,3 +231,19 @@
 
 /* embedded in the Illusion pin the page-level loop governor sees one big visible block: the text sleeps its own loops while it is off screen */
 .mf.mf-asleep *, .mf.mf-asleep *::before, .mf.mf-asleep *::after { animation-play-state: paused !important; }
+
+/* =====================================================================================================================================
+   Smooth scrolling on phones: take every expensive paint effect out of the part that moves, keep the entrance + the cheap living loops
+   ===================================================================================================================================== */
+@media (hover: none), (max-width: 820px) {
+  /* blurs behind moving content are re-computed every frame */
+  .mf-shot i, .mf-open { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .mf-shot i { background: rgba(7,10,18,.86); }
+  /* filters on chips re-rasterise the chip on every opacity change: fold the glow into a plain shadow-free tile */
+  .mf-spark, .mf-atom { filter: none; }
+  .mf-neural circle { filter: none; }
+  /* paint-heavy loops (they repaint text / background / svg each frame) are off; the transform-only ones stay on their own layers */
+  .mf-shot.is-on .mf-shot-in { animation: none; }
+  .mf-glitch.is-on::before, .mf-glitch.is-on::after { animation: none; }
+  .mf-neural.is-on .mf-nl line { animation: none; }
+}

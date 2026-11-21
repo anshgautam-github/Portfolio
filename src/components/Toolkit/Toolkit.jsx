@@ -38,6 +38,7 @@ export default function Toolkit() {
   useLayoutEffect(() => {
     let ctx;
     let lastW = window.innerWidth;
+    let covered = false;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const build = () => {
@@ -59,6 +60,9 @@ export default function Toolkit() {
                 onUpdate: (self) => {
                   if (gctl.current) gctl.current.live(self.progress > (RISE + 0.8) / T);
                   if (gwin.current) gwin.current.style.pointerEvents = self.progress > 0.97 ? "auto" : "none";
+                  // once the scene has fully arrived the dark stage behind it is hidden: nothing under it is painted or composited any more
+                  const cov = self.progress > 0.88;
+                  if (cov !== covered) { covered = cov; if (root.current) root.current.dataset.covered = cov ? "1" : "0"; }
                 },
               },
         });
@@ -75,7 +79,8 @@ export default function Toolkit() {
         const shape = () => {
           const rx = (W * 0.62 * st.k).toFixed(1), ry = (H * 0.2 * st.k).toFixed(1);
           r.style.borderRadius = `${rx}px ${rx}px 0 0 / ${ry}px ${ry}px 0 0`;
-          r.style.boxShadow = st.glow > 0.002
+          // the 130px-blur glow along the crest is re-painted every frame of the climb: phones skip it (the crest still reads from the hill shape)
+          r.style.boxShadow = !IS_MOBILE && st.glow > 0.002
             ? `0 -2px 0 rgba(255,214,190,${(0.5 * st.glow).toFixed(3)}), 0 -14px 46px rgba(238,111,78,${(0.5 * st.glow).toFixed(3)}), 0 -40px 130px rgba(138,96,211,${(0.55 * st.glow).toFixed(3)})`
             : "none";
         };

@@ -77,7 +77,7 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
       <div class="rv-row" data-row="b">${[0, 1, 2].map(() => `<span class="rv-seg">${seg(c.stripB)}</span>`).join("")}</div>
     </div>
     <div class="rv-card" data-card><section class="rv-slot" id="top"></section><i class="rv-frost" data-frost aria-hidden="true"></i></div>
-    <svg class="rv-sig" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <svg class="rv-sig" viewBox="47 0 1000 560" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       <defs>
         <linearGradient id="rvInk" gradientUnits="userSpaceOnUse" x1="120" y1="0" x2="900" y2="560">
           <stop offset="0" stop-color="#ffffff"/><stop offset=".3" stop-color="#cfe0ff"/><stop offset=".62" stop-color="#8db4ff"/><stop offset="1" stop-color="#79e4ff"/>

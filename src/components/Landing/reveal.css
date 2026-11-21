@@ -403,7 +403,8 @@
   .rv-frost { -webkit-backdrop-filter: none; backdrop-filter: none; will-change: opacity; background: linear-gradient(160deg, rgba(60, 80, 150, .55), rgba(20, 30, 80, .6)); }
   /* one cheap shadow instead of three large blurred ones on a layer that scales */
   .rv-card { box-shadow: 0 0 0 1px rgba(255, 255, 255, .22), 0 24px 48px rgba(0, 0, 0, .7); backface-visibility: hidden; }
-  .rv-sig { will-change: transform; transform: translateZ(0); }
+  /* keep the -50%/-50% centring: a bare translateZ(0) here replaced it and pushed the signature off to the right, clipped */
+  .rv-sig { will-change: transform; transform: translate3d(-50%, -50%, 0); }
   .rv-strips { will-change: opacity, transform; }
   .rv-stage::before { display: none; }
 }

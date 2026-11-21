@@ -206,7 +206,7 @@
   will-change: transform;
   box-shadow: 0 40px 120px rgba(0,0,0,.8);
 }
-.fs .screen::after { content: ""; position: absolute; inset: 0; z-index: 6; background: #000; opacity: var(--dim, 0); pointer-events: none; }
+.fs .screen-dim { position: absolute; inset: 0; z-index: 6; background: #000; opacity: 0; pointer-events: none; }   /* engine.js writes its opacity directly (a --dim custom property restyled the whole card every frame) */
 .fs .screen-bar { position: absolute; inset: 0 0 auto 0; display: grid; grid-template-columns: 1fr auto 1fr; padding: 16px 20px; color: var(--ash); z-index: 3; }
 .fs .screen-bar span:nth-child(2) { color: var(--bone); }
 .fs .screen-bar span:last-child { justify-self: end; }
@@ -903,4 +903,30 @@ html.is-mobile .fs .screen-beam::before { animation: none; }
 }
 @media (max-width: 360px) {
   .fs .services { padding-left: 20px; padding-right: 20px; }
+}
+
+
+/* =====================================================================================================
+   WHERE I'VE WORKED on phones: flat, compositor-only card stack (no 3D flip, no per-frame restyle of the card subtree).
+   engine.js (updateWork) slides a card up over the previous one, which settles back slightly and dims.
+   ===================================================================================================== */
+@media (max-width: 760px) {
+  .fs .work-stage { height: 100lvh; perspective: none; }
+  .fs .screen { backface-visibility: hidden; contain: layout paint; box-shadow: 0 14px 34px rgba(0,0,0,.7), 0 0 36px -20px color-mix(in srgb, var(--c) 45%, transparent); }
+  .fs .sb-mesh.m3 { display: none; }
+  .fs .disc-face--logo::after { mix-blend-mode: normal; background: radial-gradient(circle at 50% 32%, rgba(255,255,255,.14), transparent 46%); }
+}
+html.is-mobile .fs .work-stage { perspective: none; }
+/* while the page is being scrolled, the decorative loops inside the cards stand still: every frame goes to the slide itself */
+html.is-mobile.is-scrolling .fs .screen .sb-mesh, html.is-mobile.is-scrolling .fs .screen .sb-sparks b,
+html.is-mobile.is-scrolling .fs .screen .logo-orbit, html.is-mobile.is-scrolling .fs .screen .bar-count .live { animation-play-state: paused; }
+
+
+/* =====================================================================================================
+   THE PORTAL ("Let's build") on phones: a stable pinned box and lighter glowing layers
+   ===================================================================================================== */
+@media (max-width: 760px) {
+  .fs .portal-stage { height: 100lvh; }
+  .fs .arch { box-shadow: 0 0 16px rgba(255,90,30,.42); }                 /* one soft glow instead of a 28px outer + 28px inner pair on every arch */
+  .fs .portal-line { will-change: transform, opacity; }                    /* no `filter` layer promotion on three full-width text lines */
 }

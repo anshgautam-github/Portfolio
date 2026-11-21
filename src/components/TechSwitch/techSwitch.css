@@ -262,3 +262,43 @@
   .ts-label { left: 50%; translate: -50% 0; bottom: max(24px, env(safe-area-inset-bottom)); padding: 11px 18px; font-size: 10.5px; letter-spacing: .2em; white-space: nowrap; }
   .ts-label b { font-size: 20px; }
 }
+
+
+/* =====================================================================
+   Smooth-scroll pass
+   Every rule below only removes work from the scroll frames: no full-screen blends, no live blur, no big shadows or masks that repaint as the
+   switch / card values change. The look is the same; the phone just has far less to draw per frame.
+   ===================================================================== */
+/* all devices: whatever is fully hidden is not painted or animated */
+.ts-pin.is-dark-off .ts-dark { visibility: hidden; }
+.ts-pin.is-covered .ts-light { visibility: hidden; }
+.ts-dark { will-change: clip-path; }
+
+@media (max-width: 820px), (pointer: coarse) {
+  /* shorter pin: the same switch + wall in less scroll distance, so it no longer feels like crawling */
+  .ts { height: 285vh; }
+
+  /* the word gap: ":last-of-type" matched every word (each sits alone in its own wrapper), which removed all the spaces */
+  .ts-wd:last-of-type { margin-right: .2em; }
+  .ts-h > span:last-child .ts-wd { margin-right: 0; }
+
+  /* card rise: fixed radius + hairline while it climbs (no per-frame radius / 100px shadow repaint); scale stays on the compositor */
+  .ts .ts-pin { border-radius: 0; box-shadow: none; }
+  .ts.is-rising .ts-pin { border-radius: 28px 28px 0 0; box-shadow: 0 -1px 0 rgba(255,255,255,.55); }
+
+  /* full-screen blend / filter layers are the most expensive thing a phone GPU is asked to do while scrolling */
+  .ts-grain { display: none; }
+  .ts-light-follow { display: none; }
+  .ts-pin::after { display: none; }                       /* the animated rim: a full-screen gradient repainted every frame */
+  .ts-label, .ts-tag, .ts-top span { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .ts-label { background: rgba(0,0,0,.92); }
+  .ts-bgc { -webkit-mask-image: none; mask-image: none; }
+  .ts-lean { transform: none; }                           /* the pointer-lean needs a mouse; skip the 3D context */
+
+  /* things that fade with the switch get their own layer, so the fade is a compositor opacity change, not a repaint */
+  .ts-bgc, .ts-sub, .ts-hint, .ts-tags, .ts-light::before, .ts-light::after { will-change: opacity; }
+  .ts-light::after { animation: none; }                   /* the orbit ring turning forever under a scroll */
+  .ts-hint i { animation-play-state: paused; }
+  .ts-row { contain: layout paint; }
+  .ts-vig { will-change: auto; }
+}

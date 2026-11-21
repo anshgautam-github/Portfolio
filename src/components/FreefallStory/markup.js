@@ -25,6 +25,7 @@ const screen = (ch, i) => `
       <article class="screen" style="--c:${ch.c}" data-chapter="${ch.id}">
         <div class="screen-bg" aria-hidden="true"><i class="sb-mesh m1"></i><i class="sb-mesh m2"></i><i class="sb-mesh m3"></i><i class="sb-gw"><i class="sb-grid"></i></i><i class="sb-spot"></i><span class="sb-sparks">${sparks(i)}</span><i class="sb-grain"></i><i class="sb-vig"></i></div>
         <i class="screen-beam" aria-hidden="true"></i>
+        <i class="screen-dim" aria-hidden="true"></i>
         <header class="screen-bar"><span>Where I&rsquo;ve worked</span><span>${esc(ch.bar)}</span><span class="bar-count"><i class="live"></i>Experience ${i + 1} of ${N}<b class="segs">${segs(i)}</b></span></header>
         <div class="screen-title" aria-hidden="true"><span>${reps(ch.title)}</span></div>
         <div class="disc">

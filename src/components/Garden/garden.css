@@ -585,3 +585,21 @@ html.is-mobile .gd-flock:nth-child(n+2) { display: none !important; }
 html.is-mobile .gd-bird-svg,
 html.is-mobile .gd-b { animation: none !important; }
 html.is-mobile .gd svg [filter] { filter: none !important; }
+
+/* =====================================================================================================================================
+   Phones: smooth scrolling through the night seaside
+   - every main-thread SVG / CSS loop is held while the page is moving (Garden.jsx sets data-scrolling), clouds stay (they are compositor-only)
+   - animated blend modes, drop-shadow glows and the cloud colour filter are replaced with their flat equivalents
+   ===================================================================================================================================== */
+html.is-mobile .gd[data-scrolling="1"] .gd-world *:not(.gd-cloud),
+html.is-mobile .gd[data-scrolling="1"] .gd-critters * { animation-play-state: paused !important; }
+
+html.is-mobile .ss-beams { display: none; }                                     /* screen-blended, animated wedges */
+html.is-mobile .gd[data-night="1"] .ss-lh-lampglow { filter: none; animation: none; }
+html.is-mobile .gd[data-night="1"] .ss-win { filter: none; animation: none; opacity: .9; }
+html.is-mobile .gd-moon svg { filter: none; }                                    /* the soft halo is already the radial .gd-moon-glow */
+/* night clouds: the same colour the brightness/sepia/hue filter produced, as a flat fill, so the moving layers carry no filter */
+html.is-mobile .gd[data-night="1"] .gd-cloud { filter: none; }
+html.is-mobile .gd[data-night="1"] .gd-cloud [fill="#fff"] { fill: #3e4664; }
+html.is-mobile .gd[data-night="1"] .gd-cloud [fill="#8fa6c6"] { fill: #2b3350; }
+html.is-mobile .gd-snd { box-shadow: none; }

@@ -74,17 +74,23 @@ export default function TechSwitch() {
     });
     anims.forEach((a, i) => { a.currentTime = (i * 7919) % 40000; if (reduce) a.pause(); });
 
+    const rowState = rowEls.map(() => -1);
     let p = 0, lastP = -1, vel = 0, lastY = window.scrollY, vis = false, raf = 0, boost = 1;
     const lerpRate = (a, b, k) => a + (b - a) * k;
     const apply = () => {
       const s = sstep(0.1, 0.34, p);            // knob travels, turns green
       const r = sstep(0.3, 0.68, p);            // the dark field opens from the switch
-      pin.style.setProperty("--s", s.toFixed(4));
-      pin.style.setProperty("--r", r.toFixed(4));
+      pin.style.setProperty("--s", s.toFixed(3));
+      pin.style.setProperty("--r", r.toFixed(3));
       pin.classList.toggle("is-on", s > 0.55);
+      /* the light screen is fully covered once the dark field has opened: stop painting it (canvas + glass layers) */
+      pin.classList.toggle("is-covered", r > 0.995);
+      pin.classList.toggle("is-dark-off", r < 0.004);   // nothing of the wall is visible yet: do not paint or animate it
       const W = window.innerWidth;
       rowEls.forEach((el, i) => {
         const re = sstep(0, 1, clamp((r * 1.7 - i * 0.075) / 0.7));
+        if (re === rowState[i]) return;          // nothing moved for this row: no style write, no repaint
+        rowState[i] = re;
         el.style.opacity = re.toFixed(3);
         el.style.transform = `translate3d(${((1 - re) * (i % 2 ? 1 : -1) * W * 0.8).toFixed(1)}px,0,0)`;
       });
@@ -95,11 +101,12 @@ export default function TechSwitch() {
       onRefresh: (self) => { p = self.progress; lastP = p; apply(); },
     });
     const inSt = ScrollTrigger.create({ trigger: root, start: "top 75%", end: "bottom top", onToggle: (self) => pin.classList.toggle("is-in", self.isActive) });
+    let tcLast = "", rising = false;
     /* card rise: --tc is 1 while the section is still climbing in from the bottom of the screen over the pinned projects, 0 once it fills the screen */
     const riseSt = ScrollTrigger.create({
       trigger: root, start: "top bottom", end: "top top", invalidateOnRefresh: true,
-      onUpdate: (self) => root.style.setProperty("--tc", (1 - self.progress).toFixed(3)),
-      onRefresh: (self) => root.style.setProperty("--tc", (1 - self.progress).toFixed(3)),
+      onUpdate: (self) => { const v = (1 - self.progress).toFixed(2); if (v !== tcLast) { tcLast = v; root.style.setProperty("--tc", v); } const rs = self.progress > 0 && self.progress < 0.985; if (rs !== rising) { rising = rs; root.classList.toggle("is-rising", rs); } },
+      onRefresh: (self) => { tcLast = (1 - self.progress).toFixed(2); root.style.setProperty("--tc", tcLast); },
     });
 
     // speed boost from scroll velocity, only while visible
@@ -116,7 +123,7 @@ export default function TechSwitch() {
     const io = new IntersectionObserver(([e]) => {
       vis = e.isIntersecting;
       anims.forEach((a) => { if (reduce) return; vis ? a.play() : a.pause(); });
-      if (vis && !raf) raf = requestAnimationFrame(loop);
+      if (vis && !raf && !IS_MOBILE) raf = requestAnimationFrame(loop);   // phones: constant drift, no scroll-speed boost loop on the main thread
     }, { rootMargin: "100px" });
     io.observe(root);
 
@@ -150,7 +157,7 @@ export default function TechSwitch() {
   const words = "Engineering ideas into intelligent systems.".split(" ");   // line break after "into" (desktop) via CSS order
   return (
     <section ref={sec} className="ts" id="tech-switch" aria-label="Tech stack">
-      <div className="ts-pin">
+      <div className="ts-pin is-dark-off">
         {/* LIGHT: calm cream screen */}
         <div className="ts-light">
           <canvas className="ts-bgc" aria-hidden="true" />

@@ -4,7 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import { World, Critters } from "./Scenery.jsx";
 import "./garden.css";
-import { perf } from "../../lib/perf.js";
+import { perf, IS_MOBILE } from "../../lib/perf.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -142,6 +142,22 @@ export default function Garden({ embedded = false, ctl = null }) {
       let visible = false;
       let time = 0;
 
+      /* phones: while the page is moving, the garden's own work stops (plant sway, intro sprouting, and - through data-scrolling in garden.css - every
+         main-thread SVG loop). It all resumes ~150 ms after the finger lifts, so scrolling only ever pays for the compositor. */
+      let scrolling = false, sTimer = 0;
+      const idleQ = [];
+      const onScrollMove = () => {
+        if (!scrolling) { scrolling = true; if (root.current) root.current.dataset.scrolling = "1"; }
+        clearTimeout(sTimer);
+        sTimer = setTimeout(() => {
+          scrolling = false;
+          if (root.current) delete root.current.dataset.scrolling;
+          while (idleQ.length) idleQ.shift()();
+        }, 150);
+      };
+      if (IS_MOBILE) window.addEventListener("scroll", onScrollMove, { passive: true });
+      const whenIdle = (fn) => { if (IS_MOBILE && scrolling) idleQ.push(fn); else fn(); };
+
       /* ---------------- plant renderer ---------------- */
       const render = (i) => {
         const p = PLANTS[i];
@@ -178,7 +194,7 @@ export default function Garden({ embedded = false, ctl = null }) {
 
       let acc = 0;
       const tick = (_, dt) => {
-        if (!visible || document.hidden) return;
+        if (!visible || document.hidden || scrolling) return;
         acc += dt;
         if (acc < (perf.frameMs ? 66 : 32)) return; // idle sway at ~30fps; growth tweens still render every frame
         time += acc / 1000;
@@ -199,7 +215,8 @@ export default function Garden({ embedded = false, ctl = null }) {
         });
 
       const intro = () => {
-        PLANTS.forEach((_, i) => grow(i, START, { duration: reduce ? 0 : 1.9, ease: "power3.out", delay: reduce ? 0 : 0.15 + Math.random() * 0.7 }));
+        // on a phone the sprouting waits until the scrolling has stopped (21 SVG plants re-drawn every frame is what made the rise stutter)
+        whenIdle(() => PLANTS.forEach((_, i) => grow(i, START, { duration: reduce ? 0 : 1.9, ease: "power3.out", delay: reduce ? 0 : 0.15 + Math.random() * 0.7 })));
         if (!reduce) {
           gsap.from(root.current.querySelectorAll("[data-rise]"), { y: 38, autoAlpha: 0, duration: 1.1, ease: "power3.out", stagger: 0.12 });
         }
@@ -210,7 +227,7 @@ export default function Garden({ embedded = false, ctl = null }) {
         root.current.dataset.live = "0";   // asleep until Toolkit says it is on screen (the CSS loops used to run from mount, before that flag was ever set)
         if (ctl) ctl.current = {
           intro: () => { if (!played) { played = true; intro(); } },
-          live: (on) => { visible = on; if (root.current) root.current.dataset.live = on ? "1" : "0"; },
+          live: (on) => { if (on === visible) return; visible = on; if (root.current) root.current.dataset.live = on ? "1" : "0"; },
         };
       } else {
         ScrollTrigger.create({
@@ -591,6 +608,8 @@ export default function Garden({ embedded = false, ctl = null }) {
       });
 
       return () => {
+        window.removeEventListener("scroll", onScrollMove);
+        clearTimeout(sTimer);
         gsap.ticker.remove(tick);
         cancelAnimationFrame(raf);
         root.current?.removeEventListener("pointermove", onMove);

@@ -28,6 +28,7 @@ export function mountTechBg(canvas, host) {
 
   const loop = (now) => {
     raf = 0; if (!vis) return;
+    if (MOBILE && (host.classList.contains("is-covered") || (now - last < 32))) { raf = requestAnimationFrame(loop); return; }
     const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
     const t = now / 1000;
     const live = P.has && now - P.last < 3500;

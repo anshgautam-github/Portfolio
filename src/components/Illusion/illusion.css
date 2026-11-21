@@ -49,3 +49,6 @@
 /* the "How I work" text is invisible until the fall is over (it only exists in the tail), so none of it can show through the tunnel */
 .ill .ill-mf { visibility: hidden; }
 .ill.is-tail .ill-mf { visibility: visible; }
+
+/* phones / tablets: the text is a normal-flow block that the browser scrolls on the compositor (no JS transform = no frame lag, no giant promoted layer) */
+.ill-mf.ill-mf-flow { z-index: auto; transform: none; will-change: auto; }

@@ -237,3 +237,6 @@ html.is-mobile .pa-tile.pa-bare {
 html[data-motion="paused"] *, html[data-motion="paused"] *::before, html[data-motion="paused"] *::after { animation-play-state: paused !important; }
 .motion-toggle { position: fixed; left: 16px; bottom: 16px; z-index: 9500; padding: 9px 14px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; background: rgba(11,11,13,.78); color: #fff; font: 600 11px/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
 .motion-toggle:hover { background: rgba(11,11,13,.92); }
+
+/* phones: a blurred button over a scene that is moving has to re-blur every frame */
+html.is-mobile .motion-toggle { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(11,11,13,.92); }

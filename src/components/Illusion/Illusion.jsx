@@ -16,7 +16,10 @@ gsap.registerPlugin(ScrollTrigger);
 const pad = (n) => String(n).padStart(2, "0");
 const sstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
+const NATIVE_SCROLL = typeof window !== "undefined" && !!window.matchMedia && (window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(max-width: 820px)").matches);
+
 export default function Illusion() {
+  const flowMode = NATIVE_SCROLL;
   const root = useRef(null);
   const cv = useRef(null);
   const layerEl = useRef(null);
@@ -32,21 +35,48 @@ export default function Illusion() {
 
     // ---------- the void after the fall: the manifesto rises through it (extra scroll length is added to the section) ----------
     const mobile = window.matchMedia("(max-width: 700px)");
-    const vhPx = () => window.innerHeight;
+    // phones / tablets scroll natively (see lib/smooth.js): the text then sits in normal flow and is moved by the browser's compositor, not by JS
+    const native = flowMode;
+    // window.innerHeight changes every time the mobile URL bar slides away; that used to re-run layout() (new section height) in the middle of a scroll.
+    // A 100svh probe is stable, so on touch the height is only re-measured when the width changes (rotation).
+    let probe = null, vhCache = window.innerHeight, wCache = window.innerWidth;
+    if (native) {
+      probe = document.createElement("div");
+      probe.setAttribute("aria-hidden", "true");
+      probe.style.cssText = "position:fixed;left:0;top:0;width:0;height:100vh;height:100svh;visibility:hidden;pointer-events:none";
+      document.body.appendChild(probe);
+      vhCache = probe.offsetHeight || window.innerHeight;
+    }
+    const vhPx = () => (native ? vhCache : window.innerHeight);
     const baseLen = () => (mobile.matches ? 4.8 : 5.6) * vhPx() - vhPx();     // the fall itself (matches the old CSS heights)
     const mfWrap = mfEl.current;
     const mfH = () => (mfWrap ? mfWrap.firstElementChild.offsetHeight : 0);
     const travel = () => mfH() + vhPx() * 0.5;                              // how far the text climbs: from just below the screen to its last line mid-screen
     const tailLen = () => travel() + vhPx() * 1.15;                         // plus a hold of one screen: the stage stays stuck while the next section (Prism) rises over it
-    const layout = () => { el.style.height = Math.round(baseLen() + vhPx() + tailLen()) + "px"; };
+    const layout = () => {
+      el.style.height = Math.round(baseLen() + vhPx() + tailLen()) + "px";
+      // flow mode: the text starts just below the screen when the fall ends and then simply scrolls like any other content
+      if (native && mfWrap) mfWrap.style.top = Math.round(baseLen() + vhPx() * 1.2) + "px";
+    };
     layout();
     let mfRO = null;
     if (mfWrap && window.ResizeObserver) { mfRO = new ResizeObserver(() => { layout(); ScrollTrigger.refresh(); }); mfRO.observe(mfWrap.firstElementChild); }
-    const onResizeMf = () => { layout(); };
+    const onResizeMf = () => {
+      if (native) {
+        if (window.innerWidth === wCache) return;          // URL bar show / hide: nothing to re-lay out
+        wCache = window.innerWidth; vhCache = probe.offsetHeight || window.innerHeight;
+      }
+      layout();
+    };
     window.addEventListener("resize", onResizeMf);
     let tailOn = false;
     const applyTail = (px) => {
       if (!mfWrap) return;
+      if (native) {
+        const on = px > baseLen() + 4;
+        if (on !== tailOn) { tailOn = on; el.classList.toggle("is-tail", on); }
+        return;
+      }
       const m = Math.min(1, Math.max(0, (px - baseLen()) / Math.max(1, travel())));
       // starts fully BELOW the screen (it used to start at 85% of the height, so its first lines peeked in during the fall) and ends exactly where it always did
       const y0 = vhPx() * 1.08, y1 = vhPx() * 1.2 - travel();
@@ -54,7 +84,7 @@ export default function Illusion() {
       const on = px > baseLen() + 4;
       if (on !== tailOn) { tailOn = on; el.classList.toggle("is-tail", on); }
     };
-    const extraCleanup = () => { mfRO && mfRO.disconnect(); window.removeEventListener("resize", onResizeMf); };
+    const extraCleanup = () => { mfRO && mfRO.disconnect(); window.removeEventListener("resize", onResizeMf); probe && probe.remove(); };
 
     // ---------- text beats (scrubbed by scroll) ----------
     const b = { a: q('[data-b="1"]'), b: q('[data-b="2"]'), c: q('[data-b="3"]'), d: q('[data-b="4"]') };
@@ -82,7 +112,11 @@ export default function Illusion() {
     const S = { p: 0, sp: 0, z: 0, mx: 0, my: 0, tmx: 0, tmy: 0, t: 0 };
     let destroyed = false;
 
-    const track = (t) => { const px = t.scroll() - t.start; S.p = Math.min(1, Math.max(0, px / baseLen())); applyTail(px); };
+    let kick = null;
+    const track = (t) => {
+      const px = t.scroll() - t.start; S.p = Math.min(1, Math.max(0, px / baseLen())); applyTail(px);
+      if (S.p < 0.999 && kick) kick();                        // scrolled back up into the fall: wake the shader
+    };
     st = ScrollTrigger.create({ trigger: el, start: "top top", end: "bottom bottom", onUpdate: track, onRefresh: track });
 
     if (!gl) { el.classList.add("is-static"); return () => { extraCleanup(); ctx.revert(); st.kill(); }; }
@@ -114,6 +148,9 @@ export default function Illusion() {
       raf = 0; if (destroyed || !vis) return;
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       if (!reduce) S.t += dt;
+      // once the fall is over (the text is climbing through the black void) the shader holds its last frame: a full-screen fragment shader
+      // running behind the text is what made scrolling there stutter on phones
+      const parked = tailOn && S.p >= 0.999 && Math.abs(S.p - S.sp) < 0.0006;
       const k = 1 - Math.exp(-dt * 5.5);
       S.sp += (S.p - S.sp) * k;                              // viscous follow: wheel steps feel like one continuous fall
       S.z = 24 * Math.pow(S.sp, 1.3);
@@ -136,9 +173,9 @@ export default function Illusion() {
         if (layerEl.current) layerEl.current.textContent = pad(Math.floor(S.z) + 1);
         if (barEl.current) barEl.current.style.transform = `scaleY(${S.sp.toFixed(4)})`;
       }
-      raf = requestAnimationFrame(frame);
+      if (!parked) raf = requestAnimationFrame(frame);
     };
-    const kick = () => { if (!raf && vis && !destroyed) { last = performance.now(); raf = requestAnimationFrame(frame); } };
+    kick = () => { if (!raf && vis && !destroyed) { last = performance.now(); raf = requestAnimationFrame(frame); } };
     io = new IntersectionObserver(([en]) => { vis = en.isIntersecting; if (vis) kick(); }, { rootMargin: "300px 0px" });
     io.observe(el);
 
@@ -170,10 +207,11 @@ export default function Illusion() {
           </div>
         </div>
 
-        <div className="ill-mf" ref={mfEl}><Manifesto embedded /></div>
+        {!flowMode && <div className="ill-mf" ref={mfEl}><Manifesto embedded /></div>}
 
         <p className="ill-cue" aria-hidden="true"><i />Scroll to fall in</p>
       </div>
+      {flowMode && <div className="ill-mf ill-mf-flow" ref={mfEl}><Manifesto embedded native /></div>}
     </section>
   );
 }
