@@ -52,3 +52,12 @@
 
 /* phones / tablets: the text is a normal-flow block that the browser scrolls on the compositor (no JS transform = no frame lag, no giant promoted layer) */
 .ill-mf.ill-mf-flow { z-index: auto; transform: none; will-change: auto; }
+
+
+/* Phones: the address bar sliding away makes the page ~70-100 px taller than this 100svh stage, which left a dark strip under the artwork.
+   The stage keeps its layout (text, HUD and cue stay where they are); its clip is allowed to reach --gap below the box and the canvas + grid
+   are that much taller, so the artwork runs to the bottom of the screen. clip-path is a plain rectangle: no mask, no extra layer. */
+@media (pointer: coarse) {
+  .ill-stage { overflow: visible; clip-path: inset(0 0 calc(var(--gap) * -1) 0); }
+  .ill-cv, .ill-grid { height: calc(100% + var(--gap)); }
+}

@@ -132,7 +132,7 @@ export default function Illusion() {
     const U = {}; ["uR", "uM", "uC", "uT", "uZ", "uSat", "uHole", "uIn", "uP", "uWob", "uTilt"].forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
 
     const size = () => {
-      const stage = canvas.parentElement; const w = stage.clientWidth, h = stage.clientHeight;
+      const stage = canvas.parentElement; const w = stage.clientWidth, h = canvas.clientHeight || stage.clientHeight;   // the canvas can be taller than the stage on phones (it bleeds into the address-bar gap): size the buffer to the canvas so the picture is not stretched
       const dpr = Math.min(window.devicePixelRatio || 1, touch ? 1.25 : 1.5) * (touch ? 0.8 : 1);
       canvas.width = Math.max(2, Math.round(w * dpr)); canvas.height = Math.max(2, Math.round(h * dpr));
       gl.viewport(0, 0, canvas.width, canvas.height);

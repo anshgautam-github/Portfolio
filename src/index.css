@@ -10,6 +10,11 @@
   --font-serif: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
 }
 
+/* --gap: how much taller the page is (on phones) once the browser's address bar has slid away. svh = bars shown, lvh = bars hidden, so this is a
+   constant, not something that changes mid-scroll. Pinned screens keep their layout at the small height and let their artwork bleed into this gap. */
+:root { --gap: 0px; }
+@supports (height: 100lvh) { @media (pointer: coarse) { :root { --gap: max(0px, calc(100lvh - 100svh)); } } }
+
 html,
 body,
 #root {
