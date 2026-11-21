@@ -400,7 +400,7 @@ export function mountFreefallStory(root, { base, mode }) {
     if (!FG.on) return;
     if (Math.hypot(e.clientX - FG.cx, e.clientY - FG.cy) < Math.max(70, FG.size * 0.95)) { fig.spin(); Sound.tick(); }
   }, { passive: true });
-  const earth = PAGE ? null : createEarth(earthEl, base, { maxDpr: IS_MOBILE ? 1 : 1.5, regions: !IS_MOBILE, hold: IS_MOBILE && LOADER, scale: IS_MOBILE ? 0.7 : 1, adaptive: IS_MOBILE, minScale: 0.55 });
+  const earth = PAGE ? null : createEarth(earthEl, base, { maxDpr: IS_MOBILE ? 1 : 1.5, regions: !IS_MOBILE, hold: false, scale: IS_MOBILE ? 0.7 : 1, adaptive: IS_MOBILE, minScale: 0.55 });
   const campus = createCampus($('#fs-campus'), base);
   const rocket = createRocket($('#fs-rocket'));
   const rocketEl = $('#fs-rocket'); let rocketOn = true;   // a full-screen layer: out of the compositor as soon as the capsule is gone
@@ -708,7 +708,7 @@ export function mountFreefallStory(root, { base, mode }) {
 
     // --- the planet
     const eo = (earth && earth.ready ? 1 : 0) * (1 - sstep(0.315, 0.345, p));
-    earthFade = lerp(earthFade, eo, 0.06);
+    earthFade = lerp(earthFade, eo, eo > earthFade ? 0.2 : 0.06);   // fades IN fast (the planet should be there the moment the curtain lifts), out at the old pace
     const showEarth = !!earth && p < 0.36 && earthFade > 0.003;
     if (showEarth !== earthOn) { earthOn = showEarth; earthEl.style.visibility = showEarth ? 'visible' : 'hidden'; if (showEarth && earth) earth.invalidate(); }
     if (showEarth) {

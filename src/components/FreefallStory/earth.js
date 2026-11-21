@@ -178,7 +178,7 @@ export function createEarth(canvas, base, { maxDpr = 1.5, regions = true, hold =
   // `hold`: textures are fetched and decoded straight away, but the main-thread GPU uploads wait until E.release() (the loader's name is being written first)
   const pumpUp = () => {
     if (held || upBusy || !upQ.length) return; upBusy = true;
-    requestAnimationFrame(() => { const job = upQ.shift(); try { if (!E.dead) job(); } catch (e) { /* ignore */ } setTimeout(() => { upBusy = false; pumpUp(); }, 120); });
+    requestAnimationFrame(() => { const job = upQ.shift(); try { if (!E.dead) job(); } catch (e) { /* ignore */ } setTimeout(() => { upBusy = false; pumpUp(); }, 60); });
   };
   const load = (url, unit, mip, done, cors) => {
     const rec = { unit, mip, tex: mkTex(unit, mip), img: null }, img = new Image();

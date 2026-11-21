@@ -247,3 +247,23 @@
   .mf-glitch.is-on::before, .mf-glitch.is-on::after { animation: none; }
   .mf-neural.is-on .mf-nl line { animation: none; }
 }
+
+
+/* =====================================================================================================================================
+   Inline chips can never collide with the words: every chip keeps its own box, its labels are clipped to it, and neighbours are spaced apart
+   ===================================================================================================================================== */
+.mf-chip { position: relative; flex: none; box-sizing: border-box; white-space: nowrap; text-indent: 0; }
+.mf-chip + .mf-chip { margin-left: .22em; }
+/* the 163M ring: a true circle at every width, the label is clipped to the inner disc and fixed to a small size */
+.mf-ring { width: 1.1em; height: 1.1em; aspect-ratio: 1; }
+.mf-ring-in { overflow: hidden; }
+.mf-ring-in b { font-size: .3em !important; line-height: 1 !important; letter-spacing: 0 !important; white-space: nowrap; max-width: 100%; }
+/* project peeks: the label stays inside the picture */
+.mf-shot { flex: none; }
+.mf-shot i { max-width: calc(100% - .5em); overflow: hidden; white-space: nowrap; text-overflow: clip; font-size: max(5.5px, .27em) !important; }
+.mf-code-t, .mf-open-t, .mf-av-n b, .mf-app-in b { white-space: nowrap; max-width: 100%; overflow: hidden; }
+@media (max-width: 760px) {
+  .mf-ring { height: 1.1em; }                    /* the phone rule that sets every chip to 1em tall used to squash the ring into an oval */
+  .mf-chip + .mf-chip { margin-left: .3em; }
+  .mf-p { line-height: 1.4; }                    /* a hair more leading so a 1em chip with its glow clears the lines above and below */
+}

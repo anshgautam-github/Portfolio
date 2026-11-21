@@ -10,6 +10,7 @@ import "./index.css";
 import App from "./App.jsx";
 import { initSmoothScroll } from "./lib/smooth.js";
 import { initOffscreenPause } from "./lib/offscreen.js";
+import { initGapFill } from "./lib/gapFill.js";
 import { batchStartupRefresh } from "./lib/stRefresh.js";
 import { startFlickerProbe } from "./lib/flickerProbe.js";
 
@@ -33,4 +34,5 @@ document.getElementById("static-identity")?.remove();
 
 // endless decorative loops sleep while their section is far off-screen (see lib/offscreen.js)
 initOffscreenPause();
+initGapFill();         // phones: paint the strip behind pinned screens that shows when the address bar hides (see lib/gapFill.js)
 startFlickerProbe();   // no-op unless the URL has ?probe

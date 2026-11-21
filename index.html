@@ -37,6 +37,11 @@
     <!-- Freefall block: Archivo at its full width/weight range + Instrument Serif -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=Instrument+Serif:ital@0;1&display=swap" media="print" onload="this.media='all'" />
     <noscript><style>#static-identity{position:static!important;width:auto!important;height:auto!important;clip:auto!important;margin:2rem!important;color:#f2f2ee;font:16px/1.5 system-ui,sans-serif}#static-identity a{color:#8fb0ff}body{background:#101211}</style><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,400;125,800&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Inter+Tight:wght@400;500;700;800&display=swap" /></noscript>
+    <!-- the planet's textures start downloading with the HTML, not when the loader's JS has booted: the Earth is on screen the moment the curtain lifts -->
+    <link rel="preload" as="image" href="/freefall-story/earth/earth_atmos_2048.jpg" fetchpriority="high" />
+    <link rel="preload" as="image" href="/freefall-story/earth/earth_lights_2048.png" />
+    <link rel="preload" as="image" href="/freefall-story/earth/earth_specular_2048.jpg" />
+    <link rel="preload" as="image" href="/freefall-story/earth/earth_clouds_1024.png" />
   </head>
   <body>
     <div id="static-identity">
