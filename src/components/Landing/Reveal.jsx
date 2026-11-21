@@ -5,6 +5,10 @@ import { mountLanding } from "./landing.js";
 import { landingContent } from "./landingContent.js";
 import "./landing.css";
 import "./reveal.css";
+import { IS_MOBILE } from "../../lib/perf.js";
+
+// the WebGL landing is frozen (last frame kept) once the card has shrunk this far; phones freeze it earlier, the card is already well off the full screen
+const FREEZE_AT = IS_MOBILE ? 0.14 : 0.22;
 
 /**
  * <Reveal /> — the landing screen plus its scroll transition (see reveal.js):
@@ -19,7 +23,7 @@ export default function Reveal({ content = landingContent, scrollLength = 3.75 }
     // the WebGL scene is by far the heaviest thing on screen: lighten it as soon as the card shrinks, freeze it once it is small
     let mode = 0;
     rv.onProgress = (p) => {
-      const m = p > 0.22 ? 2 : p > 0.008 ? 1 : 0;
+      const m = p > FREEZE_AT ? 2 : p > 0.008 ? 1 : 0;
       if (m !== mode) { mode = m; destroyLanding.setLoad && destroyLanding.setLoad(m); }
     };
     ScrollTrigger.sort();

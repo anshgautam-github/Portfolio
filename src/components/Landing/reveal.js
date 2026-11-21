@@ -49,7 +49,9 @@ const END = 0.655;   // fraction of the original timeline kept: the signature fi
 
 export function mountReveal(root, content = revealContent, { scrollLength = 3.75 } = {}) {
   const c = content;
+  const STICKY = IS_MOBILE && typeof CSS !== "undefined" && CSS.supports && CSS.supports("position", "sticky");
   root.classList.add("rv");
+  if (STICKY) { root.classList.add("rv-sticky"); root.style.setProperty("--rv-len", String(+(scrollLength * END).toFixed(4))); }
   root.innerHTML = `<div class="rv-stage" data-stage>
     <div class="rv-art" aria-hidden="true">
       <canvas class="rv-fx"></canvas><i class="rv-neb n1"></i><i class="rv-neb n2"></i><i class="rv-neb n3"></i><i class="rv-spot"></i>
@@ -105,15 +107,18 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
   let offDust = null;
   let fx = null;   // the live background (revealFx.js), created right after the timeline
   const ctx = gsap.context(() => {
+    /* Phones: the stage is held with CSS `position: sticky` inside a root that is already tall enough (see .rv-sticky in reveal.css), so the
+       browser keeps it in place on the compositor while the finger is moving. A GSAP pin is `position: fixed` + a JS offset; on a native-scroll
+       phone that is re-positioned on the main thread after the page has already moved, which is the visible shake / lag during a pinned scrub.
+       Same scroll distance, same scrubbed timeline: only the holding mechanism changes. Desktop keeps the GSAP pin. */
     const tl = gsap.timeline({
       defaults: { ease: "none" },
       scrollTrigger: {
-        trigger: stage,
-        pin: stage,
+        trigger: STICKY ? root : stage,
+        ...(STICKY ? {} : { pin: stage, pinSpacer: root }),   // pinSpacer: our own wrapper, so GSAP never re-parents the stage (the landing's CSS intro animations are not restarted on refresh)
         refreshPriority: 10,      // measured before sections created earlier (e.g. Warp), so their start positions include our pin spacing
-        pinSpacer: root,          // our own wrapper: GSAP then never re-parents the stage, so the landing's CSS intro animations are not restarted on every refresh
         start: "top top",
-        end: () => "+=" + Math.round(window.innerHeight * scrollLength * END),
+        end: () => STICKY ? "+=" + Math.max(1, root.offsetHeight - stage.offsetHeight) : "+=" + Math.round(window.innerHeight * scrollLength * END),
         scrub: IS_MOBILE ? 0.2 : 0.5,   // phones: less smoothing lag behind the finger
         anticipatePin: IS_MOBILE ? 0 : 1,   // anticipatePin pre-pins early on native touch scroll = visible jump
         invalidateOnRefresh: true,
@@ -126,10 +131,12 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
     tl.set(stage, { backgroundColor: "#000000", "--rv-ink": "#ffffff" }, 0);
     tl.set("[data-bg]", { opacity: 0 }, 0);
     // scroll-linked life in the light background: rings turn, shapes drift at different depths
-    tl.to(".rv-rings", { rotation: 90, transformOrigin: "1000px 450px", duration: END, ease: "none" }, 0);
-    tl.to(".ob1", { rotation: 300, transformOrigin: "1000px 450px", duration: END, ease: "none" }, 0);
-    tl.to(".ob2", { rotation: -220, transformOrigin: "1000px 450px", duration: END, ease: "none" }, 0);
-    tl.to(".ob3", { rotation: 140, transformOrigin: "1000px 450px", duration: END, ease: "none" }, 0);
+    if (!IS_MOBILE) {   // phones: rotating SVG groups re-rasterise the whole full-screen SVG every frame, so the rings stay still there
+      tl.to(".rv-rings", { rotation: 90, transformOrigin: "1000px 450px", duration: END, ease: "none" }, 0);
+      tl.to(".ob1", { rotation: 300, transformOrigin: "1000px 450px", duration: END, ease: "none" }, 0);
+      tl.to(".ob2", { rotation: -220, transformOrigin: "1000px 450px", duration: END, ease: "none" }, 0);
+      tl.to(".ob3", { rotation: 140, transformOrigin: "1000px 450px", duration: END, ease: "none" }, 0);
+    }
     tl.to(".rv-gl.g1", { yPercent: -70, rotation: 24, duration: END, ease: "none" }, 0);
     tl.to(".rv-gl.g2", { yPercent: 55, rotation: -30, duration: END, ease: "none" }, 0);
     tl.to(".rv-gl.g4", { yPercent: 60, rotation: 40, duration: END, ease: "none" }, 0);
@@ -227,7 +234,8 @@ export function mountReveal(root, content = revealContent, { scrollLength = 3.75
       offDust && offDust();
       fx && fx.destroy();
       root.innerHTML = "";
-      root.classList.remove("rv");
+      root.classList.remove("rv", "rv-sticky");
+      root.style.removeProperty("--rv-len");
     },
   };
   return api;

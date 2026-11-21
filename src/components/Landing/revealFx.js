@@ -121,7 +121,7 @@ export function mountRevealFx(stage) {
 
     /* a shooting star now and then */
     if (!still) {
-      if (!star && t > nextStar) {
+      if (!IS_MOBILE && !star && t > nextStar) {
         const fromLeft = Math.random() < 0.5, a = (fromLeft ? 0.35 : Math.PI - 0.35) + (Math.random() - 0.5) * 0.25;
         star = { x: fromLeft ? Math.random() * W * 0.5 : W * (0.5 + Math.random() * 0.5), y: Math.random() * H * 0.35, a, s: 1000 + Math.random() * 500, life: 0, len: 170 + Math.random() * 120 };
         nextStar = t + 6 + Math.random() * 7;
@@ -140,6 +140,7 @@ export function mountRevealFx(stage) {
 
   const loop = (now) => {
     raf = 0; if (!running) return;
+    if (IS_MOBILE && lastT && now - lastT < 30) { raf = requestAnimationFrame(loop); return; }   // phones: ~30 fps is plenty for drifting stars, and leaves the other frames to the scroll
     const dt = Math.min(0.05, Math.max(0.001, (now - (lastT || now)) / 1000)); lastT = now;
     const dp = Math.abs(prog - lastProg) / dt; lastProg = prog;
     warp += (Math.min(1, dp * 0.9) - warp) * 0.1;
@@ -169,8 +170,8 @@ export function mountRevealFx(stage) {
   nextStar = 3; setup();
 
   return {
-    /* progress of the landing -> reveal scroll: the field only runs once the card starts to shrink (before that the card hides it) */
-    setProgress(p) { prog = p; const en = p > 0.004 && p < 0.985; if (en !== enabled) { enabled = en; sync(); } },
+    /* phones start the stars at ~10% progress: the card still covers the whole screen before that. Progress of the landing -> reveal scroll: the field only runs once the card starts to shrink (before that the card hides it) */
+    setProgress(p) { prog = p; const en = p > (IS_MOBILE ? 0.1 : 0.004) && p < 0.985; if (en !== enabled) { enabled = en; sync(); } },
     destroy() { running = false; if (raf) cancelAnimationFrame(raf); io.disconnect(); ro.disconnect(); window.removeEventListener("pointermove", onMove); document.removeEventListener("visibilitychange", onVis); },
   };
 }

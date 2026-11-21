@@ -410,3 +410,26 @@
 }
 /* decorative loops sit still while the page is scrolling, so every frame goes to the shrink and the signature */
 html.is-mobile.is-scrolling .rv-art .rv-neb, html.is-mobile.is-scrolling .rv-animsvg *, html.is-mobile.is-scrolling .rv-art-grain { animation-play-state: paused !important; }
+
+
+/* =====================================================================
+   Phone smoothness pass (transition)
+   Same artwork and timing; fewer things to repaint while the card shrinks and the signature signs itself.
+   ===================================================================== */
+/* sticky hold (see reveal.js): the root is tall enough for the whole scrub, the stage sticks to the top of it on the compositor */
+.rv.rv-sticky { height: calc(100svh * (1 + var(--rv-len, 2.4))); }
+.rv.rv-sticky > .rv-stage { position: sticky; top: 0; }
+
+@media (max-width: 1024px), (pointer: coarse) {
+  /* decorative loops that ran for ever under the scroll: still on phones (the stars canvas keeps the sky alive) */
+  .rv-art .rv-neb, .rv-orb.o3, .rv-sp { animation: none; }
+  .rv-sp { opacity: .8; }
+  .rv-gl .cube { animation-duration: 28s; }
+  /* a full-screen noise tile and a pointer spotlight that a touch screen cannot even aim */
+  .rv-art-grain, .rv-art .rv-spot { display: none; }
+  /* the widest, faintest signature underlay (30px stroke): drops a third of the stroked paths repainted per frame; the 18px glow + ink stay */
+  .rv-sig [data-sigg] { display: none; }
+  .rv-sig [data-sigg2] { stroke: rgba(120, 165, 255, .42); }
+  /* static artwork never needs its own animated layer now that the rings do not turn */
+  .rv-animsvg { will-change: auto; transform: none; }
+}
