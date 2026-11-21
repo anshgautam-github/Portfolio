@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { mountAboutFx } from "../FreefallStory/aboutFx.js";
+import { IS_MOBILE } from "../../lib/perf.js";
 import "./prism.css";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -58,7 +59,9 @@ export default function Prism() {
 
     const render = () => {
       const e = P.ent, o = P.out;
-      root.style.setProperty("--pc", (1 - e).toFixed(3));   // 1 while the card is still rising in, 0 once it fills the screen
+      // 1 while the card is still rising in, 0 once it fills the screen. Phones skip it: changing an inherited custom property re-styles the whole
+      // section (and the card's shadows + rounded clip were re-painted every frame of the rise); there the entrance is the plain scroll itself.
+      if (!IS_MOBILE) root.style.setProperty("--pc", (1 - e).toFixed(3));
       const ey = (1 - e) * 62 - o * 26;                 // vh: the bar starts below the fold and climbs into place
       const sc = 0.84 + 0.16 * e - o * 0.12;
       const th = P.th + (1 - e) * -52;
@@ -94,13 +97,13 @@ export default function Prism() {
       const riseTo = (p) => gsap.to(P, { ent: 1 - Math.pow(1 - p, 2.4), duration: 0.45, ease: "power2.out", overwrite: "auto", onUpdate: render });
       pre = ScrollTrigger.create({
         trigger: root, start: "top bottom", end: "top top", invalidateOnRefresh: true,
-        onUpdate: (self) => riseTo(self.progress),
+        onUpdate: (self) => { if (IS_MOBILE) { P.ent = 1 - Math.pow(1 - self.progress, 2.4); render(); } else riseTo(self.progress); },   // phones: follow the finger exactly, no 0.45 s catch-up tween
         onRefresh: (self) => { P.ent = 1 - Math.pow(1 - self.progress, 2.4); render(); },
       });
       const H = window.innerHeight;
       tl = gsap.timeline({
         defaults: { ease: "none" },
-        scrollTrigger: { trigger: root, start: "top top", end: () => "+=" + window.innerHeight * 5.6, pin: true, scrub: 0.6, anticipatePin: 1, invalidateOnRefresh: true },
+        scrollTrigger: { trigger: root, start: "top top", end: () => "+=" + window.innerHeight * 5.6, pin: true, scrub: IS_MOBILE ? true : 0.6, anticipatePin: 1, invalidateOnRefresh: true },
         onUpdate: render,
       });
       const T = 10.2;

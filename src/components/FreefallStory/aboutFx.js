@@ -22,7 +22,7 @@ export function mountAboutFx(host) {
   let W = 0, H = 0, dpr = 1, N = 0;
   let x, y, ox, oy, vx, vy, age, life, hue;
   let px = 0, py = 0, tx = 0, ty = 0, power = 0.45, lastMove = -1e9, inside = false;
-  let boost = 0, lastSy = window.scrollY, lastT = 0, running = false, raf = 0, frame = 0, spotX = -1, spotY = -1;
+  let boost = 0, lastDraw = 0, lastSy = window.scrollY, lastT = 0, running = false, raf = 0, frame = 0, spotX = -1, spotY = -1;
   const ripples = [];
   const R = () => Math.max(130, Math.min(W, 1400) * 0.13);
 
@@ -111,6 +111,9 @@ export function mountAboutFx(host) {
   const loop = (now) => {
     raf = 0;
     if (!running) return;
+    // phones: 30 fps is plenty for slow drifting threads and halves the canvas + compositing work behind the scrolling content
+    if (IS_MOBILE && now - lastDraw < 30) { raf = requestAnimationFrame(loop); return; }
+    lastDraw = now;
     const dt = Math.min(0.05, Math.max(0.001, (now - (lastT || now)) / 1000)); lastT = now;
     const t = now / 1000;
     /* pointer: the real one while it is moving over the section, otherwise a ghost that wanders */
@@ -123,11 +126,14 @@ export function mountAboutFx(host) {
     for (let j = ripples.length - 1; j >= 0; j--) { const rp = ripples[j]; rp.r += dt * 520; rp.a -= dt * 0.9; if (rp.a <= 0) ripples.splice(j, 1); }
     step(dt, t, true);
     drawFrame();
-    if (Math.abs(px - spotX) > 0.6 || Math.abs(py - spotY) > 0.6) {
-      spotX = px; spotY = py;
-      wrap.style.setProperty("--mx", px.toFixed(1) + "px"); wrap.style.setProperty("--my", py.toFixed(1) + "px");
+    // the pointer lattice + spotlight are hidden on phones (see prism.css): no custom-property writes, so no full-screen masked layer is re-painted per frame
+    if (!IS_MOBILE) {
+      if (Math.abs(px - spotX) > 0.6 || Math.abs(py - spotY) > 0.6) {
+        spotX = px; spotY = py;
+        wrap.style.setProperty("--mx", px.toFixed(1) + "px"); wrap.style.setProperty("--my", py.toFixed(1) + "px");
+      }
+      wrap.style.setProperty("--pw", power.toFixed(3));
     }
-    wrap.style.setProperty("--pw", power.toFixed(3));
     raf = requestAnimationFrame(loop);
   };
   const start = () => { if (running || reduce) return; running = true; lastT = 0; raf = requestAnimationFrame(loop); };

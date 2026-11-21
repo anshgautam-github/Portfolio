@@ -26,7 +26,7 @@ const ACCENT = "#6f95f2";
 export default function PushTransition({ from = ".kimi .last-layer", to = "[data-warp-wrap]" }) {
   useLayoutEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
-    let iris = null, st = null, hst = null, A = null, B = null, cv = null, cx = null, last = 0, hlast = 0;
+    let iris = null, st = null, hst = null, A = null, B = null, cv = null, cx = null, last = 0, hlast = 0, sec = null, ringKey = "", lastRad = -1;
 
     /* Minimal hand-off: the projects section is revealed by a single clean vertical edge travelling right -> left, with a hairline
        on the edge and a small label riding it. The paddock just steps back (slight scale + dim). No blur, no glass, no extra layers. */
@@ -36,7 +36,7 @@ export default function PushTransition({ from = ".kimi .last-layer", to = "[data
       cv.setAttribute("aria-hidden", "true");
       cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:41;pointer-events:none;display:none;overflow:hidden";
       cv.innerHTML =
-        '<div data-rg="1" style="position:absolute;left:0;top:0;box-sizing:border-box;border:1px solid rgba(255,255,255,.3);box-shadow:0 -26px 80px -12px rgba(0,0,0,.6),0 0 60px -10px rgba(111,149,242,.35);transform-origin:0 0;will-change:transform,opacity">' +
+        '<div data-rg="1" style="position:absolute;left:0;top:0;box-sizing:border-box;border:1px solid rgba(255,255,255,.3);' + (IS_MOBILE ? 'transform-origin:50% 0;' : 'box-shadow:0 -26px 80px -12px rgba(0,0,0,.6),0 0 60px -10px rgba(111,149,242,.35);transform-origin:0 0;') + 'will-change:transform,opacity">' +
         '<span data-lb="1" style="position:absolute;left:20px;top:-32px;white-space:nowrap;font:500 11px/1 \'JetBrains Mono\',ui-monospace,monospace;letter-spacing:.42em;color:#fff;will-change:opacity">( 03 )&nbsp;&nbsp;SELECTED WORK</span></div>';
       document.body.appendChild(cv);
       cx = { rg: cv.querySelector('[data-rg]'), lb: cv.querySelector('[data-lb]') };
@@ -47,6 +47,8 @@ export default function PushTransition({ from = ".kimi .last-layer", to = "[data
       if (A && A.dataset.hold === undefined) { A.style.transform = ""; A.style.filter = ""; A.style.willChange = ""; A.style.pointerEvents = ""; }
       if (B) { if (B.dataset.bg !== undefined) { B.style.background = B.dataset.bg; delete B.dataset.bg; } B.style.transform = ""; B.style.transformOrigin = ""; B.style.clipPath = ""; B.style.willChange = ""; B.style.zIndex = ""; B.style.pointerEvents = ""; }
       if (cv) cv.style.display = "none";
+      if (sec) { sec.style.borderRadius = ""; sec = null; }
+      lastRad = -1; ringKey = "";
     };
 
     const apply = (p) => {
@@ -81,21 +83,40 @@ export default function PushTransition({ from = ".kimi .last-layer", to = "[data
 
       // below the card's own content (the pin spacer) the wrap's light gradient would show: keep it dark while it is a card
       if (B.dataset.bg === undefined) B.dataset.bg = B.style.background;
-      B.style.background = "#05070d";
-      B.style.willChange = "transform, clip-path";
+      // phones: dark only BELOW the first screen, so the card's rounded top corners are not squared off by the wrap's own background
+      B.style.background = IS_MOBILE ? "linear-gradient(#05070d,#05070d) 0 100svh / 100% calc(100% - 100svh) no-repeat" : "#05070d";
+      B.style.willChange = IS_MOBILE ? "transform" : "transform, clip-path";
       B.style.zIndex = "40";
       B.style.pointerEvents = "none";
       B.style.transformOrigin = "0 0";
       B.style.transform = `translate3d(${((W * (1 - s)) / 2).toFixed(2)}px, ${(-H * (1 - sp) + yTop).toFixed(2)}px, 0) scale(${s.toFixed(4)})`;
-      B.style.clipPath = `inset(0px round ${(rad / s).toFixed(2)}px)`;
+      if (IS_MOBILE) {
+        /* a rounded clip-path on the whole wrap (~14 screens tall: it carries the pin spacer) is re-masked at that full height on every frame.
+           The card's first screen is the only part that is ever visible here, so the rounding goes on that one screen-sized section instead
+           (whole pixels, and it only changes while the card widens). The rest of the animation is transform / opacity only. */
+        if (!sec || !sec.isConnected) sec = B.querySelector('section[aria-label="Selected projects"]');
+        const rr = Math.round(rad / s);
+        if (sec && rr !== lastRad) { lastRad = rr; sec.style.borderRadius = rr + "px"; }
+      } else {
+        B.style.clipPath = `inset(0px round ${(rad / s).toFixed(2)}px)`;
+      }
 
       // a hairline ring, a soft glow and the label hug the card's edge while it is still a card
-      const cw = W * s, ch = Math.max(0, H - yTop) + 60;
       const vis = clamp01(rise * 6) * (1 - clamp01((grow - 0.55) / 0.45));
-      cx.rg.style.width = cw.toFixed(1) + "px";
-      cx.rg.style.height = ch.toFixed(1) + "px";
-      cx.rg.style.borderRadius = rad.toFixed(1) + "px";
-      cx.rg.style.transform = `translate3d(${((W - cw) / 2).toFixed(2)}px, ${yTop.toFixed(2)}px, 0)`;
+      if (IS_MOBILE) {
+        /* fixed size, moved and scaled with a transform: no layout and no re-paint of the ring while it climbs */
+        const cw0 = W - 2 * SIDE, key = W + "x" + H;
+        if (key !== ringKey) { ringKey = key; cx.rg.style.width = cw0.toFixed(1) + "px"; cx.rg.style.height = (H + 60) + "px"; }
+        const k = s / (cw0 / W);
+        cx.rg.style.borderRadius = Math.round(rad / k) + "px";
+        cx.rg.style.transform = `translate3d(${SIDE.toFixed(2)}px, ${yTop.toFixed(2)}px, 0) scale(${k.toFixed(4)})`;
+      } else {
+        const cw = W * s, ch = Math.max(0, H - yTop) + 60;
+        cx.rg.style.width = cw.toFixed(1) + "px";
+        cx.rg.style.height = ch.toFixed(1) + "px";
+        cx.rg.style.borderRadius = rad.toFixed(1) + "px";
+        cx.rg.style.transform = `translate3d(${((W - cw) / 2).toFixed(2)}px, ${yTop.toFixed(2)}px, 0)`;
+      }
       cx.rg.style.opacity = vis.toFixed(3);
       cx.lb.style.opacity = (clamp01((rise - 0.35) / 0.4) * (1 - clamp01(grow * 3))).toFixed(3);
     };
@@ -186,9 +207,11 @@ export default function PushTransition({ from = ".kimi .last-layer", to = "[data
         start: "top bottom",
         end: "top top",
         invalidateOnRefresh: true,
-        onUpdate: (self) => { tgt = self.progress; wake(); },
-        onLeave: () => { tgt = 1; cur = 1; wake(); },
-        onLeaveBack: () => { tgt = 0; cur = 0; wake(); },
+        /* phones: the eased chase (speed-capped to ~1.3 s) trails the finger and keeps playing after the swipe has stopped, which reads as slow
+           and floaty. They follow the scroll exactly, in the same frame the position was read. Desktop keeps the eased sweep. */
+        onUpdate: (self) => { tgt = self.progress; if (IS_MOBILE) { cur = tgt; apply(cur); } else wake(); },
+        onLeave: () => { tgt = 1; cur = 1; if (IS_MOBILE) apply(1); else wake(); },
+        onLeaveBack: () => { tgt = 0; cur = 0; if (IS_MOBILE) apply(0); else wake(); },
       });
     };
 

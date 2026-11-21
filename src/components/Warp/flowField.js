@@ -1,5 +1,5 @@
 /* Flow field: hundreds of fine light threads drift along a slowly shifting current; the pointer parts the stream like a stone in water. */
-import { capDpr } from "../../lib/perf.js";
+import { capDpr, perf } from "../../lib/perf.js";
 export function startFlow(canvas) {
   const g = canvas.getContext("2d");
   const reduce = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -19,7 +19,7 @@ export function startFlow(canvas) {
     raf = 0;
     if (dead || !vis) return;
     raf = requestAnimationFrame(tick);
-    if (t - last < 30) return; last = t;
+    if (t - last < 30 || perf.hold) return; last = t;   // perf.hold: a phone is sliding this section in: keep the last frame, spend the frame on the move
     // fade previous frame to leave trails
     g.globalCompositeOperation = "destination-out";   // erase a little alpha each frame: trails fade but the canvas stays transparent (the warp cursor shows through)
     g.fillStyle = "rgba(0,0,0,.085)"; g.fillRect(0, 0, W, H);

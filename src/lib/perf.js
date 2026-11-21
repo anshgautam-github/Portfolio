@@ -34,7 +34,7 @@ if (typeof document !== "undefined") {
  * frameMs = 0 means "run every display frame"; 33 means "cap at ~30 fps".
  * Phones start capped; other devices get capped automatically if they are measured to be struggling.
  */
-export const perf = { frameMs: IS_MOBILE ? 33 : 0 };
+export const perf = { frameMs: IS_MOBILE ? 33 : 0, hold: false };   // hold: true while a phone is mid-transition; decorative canvases keep their last frame
 /** true when a loop that last ran at `last` should skip this rAF tick */
 export const skipFrame = (now, last) => perf.frameMs > 0 && now - last < perf.frameMs - 2;
 

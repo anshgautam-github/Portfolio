@@ -306,6 +306,7 @@ export default function Warp({
           }
         }
       }
+      if (IS_MOBILE && perf.hold) return;   // phones: the canvas holds its last frame while the section slides in (every canvas update is a re-composite under the moving card)
       if (flag.on && fr++ % 2) return;
       wacc += deltaMs;
       // phones: the streak canvas sits under heavy DOM layers, so every canvas update costs a re-composite: run it at ~20fps there
@@ -352,11 +353,12 @@ export default function Warp({
         const R = () => Math.hypot(window.innerWidth, window.innerHeight) * 1.06;
         const enter = gsap.timeline({
           defaults: { ease: "none" },
-          scrollTrigger: { trigger: wrap.current, start: "top bottom", end: "top top", scrub: 0.5, invalidateOnRefresh: true, onUpdate: (self) => (flag.on = self.progress > 0 && self.progress < 1), onLeave: () => (flag.on = false), onLeaveBack: () => (flag.on = false) },
+          scrollTrigger: { trigger: wrap.current, start: "top bottom", end: "top top", scrub: 0.5, invalidateOnRefresh: true, onUpdate: (self) => { flag.on = self.progress > 0 && self.progress < 1; perf.hold = IS_MOBILE && flag.on; }, onLeave: () => { flag.on = false; perf.hold = false; }, onLeaveBack: () => { flag.on = false; perf.hold = false; } },
         });
         // phones: a plain fade (never a transform on `el`: this element is the pinned one, and a y offset measured at pin time leaves the whole
         // pinned screen 36px too high, with the page background showing as a strip along the bottom edge)
-        if (IS_MOBILE) enter.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, ease: "power2.out", duration: 0.7 }, 0);
+        // the rounded card rising (PushTransition) is the reveal now, so the section is solid after the first ~fifth of the rise instead of being translucent (and re-composited) all the way up
+        if (IS_MOBILE) { enter.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, ease: "power2.out", duration: 0.14 }, 0); enter.to({}, { duration: 0.7 }, 0); }
         if (rim) {
           enter.fromTo(rim, { scale: 0, autoAlpha: 1 }, { scale: () => R() / (1.28 * Math.max(window.innerWidth, window.innerHeight)), ease: "power2.in", duration: 1 }, 0);
           enter.to(rim, { autoAlpha: 0, duration: 0.18 }, 0.82);
@@ -700,7 +702,7 @@ export default function Warp({
 .wa-dust b{position:absolute;left:var(--x);bottom:-6px;width:var(--s);height:var(--s);border-radius:50%;background:#cfe0ff;box-shadow:0 0 8px rgba(141,180,255,.9);opacity:0;animation:waRise var(--d) linear var(--dl) infinite}
 @keyframes waRise{0%{transform:translate3d(0,0,0);opacity:0}12%{opacity:.7}85%{opacity:.35}100%{transform:translate3d(28px,-105vh,0);opacity:0}}
 .wa-vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.6) 100%)}
-@media (max-width:768px){.wa{filter:none}.wa-sheen,.wa-ring,.wa4{display:none}.wa-dust b:nth-child(n+9){display:none}}
+@media (max-width:768px){.wp-hl .wp-ch,.wp-built .wp-ch{animation:none;will-change:auto}.wa{filter:none;mix-blend-mode:normal}.wp-aur{contain:paint}.wa-sheen,.wa-ring,.wa4{display:none}.wa-dust b:nth-child(n+9){display:none}}
 @media (prefers-reduced-motion:reduce){.wa,.wa-sheen,.wa-ring,.wa-dust b{animation:none}}
 .wp-spot{--mx:50%;--my:50%;background:radial-gradient(560px circle at var(--mx) var(--my),rgba(141,180,255,.10),transparent 62%)}
 .wp-spot::before{content:"";position:absolute;inset:0;

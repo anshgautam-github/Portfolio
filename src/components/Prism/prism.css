@@ -161,3 +161,15 @@
    The slot reaches back one screen so the Prism starts climbing exactly while the manifesto above (the sticky stage in Illusion.jsx, held for an extra screen)
    is still pinned in place. */
 .fs .about-prism { position: relative; z-index: 6; margin-top: -100vh; margin-top: -100svh; }
+
+/* =====================================================================================================================================
+   Phones: a smooth reveal
+   The card effect (rounded clip, scale, 90px-blur shadows driven by --pc) and the pointer-only layers are replaced by flat equivalents,
+   so the section simply slides in on the compositor.
+   ===================================================================================================================================== */
+html.is-mobile #prism .pr-pin { border-radius: 0; transform: none; will-change: auto; box-shadow: inset 0 1px 0 rgba(170,198,255,.4); }
+html.is-mobile .about-fx .afx-dots, html.is-mobile .about-fx .afx-spot { display: none; }      /* follow the pointer: nothing to follow on a phone */
+html.is-mobile .about-fx .afx-b { mix-blend-mode: normal; animation: none; will-change: auto; }   /* screen-blending three full-screen layers over a live canvas */
+html.is-mobile .pr-sp { filter: none; }
+html.is-mobile .pr-f--w::after { animation: none; display: none; }                                 /* the gloss sweeps inside every white face of the 3D bar */
+html.is-mobile .pr-cap--r svg, html.is-mobile .pr-cap--r svg circle { animation: none; }

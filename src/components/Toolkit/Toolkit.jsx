@@ -39,6 +39,7 @@ export default function Toolkit() {
     let ctx;
     let lastW = window.innerWidth;
     let covered = false;
+    let peLast = "";
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const build = () => {
@@ -58,8 +59,9 @@ export default function Toolkit() {
                 scrub: IS_MOBILE ? true : 0.6,
                 anticipatePin: 1,
                 onUpdate: (self) => {
-                  if (gctl.current) gctl.current.live(self.progress > (RISE + 0.8) / T);
-                  if (gwin.current) gwin.current.style.pointerEvents = self.progress > 0.97 ? "auto" : "none";
+                  if (gctl.current) gctl.current.live(self.progress > (IS_MOBILE ? RISE + RISE_DUR * 0.92 : RISE + 0.8) / T);   // phones: the loops wake once the scene has arrived, not halfway up the climb
+                  const pe = self.progress > 0.97 ? "auto" : "none";
+                  if (gwin.current && pe !== peLast) { peLast = pe; gwin.current.style.pointerEvents = pe; }
                   // once the scene has fully arrived the dark stage behind it is hidden: nothing under it is painted or composited any more
                   const cov = self.progress > 0.88;
                   if (cov !== covered) { covered = cov; if (root.current) root.current.dataset.covered = cov ? "1" : "0"; }
@@ -76,12 +78,21 @@ export default function Toolkit() {
         const r = rise.current;
         const g = gwin.current;
         const st = { k: 1, glow: 0 };
+        // three tweens call shape() on every frame of the climb, and each write re-clips (and, with the glow, re-paints) the full-screen layer holding the whole
+        // garden. The values are quantised (a 1-2 px step in the radius, invisible) and nothing is written when they did not change.
+        let shapeKey = "";
         const shape = () => {
-          const rx = (W * 0.62 * st.k).toFixed(1), ry = (H * 0.2 * st.k).toFixed(1);
-          r.style.borderRadius = `${rx}px ${rx}px 0 0 / ${ry}px ${ry}px 0 0`;
+          const q = IS_MOBILE ? 40 : 200;
+          const kq = Math.round(st.k * q) / q;
+          const gq = IS_MOBILE ? 0 : Math.round(st.glow * 100) / 100;
+          const key = kq + "|" + gq;
+          if (key === shapeKey) return;
+          shapeKey = key;
+          const rx = (W * 0.62 * kq).toFixed(1), ry = (H * 0.2 * kq).toFixed(1);
+          r.style.borderRadius = kq === 0 ? "0" : `${rx}px ${rx}px 0 0 / ${ry}px ${ry}px 0 0`;
           // the 130px-blur glow along the crest is re-painted every frame of the climb: phones skip it (the crest still reads from the hill shape)
-          r.style.boxShadow = !IS_MOBILE && st.glow > 0.002
-            ? `0 -2px 0 rgba(255,214,190,${(0.5 * st.glow).toFixed(3)}), 0 -14px 46px rgba(238,111,78,${(0.5 * st.glow).toFixed(3)}), 0 -40px 130px rgba(138,96,211,${(0.55 * st.glow).toFixed(3)})`
+          r.style.boxShadow = gq > 0.002
+            ? `0 -2px 0 rgba(255,214,190,${(0.5 * gq).toFixed(3)}), 0 -14px 46px rgba(238,111,78,${(0.5 * gq).toFixed(3)}), 0 -40px 130px rgba(138,96,211,${(0.55 * gq).toFixed(3)})`
             : "none";
         };
         gsap.set(r, { y: H * 1.04, force3D: true });
@@ -172,7 +183,7 @@ export default function Toolkit() {
       <div
         ref={dawn}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10"
+        className="tk-dawn pointer-events-none absolute inset-x-0 bottom-0 z-10"
         style={{ height: "58%", opacity: 0, background: "radial-gradient(70% 90% at 50% 112%, rgba(238,111,78,.5) 0%, rgba(138,96,211,.34) 38%, transparent 72%)", filter: "blur(18px)" }}
       />
 
