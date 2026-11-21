@@ -469,3 +469,12 @@ html.is-mobile .tk-sec { height: 100vh; height: 100lvh; }
 /* phones: the pinned hand-off is held by sticky (see Toolkit.jsx), so the scene never jitters against the scroll */
 html.is-mobile .tk-wrap { position: relative; }
 html.is-mobile .tk-sec { position: sticky; top: 0; }
+
+/* =====================================================================================================================================
+   Phones: the climb of the "Let's grow" scene is compositor-only
+   - the two huge blurred layers (aurora, light sweep) lose their blur (their gradients are already soft) and stop drifting once the climb starts
+   - the scene's rounded clip is flat (Toolkit.jsx also stops morphing it), so nothing is re-clipped or re-painted per frame
+   ===================================================================================================================================== */
+html.is-mobile .tk-aurora-glow, html.is-mobile .tk-light-sweep { filter: none; }
+html.is-mobile .tk-sec[data-rising="1"] .tk-bg, html.is-mobile .tk-sec[data-rising="1"] .tk-bg * { animation-play-state: paused !important; }
+html.is-mobile .tk-gwin { border-radius: 0 !important; }

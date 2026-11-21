@@ -53,6 +53,7 @@ export default function Hours() {
     const note = q(".hr-note"), noteT = q(".hr-note-t"), noteK = q(".hr-note-k"), noteP = q(".hr-note-p"), lead = q(".hr-lead");
     const lines = qa(".hr-end-l"), endBits = qa(".hr-end-b");
     const pill = q(".hr-pill");
+    const mtop = q(".hr-mtop"), pips = qa(".hr-pip"), mhint = q(".hr-mtop-h");   // phone-only header above the dial
 
     /* ----- geometry: a dial whose top arc fills the width; every part shares --R and --cy ----- */
     const layout = () => {
@@ -77,7 +78,9 @@ export default function Hours() {
       hand.style.transform = `rotate(${S.ang.toFixed(2)}deg)`;
       let count = 0, st = -1;
       for (let i = 0; i < N; i++) { const on = S.ang >= stopAngle(i) - 2; objs[i].classList.toggle("is-on", on); marks[i].classList.toggle("is-on", on); if (on) { count = i + 1; st = i; } }
-      if (count !== lastCount) { el.classList.toggle("has-start", count > 0); lastCount = count; roll(cols[0], Math.floor(count / 10)); roll(cols[1], count % 10); }
+      if (count !== lastCount) { el.classList.toggle("has-start", count > 0); lastCount = count; roll(cols[0], Math.floor(count / 10)); roll(cols[1], count % 10);
+        pips.forEach((pp, k) => pp.classList.toggle("is-on", k < count));
+        if (mhint) mhint.textContent = count ? "Tap any logo to open its story" : "Scroll to sweep the dial"; }
       const ti = Math.max(-1, Math.min(TICKS, Math.floor(((S.ang - A0) / (A1 - A0)) * TICKS + 1e-6)));
       if (ti !== lastTick) {
         const a = lastTick < 0 ? 0 : Math.min(ti, lastTick), b = Math.max(ti, lastTick);
@@ -114,6 +117,7 @@ export default function Hours() {
       gsap.set([num, cap], { opacity: 0, scale: 0.86, y: 30 });
       gsap.set(hand, { opacity: 0 });
       gsap.set(lead, { opacity: 0, y: 24 });
+      gsap.set(mtop, { opacity: 0, y: 24 });
       gsap.set(ring, { strokeDashoffset: 1 });
       render();
 
@@ -124,6 +128,7 @@ export default function Hours() {
       tl.to([num, cap], { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.1 }, 0.3);
       tl.to(hand, { opacity: 1, duration: 0.4, ease: "power1.out" }, 0.6);
       tl.to(lead, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.5);
+      tl.to(mtop, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.5);
       tl.to(lead, { opacity: 0, y: -18, duration: 0.5, ease: "power2.in" }, 1.7);
       // 1 - 8.6: the sweep: the dial breathes, the paper shifts from dawn to dusk, each program wakes as the hand reaches it
       tl.to(S, { ang: A1, duration: T1 - T0, ease: "none", onUpdate: render }, T0);
@@ -143,6 +148,7 @@ export default function Hours() {
       tl.to(hand, { opacity: 0, scaleY: 0.8, duration: 0.6, ease: "power1.in" }, 9.9);
       tl.to(dial, { scale: 1.55, opacity: 0.16, duration: 1.8, ease: "power2.inOut" }, 9.5);
       tl.to(note, { opacity: 0, duration: 0.4 }, 9.2);
+      tl.to(mtop, { opacity: 0, y: -18, duration: 0.5, ease: "power2.in" }, 8.9);
       tl.to(lines, { yPercent: 0, opacity: 1, duration: 0.9, stagger: 0.14, ease: "power3.out" }, 10.2);
       tl.to(endBits, { y: 0, opacity: 1, duration: 0.8, stagger: 0.12, ease: "power3.out" }, 10.7);
       tl.to({}, { duration: 0.8 }, 11.5);
@@ -195,6 +201,13 @@ export default function Hours() {
   return (
     <section ref={root} className="hr" id="hours" aria-label="Programs I took part in">
       <div className="hr-lead" aria-hidden="true"><span>Taken part in &middot; learned from</span><b>Eight programs that<br />shaped how I build.</b></div>
+
+      <div className="hr-mtop" aria-hidden="true">
+        <span className="hr-mtop-k"><i />Programs &middot; communities &middot; summer schools</span>
+        <b className="hr-mtop-t">Eight programs that<br />shaped how I build.</b>
+        <span className="hr-pips">{ITEMS.map((d) => <i key={d.title} className="hr-pip" />)}</span>
+        <span className="hr-mtop-h">Scroll to sweep the dial</span>
+      </div>
 
       <div className="hr-dial" aria-hidden="true">
         <svg viewBox="-500 -500 1000 1000">

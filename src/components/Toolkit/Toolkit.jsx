@@ -39,7 +39,7 @@ export default function Toolkit() {
   useLayoutEffect(() => {
     let ctx;
     let lastW = window.innerWidth;
-    let covered = false;
+    let covered = false, rising = false;
     let peLast = "";
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -69,6 +69,8 @@ export default function Toolkit() {
                   const pe = self.progress > 0.97 ? "auto" : "none";
                   if (gwin.current && pe !== peLast) { peLast = pe; gwin.current.style.pointerEvents = pe; }
                   // once the scene has fully arrived the dark stage behind it is hidden: nothing under it is painted or composited any more
+                  const ris = self.progress > 0.2;   // the climb has started: the stage behind it stops animating
+                  if (ris !== rising) { rising = ris; if (root.current) root.current.dataset.rising = ris ? "1" : "0"; }
                   const cov = self.progress > 0.88;
                   if (cov !== covered) { covered = cov; if (root.current) root.current.dataset.covered = cov ? "1" : "0"; }
                 },
@@ -87,7 +89,11 @@ export default function Toolkit() {
         // three tweens call shape() on every frame of the climb, and each write re-clips (and, with the glow, re-paints) the full-screen layer holding the whole
         // garden. The values are quantised (a 1-2 px step in the radius, invisible) and nothing is written when they did not change.
         let shapeKey = "";
+        // phones: the rise is pure transform (compositor only). The morphing rounded crest, its glow, the zoom of the whole scene and the scale of the stage
+        // behind were all re-painted / re-composited on the main thread every frame of the climb; here the scene is a flat card with a hairline edge instead.
+        if (IS_MOBILE) { r.style.borderRadius = "0"; r.style.boxShadow = "0 -1px 0 rgba(190,205,255,.45)"; }
         const shape = () => {
+          if (IS_MOBILE) return;
           const q = IS_MOBILE ? 40 : 200;
           const kq = Math.round(st.k * q) / q;
           const gq = IS_MOBILE ? 0 : Math.round(st.glow * 100) / 100;
@@ -103,7 +109,7 @@ export default function Toolkit() {
         };
         gsap.set(r, { y: H * 1.04, force3D: true });
         gsap.set(g, { width: "100%", height: "100%" });
-        gsap.set(inner.current, { scale: 1.1, transformOrigin: "50% 100%", force3D: true });
+        gsap.set(inner.current, { scale: IS_MOBILE ? 1 : 1.1, transformOrigin: "50% 100%", force3D: true });
         shape();
 
         tl.to(r, { y: 0, ease: "power3.inOut", duration: RISE_DUR }, RISE);
@@ -113,7 +119,7 @@ export default function Toolkit() {
         tl.to(inner.current, { scale: 1, ease: "power2.out", duration: RISE_DUR }, RISE);                            // the scene settles from a slight zoom
 
         // the stage recedes behind it
-        tl.to(bg.current, { yPercent: -4, scale: 0.97, opacity: 0.35, ease: "power2.inOut", duration: RISE_DUR }, RISE);
+        tl.to(bg.current, IS_MOBILE ? { opacity: 0.35, ease: "power2.inOut", duration: RISE_DUR } : { yPercent: -4, scale: 0.97, opacity: 0.35, ease: "power2.inOut", duration: RISE_DUR }, RISE);
         tl.to(word.current, { y: -H * 0.14, scale: 0.94, opacity: 0, ease: "power2.in", duration: RISE_DUR * 0.7 }, RISE);
         tl.to(dawn.current, { opacity: 0, ease: "power1.in", duration: RISE_DUR * 0.6 }, RISE + RISE_DUR * 0.4);
 
@@ -192,7 +198,7 @@ export default function Toolkit() {
         ref={dawn}
         aria-hidden="true"
         className="tk-dawn pointer-events-none absolute inset-x-0 bottom-0 z-10"
-        style={{ height: "58%", opacity: 0, background: "radial-gradient(70% 90% at 50% 112%, rgba(238,111,78,.5) 0%, rgba(138,96,211,.34) 38%, transparent 72%)", filter: "blur(18px)" }}
+        style={{ height: "58%", opacity: 0, background: "radial-gradient(70% 90% at 50% 112%, rgba(238,111,78,.5) 0%, rgba(138,96,211,.34) 38%, transparent 72%)", filter: IS_MOBILE ? "none" : "blur(18px)" }}
       />
 
       {/* the wordmark that holds the stage; the scene rising from below carries it away */}

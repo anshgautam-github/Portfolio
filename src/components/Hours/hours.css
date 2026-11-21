@@ -188,3 +188,24 @@
   .hr { box-sizing: border-box; height: calc(100svh + var(--gap)); border-bottom: var(--gap) solid transparent; }
   .hr.is-static { height: auto; border-bottom: 0; }
 }
+
+
+/* =====================================================================
+   Phone header - fills the open space above the dial
+   On a phone the dial is width-limited, so ~40% of the screen above it was empty once the opening line faded. This header stays for the whole
+   sweep: a mono eyebrow, the headline, eight progress pips that light up as the hand reaches each program, and a one-line instruction that
+   switches from "scroll" to "tap". It is centred in the free space between the top of the screen and the dial, and leaves with the finale.
+   ===================================================================== */
+.hr-mtop { display: none; }
+@media (max-width: 760px) {
+  .hr-lead { display: none; }
+  .hr-mtop { display: grid; position: absolute; left: 50%; top: calc((var(--cy) - var(--R) * 1.12) / 2); translate: -50% -50%; z-index: 8;
+    width: calc(100% - 48px); justify-items: center; gap: 16px; text-align: center; pointer-events: none; }
+  .hr-mtop-k { display: inline-flex; align-items: center; gap: 9px; font: 500 10px/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; color: rgba(11,11,13,.6); }
+  .hr-mtop-k i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px rgba(238,106,55,.18); }
+  .hr-mtop-t { font: 600 clamp(28px, 8.2vw, 36px)/1.06 "Inter Tight", system-ui, sans-serif; letter-spacing: -.035em; color: var(--ink); text-wrap: balance; }
+  .hr-pips { display: flex; gap: 6px; }
+  .hr-pip { display: block; width: 22px; height: 4px; border-radius: 99px; background: rgba(11,11,13,.14); transition: background .35s ease, transform .35s ease; }
+  .hr-pip.is-on { background: var(--orange); }
+  .hr-mtop-h { font: 500 10px/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: rgba(11,11,13,.5); }
+}
