@@ -37,7 +37,7 @@ export default function PushTransition({ from = ".kimi .last-layer", to = "[data
       if (cv && cv.isConnected) return cv;
       cv = document.createElement("div");
       cv.setAttribute("aria-hidden", "true");
-      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:41;pointer-events:none;display:none;overflow:hidden";
+      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100lvh;z-index:41;pointer-events:none;display:none;overflow:hidden";
       cv.innerHTML =
         '<div data-rg="1" style="position:absolute;left:0;top:0;box-sizing:border-box;border:1px solid rgba(255,255,255,.3);' + (IS_MOBILE ? 'transform-origin:50% 0;' : 'box-shadow:0 -26px 80px -12px rgba(0,0,0,.6),0 0 60px -10px rgba(111,149,242,.35);transform-origin:0 0;') + 'will-change:transform,opacity">' +
         '<span data-lb="1" style="position:absolute;left:20px;top:-32px;white-space:nowrap;font:500 11px/1 \'JetBrains Mono\',ui-monospace,monospace;letter-spacing:.42em;color:#fff;will-change:opacity">( 03 )&nbsp;&nbsp;SELECTED WORK</span></div>';

@@ -245,3 +245,20 @@ html[data-motion="paused"] *, html[data-motion="paused"] *::before, html[data-mo
 
 /* phones: a blurred button over a scene that is moving has to re-blur every frame */
 html.is-mobile .motion-toggle { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(11,11,13,.92); }
+
+
+/* =====================================================================
+   Address-bar gap, site-wide (phones)
+   Pinned / sticky screens are sized to the SMALL viewport (100svh) so their layout never changes while you scroll. When the browser's address bar
+   slides away the visible page is --gap taller, which used to leave a strip of page background under the screen. The screen's own background
+   (solid, gradient or a colour a timeline is tweening) is extended under a transparent bottom border: the border is outside the padding box, so
+   everything positioned inside the screen stays exactly where it was. Screens whose artwork is a canvas / layered scene handle it in their own
+   stylesheet (Illusion, Hours, Toolkit + Garden).
+   ===================================================================== */
+html.is-mobile .rv-stage,
+html.is-mobile .pr {
+  box-sizing: border-box;
+  height: calc(100svh + var(--gap));
+  border-bottom: var(--gap) solid transparent;
+  background-origin: border-box !important;
+}

@@ -23,12 +23,12 @@ export default function TechTransition({ from = "[data-warp-wrap]", to = "sectio
       if (cv && cv.isConnected) return cv;
       cv = document.createElement("div");
       cv.setAttribute("aria-hidden", "true");
-      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:42;pointer-events:none;display:none;overflow:hidden";
+      cv.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100lvh;z-index:42;pointer-events:none;display:none;overflow:hidden";
       cv.innerHTML = '<div data-w="1" style="position:absolute;left:0;top:0;background:none;will-change:transform,opacity"></div>';
       document.body.appendChild(cv);
       dm = document.createElement("div");                            // sits UNDER the incoming page: darkens only the projects
       dm.setAttribute("aria-hidden", "true");
-      dm.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100svh;z-index:38;pointer-events:none;display:none;background:#05070d;opacity:0";
+      dm.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;height:100lvh;z-index:38;pointer-events:none;display:none;background:#05070d;opacity:0";
       document.body.appendChild(dm);
       cx = { w: cv.querySelector("[data-w]"), dim: dm };
       return cv;

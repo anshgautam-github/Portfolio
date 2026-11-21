@@ -461,7 +461,9 @@ html.is-mobile .tk-dawn { filter: none !important; }                       /* an
 html.is-mobile .tk-light-sweep { display: none; }                          /* a 200% x 200% layer, 40px blur, rotating forever behind the climb */
 html.is-mobile .tk-wave-path--1, html.is-mobile .tk-wave-path--2 { filter: none; animation: none; }   /* animated drop-shadow on SVG paths = a main-thread repaint every frame */
 html.is-mobile .tk-floor-orbit--1, html.is-mobile .tk-floor-orbit--2 { animation: none; }
-html.is-mobile .tk-sec { height: 100svh; }
+/* the whole scene (sky, hills, garden) is one piece of artwork: it is built to the TALL viewport (address bar hidden) so it always reaches the bottom of the screen.
+   Its content is placed by percentages, so with the bar showing the lowest ~70px of ground simply sits under the bar. */
+html.is-mobile .tk-sec { height: 100vh; height: 100lvh; }
 
 
 /* phones: the pinned hand-off is held by sticky (see Toolkit.jsx), so the scene never jitters against the scroll */

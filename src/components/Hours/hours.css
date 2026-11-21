@@ -179,3 +179,12 @@
   .hr-btn { font-size: 15px; }
   .hr-link { font-size: 15px; }
 }
+
+
+/* Phones: when the address bar slides away the screen grows ~70-100 px beyond this 100svh dial. The section's own background (it is tweened from
+   warm paper to lavender while you scroll) is extended under a transparent bottom border, so it covers the whole screen in whatever colour it
+   currently is. The border sits outside the padding box, so everything inside is placed exactly as before: no layout change. */
+@media (pointer: coarse) {
+  .hr { box-sizing: border-box; height: calc(100svh + var(--gap)); border-bottom: var(--gap) solid transparent; }
+  .hr.is-static { height: auto; border-bottom: 0; }
+}
