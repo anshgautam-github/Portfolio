@@ -462,3 +462,8 @@ html.is-mobile .tk-light-sweep { display: none; }                          /* a 
 html.is-mobile .tk-wave-path--1, html.is-mobile .tk-wave-path--2 { filter: none; animation: none; }   /* animated drop-shadow on SVG paths = a main-thread repaint every frame */
 html.is-mobile .tk-floor-orbit--1, html.is-mobile .tk-floor-orbit--2 { animation: none; }
 html.is-mobile .tk-sec { height: 100svh; }
+
+
+/* phones: the pinned hand-off is held by sticky (see Toolkit.jsx), so the scene never jitters against the scroll */
+html.is-mobile .tk-wrap { position: relative; }
+html.is-mobile .tk-sec { position: sticky; top: 0; }

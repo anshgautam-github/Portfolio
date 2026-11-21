@@ -23,6 +23,7 @@ const RISE = 0.9;     // the scene starts to rise (the Garden's intro + live fla
 const RISE_DUR = 2.5; // how long the climb takes
 
 export default function Toolkit() {
+  const wrap = useRef(null);
   const root = useRef(null);
   const bg = useRef(null);
   const word = useRef(null);
@@ -47,17 +48,22 @@ export default function Toolkit() {
         const W = root.current.clientWidth;
         const H = root.current.clientHeight;
 
+        // phones: the section is held by CSS `position: sticky` inside a tall wrapper instead of ScrollTrigger's pin. A pin swaps the section to
+        // position:fixed from JS, which on a touch device trails the native scroll by a frame (the section visibly jitters / flips while you swipe);
+        // sticky is handled by the compositor, so the held scene never moves. The timeline is still scrubbed by the same scroll distance.
+        const dist = T * H * PER;
+        if (wrap.current) wrap.current.style.height = IS_MOBILE && !reduce ? `${H + dist}px` : "";
         const tl = gsap.timeline({
           defaults: { ease: "power3.inOut" },
           scrollTrigger: reduce
             ? undefined
             : {
-                trigger: root.current,
+                trigger: IS_MOBILE ? wrap.current : root.current,
                 start: "top top",
                 end: () => "+=" + T * H * PER,
-                pin: true,
+                pin: !IS_MOBILE,
                 scrub: IS_MOBILE ? true : 0.6,
-                anticipatePin: 1,
+                anticipatePin: IS_MOBILE ? 0 : 1,
                 onUpdate: (self) => {
                   if (gctl.current) gctl.current.live(self.progress > (IS_MOBILE ? RISE + RISE_DUR * 0.92 : RISE + 0.8) / T);   // phones: the loops wake once the scene has arrived, not halfway up the climb
                   const pe = self.progress > 0.97 ? "auto" : "none";
@@ -139,10 +145,12 @@ export default function Toolkit() {
       clearTimeout(t);
       window.removeEventListener("resize", onResize);
       ctx.revert();
+      if (wrap.current) wrap.current.style.height = "";
     };
   }, []);
 
   return (
+    <div ref={wrap} className="tk-wrap">
     <section
       ref={root}
       className="tk-sec relative h-screen min-h-[560px] w-full overflow-hidden text-[#e8f1ff] [--c:min(56vw,38vh)] md:[--c:min(26vw,44vh)]"
@@ -211,5 +219,6 @@ export default function Toolkit() {
         </div>
       </div>
     </section>
+    </div>
   );
 }

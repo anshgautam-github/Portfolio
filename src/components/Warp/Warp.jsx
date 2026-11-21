@@ -358,7 +358,8 @@ export default function Warp({
         // phones: a plain fade (never a transform on `el`: this element is the pinned one, and a y offset measured at pin time leaves the whole
         // pinned screen 36px too high, with the page background showing as a strip along the bottom edge)
         // the rounded card rising (PushTransition) is the reveal now, so the section is solid after the first ~fifth of the rise instead of being translucent (and re-composited) all the way up
-        if (IS_MOBILE) { enter.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, ease: "power2.out", duration: 0.14 }, 0); enter.to({}, { duration: 0.7 }, 0); }
+        // phones: no card transition any more (PushTransition is off), so the section is simply there and scrolls in normally: no fade to run
+        if (IS_MOBILE) enter.to({}, { duration: 0.7 }, 0);
         if (rim) {
           enter.fromTo(rim, { scale: 0, autoAlpha: 1 }, { scale: () => R() / (1.28 * Math.max(window.innerWidth, window.innerHeight)), ease: "power2.in", duration: 1 }, 0);
           enter.to(rim, { autoAlpha: 0, duration: 0.18 }, 0.82);
