@@ -232,3 +232,7 @@
 .dv-fs { position: absolute; inset: 0; overflow: hidden; background: #000; }
 .dv-fs .about { will-change: transform; }
 .dv-fs .manifesto .w { opacity: var(--wo, 0.13) !important; transition: opacity .25s linear; }
+
+/* once the night is up, nothing pale may sit behind the sticky stage: sub-pixel gaps at its top/bottom edge while scrolling flashed as white lines */
+.dv.dv-dark { background: #000; }
+.dv.dv-dark .dv-stage { background: #000; }

@@ -122,6 +122,7 @@ export default function initDive(root) {
   const entry = { v: reduce ? 1 : 0, played: reduce };
   const look = { tx: 0, ty: 0, x: 0, y: 0, lastMove: -9 };
   const tilt = { tx: 0, ty: 0, x: 0, y: 0 };
+  let nightOn = false;
   let inView = false, ended = false, lastBlink = 2.2;
 
   const draw = (p, time) => {
@@ -170,6 +171,7 @@ export default function initDive(root) {
     // the night behind the eye
     const showNight = p >= pCover;
     night.style.visibility = showNight ? "visible" : "hidden";
+    if (showNight !== nightOn) { nightOn = showNight; root.classList.toggle("dv-dark", nightOn); }   // pale paper behind the stage must not peek out at its top/bottom edge
     const fade = seg(p, P_B1, 0.68);
     svg.style.opacity = (1 - easeOut(fade)).toFixed(3);
     svg.style.visibility = fade >= 1 ? "hidden" : "visible";
