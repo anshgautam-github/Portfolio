@@ -13,7 +13,7 @@
 /* ---------- Bloom ---------- */
 .bl { position: relative; background: var(--fn-night); overflow-x: clip; }
 .bl-wrap { height: 400vh; }
-.bl-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; isolation: isolate; background: radial-gradient(80% 70% at 50% 46%, #0c1330 0%, var(--fn-night) 72%); }
+.bl-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; isolation: isolate; background: #000; }
 .bl-sky { position: absolute; inset: 0; }
 .bl-s { position: absolute; display: block; will-change: transform, opacity; backface-visibility: hidden; }
 .bl-si { display: block; width: 100%; height: 100%; overflow: visible; }
@@ -126,3 +126,13 @@
   .fn-pew { font-size: 12.6vw; }
   .fn-btn { padding-left: 22px; padding-right: 22px; }
 }
+
+/* the night is the About section's: black, the live streaks, the drifting glows and the pointer dots (a copy of that background) */
+.bl-stage .bl-fs { position: absolute; inset: 0; overflow: hidden; background: #000; }
+.bl-stage .bl-fs .about { position: absolute; inset: 0; padding: 0; }
+
+/* the line between the About and the finale */
+.bl-txt { position: absolute; left: clamp(20px, 5vw, 96px); right: 40%; top: 50%; margin: 0; margin-top: calc(-1 * clamp(40px, 5.2vw, 100px)); z-index: 1; display: flex; flex-direction: column; gap: 0.04em; pointer-events: none; opacity: 0; will-change: transform, opacity; font-family: "Instrument Serif", "Times New Roman", serif; font-size: clamp(34px, 5.4vw, 104px); line-height: 1.02; letter-spacing: -0.02em; color: #efe7da; text-wrap: balance; }
+.bl-txt em { font-style: italic; color: #8db4ff; padding: 0 0.06em; margin: 0 -0.06em; filter: drop-shadow(0 0 0.28em rgba(110, 150, 255, 0.28)); }
+.bl.is-static .bl-txt { opacity: 1; position: relative; inset: auto; margin: 0 auto; padding: 12vh 6vw; }
+@media (max-width: 767px) { .bl-txt { right: 6vw; font-size: clamp(30px, 9vw, 52px); top: 38%; } }

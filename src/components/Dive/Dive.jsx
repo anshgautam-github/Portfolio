@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import initDive from "./dive.js";
+import { mountAboutFx } from "../FreefallStory/aboutFx.js";
 import "./dive.css";
 
 /* Right after the landing: "Look closer".
@@ -23,7 +24,34 @@ const CONTENT = {
 
 export default function Dive() {
   const root = useRef(null);
-  useEffect(() => initDive(root.current), []);
+  useEffect(() => {
+    const el = root.current;
+    const stop = initDive(el);
+    let fx = null, clone = null, orig = null, tries = 0, timer = 0;
+    // The About section (FreefallStory) lives in the eye now: take a copy of the real section, hide the one below it, and let the dive scroll it.
+    const adopt = () => {
+      orig = document.getElementById("fs-about");
+      const host = el.querySelector("[data-dv-about-host]");
+      if (!orig || !host) { if (++tries < 80) timer = setTimeout(adopt, 100); return; }
+      clone = orig.cloneNode(true);
+      clone.removeAttribute("id");
+      const mf = clone.querySelector("#fs-manifesto"); if (mf) mf.removeAttribute("id");
+      clone.querySelectorAll("canvas").forEach((c) => { c.removeAttribute("width"); c.removeAttribute("height"); c.removeAttribute("style"); });
+      host.appendChild(clone);
+      orig.style.display = "none";
+      fx = mountAboutFx(clone);
+      el.dispatchEvent(new CustomEvent("dv-about-ready"));
+      window.dispatchEvent(new Event("resize"));            // the story below re-measures now that the About block has left it
+    };
+    adopt();
+    return () => {
+      clearTimeout(timer);
+      try { fx && fx(); } catch (e) { /* ignore */ }
+      if (clone) clone.remove();
+      if (orig) { orig.style.display = ""; window.dispatchEvent(new Event("resize")); }
+      try { stop && stop(); } catch (e) { /* ignore */ }
+    };
+  }, []);
 
   return (
     <section ref={root} className="dv" id="dive" aria-label="Featured build">
@@ -132,22 +160,9 @@ export default function Dive() {
 
           {/* the featured build, tiny inside the eye at first, full size on the far side */}
           <div className="dv-card" data-dv-card>
-            <a className="dv-card-in" data-dv-card-in href={CONTENT.href} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true">
-              <span className="dv-card-spine" />
-              <span className="dv-card-title">
-                {CONTENT.cardTitle.map((w) => <span key={w}>{w}</span>)}
-              </span>
-              <svg className="dv-card-net" viewBox="0 0 160 120" aria-hidden="true">
-                <g className="dv-net-l">
-                  {[[20, 24, 80, 12], [20, 24, 80, 42], [20, 60, 80, 42], [20, 60, 80, 78], [20, 96, 80, 78], [20, 96, 80, 108], [20, 24, 80, 78], [20, 96, 80, 42],
-                    [80, 12, 140, 40], [80, 42, 140, 40], [80, 42, 140, 80], [80, 78, 140, 80], [80, 78, 140, 40], [80, 108, 140, 80]].map(([a, b, c, d], i) => <line key={i} x1={a} y1={b} x2={c} y2={d} />)}
-                </g>
-                <g className="dv-net-n">
-                  {[[20, 24], [20, 60], [20, 96], [80, 12], [80, 42], [80, 78], [80, 108], [140, 40], [140, 80]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="7" />)}
-                </g>
-              </svg>
-              <span className="dv-card-by">{CONTENT.cardBy}</span>
-            </a>
+            <div className="dv-card-in dv-about" data-dv-card-in aria-label="About Ansh">
+              <div className="fs dv-fs" data-dv-about-host aria-hidden="false" />
+            </div>
           </div>
 
           {/* headline, button and the nudge: the first thing you see, lifted away by the first stretch of scroll */}
@@ -169,12 +184,6 @@ export default function Dive() {
           {/* the far side */}
           <div className="dv-final" data-dv-final>
             <div className="dv-slot" data-dv-slot aria-hidden="true" />
-            <div className="dv-copy" data-dv-copy>
-              <p className="dv-eyebrow">{CONTENT.eyebrow}</p>
-              <h3 className="dv-title">{CONTENT.title}</h3>
-              <p className="dv-body">{CONTENT.body}</p>
-              <a className="dv-btn dv-btn-gold" href={CONTENT.href} target="_blank" rel="noopener noreferrer">{CONTENT.cta}</a>
-            </div>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { lazy, Suspense, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Prism from "../Prism/Prism.jsx";
+const SHOW_PRISM = false;
 import Illusion from "../Illusion/Illusion.jsx";
 import { markup } from "./markup.js";
 import { mountFreefallStory } from "./engine.js";
@@ -65,7 +66,8 @@ export default function FreefallStory() {
   return (
     <section ref={ref} className="fs fs--page" aria-label="Freefall, a story told in one fall">
       {SHOW_KIMI && kimiSlot && createPortal(<Suspense fallback={null}><KimiAntonelli /></Suspense>, kimiSlot)}
-      {prismSlot && createPortal(<Prism />, prismSlot)}
+      {/* Prism (the rolling four-sided bar) is hidden on request: set SHOW_PRISM = true to bring it back */}
+      {SHOW_PRISM && prismSlot && createPortal(<Prism />, prismSlot)}
       {illSlot && createPortal(<Illusion />, illSlot)}
     </section>
   );

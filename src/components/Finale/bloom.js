@@ -20,11 +20,13 @@ const seg = (p, a, b) => clamp((p - a) / (b - a));
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const easeOutBack = (t) => { const c = 1.9; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
 const sine = (t) => (1 - Math.cos(Math.PI * t)) / 2;
+const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 
 const INRADIUS = 16;   // the star's solid core, in its 100-unit box: the size at which that core out-reaches the screen's corners
 
 export default function initBloom(root) {
   const q = (s) => root.querySelector(s);
+  const txt = q("[data-bl-txt]");
   const wrap = q("[data-bl-wrap]"), stage = q("[data-bl-stage]"), svg = q("[data-bl-svg]"), star = q("[data-bl-star]"), fill = q("[data-bl-fill]");
   const sky = [...root.querySelectorAll("[data-bl-s]")].map((el) => ({ el, depth: +el.dataset.depth, base: el.style.transform }));
   if (!wrap || !stage || !svg || !star) return () => {};
@@ -52,6 +54,12 @@ export default function initBloom(root) {
     const x = lerp(W * 0.64, W / 2, k), y = lerp(H * 0.4, H / 2, k);
     const rot = -14 + 70 * easeInOut(seg(p, 0.05, 0.95));
     star.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(2)}) scale(${s.toFixed(3)})`);
+
+    if (txt) {            // the line between the About and the finale: it rises in as the star appears and is gone before the star fills the screen
+      const tin = easeOut(seg(p, 0.1, 0.3)), tout = seg(p, 0.5, 0.7);
+      txt.style.opacity = (tin * (1 - tout)).toFixed(3);
+      txt.style.transform = `translate3d(0,${((1 - tin) * 26 - tout * 22).toFixed(1)}px,0)`;
+    }
 
     const done = seg(p, 0.93, 0.99);
     fill.style.opacity = done.toFixed(3);
@@ -86,7 +94,7 @@ export default function initBloom(root) {
   const onResize = () => { measure(); S.drawn = -1; };
   window.addEventListener("resize", onResize);
   measure(); draw(0);
-  const waveOff = initWaveBg(stage, { theme: "blue", front: true, alpha: () => seg(S.cur, 0.34, 0.9) });
+  const waveOff = () => {};   // the background is now the About section's live streaks (Bloom.jsx), not the wave
 
   return () => { waveOff(); window.removeEventListener("resize", onResize); gsap.ticker.remove(tick); io.disconnect(); st.kill(); };
 }

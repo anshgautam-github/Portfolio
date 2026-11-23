@@ -9,16 +9,18 @@ import "./finale.css";
 const COPY = {
   hello: ["SAY", "HELLO!"],
   helloNote: "Got a role, a collab or a strange problem? Say hi, I'm easy to find.",
-  helloCta: "Find me on GitHub",
   ribbon: "FANCY A CHAT?   FANCY EVEN MORE OF MY WORK?   ",
-  connectNote: "Want to see what I build next?",
-  connectTitle: ["LET'S BUILD", "SOMETHING GOOD"],
+  connectNote: "I also help startups come online. Almost 3 so far.",
+  connectTitle: ["LET'S PUT YOUR", "STARTUP ONLINE"],
   freeNote: "say hi, it's free",
+  mark: "TRAIN. SHIP.",
+  credit: "Language models, research and the interfaces built around them.",
 };
 
 const FOOT = content.garden.footer;
 const SOCIALS = FOOT.socials.filter((s) => s.href);
-const PRIMARY = (SOCIALS.find((s) => s.icon === "github") || SOCIALS[0] || {}).href || "#";
+const PRIMARY = (SOCIALS.find((s) => s.icon === "linkedin") || SOCIALS[0] || {}).href || "";
+const PRIMARY_NAME = SOCIALS.find((s) => s.icon === "linkedin") ? "LinkedIn" : "";
 
 /* the ribbon's centre line: a smooth sine, built once. crest at x = 1250, where the hanging character holds on */
 function ribbonPath() {
@@ -73,7 +75,7 @@ export default function Finale() {
             {COPY.hello.map((w, i) => <span className="fn-pew-l" key={w} aria-hidden="true"><span className="fn-pew-w" data-fn-pew>{w}</span></span>)}
           </h2>
           <p className="fn-hand" data-fn-rise>{COPY.helloNote}</p>
-          <a className="fn-btn fn-btn-coral" data-fn-rise href={PRIMARY} target="_blank" rel="noopener noreferrer">{COPY.helloCta}</a>
+          {PRIMARY && <a className="fn-btn fn-btn-coral" data-fn-rise href={PRIMARY} target="_blank" rel="noopener noreferrer">Find me on {PRIMARY_NAME || "the web"}</a>}
         </div>
         <svg className="fn-char" data-fn-char viewBox="0 0 440 540" aria-hidden="true" focusable="false">
           <ellipse cx="220" cy="522" rx="130" ry="13" fill="rgba(16,18,17,.18)" />
@@ -154,12 +156,9 @@ export default function Finale() {
 
       {/* ---------- the wordmark ---------- */}
       <footer className="fn-foot">
-        <nav className="fn-nav" aria-label="Footer">
-          {FOOT.nav.map((n) => <a key={n.id} href={"#" + n.id} onClick={goTo(n.id)}>{n.label}</a>)}
-        </nav>
         <svg className="fn-rule" viewBox="0 0 1600 14" preserveAspectRatio="none" aria-hidden="true"><path d="M0 8 C200 3 380 12 640 7 S1100 4 1300 9 S1500 5 1600 7" /></svg>
-        <p className="fn-mark" aria-label={FOOT.name}>
-          {FOOT.name.toUpperCase().split("").map((ch, i) => (
+        <p className="fn-mark" aria-label={COPY.mark}>
+          {COPY.mark.toUpperCase().split("").map((ch, i) => (
             ch === " " ? <span className="fn-gap" key={i} aria-hidden="true" /> : <span className="fn-mark-l" key={i} aria-hidden="true"><span data-fn-letter>{ch}</span></span>
           ))}
         </p>
@@ -176,7 +175,7 @@ export default function Finale() {
             <g className="fn-ink fn-body"><rect x="30" y="14" width="22" height="64" rx="11" /><rect x="14" y="50" width="22" height="22" rx="11" transform="rotate(-18 25 61)" /></g>
           </svg>
         </div>
-        <p className="fn-credit">&copy; {FOOT.year} {FOOT.name}. {FOOT.tagline}.</p>
+        <p className="fn-credit">{COPY.credit}</p>
       </footer>
     </section>
   );

@@ -1,3 +1,4 @@
+export const LINKEDIN_URL = "https://www.linkedin.com/in/your-handle";   // DUMMY: replace with your real LinkedIn profile URL
 // All copy and links live here so the component is easy to re-skin.
 export const content = {
   name: { first: "JAY", last: "CALDER" },
@@ -316,9 +317,9 @@ export const content = {
         { label: "Projects", id: "projects" },
       ],
       // a social with an empty href is not shown: paste your LinkedIn URL / "mailto:you@domain" below to switch them on
+      // LinkedIn replaces GitHub in the finale: paste the profile URL into LINKEDIN_URL (top of this file). GitHub is no longer shown here.
       socials: [
-        { label: "GitHub", icon: "github", href: "https://github.com/anshgautam-github" },
-        { label: "LinkedIn", icon: "linkedin", href: "" },
+        { label: "LinkedIn", icon: "linkedin", href: LINKEDIN_URL },   // hidden until LINKEDIN_URL is filled in
         { label: "Email", icon: "mail", href: "" },
       ],
     },

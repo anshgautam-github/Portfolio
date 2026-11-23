@@ -85,6 +85,40 @@ export default function initDive(root) {
 
   // ---- state ----
   const S = { target: 0, cur: 0, drawn: -1, drawnEnded: false };
+
+  /* ---- the About section inside the eye: once the card fills the screen, the section scrolls up through it as you keep scrolling ---- */
+  const host = q("[data-dv-about-host]");
+  const Q = { target: 0, cur: 0, drawn: -1 };
+  let aboutEl = null, aboutWords = [], extraPx = 0, diveEnd = 1;
+  const split = (r) => {                       // raw pinned progress -> (the dive's own 0..1, the about's 0..1)
+    if (diveEnd >= 1) return [r, 0];
+    return [Math.min(1, r / diveEnd), clamp((r - diveEnd) / (1 - diveEnd))];
+  };
+  const drawAbout = (qv) => {
+    if (!aboutEl) return;
+    const y = -qv * extraPx, hh = stage.clientHeight || window.innerHeight;
+    aboutEl.style.transform = `translate3d(0,${y.toFixed(1)}px,0)`;
+    // the manifesto lights word by word as it climbs past a reading line (same look as on the page: dim until read)
+    for (const w of aboutWords) {
+      const o = Math.round(lerp(0.13, 1, clamp((0.8 * hh - (w.cy + y)) / (0.24 * hh))) * 50) / 50;
+      if (o !== w.o) { w.o = o; w.el.style.setProperty("--wo", o); }
+    }
+  };
+  const fitAbout = () => {
+    aboutEl = host && host.querySelector(".about");
+    wrap.style.height = "";
+    const base = wrap.offsetHeight, hh = stage.clientHeight || window.innerHeight;
+    if (!aboutEl) { extraPx = 0; diveEnd = 1; return; }
+    aboutEl.style.transform = "";
+    extraPx = Math.max(0, aboutEl.offsetHeight - hh + hh * 0.1);
+    wrap.style.height = (base + extraPx).toFixed(0) + "px";
+    diveEnd = (base - hh) / (base + extraPx - hh);
+    aboutWords = [...aboutEl.querySelectorAll(".manifesto .w")].map((el) => {
+      let cy = el.offsetHeight / 2; for (let n = el; n && n !== aboutEl; n = n.offsetParent) cy += n.offsetTop;
+      return { el, cy, o: -1 };
+    });
+    Q.drawn = -1; drawAbout(Q.cur);
+  };
   const entry = { v: reduce ? 1 : 0, played: reduce };
   const look = { tx: 0, ty: 0, x: 0, y: 0, lastMove: -9 };
   const tilt = { tx: 0, ty: 0, x: 0, y: 0 };
@@ -153,7 +187,7 @@ export default function initDive(root) {
     const c = Math.min(1, z / zEnd);
     const cx = lerp(sx, slotX, mv);
     const cy = lerp(sy, slotY, mv);
-    const rot = lerp(-13, -6, mv);
+    const rot = lerp(-13, 0, mv);
     card.style.transform = `translate3d(${(cx - cardW / 2).toFixed(1)}px,${(cy - cardH / 2).toFixed(1)}px,0) rotate(${rot.toFixed(2)}deg) scale(${c.toFixed(4)})`;
     card.style.opacity = (entry.v * seg(p, 0.1, 0.22)).toFixed(3);
 
@@ -173,7 +207,7 @@ export default function initDive(root) {
   const drawTilt = (p) => {
     const on = seg(p, 0.86, 0.92);
     tilt.x += (tilt.tx * on - tilt.x) * 0.1; tilt.y += (tilt.ty * on - tilt.y) * 0.1;
-    cardIn.style.transform = `perspective(1100px) rotateX(${(-tilt.y * 7).toFixed(2)}deg) rotateY(${(tilt.x * 9).toFixed(2)}deg)`;
+    // the card now fills the screen: no 3-D tilt
   };
 
   // ---- reduced motion: a calm, fully laid-out version (no pin, no zoom) ----
@@ -183,7 +217,7 @@ export default function initDive(root) {
     const lay = () => {
       measure();
       cam.setAttribute("transform", `translate(${(sw / 2 - FACE_CX * u).toFixed(1)} ${(sh * 0.96).toFixed(1)}) scale(${u})`);
-      card.style.transform = `translate3d(${(slotX - cardW / 2).toFixed(1)}px,${(slotY - cardH / 2).toFixed(1)}px,0) rotate(-6deg)`;
+      card.style.transform = `translate3d(${(slotX - cardW / 2).toFixed(1)}px,${(slotY - cardH / 2).toFixed(1)}px,0) rotate(0deg)`;
       card.style.opacity = "1";
     };
     lay();
@@ -204,8 +238,8 @@ export default function initDive(root) {
 
   const st = ScrollTrigger.create({
     trigger: wrap, start: "top top", end: "bottom bottom", invalidateOnRefresh: true,
-    onUpdate: (s) => { S.target = s.progress; },
-    onRefresh: (s) => { measure(); S.drawn = -1; S.target = s.progress; S.cur = s.progress; if (s.progress > 0.001 || s.scroll() > s.start) playEntry(true); },
+    onUpdate: (s) => { const [a, b] = split(s.progress); S.target = a; Q.target = b; },
+    onRefresh: (s) => { measure(); S.drawn = -1; const [a, b] = split(s.progress); S.target = a; S.cur = a; Q.target = b; Q.cur = b; if (s.progress > 0.001 || s.scroll() > s.start) playEntry(true); },
   });
 
   // visibility governor: tick only when the section is near the screen
@@ -215,6 +249,8 @@ export default function initDive(root) {
   const t0 = performance.now();
   const tick = () => {
     if (!inView) return;
+    const eq = Q.target - Q.cur; Q.cur = Math.abs(eq) > 0.00005 ? Q.cur + eq * 0.14 : Q.target;
+    if (Q.cur !== Q.drawn) { Q.drawn = Q.cur; drawAbout(Q.cur); }
     const e = S.target - S.cur;
     if (Math.abs(e) > 0.00005) S.cur += e * 0.14; else S.cur = S.target;
     const time = (performance.now() - t0) / 1000;
@@ -236,7 +272,9 @@ export default function initDive(root) {
   window.addEventListener("pointermove", onMove, { passive: true });
 
 
-  const onResize = () => { measure(); S.drawn = -1; };
+  const onResize = () => { fitAbout(); measure(); S.drawn = -1; ScrollTrigger.refresh(); };
+  const onAbout = () => { fitAbout(); ScrollTrigger.refresh(); };
+  root.addEventListener("dv-about-ready", onAbout);
   window.addEventListener("resize", onResize);
   measure(); draw(0, 0);
   const bgOff = initBg(stage, () => S.cur, () => inView);
@@ -244,6 +282,7 @@ export default function initDive(root) {
 
   return () => {
     window.removeEventListener("resize", onResize);
+    root.removeEventListener("dv-about-ready", onAbout);
     window.removeEventListener("pointermove", onMove);
     bgOff(); nightOff();
     gsap.ticker.remove(tick);

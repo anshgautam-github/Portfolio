@@ -26,6 +26,8 @@ const MARGIN = [
   { key: "design", side: "l", n: "03", title: "Design", text: "interfaces people keep", acc: "#4ee39a", rgb: [78, 227, 154] },
 ];
 
+// the three project cards (GPT-2, CineMyst, OwnMove) are hidden on request: set to true to show them again
+const SHOW_WORKS = false;
 const WORKS = [
   { src: "/stack/01.webp", title: "GPT-2 from scratch", text: "A language model in pure PyTorch: tokenizer, attention, pretraining and fine-tuning.", href: "https://github.com/anshgautam-github/llm-from-scratch", cta: "View on GitHub" },
   { src: "/stack/03.webp", title: "CineMyst", text: "An iOS app bridging aspiring artists and real opportunities in the film industry.", href: "#projects", cta: "See the project" },
@@ -107,7 +109,7 @@ export default function ScreenStack() {
         </div>
       </div>
 
-      <ul className="ss-works">
+      {SHOW_WORKS && <ul className="ss-works">
         {WORKS.map((w) => {
           const ext = /^https?:/.test(w.href);
           return (
@@ -121,7 +123,7 @@ export default function ScreenStack() {
             </li>
           );
         })}
-      </ul>
+      </ul>}
     </section>
   );
 }

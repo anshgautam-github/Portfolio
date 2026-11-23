@@ -52,7 +52,7 @@ export default function Illusion() {
     const mfWrap = mfEl.current;
     const mfH = () => (mfWrap ? mfWrap.firstElementChild.offsetHeight : 0);
     const travel = () => mfH() + vhPx() * 0.5;                              // how far the text climbs: from just below the screen to its last line mid-screen
-    const tailLen = () => travel() + vhPx() * 1.15;                         // plus a hold of one screen: the stage stays stuck while the next section (Prism) rises over it
+    const tailLen = () => travel() + vhPx() * 0.3;                         // plus a hold of one screen: the stage stays stuck while the next section (Prism) rises over it
     const layout = () => {
       el.style.height = Math.round(baseLen() + vhPx() + tailLen()) + "px";
       // flow mode: the text starts just below the screen when the fall ends and then simply scrolls like any other content
