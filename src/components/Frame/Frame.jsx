@@ -15,8 +15,11 @@ function read(el) {
   return { m: n("--fr-m", 14), r: n("--fr-r", 30), nw: n("--fr-nw", 340), nh: n("--fr-nh", 50), nr: n("--fr-nr", 26) };
 }
 
-function build(W, H, { m, r, nw, nh, nr }) {
-  const x0 = m, y0 = m, x1 = W - m, y1 = H - m;
+function build(W, H, { m, r, nw, nh, nr, bleed = 0 }) {
+  // bleed: once the frame is full-bleed its window edge would sit exactly on the screen edge; the two coincident edges antialias into a faint
+  // light hairline along the top and bottom that flickers as the page moves under it. Pushing the window edge past the screen removes the seam.
+  nh += bleed;
+  const x0 = m - bleed, y0 = m - bleed, x1 = W - m + bleed, y1 = H - m + bleed;
   r = Math.min(r, (x1 - x0) / 2, (y1 - y0) / 2);   // simple rounded corners
   nr = Math.max(nr, 0);
   const cx = W / 2;
@@ -73,7 +76,7 @@ export default function Frame() {
       const e = t * t * (3 - 2 * t);
       const k = 1 - e;
       settled = t >= 1;
-      const d = build(W, H, { m: base.m * k, r: base.r * k, nw: base.nw, nh: base.nh, nr: base.nr });
+      const d = build(W, H, { m: base.m * k, r: base.r * k, nw: base.nw, nh: base.nh, nr: base.nr, bleed: base.m * k < 0.5 ? 3 : 0 });
       ringRef.current?.setAttribute("d", d.ring);
       edgeRef.current?.setAttribute("d", d.edge);
       el.style.setProperty("--fr-top", `${base.m * k}px`);   // brand text + blur halo ride up with the shrinking margin
