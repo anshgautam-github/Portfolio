@@ -1,0 +1,111 @@
+.hz {
+  --hz-ink: #03050a; --hz-orange: #3f72ee; --hz-lime: #c5dcf0; --hz-forest: #050505; --hz-cream: #eef3ff; --hz-yellow: #eef3ff; --hz-violet: #8f7bff; --hz-mint: #4ee39a; --hz-mono: "JetBrains Mono", ui-monospace, monospace;
+  position: relative; background: var(--hz-ink); color: var(--hz-forest); overflow-x: clip;
+  font-family: "Archivo", "Inter Tight", system-ui, sans-serif;
+}
+.hz *, .hz *::before, .hz *::after { box-sizing: border-box; }
+.hz-head-l { display: block; overflow: hidden; padding: 0.06em 0.1em; margin: -0.06em -0.1em; }
+.hz-head-l > span { display: inline-block; }
+
+/* ribbon */
+.hz-top { position: relative; height: clamp(240px, 32vw, 480px); background: #eaf2fb; }
+.hz-top svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: hidden; }
+.hz-orange { fill: var(--hz-orange); }
+.hz-band { fill: none; stroke: var(--hz-violet); stroke-width: 150; stroke-linecap: butt; }
+.hz-rtext { font: 800 62px "Archivo", system-ui, sans-serif; font-stretch: 112%; letter-spacing: 0.02em; fill: var(--hz-forest); text-transform: uppercase; }
+
+/* orange scene */
+.hz-intro { position: relative; background: var(--hz-orange); min-height: 118vh; padding: 6vh 6vw 10vh; display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden; }
+.hz-pill { display: inline-flex; align-items: center; gap: 0.6em; margin: 0 0 2vh; padding: 0.85em 1.3em; border-radius: 999px; background: var(--hz-forest); color: var(--hz-cream); transform: none;
+  font: 600 clamp(11px, .9vw, 13px)/1 var(--hz-mono); text-transform: uppercase; letter-spacing: 0.12em; box-shadow: 0 14px 30px -12px rgba(5,5,5,.55); }
+.hz-pill i, .hz-chip i { width: 4px; height: 14px; background: radial-gradient(circle, currentColor 1.6px, transparent 2px) 50% 0 / 4px 5px repeat-y; }
+.hz-pill-d { background: var(--hz-cream); color: var(--hz-forest); }
+.hz-head { position: absolute; left: 50%; top: 20vh; transform: translateX(-50%); margin: 0; z-index: 1; font-weight: 800; font-stretch: 112%; text-transform: uppercase;
+  font-size: min(27vh, 14.5vw); line-height: 0.9; letter-spacing: -0.03em; color: var(--hz-yellow); text-align: center; width: 100%; }
+.hz-chips { position: absolute; left: 1.4vw; bottom: 34vh; z-index: 3; display: flex; flex-direction: column; gap: 1.2vh; align-items: flex-start; }
+.hz-chip { display: inline-flex; align-items: center; gap: 0.6em; padding: 0.85em 1.3em; background: rgba(238,243,255,.14); color: var(--hz-cream); border: 1px solid rgba(238,243,255,.3); backdrop-filter: blur(6px); border-radius: 999px; font: 600 clamp(11px, .9vw, 13px)/1 var(--hz-mono); letter-spacing: .12em; text-transform: uppercase; }
+.hz-blurb { position: absolute; left: 1.4vw; bottom: 8vh; z-index: 3; max-width: 22ch; margin: 0; text-align: left; color: rgba(238,243,255,.9); font: 400 clamp(15px, 1.3vw, 21px)/1.5 "Inter Tight", sans-serif; }
+.hz-hero-disc { position: absolute; left: 50%; bottom: -8vh; z-index: 2; width: min(46vh, 34vw); transform: translateX(-50%); }
+.hz-disc-svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 30px 40px rgba(5, 8, 30, 0.45)); overflow: visible; }
+.hz-ringtext { font: 600 18px "JetBrains Mono", monospace; letter-spacing: 0.06em; fill: #101211; text-transform: uppercase; }
+.hz-disc-t { font: 800 44px "Archivo", sans-serif; font-stretch: 112%; text-transform: uppercase; }
+.hz-disc-s { font: 600 13px "JetBrains Mono", monospace; letter-spacing: 0.1em; }
+.hz-card { position: absolute; width: calc(var(--w, 34) * 1vh); aspect-ratio: 1; border-radius: 26% / 24%; will-change: transform; backface-visibility: hidden;
+  transform: rotate(var(--r, 0deg)); box-shadow: 0 40px 60px -24px rgba(5, 8, 30, 0.55), 0 0 0 1px rgba(238,243,255,.12); }
+.hz-card > svg { display: block; width: 100%; height: 100%; border-radius: inherit; }
+.hz-tape { position: absolute; z-index: 2; left: 22%; top: -9%; width: 56%; height: 17%; transform: rotate(-3deg); background: rgba(238,243,255,.55); backdrop-filter: blur(4px); opacity: 1;
+  clip-path: polygon(0 4%, 3% 0, 6% 6%, 94% 0, 97% 8%, 100% 2%, 98% 52%, 100% 96%, 96% 100%, 92% 94%, 6% 100%, 2% 94%, 0 98%, 3% 50%); }
+.hz-tape-d { background: rgba(5,5,5,.7); }
+.hz-card-l { left: 12%; top: 56vh; width: min(34vh, 24vw); --r: -9deg; }
+.hz-card-r { right: 12%; top: 50vh; width: min(34vh, 24vw); --r: 9deg; }
+.hz-explore { position: absolute; z-index: 4; right: 24%; top: 54vh; width: min(24vh, 17vw); aspect-ratio: 1; padding: 0; border: 0; background: none; cursor: pointer; display: grid; place-items: center; color: var(--hz-forest); transition: transform 0.25s ease; }
+.hz-explore svg { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 18px 26px rgba(5, 8, 30, 0.35)); }
+.hz-explore span { position: relative; font: 800 clamp(16px, 1.8vw, 30px)/1 "Archivo", sans-serif; font-stretch: 112%; transform: rotate(10deg); }
+.hz-explore b { position: absolute; left: 50%; bottom: 24%; width: 26%; aspect-ratio: 1; border-radius: 50%; background: var(--hz-mint); display: grid; place-items: center; font-size: clamp(12px, 1.3vw, 22px); transform: translateX(-50%); }
+.hz-explore:hover, .hz-explore:focus-visible { transform: rotate(-8deg) scale(1.07); outline: none; }
+.hz-explore:focus-visible { box-shadow: 0 0 0 4px var(--hz-forest); border-radius: 50%; }
+
+/* orange -> lime */
+.hz-curve { position: relative; height: clamp(120px, 24vh, 260px); background: var(--hz-lime); overflow: hidden; }
+.hz-curve::before { content: ""; position: absolute; left: -12%; right: -12%; top: -100%; height: 200%; background: var(--hz-orange); border-radius: 0 0 50% 50% / 0 0 100% 100%; }
+
+/* heading on lime */
+.hz-why { position: relative; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.07'/></svg>"), var(--hz-lime); display: flex; flex-direction: column; align-items: center; text-align: center; padding: 6vh 6vw 8vh; }
+.hz-whyh { margin: 0; font-weight: 800; font-stretch: 112%; text-transform: uppercase; font-size: clamp(38px, 6.4vw, 116px); line-height: 0.98; letter-spacing: -0.03em; color: var(--hz-forest); }
+
+/* horizontal scroll */
+.hz-wrap { position: relative; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.07'/></svg>"), var(--hz-lime); }
+.hz-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+.hz-track { position: absolute; left: 0; top: 0; height: 100%; display: flex; align-items: center; will-change: transform; backface-visibility: hidden; }
+.hz-panel { position: relative; flex: 0 0 auto; height: 100%; display: flex; align-items: center; padding: 0 14vw; }
+.hz-word { margin: 0; white-space: nowrap; font-weight: 800; font-stretch: 112%; text-transform: uppercase; font-size: min(40vh, 19vw); line-height: 0.9; letter-spacing: -0.035em; color: var(--hz-forest); transform: translateY(4vh); }
+.hz-pcard { width: calc(var(--w, 34) * 1vh); }
+.hz-pdisc { position: absolute; width: min(40vh, 30vw); will-change: transform; z-index: 3; }
+.hz-note { position: absolute; z-index: 4; margin: 0; display: flex; gap: 0.7em; align-items: flex-start; font: 500 clamp(11px, .9vw, 13px)/1.5 var(--hz-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--hz-forest); transform: none; }
+.hz-note svg { flex: none; width: clamp(80px, 9vw, 150px); height: auto; fill: none; stroke: var(--hz-forest); stroke-width: 2.2; stroke-linecap: round; overflow: visible; }
+.hz-note span { padding-top: 1.4em; }
+.hz-num { position: absolute; left: 6vw; top: 20vh; width: clamp(36px, 4.4vw, 70px); }
+.hz-num svg { display: block; width: 100%; overflow: visible; fill: none; stroke: var(--hz-forest); stroke-width: 2.4; stroke-linecap: round; }
+.hz-num text { fill: var(--hz-forest); stroke: none; font: 500 30px "JetBrains Mono", monospace; }
+.hz-prog { position: absolute; left: 6vw; right: 6vw; bottom: 4.5vh; display: flex; align-items: center; gap: 1em; color: var(--hz-forest); font: 600 clamp(11px, .9vw, 13px)/1 var(--hz-mono); letter-spacing: 0.12em; text-transform: uppercase; z-index: 5; }
+.hz-prog i { flex: 1; height: 2px; border-radius: 4px; background: rgba(5, 5, 5, 0.18); overflow: hidden; }
+.hz-prog b { display: block; height: 100%; background: var(--hz-orange); transform: scaleX(0); transform-origin: 0 50%; }
+.hz-prog em { font: 600 clamp(11px, .9vw, 13px)/1 var(--hz-mono); font-style: normal; letter-spacing: .12em; margin-left: 0.4em; }
+
+/* lime -> dark, so the star bloom that follows starts on the same ink */
+.hz-out { position: relative; height: clamp(120px, 26vh, 280px); background: var(--hz-lime); overflow: hidden; }
+.hz-out::before { content: ""; position: absolute; left: -12%; right: -12%; bottom: 0; height: 200%; background: var(--hz-ink); border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+
+@media (max-width: 860px) {
+  .hz-head { font-size: min(22vh, 19vw); top: 17vh; }
+  /* phone layout of the blue scene (it is 118vh tall): headline -> two taped cards with the Explore badge between -> chips in a row -> blurb on the left, disc peeking in from the right */
+  .hz-intro { min-height: 112vh; padding-left: 5vw; padding-right: 5vw; }
+  .hz-card-l { left: 4%; top: 37vh; width: min(24vh, 38vw); }
+  .hz-card-r { right: 4%; top: 33vh; width: min(24vh, 38vw); }
+  .hz-explore { right: 8%; top: 55vh; width: min(17vh, 27vw); }
+  .hz-chips { left: 5vw; right: 5vw; top: 66vh; bottom: auto; flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  .hz-chip { padding: 0.75em 1.05em; }
+  .hz-blurb { left: 5vw; bottom: 7vh; max-width: min(54vw, 26ch); font-size: 15px; line-height: 1.45; }
+  .hz-hero-disc { left: auto; right: -13vw; bottom: -5vh; transform: none; width: min(34vh, 44vw); }
+  .hz-panel { padding: 0 10vw; } .hz-word { font-size: min(34vh, 26vw); }
+  .hz-pcard { width: calc(var(--w, 34) * 0.78vh); } .hz-pdisc { width: min(30vh, 44vw); }
+}
+
+/* reduced motion: no pin, panels stack */
+.hz.is-static .hz-wrap { height: auto !important; }
+.hz.is-static .hz-stage { position: relative; height: auto; overflow: visible; }
+.hz.is-static .hz-track { position: relative; flex-direction: column; height: auto; transform: none !important; }
+.hz.is-static .hz-panel { width: 100%; min-height: 80vh; padding: 6vh 6vw; }
+.hz.is-static .hz-word { font-size: min(30vh, 22vw); }
+.hz.is-static .hz-prog { display: none; }
+
+/* short phones: pull the lower half up a little so nothing meets */
+@media (max-width: 860px) and (max-height: 700px) {
+  .hz-card-l { top: 36vh; } .hz-card-r { top: 31vh; } .hz-explore { top: 56vh; }
+  .hz-chips { top: 68vh; } .hz-blurb { bottom: 5vh; }
+}
+@media (max-width: 380px) {
+  .hz-head { font-size: min(21vh, 18vw); }
+  .hz-chip { font-size: 10.5px; }
+  .hz-blurb { font-size: 14px; max-width: 52vw; }
+}

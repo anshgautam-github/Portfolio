@@ -23,7 +23,7 @@ html, body { background: var(--fr-bg); }
 
 .fr-brand {
   all: unset; box-sizing: border-box; pointer-events: auto; cursor: pointer;
-  position: absolute; left: 50%; top: var(--fr-m); height: var(--fr-nh); transform: translateX(-50%);
+  position: absolute; left: 50%; top: var(--fr-top, var(--fr-m)); height: var(--fr-nh); transform: translateX(-50%);
   display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; align-content: center; max-width: calc(var(--fr-nw) - 24px);
   white-space: nowrap; color: #0b0b0b;
   font-family: "Archivo", "Inter Tight", Arial, sans-serif; font-stretch: 125%; font-weight: 800;
@@ -37,3 +37,31 @@ html, body { background: var(--fr-bg); }
 .ll-logo { visibility: hidden; }
 
 .fr-brand .fr-tag { margin-left: .35em; font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; font-stretch: 100%; font-weight: 500; font-size: .55em; letter-spacing: .04em; opacity: .55; align-self: baseline; padding-bottom: 0; }
+
+
+/* Frosted halo around the brand notch: progressive backdrop blur (soft outside, strong near the tab) + a faint cream glow, so the tab melts into whatever scrolls under it.
+   Sits under the ring in the stack, so in the hero (where the ring is opaque above the window) only the part spilling into the scene shows. */
+.fr-halo {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  top: calc(var(--fr-top, var(--fr-m)) - 40px);
+  width: calc(var(--fr-nw) + var(--fr-nh) * 2 + 220px);
+  height: calc(var(--fr-nh) + 120px);
+  pointer-events: none;
+  --ease: #000 0%, #000 52%, rgba(0,0,0,.82) 62%, rgba(0,0,0,.55) 72%, rgba(0,0,0,.26) 83%, rgba(0,0,0,.08) 93%, transparent 100%;
+}
+.fr-halo i, .fr-halo b { position: absolute; display: block; }
+.fr-halo i {
+  --vr: calc(var(--fr-nh) / 2 + 80px);
+  -webkit-mask-image: radial-gradient(ellipse 50% var(--vr) at 50% calc(40px + var(--fr-nh) / 2), var(--ease));
+          mask-image: radial-gradient(ellipse 50% var(--vr) at 50% calc(40px + var(--fr-nh) / 2), var(--ease));
+}
+.fr-halo i:nth-child(1) { inset: 0;                         -webkit-backdrop-filter: blur(3px)  saturate(1.05); backdrop-filter: blur(3px)  saturate(1.05); }
+.fr-halo i:nth-child(2) { inset: 0 13% 14px 13%; --vr: calc(var(--fr-nh) / 2 + 62px); -webkit-backdrop-filter: blur(9px)  saturate(1.1);  backdrop-filter: blur(9px)  saturate(1.1); }
+.fr-halo i:nth-child(3) { inset: 0 26% 30px 26%; --vr: calc(var(--fr-nh) / 2 + 44px); -webkit-backdrop-filter: blur(20px) saturate(1.15); backdrop-filter: blur(20px) saturate(1.15); }
+/* cream glow: lifts the tab off the page like frosted glass catching light */
+.fr-halo b {
+  inset: 0 16% 20px 16%;
+  background: radial-gradient(ellipse 50% calc(var(--fr-nh) / 2 + 54px) at 50% calc(40px + var(--fr-nh) / 2), rgba(239,237,231,.55) 0%, rgba(239,237,231,.30) 55%, rgba(239,237,231,0) 100%);
+}
+@media (max-width: 640px) { .fr-halo { width: calc(var(--fr-nw) + var(--fr-nh) * 2 + 120px); } }
+@media (prefers-reduced-transparency: reduce) { .fr-halo i { display: none; } }

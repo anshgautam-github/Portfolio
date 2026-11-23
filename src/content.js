@@ -301,12 +301,27 @@ export const content = {
     title: "Let\u2019s grow your next idea",
     hint: "Water me",
     full: "In full bloom",
-    credit: "Designed & built by Jay Calder \u00b7 2026",
+    credit: "Designed & built by Ansh Gautam \u00b7 2026",
     links: [
-      { label: "LinkedIn", href: "#" },
-      { label: "GitHub", href: "#" },
-      { label: "Behance", href: "#" },
+      { label: "GitHub", href: "https://github.com/anshgautam-github" },
     ],
+    footer: {
+      name: "Ansh Gautam",
+      year: 2026,
+      tagline: "AI engineer, researcher & builder",
+      nav: [
+        { label: "About", id: "fs-about" },
+        { label: "Work", id: "fs-work" },
+        { label: "Services", id: "fs-services" },
+        { label: "Projects", id: "projects" },
+      ],
+      // a social with an empty href is not shown: paste your LinkedIn URL / "mailto:you@domain" below to switch them on
+      socials: [
+        { label: "GitHub", icon: "github", href: "https://github.com/anshgautam-github" },
+        { label: "LinkedIn", icon: "linkedin", href: "" },
+        { label: "Email", icon: "mail", href: "" },
+      ],
+    },
   },
   hero: {
     name: "jay calder",

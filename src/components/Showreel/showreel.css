@@ -1,0 +1,49 @@
+/* ============================================================
+   Showreel. One sticky stage; scroll progress is mapped in showreel.js.
+   ============================================================ */
+.sr { --sr-amber: #f5b93f; position: relative; background: #000; color: #fff; overflow-x: clip; font-family: "Archivo", "Inter Tight", system-ui, sans-serif; }
+.sr-wrap { height: 1050vh; }
+.sr-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; background: #000; }
+
+.sr-media, .sr-tint { position: absolute; inset: 0; pointer-events: none; visibility: hidden; will-change: clip-path, transform; }
+.sr-media { transform-origin: 50% 50%; background: #000; }
+.sr-media img, .sr-media video { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+.sr-tint { will-change: clip-path, opacity; }
+.sr-stage.is-reel .sr-media, .sr-stage.is-reel .sr-tint { visibility: visible; }
+.sr-bridge { position: absolute; left: 0; top: 41%; height: 22%; width: 0; background: var(--sr-amber); opacity: 0; pointer-events: none; will-change: transform, opacity; }
+
+/* ---- the column ---- */
+.sr-flow { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+.sr-label { margin: 0; padding-top: 30vh; text-align: center; color: var(--sr-amber); font: 400 clamp(18px, 1.9vw, 30px)/1 "JetBrains Mono", ui-monospace, Menlo, monospace; letter-spacing: 0.01em; }
+.sr-rows { margin-top: clamp(40px, 9vh, 120px); border-top: 1px solid rgba(255, 255, 255, 0.14); }
+.sr-row { position: relative; margin: 0; height: 21vh; border-bottom: 1px solid rgba(255, 255, 255, 0.14); overflow: hidden; display: grid; place-items: center; }
+.sr-t { display: block; white-space: nowrap; font-weight: 900; font-style: italic; font-stretch: 100%; font-size: min(11.4vw, 18vh); line-height: 1; letter-spacing: -0.035em; text-transform: uppercase; padding-right: 0.04em; }
+.sr-wipe { position: absolute; inset: 0; display: grid; place-items: center; will-change: clip-path; clip-path: inset(0 100% 0 0); }
+.sr-note { margin: clamp(60px, 14vh, 180px) auto 0; max-width: 62ch; padding: 0 6vw; text-align: center; color: var(--sr-amber); font: 400 clamp(15px, 1.55vw, 25px)/1.55 "JetBrains Mono", ui-monospace, Menlo, monospace; text-wrap: balance; }
+.sr-title { margin: 0; padding-top: 64vh; padding-bottom: 8vh; text-align: center; color: var(--sr-amber); font-weight: 900; font-style: italic; font-size: min(14.2vw, 24vh); line-height: 0.9; letter-spacing: -0.04em; will-change: opacity; }
+
+/* ---- button + hint ---- */
+.sr-btn {
+  position: absolute; left: 69%; top: 0; z-index: 4; padding: 12px 18px; background: var(--sr-amber); color: #0b0b0b; text-decoration: none; opacity: 0; will-change: transform, opacity;
+  font: 800 clamp(11px, 0.95vw, 15px)/1 "Archivo", system-ui, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; pointer-events: none;
+}
+.sr-stage.is-reel .sr-btn { pointer-events: auto; }
+.sr-btn:hover, .sr-btn:focus-visible { background: #ffd070; }
+.sr-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.sr-hint { position: absolute; left: 0; right: 0; bottom: 5vh; margin: 0; text-align: center; opacity: 0; color: var(--sr-amber); font: 400 clamp(11px, 0.95vw, 15px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.3em; text-transform: uppercase; pointer-events: none; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6); }
+.sr-stage.is-full { cursor: pointer; }
+
+@media (max-width: 767px) {
+  .sr-wrap { height: 820vh; }
+  .sr-t { font-size: min(14.4vw, 15vh); }
+  .sr-btn { left: 50%; margin-left: -64px; }
+}
+
+/* reduced motion: calm static layout */
+.sr.is-static .sr-wrap { height: auto; }
+.sr.is-static .sr-stage { position: relative; height: auto; overflow: visible; padding-bottom: 10vh; }
+.sr.is-static .sr-flow { position: relative; }
+.sr.is-static .sr-wipe { clip-path: none !important; }
+.sr.is-static .sr-title { padding-top: 14vh; padding-bottom: 6vh; opacity: 1 !important; }
+.sr.is-static .sr-media { position: relative; visibility: visible; clip-path: none !important; transform: none !important; height: 70vh; margin: 0 4vw; border-radius: 16px; overflow: hidden; }
+.sr.is-static .sr-tint, .sr.is-static .sr-bridge, .sr.is-static .sr-btn { display: none; }

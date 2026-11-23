@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { content } from "../../content.js";
 import { World, Critters } from "./Scenery.jsx";
+import GardenFooter from "./GardenFooter.jsx";
 import "./garden.css";
 import { perf, IS_MOBILE } from "../../lib/perf.js";
 
@@ -751,39 +752,18 @@ export default function Garden({ embedded = false, ctl = null }) {
 
       <Critters />
 
-      <button
-        type="button"
-        className="gd-snd"
-        aria-pressed={sound}
-        aria-label={sound ? "Mute sound" : "Turn sound on"}
-        onClick={() => {
-          const v = !sound;
-          soundOn.current = v;
-          setSound(v);
-          if (v && api.current.plink) api.current.plink();
-        }}
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor" />
-          {sound ? (
-            <>
-              <path d="M15.5 8.5a5 5 0 0 1 0 7" />
-              <path d="M18.5 5.5a9 9 0 0 1 0 13" />
-            </>
-          ) : (
-            <path d="m16 9 5 6m0-6-5 6" />
-          )}
-        </svg>
-      </button>
 
 
 
+
+      {/* ---------------- footer: the scene is also the site footer ---------------- */}
+      <GardenFooter />
 
       {/* ---------------- water drops ---------------- */}
       <div ref={drops} className="pointer-events-none absolute inset-0 z-40" aria-hidden="true" />
 
       {/* ---------------- watering-can cursor ---------------- */}
-      <div ref={cursor} style={{ marginLeft: "calc(clamp(54px, 4.2vw, 92px) * -0.4)" }} className="pointer-events-none absolute left-0 top-0 z-50 flex select-none items-center gap-[0.9vw] [@media(hover:none)]:hidden" aria-hidden="true">
+      <div ref={cursor} style={{ marginLeft: "calc(clamp(54px, 4.2vw, 92px) * -0.4)" }} className="gd-can pointer-events-none absolute left-0 top-0 z-50 flex select-none items-center gap-[0.9vw] [@media(hover:none)]:hidden" aria-hidden="true">
         <svg
           ref={can}
           viewBox="0 0 92 70"

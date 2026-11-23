@@ -360,6 +360,7 @@
 .fs .svc-preview.is-on { opacity: 1; }
 .fs .svc-preview img { width: 100%; height: 100%; object-fit: cover; }
 .fs .portal { position: relative; height: 640vh; }
+.fs .portal[hidden] { display: none; }
 .fs .portal-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
 .fs #fs-portalCanvas, .fs #portalCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; will-change: transform; transform-origin: 50% 44%; }
 .fs .tunnel { position: absolute; inset: 0; perspective: 700px; pointer-events: none; mix-blend-mode: screen; }
@@ -677,6 +678,27 @@ html.is-mobile .fs .stage-inner.is-shake { animation: none; }
   background: radial-gradient(circle 340px at var(--mx) var(--my), rgba(140, 170, 255, calc(.05 + var(--pw) * .09)), transparent 70%);
 }
 @media (prefers-reduced-motion: reduce) { .fs .about-fx .afx-b { animation: none; } }
+
+/* lead-in to the About background: the same periwinkle / violet / cyan threads, but they begin in the empty space under the previous block and fall
+   diagonally toward the flow field, fading in as they drop, so the effect arrives instead of switching on at the section edge */
+.fs .about > .afx-lead { position: absolute; left: 0; right: 0; top: -46vh; height: 46vh; z-index: 2; overflow: hidden; pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, rgba(0,0,0,.35) 38%, #000 100%); mask-image: linear-gradient(180deg, transparent 0, rgba(0,0,0,.35) 38%, #000 100%); }
+.afx-lead-glow { position: absolute; left: -10%; right: -10%; bottom: 0; height: 100%; display: block;
+  background: radial-gradient(60% 70% at 28% 100%, rgba(80, 110, 255, .2), transparent 70%), radial-gradient(50% 60% at 78% 100%, rgba(150, 100, 255, .13), transparent 72%); }
+.afx-lead > i { position: absolute; top: 0; display: block; width: 1px; height: var(--len); border-radius: 1px; opacity: 0; will-change: transform, opacity;
+  background: linear-gradient(180deg, transparent, rgba(126, 162, 255, .9) 55%, rgba(220, 232, 255, .95));
+  transform: translate3d(0, 0, 0) rotate(-60deg) translateY(-30vh);
+  animation: afxFall var(--d) linear var(--dl) infinite; }
+.afx-lead > i:nth-child(3n+2) { background: linear-gradient(180deg, transparent, rgba(154, 123, 255, .85) 55%, rgba(220, 210, 255, .9)); }
+.afx-lead > i:nth-child(3n) { background: linear-gradient(180deg, transparent, rgba(111, 227, 255, .8) 55%, rgba(215, 245, 255, .9)); }
+@keyframes afxFall {
+  0%   { opacity: 0; transform: translate3d(0, 0, 0) rotate(-60deg) translateY(-30vh); }
+  14%  { opacity: var(--a); }
+  80%  { opacity: var(--a); }
+  100% { opacity: 0; transform: translate3d(0, 0, 0) rotate(-60deg) translateY(70vh); }
+}
+@media (max-width: 700px) { .afx-lead > i:nth-child(n+10) { display: none; } }
+@media (prefers-reduced-motion: reduce) { .afx-lead > i { animation: none; opacity: calc(var(--a) * .6); transform: rotate(-60deg) translateY(10vh); } }
 
 /* skills marquee: filled words carry the landing page's blue (ice → periwinkle → royal), outlined words get a periwinkle stroke with a faint glow */
 .fs .marquee-track span:not(.o) {

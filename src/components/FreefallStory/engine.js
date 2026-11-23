@@ -19,6 +19,7 @@ import { createFigure } from "./figure.js";
 const PAGE_P0 = 0.515;   // 'page': story progress at the top of the block (just after the impact flash has cleared)
 export function mountFreefallStory(root, { base, mode }) {
   const LOADER = mode === 'loader', PAGE = mode === 'page';
+  const NO_PORTAL = !!root.querySelector('#fs-portal[hidden]');   // the closing portal scene is switched off (SHOW_PORTAL in markup.js)
   const offs = [];
   const on = (t, ev, fn, o) => { t.addEventListener(ev, fn, o); offs.push([t, ev, fn, o]); };
   const html = document.documentElement;
@@ -954,6 +955,7 @@ export function mountFreefallStory(root, { base, mode }) {
   // ---------- portal: he walks out, the tunnel flies past you ----------
   let pTf = '', pCam = '', pCta = -1, pCtaT = '', pDrift = 0, pLast = 0;
   function updatePortal() {
+    if (NO_PORTAL) { S.portalOpen = 0; return; }
     const L = layout.portal;
     if (S.y + S.H < L.top || S.y > L.top + L.h) { S.portalOpen = 0; return; }
     const w = clamp((S.y - L.top) / (L.h - (L.sh || S.H)));
@@ -1189,8 +1191,8 @@ export function mountFreefallStory(root, { base, mode }) {
   const startLoad = () => {
     if (loading) return;
     loading = true;
-    if (PAGE) { portal.load(3); return; }   // the page no longer plays the crowd film (it lives in the loader): only the doorway film is needed here
-    fall.load(IS_MOBILE ? 4 : 8).then(() => { if (!fall.dead && !LOADER) portal.load(3); });
+    if (PAGE) { if (!NO_PORTAL) portal.load(3); return; }   // the page no longer plays the crowd film (it lives in the loader): only the doorway film is needed here
+    fall.load(IS_MOBILE ? 4 : 8).then(() => { if (!fall.dead && !LOADER && !NO_PORTAL) portal.load(3); });
   };
   let idleT = 0;
   const armIdle = () => { idleT = setTimeout(startLoad, 3500); };

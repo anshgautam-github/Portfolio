@@ -63,28 +63,24 @@ export default function Frame() {
     const el = ref.current;
     let base = read(el), raf = 0;
     // H is cached: reading clientHeight on every scroll frame forces a full style + layout flush, even once the frame is long gone
-    let H = el.clientHeight || window.innerHeight, W = el.clientWidth, gone = false;   // W is cached too: reading clientWidth right after the style writes below forced a layout on every scroll frame
-    // the frame belongs to the hero only: as you scroll out of it the margins, corners and brand tab melt away (full-bleed below)
+    let H = el.clientHeight || window.innerHeight, W = el.clientWidth;   // W is cached too: reading clientWidth right after the style writes below forced a layout on every scroll frame
+    // scrolling out of the hero: the margins and rounded corners melt away so the page runs full-bleed, but the brand notch stays pinned at top-centre
+    let settled = false;                                // fully scrolled: the path is final, so skip all writes until a resize
     const draw = () => {
       raf = 0;
       const t = Math.min(1, Math.max(0, (window.scrollY || 0) / (H * 0.75)));
-      if (t >= 1 && gone) return;                      // already hidden: no reads, no writes, nothing for the browser to recalc
+      if (t >= 1 && settled) return;
       const e = t * t * (3 - 2 * t);
       const k = 1 - e;
-      gone = t >= 1;
-      el.style.visibility = gone ? "hidden" : "visible";
-      if (gone) return;
-      const d = build(W, H, { m: base.m * k, r: base.r * k, nw: base.nw, nh: base.nh * k, nr: base.nr * k });
+      settled = t >= 1;
+      const d = build(W, H, { m: base.m * k, r: base.r * k, nw: base.nw, nh: base.nh, nr: base.nr });
       ringRef.current?.setAttribute("d", d.ring);
       edgeRef.current?.setAttribute("d", d.edge);
-      if (brandRef.current) {
-        brandRef.current.style.opacity = Math.max(0, 1 - e * 2.2);
-        brandRef.current.style.pointerEvents = e > 0.4 ? "none" : "auto";
-      }
-      el.style.opacity = String(1 - Math.max(0, e - 0.7) / 0.3);
+      el.style.setProperty("--fr-top", `${base.m * k}px`);   // brand text + blur halo ride up with the shrinking margin
+      if (edgeRef.current) edgeRef.current.style.opacity = String(k);   // no hairline around the screen edge once it is full-bleed
     };
     const req = () => { if (!raf) raf = requestAnimationFrame(draw); };
-    const resize = () => { base = read(el); H = el.clientHeight || window.innerHeight; W = el.clientWidth; gone = false; req(); };
+    const resize = () => { base = read(el); H = el.clientHeight || window.innerHeight; W = el.clientWidth; settled = false; req(); };
     draw();
     const offScroll = onScrollFrame(draw);              // same tick as ScrollTrigger, not a frame behind it
     const ro = new ResizeObserver(resize);
@@ -100,6 +96,7 @@ export default function Frame() {
 
   return (
     <div className="fr" ref={ref}>
+      <div className="fr-halo" aria-hidden="true"><i /><i /><i /><b /></div>
       <svg className="fr-svg" width="100%" height="100%" aria-hidden="true">
         <path className="fr-ring" ref={ringRef} fillRule="evenodd" />
         <path className="fr-edge" ref={edgeRef} />

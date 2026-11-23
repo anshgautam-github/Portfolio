@@ -2,6 +2,12 @@ import { useEffect, useState, useCallback, lazy, Suspense } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Reveal from "./components/Landing/Reveal.jsx";
 // import Hero from "./components/Hero/Hero.jsx"; // previous hero – still on disk, swap back here if you want it
+import ScreenStack from "./components/ScreenStack/ScreenStack.jsx";
+import Dive from "./components/Dive/Dive.jsx";
+import Horizon from "./components/Horizon/Horizon.jsx";
+import Bloom from "./components/Finale/Bloom.jsx";
+import Finale from "./components/Finale/Finale.jsx";
+import Showreel from "./components/Showreel/Showreel.jsx";
 import FreefallStory from "./components/FreefallStory/FreefallStory.jsx";
 import Warp from "./components/Warp/Warp.jsx";
 import TechSwitch from "./components/TechSwitch/TechSwitch.jsx";
@@ -19,7 +25,6 @@ import Toolkit from "./components/Toolkit/Toolkit.jsx";
 import Frame from "./components/Frame/Frame.jsx";
 import Cursor from "./components/Cursor/Cursor.jsx";
 import Fx from "./components/Fx/Fx.jsx";
-import MotionToggle from "./components/MotionToggle.jsx";
 
 // Parked sections load on demand: their code and stylesheets are separate chunks that are only fetched when the flag below is flipped on
 // (a static import would ship ~200 KB of script and ~3,000 lines of CSS to every visitor for sections that are not rendered).
@@ -32,7 +37,7 @@ const SHOW_DIARY = false;
 // the scroll showcase is still the template's "Butter" video-editor demo (its copy and /showcase images are not yours), so it is parked here:
 // flip to true to put it back between the garden and the collaboration scene
 const SHOW_SHOWCASE = false;
-const SHOW_LOADER = true; // the counter + freefall loader - set to true to bring it back (off while testing so reloads are instant)
+const SHOW_LOADER = false; // the counter + freefall loader - set to true to bring it back (off while testing so reloads are instant)
 const SHOW_CONTACT = false; // the footer / contact section - flip to true to bring it back
 const SHOW_COLLAB = false; // the handshake section - flip to true to bring it back
 
@@ -137,6 +142,17 @@ export default function App() {
       {/* Act 2: the landing */}
       <main id="main" tabIndex={-1}>
       <Reveal />
+      {/* "Look closer": a character peeks up, you fall through its eye into a starfield and the featured build (Dive/Dive.jsx) */}
+      <Seam to="#c5dcf0" accent="63,114,238" span={22} glow={30} />
+      <Dive />
+        {/* after the featured build: a star swells to amber, then the say-hello finale (Finale/) */}
+        <Bloom />
+        <Finale />
+        {/* what I do: endless ribbon, orange scene, pinned horizontal scroll (Horizon/) */}
+        <Horizon />
+      {/* "Selected work": a fan of product screens that squares up into one as you scroll, then a word-by-word headline and the three projects */}
+      <Showreel />
+      <ScreenStack />
       {/* Act 2a: the rest of the Freefall story (impact, noise, rise, chapters...) straight after the landing */}
       <FreefallStory />
       {/* the Kimi / paddock block now lives inside <FreefallStory />, right after its About section */}
@@ -151,7 +167,7 @@ export default function App() {
           <Seam to="#12161b" accent="120,160,255" span={34} glow={40} />
           <Proof />
       */}
-      <PushTransition from="#fs-portal" />
+      <PushTransition from="#fs-services" />
       <Seam to="#000000" accent="91,140,255" span={22} glow={30} />
       <ArcCarousel />
       <Seam to="#04071a" accent="110,150,255" span={26} glow={34} />
@@ -165,10 +181,9 @@ export default function App() {
       {SHOW_CONTACT && <Suspense fallback={null}><Contact /></Suspense>}
       </main>
       {/* text-only footer landmark (no visual change: the page still ends on the garden scene) */}
-      <footer className="a11y-hidden">
+      <div className="a11y-hidden">
         <p>Ansh Gautam: AI engineer, researcher and builder, from India.</p>
-      </footer>
-      <MotionToggle />
+      </div>
       <Frame />
       <Cursor />
       <Fx />

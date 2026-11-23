@@ -603,3 +603,32 @@ html.is-mobile .gd[data-night="1"] .gd-cloud { filter: none; }
 html.is-mobile .gd[data-night="1"] .gd-cloud [fill="#fff"] { fill: #3e4664; }
 html.is-mobile .gd[data-night="1"] .gd-cloud [fill="#8fa6c6"] { fill: #2b3350; }
 html.is-mobile .gd-snd { box-shadow: none; }
+
+/* ============================================================
+   Footer: the garden scene doubles as the site footer. A flush, solid band at the foot of the scene.
+   ============================================================ */
+.gd-foot {
+  position: absolute; z-index: 30; left: 0; right: 0; bottom: 0;
+  background: #0c0d17; border-top: 1px solid rgba(255, 255, 255, 0.09);
+  color: #e9e7f5; cursor: auto; text-shadow: none;
+  font-family: "Inter Tight", system-ui, sans-serif;
+}
+.gd-foot-in {
+  display: flex; align-items: center; justify-content: space-between; gap: 32px;
+  max-width: 1600px; margin: 0 auto; padding: 22px clamp(20px, 3vw, 48px);
+}
+.gd-foot p { margin: 0; }
+.gd-foot-name { font-size: 15px; font-weight: 600; line-height: 1.2; }
+.gd-foot-sub { margin-top: 3px !important; font-size: 13px; line-height: 1.3; color: rgba(233, 231, 245, 0.55); }
+.gd-foot a { color: rgba(233, 231, 245, 0.72); text-decoration: none; cursor: pointer; font-size: 14px; transition: color 0.2s; }
+.gd-foot a:hover, .gd-foot a:focus-visible { color: #fff; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.gd-foot a:focus-visible { outline: 2px solid #8db4ff; outline-offset: 4px; border-radius: 2px; }
+.gd-foot-links { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 28px; }
+.gd-foot-meta { display: flex; align-items: center; gap: 24px; font-size: 13px; color: rgba(233, 231, 245, 0.5); white-space: nowrap; }
+.gd-foot-meta a { font-size: 13px; }
+@media (max-width: 860px) {
+  .gd-foot-in { flex-direction: column; align-items: flex-start; gap: 16px; padding-top: 20px; padding-bottom: 20px; }
+  .gd-foot-meta { width: 100%; justify-content: space-between; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+}
+/* the watering can steps aside while the pointer is over the footer */
+.gd:has(.gd-foot:hover) .gd-can { visibility: hidden !important; }

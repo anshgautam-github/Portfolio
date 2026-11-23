@@ -10,6 +10,10 @@ import { CHAPTERS, LESSONS, WAYPOINTS } from './chapters.js';
 import { tileGuess, tileAttn, tileCurve } from './art.js';
 import { escapeHtml as esc } from '../../lib/escapeHtml.js';
 
+// The closing "portal" scene (doorway film, arches, "Every descent teaches you something.") is switched off for now: set to true to bring it back.
+// While off the section stays in the DOM as [hidden] so the engine's lookups still resolve, but it takes no space and its frames are never downloaded.
+export const SHOW_PORTAL = false;
+
 const LOGO_BASE = `${import.meta.env.BASE_URL}freefall/`;   // organisation logos (shared with the Where I've Worked cards)
 
 const reps = (w) => Array.from({ length: 4 }, () => esc(w)).join('&nbsp; ') + '&nbsp;';
@@ -19,6 +23,11 @@ const ringFill = (t) => { const n = Math.max(1, Math.round(66 / Math.max(1, t.le
 
 // a handful of slow embers per card (deterministic positions so every card differs a little)
 const sparks = (i) => Array.from({ length: 16 }, (_, k) => `<b style="--x:${(k * 47 + i * 31) % 100}%;--d:${8 + ((k * 7 + i * 3) % 9)}s;--dl:${-((k * 5 + i * 7) % 14)}s;--s:${1 + ((k * 3 + i) % 3)}px"></b>`).join('');
+// the About background's lead-in: fine light threads that start above the section (over the bottom of the previous block) and fall diagonally into the flow field
+const leadThreads = Array.from({ length: 22 }, (_, k) => {
+  const x = (k * 37 + 11 + (k % 3) * 9) % 100, len = 90 + ((k * 53) % 130), dur = 8 + ((k * 7) % 8), dl = -((k * 13) % 17), a = (0.22 + ((k * 29) % 40) / 100).toFixed(2);
+  return `<i style="left:${x}%;--len:${len}px;--d:${dur}s;--dl:${dl}s;--a:${a}"></i>`;
+}).join('');
 const segs = (i) => Array.from({ length: N }, (_, k) => `<i${k === i ? ' class="on"' : ''}></i>`).join('');
 
 const screen = (ch, i) => `
@@ -43,7 +52,7 @@ const screen = (ch, i) => `
         </div>
         ${ch.next
           ? `<button class="screen-cta magnet" type="button" data-go="${i + 1}" data-cursor="Next">Next &middot; ${esc(ch.next)}</button>`
-          : `<a class="screen-cta screen-cta--solid magnet" href="#contact" data-jump="contact" data-cursor="Talk">Let&rsquo;s build</a>`}
+          : ''}
         <span class="screen-mark" aria-hidden="true">${ch.yr ? esc(ch.yr) : '&nabla; 0' + (i + 1)}</span>
       </article>`;
 
@@ -74,14 +83,14 @@ export const markup = (A) => {
         <div class="index-tiles" id="fs-tiles">
           <button class="tile tile--art" data-go="1" data-cursor="View" data-x="-.30" data-y="-.25" data-s=".24" data-ar="1" data-z="-120" data-d="0">${tileAttn()}<span class="tile-cap">Attention</span></button>
           <button class="tile tile--art" data-go="0" data-cursor="View" data-x=".30" data-y="-.26" data-s=".18" data-ar=".62" data-z="-60" data-d=".08">${tileGuess()}<span class="tile-cap">Guess</span></button>
-          <button class="tile" data-go="2" data-cursor="View" data-x="-.33" data-y=".18" data-s=".12" data-ar="1" data-z="40" data-d=".18"><img src="${A}portal/228.webp" alt="" style="object-position:50% 30%"><span class="tile-cap">Signal</span></button>
-          <button class="tile" data-go="1" data-cursor="View" data-x=".31" data-y=".19" data-s=".19" data-ar="1" data-z="-20" data-d=".12"><img src="${A}fall/288.webp" alt=""><span class="tile-cap">Loss</span></button>
+          <button class="tile" data-go="2" data-cursor="View" data-x="-.33" data-y=".18" data-s=".12" data-ar="1" data-z="40" data-d=".18"><img src="/services/4-web-mobile.jpg" alt="" style="object-position:50% 30%"><span class="tile-cap">Signal</span></button>
+          <button class="tile" data-go="1" data-cursor="View" data-x=".31" data-y=".19" data-s=".19" data-ar="1" data-z="-20" data-d=".12"><img src="/services/2-ai-workflows.jpg" alt=""><span class="tile-cap">Loss</span></button>
           <button class="tile tile--gen gen-sun" data-go="0" data-cursor="View" data-x="-.07" data-y="-.43" data-s=".11" data-ar="1.3" data-z="-260" data-d=".26"><span class="tile-cap">Curiosity</span></button>
           <button class="tile tile--art" data-go="1" data-cursor="View" data-x=".06" data-y=".43" data-s=".13" data-ar="1.7" data-z="-200" data-d=".3">${tileCurve()}<span class="tile-cap">Descent</span></button>
           <button class="tile is-mono" data-go="2" data-cursor="View" data-x="-.46" data-y="-.02" data-s=".15" data-ar=".75" data-z="-320" data-d=".22"><img src="${A}fall/250.webp" alt=""><span class="tile-cap">Noise</span></button>
           <button class="tile" data-go="3" data-cursor="View" data-x=".47" data-y="-.03" data-s=".13" data-ar=".7" data-z="-280" data-d=".34"><img src="${A}portal/036.webp" alt="" style="object-position:50% 30%"><span class="tile-cap">Epoch</span></button>
           <button class="tile tile--gen gen-type" data-go="services" data-cursor="View" data-x="-.20" data-y=".41" data-s=".10" data-ar=".8" data-z="-160" data-d=".38"><b>AI</b><span class="tile-cap">Generative AI</span></button>
-          <button class="tile is-iris" data-go="4" data-cursor="View" data-x=".19" data-y="-.42" data-s=".10" data-ar="1" data-z="-220" data-d=".42"><img src="${A}portal/150.webp" alt=""><span class="tile-cap">Weights</span></button>
+          <button class="tile is-iris" data-go="4" data-cursor="View" data-x=".19" data-y="-.42" data-s=".10" data-ar="1" data-z="-220" data-d=".42"><img src="/services/1-language-models.jpg" alt=""><span class="tile-cap">Weights</span></button>
         </div>
 
 
@@ -133,6 +142,7 @@ export const markup = (A) => {
   <!-- ============ ABOUT ============ -->
   <section class="about" id="fs-about" aria-label="About Ansh">
     <div class="about-fx" aria-hidden="true"><canvas class="afx-cv"></canvas><i class="afx-b afx-b1"></i><i class="afx-b afx-b2"></i><i class="afx-b afx-b3"></i><i class="afx-dots"></i><i class="afx-spot"></i></div>
+    <div class="afx-lead" aria-hidden="true"><span class="afx-lead-glow"></span>${leadThreads}</div>
     <p class="manifesto" id="fs-manifesto">I have always been more interested in the why than the what. ¶ Why does a system behave this way? What happens when we challenge its assumptions? And what could we build if we started again? ¶ My curiosity usually takes me somewhere between a research paper, an unfamiliar technology, and an idea I can’t stop thinking about. ¶ I enjoy understanding something deeply enough to make something useful out of it.</p>
     <div class="about-cols">
       <p>Currently in <em class="kb">Chennai</em>, pursuing a B.Tech in Computer Science.</p>
@@ -178,17 +188,17 @@ export const markup = (A) => {
   <section class="services" id="fs-services" aria-label="What I can build with you">
     <h2 class="services-head">What I can build with you</h2>
     <ul class="svc-list">
-      <li class="svc" data-img="${A}portal/150.webp" data-cursor="Ask"><a href="#contact" data-jump="contact"><span class="svc-name">Language models</span><span class="svc-desc">From model architecture and training experiments to fine-tuning, evaluation, and understanding what happens beneath the weights.</span></a></li>
-      <li class="svc" data-img="${A}fall/288.webp" data-cursor="Ask"><a href="#contact" data-jump="contact"><span class="svc-name">AI-powered workflows</span><span class="svc-desc">Intelligent features that connect models, data, and users to solve specific problems without adding AI just for the sake of it.</span></a></li>
-      <li class="svc" data-img="${A}portal/120.webp" data-cursor="Ask"><a href="#contact" data-jump="contact"><span class="svc-name">Backend &amp; integrations</span><span class="svc-desc">The infrastructure behind an application: API design, authentication, database architecture, integrations, and dependable data flows.</span></a></li>
-      <li class="svc" data-img="${A}portal/228.webp" data-cursor="Ask"><a href="#contact" data-jump="contact"><span class="svc-name">Web &amp; mobile experiences</span><span class="svc-desc">Thoughtful digital experiences, from interactive web applications to native iOS interfaces, designed around how people actually use them.</span></a></li>
-      <li class="svc" data-img="${A}fall/205.webp" data-cursor="Ask"><a href="#contact" data-jump="contact"><span class="svc-name">Research collaboration</span><span class="svc-desc">Exploring unanswered questions, testing hypotheses, analysing results, and translating research into practical directions.</span></a></li>
+      <li class="svc" data-img="/services/1-language-models.jpg" data-cursor="Ask"><a href="#contact" data-jump="contact"><span class="svc-name">Language models</span><span class="svc-desc">From model architecture and training experiments to fine-tuning, evaluation, and understanding what happens beneath the weights.</span></a></li>
+      <li class="svc" data-img="/services/2-ai-workflows.jpg" data-cursor="Ask"><a href="#contact" data-jump="contact"><span class="svc-name">AI-powered workflows</span><span class="svc-desc">Intelligent features that connect models, data, and users to solve specific problems without adding AI just for the sake of it.</span></a></li>
+      <li class="svc" data-img="/services/3-backend-integrations.jpg" data-cursor="Ask"><a href="#contact" data-jump="contact"><span class="svc-name">Backend &amp; integrations</span><span class="svc-desc">The infrastructure behind an application: API design, authentication, database architecture, integrations, and dependable data flows.</span></a></li>
+      <li class="svc" data-img="/services/4-web-mobile.jpg" data-cursor="Ask"><a href="#contact" data-jump="contact"><span class="svc-name">Web &amp; mobile experiences</span><span class="svc-desc">Thoughtful digital experiences, from interactive web applications to native iOS interfaces, designed around how people actually use them.</span></a></li>
+      <li class="svc" data-img="/services/5-research-collaboration.jpg" data-cursor="Ask"><a href="#contact" data-jump="contact"><span class="svc-name">Research collaboration</span><span class="svc-desc">Exploring unanswered questions, testing hypotheses, analysing results, and translating research into practical directions.</span></a></li>
     </ul>
-    <div class="svc-preview" aria-hidden="true"><img alt="" src="${A}portal/150.webp"></div>
+    <div class="svc-preview" aria-hidden="true"><img alt="" src="/services/1-language-models.jpg"></div>
   </section>
 
   <!-- ============ PORTAL ============ -->
-  <section class="portal" id="fs-portal" aria-label="Contact intro">
+  <section class="portal" id="fs-portal" aria-label="Contact intro"${SHOW_PORTAL ? '' : ' hidden'}>
     <div class="portal-stage">
       <canvas id="fs-portalCanvas" aria-label="A man in a suit walks out of a burning doorway in the clouds"></canvas>
       <div class="tunnel" aria-hidden="true"><div class="tunnel-cam"></div></div>

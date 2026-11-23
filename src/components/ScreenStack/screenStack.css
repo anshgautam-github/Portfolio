@@ -1,0 +1,173 @@
+/* ============================================================
+   Screen stack (Selected work). Sticky stages inside tall wrappers; scroll is mapped to progress in screenStack.js.
+   ============================================================ */
+.ss {
+  --ss-bg: #03050a;
+  --ss-blue: #3b6cf0;
+  position: relative; background: var(--ss-bg); color: #fff; overflow-x: clip;
+  font-family: "Inter Tight", "Inter", system-ui, sans-serif;
+}
+.ss-a { height: 540vh; }
+.ss-b { height: 330vh; }
+.ss-sticky { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.ss-sticky--b { display: grid; place-items: center; padding: 0 6vw; }
+
+/* ---- header ---- */
+.ss-head {
+  position: absolute; z-index: 5; left: 0; right: 0; top: clamp(60px, 11vh, 140px);
+  display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 6vw; will-change: transform, opacity;
+}
+.ss-pill {
+  display: inline-flex; align-items: center; gap: 10px; padding: 11px 22px 11px 18px; border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28); font-size: clamp(15px, 1.15vw, 19px); font-weight: 500; letter-spacing: -0.005em; color: #f2f4fa;
+  background: rgba(255, 255, 255, 0.03);
+}
+.ss-title { margin: clamp(22px, 3.2vh, 40px) 0 0; font-weight: 700; font-size: clamp(2.6rem, 6.3vw, 7.4rem); line-height: 0.98; letter-spacing: -0.052em; text-wrap: balance; max-width: 15ch; }
+.ss-sub { margin: clamp(18px, 3vh, 34px) 0 0; font-size: clamp(1rem, 1.55vw, 1.6rem); line-height: 1.35; color: rgba(255, 255, 255, 0.82); max-width: 40ch; text-wrap: balance; }
+.ss-cta {
+  margin-top: clamp(22px, 4vh, 44px); display: inline-block; padding: 18px 34px; background: var(--ss-blue); color: #fff; text-decoration: none;
+  font-size: clamp(15px, 1.2vw, 20px); font-weight: 500; letter-spacing: -0.005em; border-radius: 4px;
+  transition: background 0.25s, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.ss-cta:hover, .ss-cta:focus-visible { background: #5a85f6; transform: translateY(-2px); }
+.ss-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ---- the deck ---- */
+.ss-stage { position: absolute; inset: 0; perspective: 2400px; perspective-origin: 50% 36%; pointer-events: none; }
+.ss-card {
+  --d: 0; --r: 18px;
+  position: absolute; left: 50%; top: 50%; margin: 0;
+  width: min(66vw, 1180px); aspect-ratio: 16 / 10; margin-left: calc(min(66vw, 1180px) / -2); margin-top: calc(min(66vw, 1180px) * -0.3125);
+  border-radius: var(--r); overflow: hidden; background: #0c0e14; transform-origin: 50% 50%; will-change: transform, opacity; backface-visibility: hidden;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.07);
+  transform: translate3d(0, 60vh, 0) rotateX(60deg);
+}
+.ss-card img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+.ss-card::after { content: ""; position: absolute; inset: 0; background: #000; opacity: var(--d); pointer-events: none; }
+
+/* ---- headline ---- */
+.ss-line {
+  margin: 0; max-width: 17ch; text-align: center; font-weight: 700; font-size: clamp(2.3rem, 5.6vw, 6.4rem); line-height: 1.07; letter-spacing: -0.048em; text-wrap: balance;
+}
+.ss-w { display: inline; opacity: 0.16; will-change: opacity; }
+
+/* ---- the work ---- */
+.ss-works { list-style: none; margin: 0 auto; padding: 0 clamp(20px, 3.4vw, 56px) clamp(80px, 14vh, 180px); max-width: 1760px; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 32px); }
+.ss-work { will-change: transform, opacity; }
+.ss-work a { display: block; color: inherit; text-decoration: none; }
+.ss-work-img { display: block; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 14px; background: #0c0e14; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08); }
+.ss-work-img img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.ss-work a:hover .ss-work-img img, .ss-work a:focus-visible .ss-work-img img { transform: scale(1.045); }
+.ss-work-t { display: block; margin-top: 22px; font-size: clamp(1.15rem, 1.5vw, 1.55rem); font-weight: 600; letter-spacing: -0.02em; }
+.ss-work-d { display: block; margin-top: 8px; font-size: clamp(0.95rem, 1.05vw, 1.1rem); line-height: 1.5; color: rgba(255, 255, 255, 0.62); max-width: 42ch; }
+.ss-work-c { display: inline-block; margin-top: 16px; font-size: 0.95rem; color: #9db8ff; }
+.ss-work-c i { font-style: normal; display: inline-block; transition: transform 0.3s; }
+.ss-work a:hover .ss-work-c i { transform: translateX(5px); }
+.ss-work a:focus-visible { outline: 2px solid #9db8ff; outline-offset: 6px; border-radius: 6px; }
+
+.ss-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; list-style: none; }
+
+@media (max-width: 767px) {
+  .ss-a { height: 440vh; }
+  .ss-b { height: 280vh; }
+  .ss-card { width: 88vw; margin-left: -44vw; margin-top: -27.5vw; }
+  .ss-card:nth-child(n + 6) { display: none; }
+  .ss-title { max-width: 11ch; }
+  .ss-works { grid-template-columns: 1fr; gap: 44px; }
+}
+
+/* reduced motion: no scroll choreography, a calm static layout */
+.ss.is-static .ss-a, .ss.is-static .ss-b { height: auto; }
+.ss.is-static .ss-sticky { position: relative; height: auto; overflow: visible; padding: 14vh 0 8vh; }
+.ss.is-static .ss-head { position: relative; top: 0; }
+.ss.is-static .ss-stage { position: relative; height: auto; perspective: none; margin-top: 8vh; display: grid; place-items: center; }
+.ss.is-static .ss-card { position: relative; left: auto; top: auto; margin: 0; transform: none !important; opacity: 1 !important; visibility: visible !important; width: min(80vw, 1100px); }
+.ss.is-static .ss-card:nth-child(n + 2) { display: none; }
+.ss.is-static .ss-w { opacity: 1 !important; }
+.ss.is-static .ss-work { opacity: 1 !important; transform: none !important; }
+
+/* ---- ambient light + floor ---- */
+.ss-amb { position: absolute; inset: 0; pointer-events: none; overflow: hidden; --ax: 60%; --ay: 80%; --ao: 0.45; --px: 0; --py: 0; }
+.ss-amb-a, .ss-amb-b { position: absolute; inset: -6%; will-change: transform; }
+.ss-amb-a { background: radial-gradient(48% 46% at var(--ax) var(--ay), rgba(63, 114, 238, 0.34), rgba(63, 114, 238, 0) 72%); opacity: var(--ao); transform: translate3d(calc(var(--px) * 1.6vw), calc(var(--py) * 1.2vh), 0); }
+.ss-amb-b { background: radial-gradient(30% 30% at calc(var(--ax) + 15%) calc(var(--ay) - 12%), rgba(143, 123, 255, 0.22), rgba(143, 123, 255, 0) 70%); opacity: var(--ao); animation: ss-breathe 12s ease-in-out infinite alternate; }
+@keyframes ss-breathe { from { transform: translate3d(calc(var(--px) * -2.4vw), calc(var(--py) * -1.8vh), 0) scale(1); } to { transform: translate3d(calc(var(--px) * -2.4vw - 2vw), calc(var(--py) * -1.8vh + 1.5vh), 0) scale(1.1); } }
+.ss-floor { position: absolute; left: 50%; top: var(--fy, 80vh); width: var(--fw, 50vw); height: 16vh; margin-left: calc(var(--fw, 50vw) / -2); opacity: var(--fo, 0);
+  background: radial-gradient(50% 60% at 50% 0%, rgba(63, 114, 238, 0.4), rgba(63, 114, 238, 0) 72%); }
+.ss-floor::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(126, 162, 255, 0.55), transparent); }
+
+/* ---- the editor's frame ---- */
+.ss-frame { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.ss-fv { position: absolute; top: 0; bottom: 0; width: 1px; background: linear-gradient(rgba(238, 243, 255, 0), rgba(238, 243, 255, 0.09) 18%, rgba(238, 243, 255, 0.09) 82%, rgba(238, 243, 255, 0)); }
+.ss-fc { position: absolute; width: 11px; height: 11px; }
+.ss-fc::before, .ss-fc::after { content: ""; position: absolute; background: rgba(238, 243, 255, 0.4); }
+.ss-fc::before { left: 5px; top: 0; width: 1px; height: 11px; } .ss-fc::after { top: 5px; left: 0; height: 1px; width: 11px; }
+.ss-fc-tl { left: calc(4.4% - 5px); top: 3.4vh; } .ss-fc-tr { left: calc(95.6% - 5px); top: 3.4vh; } .ss-fc-bl { left: calc(4.4% - 5px); bottom: 3.4vh; } .ss-fc-br { left: calc(95.6% - 5px); bottom: 3.4vh; }
+.ss-fm { position: absolute; font: 500 clamp(10px, 0.78vw, 12px)/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(238, 243, 255, 0.46); display: inline-flex; align-items: center; gap: 12px; }
+.ss-fm-tl { left: calc(4.4% + 18px); top: 3.4vh; margin-top: -1px; } .ss-fm-tr { right: calc(4.4% + 18px); top: 3.4vh; margin-top: -1px; }
+.ss-fm-bl { left: calc(4.4% + 18px); bottom: 3.4vh; } .ss-fm-br { right: calc(4.4% + 18px); bottom: 3.4vh; font-variant-numeric: tabular-nums; }
+.ss-bar { display: block; width: 64px; height: 1px; background: rgba(238, 243, 255, 0.18); overflow: hidden; }
+.ss-bar i { display: block; height: 100%; background: #7ea2ff; transform: scaleX(0); transform-origin: 0 50%; }
+
+/* ---- notes from the run ---- */
+.ss-notes { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.ss-note { position: absolute; margin: 0; display: flex; flex-direction: column; gap: 6px; opacity: 0; will-change: transform, opacity; font-family: "JetBrains Mono", ui-monospace, monospace; }
+.ss-note-l { right: 70%; align-items: flex-end; text-align: right; padding-right: 3.4vw; }
+.ss-note-r { left: 70%; align-items: flex-start; text-align: left; padding-left: 3.4vw; }
+.ss-nk { font-size: clamp(11px, 0.9vw, 14px); letter-spacing: 0.06em; color: #eef3ff; }
+.ss-nk b { font-weight: 500; color: #7ea2ff; margin-left: 6px; font-variant-numeric: tabular-nums; }
+.ss-nv { font-size: clamp(10px, 0.75vw, 12px); letter-spacing: 0.12em; text-transform: uppercase; color: rgba(238, 243, 255, 0.5); }
+.ss-nl { position: absolute; top: 0.62em; width: 3vw; height: 1px; background: rgba(126, 162, 255, 0.7); transform: scaleX(var(--ln, 0)); }
+.ss-nl::after { content: ""; position: absolute; top: -2px; width: 5px; height: 5px; border-radius: 50%; background: #7ea2ff; }
+.ss-note-l .ss-nl { right: 0; transform-origin: 100% 50%; } .ss-note-l .ss-nl::after { right: -1px; }
+.ss-note-r .ss-nl { left: 0; transform-origin: 0 50%; } .ss-note-r .ss-nl::after { left: -1px; }
+.ss-spark { width: clamp(86px, 8vw, 128px); height: auto; overflow: visible; fill: none; stroke: #7ea2ff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* compact: no room beside the finished screen, so its notes hang above (1st, 3rd) and below (2nd, 4th) it, each ticking toward it.
+   --ss-hw / --ss-half = the finished screen's half width / half height (set in screenStack.js). */
+@media (max-width: 860px) {
+  .ss-fm { font-size: 9px; gap: 10px; } .ss-bar { width: 44px; }
+  .ss .ss-note { right: auto; left: auto; padding: 0; gap: 5px; max-width: max(var(--ss-hw, 140px), 132px); }
+  .ss .ss-note-l { left: calc(50% - var(--ss-hw, 140px)); align-items: flex-start; text-align: left; }
+  .ss .ss-note-r { right: calc(50% - var(--ss-hw, 140px)); align-items: flex-end; text-align: right; }
+  .ss .ss-note:nth-child(odd) { top: auto !important; bottom: calc(50% + var(--ss-half, 90px) + 30px); }
+  .ss .ss-note:nth-child(even) { top: calc(50% + var(--ss-half, 90px) + 32px) !important; bottom: auto; }
+  .ss .ss-nk { font-size: 11px; letter-spacing: 0.04em; }
+  .ss .ss-nv { font-size: 9px; letter-spacing: 0.08em; line-height: 1.35; }
+  .ss .ss-spark { width: 84px; }
+  .ss .ss-note .ss-nl { width: 1px; height: 16px; transform: scaleY(var(--ln, 0)); }
+  .ss .ss-note-l .ss-nl { left: 0; right: auto; }
+  .ss .ss-note-r .ss-nl { right: 0; left: auto; }
+  .ss .ss-note:nth-child(odd) .ss-nl { top: 100%; bottom: auto; margin-top: 8px; transform-origin: 50% 0; }
+  .ss .ss-note:nth-child(even) .ss-nl { top: auto; bottom: 100%; margin-bottom: 8px; transform-origin: 50% 100%; }
+  .ss .ss-note .ss-nl::after { left: -2px; right: auto; }
+  .ss .ss-note:nth-child(odd) .ss-nl::after { top: auto; bottom: -2px; }
+  .ss .ss-note:nth-child(even) .ss-nl::after { top: -2px; bottom: auto; }
+}
+.ss.is-static .ss-notes, .ss.is-static .ss-floor, .ss.is-static .ss-frame { display: none; }
+
+/* ---- margin notes beside the headline ---- */
+.ss-marg { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.ss-mn { position: absolute; margin: 0; display: flex; flex-direction: column; gap: 6px; opacity: 0; will-change: transform, opacity; font-family: "JetBrains Mono", ui-monospace, monospace; --gap: 36px; --ln: 0; }
+.ss-mn-r { align-items: flex-start; text-align: left; padding-left: var(--gap); }
+.ss-mn-l { align-items: flex-end; text-align: right; padding-right: var(--gap); }
+.ss-mi { font-size: clamp(10px, 0.8vw, 12px); letter-spacing: 0.18em; color: var(--acc); }
+.ss-mk { font-size: clamp(12px, 1vw, 15px); font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #eef3ff; }
+.ss-md { font-size: clamp(10px, 0.78vw, 12px); letter-spacing: 0.08em; color: rgba(238, 243, 255, 0.5); }
+.ss-ml { position: absolute; top: 0.62em; width: calc(var(--gap) * 0.78); height: 1px; background: var(--acc); transform: scaleX(var(--ln)); }
+.ss-ml::after { content: ""; position: absolute; top: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--acc); }
+.ss-mn-r .ss-ml { left: 0; transform-origin: 0 50%; } .ss-mn-r .ss-ml::after { left: -1px; }
+.ss-mn-l .ss-ml { right: 0; transform-origin: 100% 50%; } .ss-mn-l .ss-ml::after { right: -1px; }
+.ss-sticky--b .ss-line { position: relative; z-index: 2; }
+/* narrow screens: no room beside the headline, so the notes stack beneath it and still appear as each word lights up */
+@media (max-width: 860px) {
+  .ss-sticky--b { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(26px, 5vh, 46px); }
+  .ss-sticky--b .ss-line { order: 1; }
+  .ss-marg { position: static; inset: auto; order: 2; display: flex; flex-direction: column; gap: 16px; width: min(100%, 320px); }
+  .ss-mn, .ss-mn-l, .ss-mn-r { position: static; flex-direction: row; flex-wrap: wrap; align-items: baseline; text-align: left; gap: 3px 10px; padding: 0 0 0 14px; border-left: 2px solid var(--acc); }
+  .ss-ml { display: none; }
+  .ss-mi { font-size: 11px; }
+  .ss-mk { font-size: 13px; }
+  .ss-md { flex-basis: 100%; font-size: 11px; }
+}
+.ss.is-static .ss-marg, .ss.is-static .ss-sticky--b .ss-frame, .ss.is-static .ss-sticky--b .ss-amb { display: none; }

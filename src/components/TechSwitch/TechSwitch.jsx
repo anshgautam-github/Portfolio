@@ -79,7 +79,10 @@ export default function TechSwitch() {
     const lerpRate = (a, b, k) => a + (b - a) * k;
     const apply = () => {
       const s = sstep(0.1, 0.34, p);            // knob travels, turns green
-      const r = sstep(0.3, 0.68, p);            // the dark field opens from the switch
+      // the dark field opens from the switch. Phones: it opens over a longer stretch of the scroll (0.30 -> 0.80, in a taller section) and with an almost linear
+      // ease, so the circle's edge keeps pace with your thumb instead of racing through the middle of a smoothstep
+      const rt = clamp((p - 0.3) / 0.5);
+      const r = IS_MOBILE ? rt * 0.7 + rt * rt * (3 - 2 * rt) * 0.3 : sstep(0.3, 0.68, p);
       pin.style.setProperty("--s", s.toFixed(3));
       pin.style.setProperty("--r", r.toFixed(3));
       pin.classList.toggle("is-on", s > 0.55);
