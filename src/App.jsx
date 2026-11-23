@@ -37,7 +37,7 @@ const SHOW_DIARY = false;
 // the scroll showcase is still the template's "Butter" video-editor demo (its copy and /showcase images are not yours), so it is parked here:
 // flip to true to put it back between the garden and the collaboration scene
 const SHOW_SHOWCASE = false;
-const SHOW_LOADER = false; // the counter + freefall loader - set to true to bring it back (off while testing so reloads are instant)
+const SHOW_LOADER = true; // the counter + freefall loader - set to false to hide it (handy while testing so reloads are instant)
 const SHOW_CONTACT = false; // the footer / contact section - flip to true to bring it back
 const SHOW_COLLAB = false; // the handshake section - flip to true to bring it back
 
