@@ -10,14 +10,14 @@ import "./soundConsent.css";
 const COPY = {
   ask: {
     eyebrow: "( Sound design )",
-    title: "This site has a score.",
-    text: "A cinematic soundtrack that moves with you: it swells as you scroll faster and settles when you pause. Best with headphones.",
+    title: "A little sound, just for the fall.",
+    text: "A soft wind as you fall from the sky, and a far-off jet in the clouds. Once you land, the site is quiet.",
     yes: "Enter with sound",
   },
   locked: {
     eyebrow: "( Welcome back )",
     title: "Pick the sound back up?",
-    text: "Your browser needs one tap before it lets the soundtrack play. The music is exactly where you left it.",
+    text: "Your browser needs one tap before it lets the sound through. Everything else stays quiet.",
     yes: "Resume sound",
   },
 };

@@ -4,6 +4,7 @@ import { mountFreefallStory } from "./engine.js";
 import { createClouds } from "./clouds.js";
 import { createCloudFx } from "./cloudFx.js";
 import { release, pendingTasks } from "../../lib/loader.js";
+import { score } from "../../lib/score.js";
 import { IS_MOBILE, IS_SAFARI } from "../../lib/perf.js";
 import { buildFramePath, readFrameVars } from "../Frame/Frame.jsx";
 import { hudAt, fmtAlt, fmtVel, fmtMet, fmtLat, fmtLon, fmtG, STAGES, EVENTS } from "./loaderHud.js";
@@ -202,6 +203,7 @@ export default function FreefallLoader() {
       destroy.setProgress(T.p);
       destroy.render(now);                                              // the scene is drawn in this very frame, so it, the HUD and the bar always show the same progress
       hud(T.p);
+      score.setFall(T.p);                                               // the wind follows the fall and is gone at touchdown
       bar.style.transform = `scaleX(${(T.p / END).toFixed(4)})`;
       // the readout is written at most every other frame on phones (a changing digit is a repaint over the live scene); it never lags by more than 33 ms
       if (!IS_MOBILE || (tabN = (tabN + 1) % 2) === 0 || T.p >= END) {

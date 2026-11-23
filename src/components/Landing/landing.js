@@ -38,7 +38,6 @@ export function mountLanding(root, content = landingContent, options = {}) {
     <nav class="ll-t ll-nav ll-rise ll-d1" aria-label="Primary">
       ${c.nav.map((n, i) => `<button type="button" data-nav="${esc(n.target)}" data-i="${i}">${esc(n.label)}</button>`).join("")}
       <button type="button" data-theme-btn>THEME[<span data-theme-l>D</span>]</button>
-      <button type="button" data-sound-btn>SOUND[<span data-sound-s>·</span>]</button>
     </nav>
     <div class="ll-spot" aria-hidden="true"></div>
     <div class="ll-t ll-col ll-c1">
@@ -193,7 +192,7 @@ export function mountLanding(root, content = landingContent, options = {}) {
   setTheme(!savedLight, false);
   const setSound = (on) => {
     soundOn = on;
-    $("[data-sound-s]").textContent = on ? "●" : "·";
+    const ind = $("[data-sound-s]"); if (ind) ind.textContent = on ? "●" : "·";
     if (on) tick(0.6);
   };
   const scrollTo = (target) => {

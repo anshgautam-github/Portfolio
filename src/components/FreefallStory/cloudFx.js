@@ -2,6 +2,7 @@
    While the clouds roll in (k 0 -> 1) this 2D layer sits on top of the cloud shader and adds what makes it feel like you are really
    flying through it: billowing mist puffs that rush toward the lens (parting around the pointer), a far-off airliner with a contrail
    glimpsed through a gap, drifting ice-crystal glints, an altitude readout counting down, and a soft wake around the cursor. */
+import { score } from "../../lib/score.js";
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const sstep = (a, b, v) => { const t = clamp((v - a) / (b - a)); return t * t * (3 - 2 * t); };
 const fract = (v) => v - Math.floor(v);
@@ -128,6 +129,7 @@ export function createCloudFx(canvas) {
         const size = (108 + 24 * Math.sin(pk * Math.PI)) * unit * dpr;
         const vis = sstep(0, 0.16, pk) * (1 - sstep(0.84, 1, pk)) * 0.96 * Math.min(1, amp * 1.6);
         plane(x, y, size, -0.07 - 0.03 * Math.sin(pk * 6), vis, 0.9 + 0.1 * Math.cos(pk * 5), t);
+        score.plane(x / W, vis, pk);                                   // the sound of it: a far-off jet that pans and passes with the plane
       }
 
       // 2. mist puffs rushing past the lens, parting around the pointer

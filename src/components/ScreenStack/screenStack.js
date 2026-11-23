@@ -63,9 +63,12 @@ export default function initScreenStack(root) {
     margin.forEach((el, i) => {
       const w = words[kIdx[i]]; if (!w) return;
       const r = w.getBoundingClientRect(), cy = r.top - sr.top + r.height * 0.5;
+      // the notes live outside the headline, never on top of it: measure the whole line the word is on and sit beside its outer edge
+      const row = words.map((x) => x.getBoundingClientRect()).filter((b) => Math.abs((b.top + b.height / 2) - (r.top + r.height / 2)) < r.height * 0.45);
+      const rowL = Math.min(...row.map((b) => b.left)), rowR = Math.max(...row.map((b) => b.right));
       el.style.setProperty("--gap", gap + "px"); el.style.top = (cy - 16).toFixed(1) + "px";
-      if (el.classList.contains("ss-mn-r")) { el.style.left = (r.right - sr.left + gap * 0.4).toFixed(1) + "px"; el.style.right = "auto"; }
-      else { el.style.right = (sr.right - r.left + gap * 0.4).toFixed(1) + "px"; el.style.left = "auto"; }
+      if (el.classList.contains("ss-mn-r")) { el.style.left = (rowR - sr.left + gap * 0.6).toFixed(1) + "px"; el.style.right = "auto"; }
+      else { el.style.right = (sr.right - rowL + gap * 0.6).toFixed(1) + "px"; el.style.left = "auto"; }
     });
   };
 

@@ -152,10 +152,6 @@ export default function Dive() {
 
           {/* headline, button and the nudge: the first thing you see, lifted away by the first stretch of scroll */}
           <div className="dv-hero" data-dv-hero>
-            <div className="dv-meta" aria-hidden="true">
-              <span><b>02</b>Featured build</span>
-              <span>Scroll to dive<i /></span>
-            </div>
             <h2 className="dv-h" aria-label={CONTENT.line1 + " " + CONTENT.line2}>
               {[CONTENT.line1, CONTENT.line2].map((l, li) => (
                 <span className="dv-line" key={li} aria-hidden="true">

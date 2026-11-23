@@ -108,7 +108,6 @@ export default function Horizon() {
 
       {/* orange scene */}
       <div className="hz-intro" data-hz-intro>
-        <p className="hz-pill" data-hz-rise><i /> {COPY.eyebrow}</p>
         <h2 className="hz-head" aria-label={COPY.headA + " " + COPY.headB}>
           <span className="hz-head-l" aria-hidden="true"><span data-hz-word>{COPY.headA}</span></span>
           <span className="hz-head-l" aria-hidden="true"><span data-hz-word>{COPY.headB}</span></span>
@@ -128,7 +127,6 @@ export default function Horizon() {
 
       {/* heading on lime */}
       <div className="hz-why">
-        <p className="hz-pill hz-pill-d" data-hz-rise2><i /> {COPY.whyEyebrow}</p>
         <h2 className="hz-whyh" aria-label={COPY.why.join(" ")}>
           {COPY.why.map((l) => <span className="hz-head-l" key={l} aria-hidden="true"><span data-hz-why>{l}</span></span>)}
         </h2>

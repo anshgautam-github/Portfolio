@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { score } from "../../lib/score.js";
+import { whenReleased } from "../../lib/loader.js";
 import "./soundToggle.css";
 
 /* The site's one sound switch. It shows what the music is doing: four bars that move with the scroll speed, and a plain label.
@@ -9,9 +10,11 @@ const LABEL = { on: "Sound on", off: "Sound off" };
 export default function SoundToggle() {
   const [st, setSt] = useState(() => score.state());
   const btn = useRef(null);
+  const [landed, setLanded] = useState(false);          // the landing page and the rest of the site are silent: the switch belongs to the loader only
 
   useEffect(() => {
     score.init();
+    whenReleased(() => setLanded(true));
     setSt(score.state());
     const un = score.subscribe(() => setSt(score.state()));
     let raf = 0, last = 0;
@@ -25,7 +28,7 @@ export default function SoundToggle() {
     return () => { un(); cancelAnimationFrame(raf); };
   }, []);
 
-  if (st !== "on" && st !== "off") return null;   // never asked / waiting for a tap: the consent card is on screen instead
+  if (landed || (st !== "on" && st !== "off")) return null;   // never asked / waiting for a tap: the consent card is on screen instead
   return (
     <button
       ref={btn}

@@ -21,8 +21,8 @@ const HEADLINE = "Great products are built where research, engineering and desig
 
 // notes in the margin that appear as the matching word of the headline lights up
 const MARGIN = [
-  { key: "research", side: "r", n: "01", title: "Research", text: "papers, ablations, evals", acc: "#7ea2ff", rgb: [126, 162, 255] },
-  { key: "engineering", side: "l", n: "02", title: "Engineering", text: "training, serving, scale", acc: "#8f7bff", rgb: [143, 123, 255] },
+  { key: "research", side: "l", n: "01", title: "Research", text: "papers, ablations, evals", acc: "#7ea2ff", rgb: [126, 162, 255] },
+  { key: "engineering", side: "r", n: "02", title: "Engineering", text: "training, serving, scale", acc: "#8f7bff", rgb: [143, 123, 255] },
   { key: "design", side: "l", n: "03", title: "Design", text: "interfaces people keep", acc: "#4ee39a", rgb: [78, 227, 154] },
 ];
 
@@ -56,9 +56,6 @@ export default function ScreenStack() {
           <div className="ss-frame" aria-hidden="true">
             <i className="ss-fv" style={{ left: "4.4%" }} /><i className="ss-fv" style={{ left: "95.6%" }} />
             <i className="ss-fc ss-fc-tl" /><i className="ss-fc ss-fc-tr" /><i className="ss-fc ss-fc-bl" /><i className="ss-fc ss-fc-br" />
-            <span className="ss-fm ss-fm-tl">(Selected work)</span><span className="ss-fm ss-fm-tr">2026</span>
-            <span className="ss-fm ss-fm-bl"><b className="ss-bar"><i data-ss-bar /></b>Scroll</span>
-            <span className="ss-fm ss-fm-br" data-ss-count>09 / 09 screens</span>
           </div>
           {/* once the deck is one screen, notes from the run point at it */}
           <div className="ss-notes" data-ss-notes aria-hidden="true">
@@ -72,13 +69,8 @@ export default function ScreenStack() {
             <p className="ss-note ss-note-r" data-ss-note style={{ top: "64vh" }}><span className="ss-nk">12 layers / 12 heads</span><span className="ss-nv">context 1024, emb 768</span><i className="ss-nl" /></p>
           </div>
           <div className="ss-head" data-ss-head>
-            <span className="ss-pill">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M13 2 4.5 13.5H12L11 22l8.5-11.5H12z" /></svg>
-              Selected work
-            </span>
             <h2 className="ss-title">Software that moves people</h2>
             <p className="ss-sub">From language models to mobile apps, I design, train and ship products end to end.</p>
-            <a className="ss-cta" href="#projects" onClick={toProjects}>See the work</a>
           </div>
 
           <div className="ss-stage" data-ss-stage aria-hidden="true">
@@ -99,9 +91,6 @@ export default function ScreenStack() {
           <div className="ss-frame" aria-hidden="true">
             <i className="ss-fv" style={{ left: "4.4%" }} /><i className="ss-fv" style={{ left: "95.6%" }} />
             <i className="ss-fc ss-fc-tl" /><i className="ss-fc ss-fc-tr" /><i className="ss-fc ss-fc-bl" /><i className="ss-fc ss-fc-br" />
-            <span className="ss-fm ss-fm-tl">(How I work)</span><span className="ss-fm ss-fm-tr">2026</span>
-            <span className="ss-fm ss-fm-bl"><b className="ss-bar"><i data-ss-bar-b /></b>Read on</span>
-            <span className="ss-fm ss-fm-br" data-ss-count-b>00 / 03</span>
           </div>
           <div className="ss-marg" aria-hidden="true">
             {MARGIN.map((m) => (
