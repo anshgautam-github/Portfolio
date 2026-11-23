@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { pendingTasks } from "../../lib/loader.js";
+import { score } from "../../lib/score.js";
 import "./preloader.css";
 
 /**
@@ -93,6 +94,7 @@ export default function Preloader({ onReady }) {
       root.style.setProperty("--mx", (ptr.sx * 100).toFixed(2) + "%"); root.style.setProperty("--my", (ptr.sy * 100).toFixed(2) + "%");
       root.style.setProperty("--rad", (150 + (vv / 100) * 560).toFixed(0) + "px");
       if (barRef.current) barRef.current.style.transform = "scaleX(" + (v / 100).toFixed(4) + ")";
+      score.setTension(v / 100 * 0.6);                              // the score tightens as the count climbs
 
       const n = Math.max(0, Math.min(100, Math.floor(v + 0.0001)));
       if (n !== shownN) {
@@ -110,6 +112,7 @@ export default function Preloader({ onReady }) {
       if (n >= 100 && !finished) {
         finished = true;
         cancelAnimationFrame(raf);
+        score.impact(0.8);                                        // the count lands on 100: a low hit under the lifting screen
         root.classList.add("is-launch");                          // the number settles on 100, the status reads Ready, the grid flares
         onReady && onReady();                                     // mount the main loader underneath while this screen is still up
         tFade = setTimeout(() => { if (rootRef.current) rootRef.current.classList.add("is-out"); window.dispatchEvent(new Event("pl:out")); }, LAUNCH_MS);   // the screen lifts away now

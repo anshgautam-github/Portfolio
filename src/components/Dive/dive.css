@@ -51,17 +51,19 @@
 /* ---- the camera / character ---- */
 .dv-cam { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; display: block; overflow: visible; }
 .dv-ink { stroke: var(--dv-ink); stroke-width: 12; stroke-linejoin: round; stroke-linecap: round; }
-.dv-head { fill: var(--dv-body); }
+.dv-head { fill: url(#dv-skin); }
 .dv-white { fill: #fff; }
 .dv-coral { fill: var(--dv-coral); }
 .dv-amber { fill: var(--dv-amber); }
 .dv-blue { fill: var(--dv-blue); }
 .dv-stroke { fill: none; stroke: var(--dv-ink); stroke-width: 18; stroke-linecap: round; }
-.dv-blush { fill: var(--dv-pink); opacity: 0.4; }
+.dv-blush { fill: url(#dv-blushg); }
+.dv-rim { fill: none; stroke: #fff; stroke-width: 9; stroke-linecap: round; opacity: 0.85; }
+.dv-sheen-b { fill: none; stroke: #7ea2ff; stroke-width: 8; stroke-linecap: round; opacity: 0.45; }
 .dv-freckles circle { fill: var(--dv-blue2); opacity: 0.6; }
 .dv-ring { fill: none; stroke: var(--dv-ink); stroke-width: 10; }
 .dv-shine { fill: none; stroke: #fff; stroke-width: 14; stroke-linecap: round; }
-.dv-lid { fill: var(--dv-body); }
+.dv-lid { fill: url(#dv-skin); }
 .dv-pt { fill: #dfe7ff; }
 .dv-tuft { transform-box: fill-box; transform-origin: 50% 100%; animation: dv-sway 4.2s ease-in-out infinite alternate; }
 @keyframes dv-sway { from { transform: rotate(-2.4deg); } to { transform: rotate(2.4deg); } }
@@ -181,3 +183,42 @@
 
 .dv-nbg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
 .dv.is-static .dv-nbg { display: none; }
+
+/* ============================================================
+   Premium pass: editorial frame, scroll cue, reticle, grain
+   ============================================================ */
+/* the frame: two mono captions on the grid's outer rails, like a printed plate */
+.dv-meta { align-items: center; opacity: 0; font-size: clamp(10px, 0.82vw, 13px); letter-spacing: 0.14em; }
+.is-in .dv-meta { animation: dv-fade 1s ease 0.5s both; }
+.dv-meta span { display: inline-flex; align-items: center; gap: 12px; opacity: 0.72; }
+.dv-meta b { font-weight: 500; padding: 5px 8px 4px; border: 1px solid currentColor; border-radius: 3px; letter-spacing: 0.08em; margin-right: 2px; }
+.dv-meta i { position: relative; width: 22px; height: 1px; background: currentColor; }
+.dv-meta i::after { content: ""; position: absolute; right: 0; top: -3px; width: 6px; height: 6px; border-top: 1px solid currentColor; border-right: 1px solid currentColor; transform: rotate(45deg); transform-origin: 100% 0; }
+
+/* headline: a touch tighter, ink a touch deeper */
+.dv-h { letter-spacing: -0.022em; }
+
+/* the cue: caption flanked by hairlines, and a line with a drop of light running down toward the character */
+.dv-note { display: flex; flex-direction: column; align-items: center; gap: clamp(10px, 1.6vh, 18px); font-size: clamp(10px, 0.82vw, 13px); letter-spacing: 0.22em; }
+.dv-note-t { display: inline-flex; align-items: center; gap: 16px; }
+.dv-note-t::before, .dv-note-t::after { content: ""; width: clamp(24px, 3.4vw, 56px); height: 1px; background: var(--dv-ink); opacity: 0.35; }
+.dv-note-line { position: relative; width: 1px; height: clamp(22px, 4.4vh, 46px); background: linear-gradient(to bottom, rgba(5, 5, 5, 0.5), rgba(5, 5, 5, 0)); overflow: hidden; }
+.dv-note-line i { position: absolute; left: -1px; top: 0; width: 3px; height: 12px; border-radius: 2px; background: linear-gradient(to bottom, rgba(63, 114, 238, 0), var(--dv-blue)); animation: dv-drip 2.2s cubic-bezier(0.5, 0, 0.3, 1) infinite; }
+@keyframes dv-drip { 0% { transform: translateY(-14px); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(54px); opacity: 0; } }
+.dv:not(.is-live) .dv-note-line i, .is-scrolling .dv-note-line i { animation-play-state: paused; }
+
+/* the reticle (svg, in the character's own units) */
+.dv-ret { pointer-events: none; }
+.dv-ret circle, .dv-ret path { fill: none; stroke: var(--dv-ink); stroke-linecap: round; }
+.dv-ret-ring { stroke-width: 3; stroke-dasharray: 3 15; opacity: 0.6; transform-box: fill-box; transform-origin: 50% 50%; animation: dv-spin 40s linear infinite; }
+.dv-ret-ticks path, .dv-ret-lead { stroke-width: 3; opacity: 0.55; }
+.dv-ret-txt { fill: var(--dv-ink); stroke: none; font: 500 25px var(--dv-mono); letter-spacing: 0.18em; opacity: 0.7; }
+@keyframes dv-spin { to { transform: rotate(360deg); } }
+.dv:not(.is-live) .dv-ret-ring, .is-scrolling .dv-ret-ring { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .dv-ret-ring, .dv-note-line i { animation: none; } }
+@media (max-width: 767px) { .dv-ret-txt, .dv-ret-lead { display: none; } .dv-meta span:last-child { display: none; } }
+
+/* a fine film grain over the whole stage: dark speckle, normal blending (no blend modes, so it costs nothing while the camera zooms) */
+.dv-grain { position: absolute; inset: 0; z-index: 7; pointer-events: none; opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .02 0 0 0 0 .03 0 0 0 0 .08 0 0 0 1.6 -.55'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.dv.is-static .dv-grain { display: none; }

@@ -17,10 +17,10 @@ import "./freefallLoader.css";
  * down (wheel / swipe / arrow keys; scrolling back up rewinds it), and "Skip intro" (or Esc) runs it to the end. It uses the same engine as the in-page story, in 'loader' mode (virtual progress).
  * When it ends in the SRM flash it calls release() (lib/loader.js) so the landing starts its own intro behind the lifting overlay.
  */
-const END = 0.99;           // story progress where the loader ends: the index of floating tiles (the descent, the SRM flash, the crowd's noise, the fire ring, RISE, then the tiles)
+const END = 0.81;           // story progress where the loader ends: the moment SHIP (the R I S E letters) has finished being written - it stops there and the clouds roll in; the tip-away and the floating index tiles are cut
 const POST = 0.505;         // the SRM flash has cleared: from here the ending plays on by scroll, with a slow cruise so nobody gets stuck
 const CRUISE = (END - POST) / 42000;   // idle drift per ms through the ending (about 42 s end to end); scrolling / swiping speeds it up
-const DWELL = 1700;         // ms to rest on the finished index tiles before the clouds roll in
+const DWELL = 1200;         // ms to rest on the finished index tiles before the clouds roll in
 const DURATION = 52000;     // only used for how fast the flash is crossed once the landing is ready
 const LOCK_MS = 500;        // after the clouds have parted the landing page cannot be scrolled for this long
 const CLOUD_MS = 3800;      // the cloud transition onto the landing page (clouds roll in, hide the hand-over, part from the centre)
@@ -206,7 +206,7 @@ export default function FreefallLoader() {
       // the readout is written at most every other frame on phones (a changing digit is a repaint over the live scene); it never lags by more than 33 ms
       if (!IS_MOBILE || (tabN = (tabN + 1) % 2) === 0 || T.p >= END) {
         put(num, String(Math.round((T.p / END) * 100)).padStart(3, "0"));
-        const tt = T.p < 0.47 ? "% FALLING" : T.p < 0.685 ? "% LANDED" : T.p < 0.86 ? "% RISING" : "% READY";
+        const tt = T.p < 0.47 ? "% FALLING" : T.p < 0.685 ? "% LANDED" : T.p < 0.79 ? "% RISING" : "% READY";
         if (tt !== tagTxt) { tagTxt = tt; tag.textContent = tt; }
       }
     };

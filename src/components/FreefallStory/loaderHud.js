@@ -9,15 +9,15 @@ const outCubic = (t) => 1 - Math.pow(1 - t, 3);
 
 export const TOUCH = 0.464;
 export const PHASES = [
-  [0, 'Weightless'], [0.06, 'Separation'], [0.12, 'Freefall'], [0.395, 'Final approach'], [0.436, 'Campus lock'], [0.472, 'Landed'], [0.685, 'Rising'], [0.86, 'Ready'],
+  [0, 'Weightless'], [0.06, 'Separation'], [0.12, 'Freefall'], [0.395, 'Final approach'], [0.436, 'Campus lock'], [0.472, 'Landed'], [0.685, 'Rising'], [0.79, 'Ready'],
 ];
 // the markers on the progress bar: [label, story progress]
 // the mission log: [story progress, line]. The newest three show in the monitor, each stamped with its mission-elapsed time.
-export const EVENTS = [[0, 'All systems nominal'], [0.06, 'Capsule separation'], [0.12, 'Entry interface'], [0.2, 'Peak heating \u00b7 max-Q'], [0.3, 'Decelerating'], [0.395, 'Final approach'], [0.436, 'Campus lock'], [0.472, 'Touchdown \u00b7 Chennai'], [0.685, 'Ascent to site'], [0.86, 'Site ready']];
+export const EVENTS = [[0, 'All systems nominal'], [0.06, 'Capsule separation'], [0.12, 'Entry interface'], [0.2, 'Peak heating \u00b7 max-Q'], [0.3, 'Decelerating'], [0.395, 'Final approach'], [0.436, 'Campus lock'], [0.472, 'Touchdown \u00b7 Chennai'], [0.685, 'Ascent to site'], [0.79, 'Site ready']];
 const bell = (p, c, w) => Math.exp(-(((p - c) / w) ** 2));
 export const gLoad = (p) => (p < 0.12 ? 0 : p < 0.395 ? 0.2 + 7.2 * bell(p, 0.2, 0.06) : 1 + 3.4 * bell(p, 0.405, 0.008) + (p < 0.436 ? 0.5 : 0));
 export const fmtG = (g) => g.toFixed(1) + ' G';
-export const STAGES = [['Orbit', 0], ['Fall', 0.12], ['Dive', 0.405], ['Land', 0.472], ['Rise', 0.685], ['Ready', 0.86]];
+export const STAGES = [['Orbit', 0], ['Fall', 0.12], ['Dive', 0.405], ['Land', 0.472], ['Rise', 0.685], ['Ready', 0.79]];
 
 const START = { lat: 27.4, lon: 61.8 };       // over the Arabian Sea / Iran at the start of the fall
 const TARGET = { lat: 13.0827, lon: 80.2707 };  // Chennai

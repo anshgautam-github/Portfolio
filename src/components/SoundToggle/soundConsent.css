@@ -1,0 +1,61 @@
+/* the sound permission card: slides up out of the bottom edge, dark glass with a moving hairline, sits under the custom cursor (z 2147483000) */
+.sc-wrap { position: fixed; left: 0; right: 0; bottom: 0; z-index: 2147482900; display: flex; justify-content: center; padding: 0 16px max(22px, env(safe-area-inset-bottom, 0px)); pointer-events: none; }
+.sc-card {
+  position: relative; width: min(440px, 100%); padding: 22px 22px 18px; border-radius: 20px; overflow: hidden; pointer-events: auto; color: #eef3ff;
+  background: radial-gradient(120% 90% at 0% 0%, rgba(63, 114, 238, 0.16), rgba(63, 114, 238, 0) 60%), rgba(9, 11, 17, 0.92);
+  box-shadow: 0 40px 90px -24px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(238, 243, 255, 0.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2); backdrop-filter: blur(18px) saturate(1.2);
+  font-family: "Inter Tight", "Inter", system-ui, sans-serif;
+  opacity: 0; transform: translate3d(0, 38px, 0) scale(0.965); filter: blur(10px);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* the page dims behind the card so attention goes to the question; it never blocks scrolling or clicks */
+.sc-scrim { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: radial-gradient(120% 80% at 50% 100%, rgba(2, 4, 10, 0.82), rgba(2, 4, 10, 0.52) 60%, rgba(2, 4, 10, 0.4)); }
+.sc-wrap.is-open .sc-scrim { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .sc-scrim { transition-duration: 0.01s; } }
+.sc-card:focus { outline: none; }
+.sc-wrap.is-open .sc-card { opacity: 1; transform: none; filter: none; }
+/* a hairline of light that travels around the card */
+.sc-edge { position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: conic-gradient(from var(--sc-a, 0deg), rgba(126, 162, 255, 0) 0 62%, rgba(126, 162, 255, 0.95) 78%, rgba(143, 123, 255, 0.9) 88%, rgba(78, 227, 154, 0.85) 94%, rgba(126, 162, 255, 0) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); animation: sc-spin 5.5s linear infinite; }
+@property --sc-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes sc-spin { to { --sc-a: 360deg; } }
+
+/* content rises in one after another */
+.sc-top, .sc-title, .sc-text, .sc-actions, .sc-fine { opacity: 0; transform: translate3d(0, 14px, 0); transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(0.18s + var(--i, 0) * 0.08s); }
+.sc-wrap.is-open :is(.sc-top, .sc-title, .sc-text, .sc-actions, .sc-fine) { opacity: 1; transform: none; }
+
+.sc-top { display: flex; align-items: center; gap: 14px; }
+.sc-eyebrow { font: 500 10.5px/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(238, 243, 255, 0.55); }
+.sc-title { margin: 14px 0 0; font-size: clamp(1.6rem, 6vw, 2rem); font-weight: 700; line-height: 1.02; letter-spacing: -0.04em; }
+.sc-text { margin: 10px 0 0; font-size: 0.98rem; line-height: 1.45; color: rgba(238, 243, 255, 0.72); max-width: 38ch; }
+.sc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.sc-yes, .sc-no { font: 600 14px/1 "Inter Tight", "Inter", system-ui, sans-serif; letter-spacing: -0.005em; border-radius: 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.sc-yes { display: inline-flex; align-items: center; gap: 10px; padding: 14px 20px; border: 0; color: #fff; background: #3b6cf0; box-shadow: 0 10px 28px -10px rgba(59, 108, 240, 0.9); transition: background 0.25s, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.sc-yes:hover, .sc-yes:focus-visible { background: #5a85f6; transform: translateY(-2px); }
+.sc-no { padding: 14px 18px; border: 1px solid rgba(238, 243, 255, 0.2); color: rgba(238, 243, 255, 0.82); background: transparent; transition: border-color 0.25s, color 0.25s, background 0.25s; }
+.sc-no:hover, .sc-no:focus-visible { border-color: rgba(238, 243, 255, 0.5); color: #fff; background: rgba(255, 255, 255, 0.05); }
+.sc-yes:focus-visible, .sc-no:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.sc-fine { margin: 14px 0 0; font: 400 10.5px/1.4 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.04em; color: rgba(238, 243, 255, 0.4); }
+.sc-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 13px; }
+.sc-bars i { display: block; width: 2px; height: 100%; border-radius: 1px; background: #fff; transform-origin: 50% 100%; animation: sc-eq 1.1s ease-in-out infinite; }
+.sc-bars i:nth-child(2) { animation-delay: 0.18s; } .sc-bars i:nth-child(3) { animation-delay: 0.36s; } .sc-bars i:nth-child(4) { animation-delay: 0.54s; }
+@keyframes sc-eq { 0%, 100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
+
+/* the cookie: dough, a bite out of the corner, chips that bounce like an equalizer, and rings of sound going out */
+.sc-cookie { position: relative; display: inline-grid; place-items: center; width: 52px; height: 52px; flex: none; }
+.sc-cookie svg { position: relative; z-index: 1; overflow: visible; animation: sc-bob 3.6s ease-in-out infinite; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45)); }
+.sc-chip { transform-box: fill-box; transform-origin: 50% 50%; animation: sc-chip 1.2s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.sc-ring { position: absolute; inset: 4px; border-radius: 50%; border: 1px solid rgba(126, 162, 255, 0.55); animation: sc-ring 2.6s cubic-bezier(0.2, 0.6, 0.3, 1) infinite; }
+.sc-ring--b { animation-delay: 1.3s; }
+@keyframes sc-bob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-3px) rotate(4deg); } }
+@keyframes sc-chip { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.18, 0.7); } }
+@keyframes sc-ring { 0% { transform: scale(0.8); opacity: 0.7; } 100% { transform: scale(2.1); opacity: 0; } }
+
+@media (max-width: 520px) { .sc-wrap { padding: 0 10px max(14px, env(safe-area-inset-bottom, 0px)); } .sc-card { padding: 20px 18px 16px; border-radius: 18px; } .sc-actions > * { flex: 1 1 auto; justify-content: center; } }
+@media (prefers-reduced-motion: reduce) {
+  .sc-card, .sc-top, .sc-title, .sc-text, .sc-actions, .sc-fine { transition-duration: 0.01s; transition-delay: 0s; filter: none; transform: none; }
+  .sc-edge, .sc-bars i, .sc-cookie svg, .sc-chip, .sc-ring { animation: none; }
+}

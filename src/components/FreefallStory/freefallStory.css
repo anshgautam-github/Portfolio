@@ -952,3 +952,7 @@ html.is-mobile.is-scrolling .fs .screen .logo-orbit, html.is-mobile.is-scrolling
   .fs .arch { box-shadow: 0 0 16px rgba(255,90,30,.42); }                 /* one soft glow instead of a 28px outer + 28px inner pair on every arch */
   .fs .portal-line { will-change: transform, opacity; }                    /* no `filter` layer promotion on three full-width text lines */
 }
+
+/* the intro's own "Sound on/off" button is hidden: the site-wide sound switch (components/SoundToggle) replaces it.
+   The element stays in the markup because engine.js binds to it. */
+.fs-sound { display: none !important; }

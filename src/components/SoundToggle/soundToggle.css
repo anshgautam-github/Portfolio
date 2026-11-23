@@ -1,0 +1,23 @@
+/* the sound switch: bottom-centre, above the frame and the loaders. Dark pill so it reads on the light landing and the dark sections alike. */
+.snd-toggle {
+  position: fixed; left: 50%; bottom: max(22px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 2147482900;
+  display: inline-flex; align-items: center; gap: 10px; padding: 9px 15px 9px 13px; border-radius: 999px;
+  border: 1px solid rgba(238, 243, 255, 0.24); background: rgba(10, 12, 18, 0.72); color: rgba(238, 243, 255, 0.86);
+  font: 500 10px/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: background 0.25s, border-color 0.25s, color 0.25s, opacity 0.4s;
+}
+.snd-toggle:hover, .snd-toggle:focus-visible { background: rgba(10, 12, 18, 0.9); border-color: rgba(157, 184, 255, 0.7); color: #fff; }
+.snd-toggle:focus-visible { outline: 2px solid #9db8ff; outline-offset: 3px; }
+.snd-toggle.is-off { opacity: 0.7; }
+.snd-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; --lv: 0; }
+.snd-bars i { display: block; width: 2px; height: 100%; border-radius: 1px; background: #9db8ff; transform-origin: 50% 100%; transform: scaleY(0.25); transition: transform 0.12s linear; }
+.snd-toggle.is-on .snd-bars i:nth-child(1) { transform: scaleY(calc(0.28 + var(--lv) * 0.7)); }
+.snd-toggle.is-on .snd-bars i:nth-child(2) { transform: scaleY(calc(0.45 + var(--lv) * 0.55)); }
+.snd-toggle.is-on .snd-bars i:nth-child(3) { transform: scaleY(calc(0.34 + var(--lv) * 0.66)); }
+.snd-toggle.is-on .snd-bars i:nth-child(4) { transform: scaleY(calc(0.22 + var(--lv) * 0.6)); }
+.snd-toggle.is-locked .snd-bars i { animation: snd-pulse 1.4s ease-in-out infinite; }
+.snd-toggle.is-locked .snd-bars i:nth-child(2) { animation-delay: 0.15s; } .snd-toggle.is-locked .snd-bars i:nth-child(3) { animation-delay: 0.3s; } .snd-toggle.is-locked .snd-bars i:nth-child(4) { animation-delay: 0.45s; }
+.snd-toggle.is-locked { border-color: rgba(157, 184, 255, 0.55); }
+@keyframes snd-pulse { 0%, 100% { transform: scaleY(0.25); } 50% { transform: scaleY(0.95); } }
+@media (prefers-reduced-motion: reduce) { .snd-toggle.is-locked .snd-bars i { animation: none; transform: scaleY(0.6); } }
+@media (max-width: 860px) { .snd-toggle { padding: 8px 13px 8px 11px; font-size: 9px; } }

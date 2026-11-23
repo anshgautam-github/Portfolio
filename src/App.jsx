@@ -19,6 +19,8 @@ import FreefallLoader from "./components/FreefallStory/FreefallLoader.jsx";
 import { release } from "./lib/loader.js";
 import Preloader from "./components/Preloader/Preloader.jsx";
 import { resumeTarget } from "./lib/resume.js";
+import SoundToggle from "./components/SoundToggle/SoundToggle.jsx";
+import SoundConsent from "./components/SoundToggle/SoundConsent.jsx";
 
 import ArcCarousel from "./components/ArcCarousel/ArcCarousel.jsx";
 import Toolkit from "./components/Toolkit/Toolkit.jsx";
@@ -185,6 +187,8 @@ export default function App() {
         <p>Ansh Gautam: AI engineer, researcher and builder, from India.</p>
       </div>
       <Frame />
+      <SoundConsent />  {/* asks for sound once, in its own voice: the click is what lets the browser play audio */}
+      <SoundToggle />   {/* the site-wide score (lib/score.js): starts at the loader, follows the scroll speed */}
       <Cursor />
       <Fx />
     </>

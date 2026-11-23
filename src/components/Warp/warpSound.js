@@ -6,6 +6,7 @@
   - It only sounds while the number is actually changing (scrolling) and fades out when you stop.
   Browsers only allow audio after a click / key / tap, so unlock() is called from those events.
 */
+import { score } from "../../lib/score.js";
 let ctx = null;
 let master = null;
 let bedBuf = null;
@@ -131,6 +132,7 @@ const schedule = () => {
 
 function startBed() {
   if (bed || !bedBuf) return;
+  score.duck(true);   // the site score sits back while this section plays its own sound
   const src = ctx.createBufferSource();
   src.buffer = bedBuf;
   src.loop = true;
@@ -147,6 +149,7 @@ function startBed() {
 }
 
 function stopAll(fade = 0.3) {
+  score.duck(false);
   clearInterval(timer);
   timer = 0;
   clearInterval(idle);

@@ -38,6 +38,7 @@ export default function initDive(root) {
   const pupil = q("[data-dv-pupil]");
   const lpupil = q("[data-dv-lpupil]");
   const portal = q("[data-dv-portal]");
+  const ret = q("[data-dv-ret]");
   const lids = [...root.querySelectorAll("[data-dv-lid]")];
   const hero = q("[data-dv-hero]");
   const words = [...root.querySelectorAll("[data-dv-word]")];
@@ -113,6 +114,8 @@ export default function initDive(root) {
     lpupil.setAttribute("opacity", (1 - seg(m, 0.15, 0.85)).toFixed(3));
     portal.setAttribute("opacity", seg(m, 0.1, 0.7).toFixed(3));
     portal.setAttribute("transform", `scale(${lerp(0.8, 1, m).toFixed(3)})`);
+
+    if (ret) ret.setAttribute("opacity", (entry.v * (1 - seg(p, 0.0, 0.06))).toFixed(3));
 
     // blink, only while the character is still just a face
     if (calm > 0.4) {

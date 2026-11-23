@@ -48,6 +48,21 @@ export default function Dive() {
                 <stop offset="0" stopColor="#141b3b" />
                 <stop offset="1" stopColor="#04060c" />
               </radialGradient>
+              {/* soft volume for the head: lit from the upper left, cooler toward the edges (user-space so the blink lids match it exactly) */}
+              <radialGradient id="dv-skin" gradientUnits="userSpaceOnUse" cx="60" cy="40" r="980">
+                <stop offset="0" stopColor="#fbfcff" />
+                <stop offset="0.55" stopColor="#eef3ff" />
+                <stop offset="1" stopColor="#d2ddf6" />
+              </radialGradient>
+              <radialGradient id="dv-pup" cx="42%" cy="34%" r="75%">
+                <stop offset="0" stopColor="#262b33" />
+                <stop offset="0.55" stopColor="#111316" />
+                <stop offset="1" stopColor="#07080a" />
+              </radialGradient>
+              <radialGradient id="dv-blushg" cx="50%" cy="50%" r="50%">
+                <stop offset="0" stopColor="#ff8f9e" stopOpacity="0.5" />
+                <stop offset="1" stopColor="#ff8f9e" stopOpacity="0" />
+              </radialGradient>
               <radialGradient id="dv-bloom" cx="50%" cy="50%" r="50%">
                 <stop offset="0" stopColor="#6f8cff" stopOpacity="0.26" />
                 <stop offset="1" stopColor="#6f8cff" stopOpacity="0" />
@@ -62,8 +77,9 @@ export default function Dive() {
               </g></g>
               {/* head */}
               <path className="dv-ink dv-head" d="M-520 1300 C-528 520 -330 -330 160 -332 C650 -330 846 520 840 1300 Z" />
-              <ellipse className="dv-blush" cx="-150" cy="215" rx="70" ry="38" />
-              <ellipse className="dv-blush" cx="470" cy="225" rx="70" ry="38" />
+              <path className="dv-rim" d="M-462 620 C-470 250 -290 -246 110 -288" />
+              <ellipse className="dv-blush" cx="-150" cy="215" rx="104" ry="58" />
+              <ellipse className="dv-blush" cx="470" cy="225" rx="104" ry="58" />
               <g className="dv-freckles">
                 <circle cx="-190" cy="190" r="7" /><circle cx="-135" cy="178" r="7" /><circle cx="-165" cy="238" r="7" />
                 <circle cx="425" cy="196" r="7" /><circle cx="480" cy="184" r="7" /><circle cx="455" cy="244" r="7" />
@@ -74,7 +90,8 @@ export default function Dive() {
               {/* left eye: starts as an ordinary pupil, scroll turns it into the portal */}
               <ellipse className="dv-ink dv-white" cx="0" cy="0" rx="106" ry="150" />
               <g data-dv-lpupil>
-                <ellipse cx="0" cy="0" rx="64" ry="100" fill="#101211" />
+                <ellipse cx="0" cy="0" rx="64" ry="100" fill="url(#dv-pup)" />
+                <path className="dv-sheen-b" d="M-30 76 C-8 92 24 88 42 66" />
                 <path className="dv-shine" d="M-34 -50 C-40 -76 -16 -88 2 -80" />
                 <circle cx="32" cy="52" r="9" fill="#fff" />
               </g>
@@ -88,10 +105,21 @@ export default function Dive() {
               <path className="dv-shine" data-dv-shine d="M-46 -64 C-52 -88 -30 -102 -14 -96" />
               </g>
 
+              {/* a surveyor's reticle on the eye that opens: draws attention to where "closer" leads, gone as soon as the dive starts */}
+              <g className="dv-ret" data-dv-ret opacity="0" aria-hidden="true">
+                <circle className="dv-ret-ring" cx="0" cy="0" r="196" />
+                <g className="dv-ret-ticks">
+                  <path d="M0 -226 V-176" /><path d="M0 176 V226" /><path d="M-226 0 H-176" /><path d="M176 0 H226" />
+                </g>
+                <path className="dv-ret-lead" d="M-150 -146 L-262 -232 H-440" />
+                <text className="dv-ret-txt" x="-262" y="-252" textAnchor="start">THE WAY IN</text>
+              </g>
+
               {/* right eye: follows the pointer */}
               <ellipse className="dv-ink dv-white" cx="320" cy="10" rx="106" ry="150" />
               <g data-dv-pupil>
-                <ellipse cx="320" cy="10" rx="64" ry="100" fill="#101211" />
+                <ellipse cx="320" cy="10" rx="64" ry="100" fill="url(#dv-pup)" />
+                <path className="dv-sheen-b" d="M290 86 C312 102 344 98 362 76" />
                 <path className="dv-shine" d="M286 -40 C280 -66 304 -78 322 -70" />
                 <circle cx="352" cy="62" r="9" fill="#fff" />
               </g>
@@ -124,6 +152,10 @@ export default function Dive() {
 
           {/* headline, button and the nudge: the first thing you see, lifted away by the first stretch of scroll */}
           <div className="dv-hero" data-dv-hero>
+            <div className="dv-meta" aria-hidden="true">
+              <span><b>02</b>Featured build</span>
+              <span>Scroll to dive<i /></span>
+            </div>
             <h2 className="dv-h" aria-label={CONTENT.line1 + " " + CONTENT.line2}>
               {[CONTENT.line1, CONTENT.line2].map((l, li) => (
                 <span className="dv-line" key={li} aria-hidden="true">
@@ -133,8 +165,10 @@ export default function Dive() {
                 </span>
               ))}
             </h2>
-            <p className="dv-note" data-dv-note aria-hidden="true">{CONTENT.note}</p>
+            <p className="dv-note" data-dv-note aria-hidden="true"><span className="dv-note-t">{CONTENT.note}</span><span className="dv-note-line"><i /></span></p>
           </div>
+
+          <div className="dv-grain" aria-hidden="true" />
 
           {/* the far side */}
           <div className="dv-final" data-dv-final>
