@@ -413,3 +413,6 @@
 .rv-going .rv-slot { backface-visibility: hidden; }
 /* endless decorative loops rest while the card shrinks (the one-shot intro animations are left alone so nothing freezes half-way) */
 .rv-going .ll-globe .ll-spin, .rv-going .ll-arrow-in, .rv-going .ll-glint, .rv-going .ll-status b::after, .rv-going .ll-scroll i::after, .rv-going .ll-mq-track { animation-play-state: paused !important; }
+
+/* phones: the WORK / CONTACT / THEME nav row is removed (it sat under the frosted brand notch and looked blurred) */
+@media (max-width: 760px) { .ll-nav { display: none !important; } }
