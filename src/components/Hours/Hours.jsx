@@ -203,7 +203,7 @@ export default function Hours() {
       <div className="hr-lead" aria-hidden="true"><span>Taken part in &middot; learned from</span><b>Eight programs that<br />shaped how I build.</b></div>
 
       <div className="hr-mtop" aria-hidden="true">
-        <span className="hr-mtop-k"><i />Programs &middot; communities &middot; summer schools</span>
+        <span className="hr-mtop-k">Programs &middot; communities &middot; summer schools</span>
         <b className="hr-mtop-t">Eight programs that<br />shaped how I build.</b>
         <span className="hr-pips">{ITEMS.map((d) => <i key={d.title} className="hr-pip" />)}</span>
         <span className="hr-mtop-h">Scroll to sweep the dial</span>

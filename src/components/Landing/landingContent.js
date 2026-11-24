@@ -1,7 +1,7 @@
 // Landing / hero copy.
 export const landingContent = {
   logo: "ANSH GAUTAM",
-  logoTag: ".DEV",
+  logoTag: "",
   nav: [
     { label: "WORK", target: "projects" },
     { label: "CONTACT", target: "end" },

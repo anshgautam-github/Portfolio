@@ -136,3 +136,6 @@
 .bl-txt em { font-style: italic; color: #8db4ff; padding: 0 0.06em; margin: 0 -0.06em; filter: drop-shadow(0 0 0.28em rgba(110, 150, 255, 0.28)); }
 .bl.is-static .bl-txt { opacity: 1; position: relative; inset: auto; margin: 0 auto; padding: 12vh 6vw; }
 @media (max-width: 767px) { .bl-txt { right: 6vw; font-size: clamp(30px, 9vw, 52px); top: 38%; } }
+
+/* phones: the ribbon svg is scaled down hard (slice), so the marquee text is set larger to stay readable (band is 124 thick) */
+@media (max-width: 700px) { .fn-rtext { font-size: 78px; letter-spacing: 0.04em; } }

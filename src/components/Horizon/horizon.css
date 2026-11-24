@@ -109,3 +109,6 @@
   .hz-chip { font-size: 10.5px; }
   .hz-blurb { font-size: 14px; max-width: 52vw; }
 }
+
+/* phones: bigger marquee text on the ribbon (band is 150 thick) */
+@media (max-width: 700px) { .hz-rtext { font-size: 94px; letter-spacing: 0.015em; } }
