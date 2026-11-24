@@ -668,6 +668,21 @@ export function createGlassScene(canvas, opts = {}) {
   let lw = canvas.clientWidth || 1, lh = canvas.clientHeight || 1;
   const ro = new ResizeObserver(() => { sizeDirty = true; lw = canvas.clientWidth || 1; lh = canvas.clientHeight || 1; });
   ro.observe(canvas);
+  // portrait phones: the lettering is centred in the free band between the text above it (role / approach) and the skills ribbon / headline below it,
+  // measured from the real DOM, so it never overlaps them whatever the phone's height or font metrics are
+  const llRoot = canvas.closest(".ll") || document;
+  let band = null;                                   // [top, bottom] in aspect units (1 = viewport height), or null = use the fixed fractions
+  const bandEls = () => ({ a: llRoot.querySelector(".ll-c2"), a0: llRoot.querySelector(".ll-c1"), b: llRoot.querySelector(".ll-mq"), b0: llRoot.querySelector(".ll-h1") });
+  { const e = bandEls(); [e.a, e.a0, e.b, e.b0].forEach((el) => el && ro.observe(el)); }
+  const measureBand = (r) => {
+    const e = bandEls();
+    const shown = (el) => el && el.offsetParent !== null && getComputedStyle(el).display !== "none";
+    const top = shown(e.a) ? e.a : shown(e.a0) ? e.a0 : null;
+    const bot = shown(e.b) ? e.b : shown(e.b0) ? e.b0 : null;
+    if (!top || !bot) { band = null; return; }
+    const t = (top.getBoundingClientRect().bottom - r.top) / r.height, b = (bot.getBoundingClientRect().top - r.top) / r.height;
+    band = b - t > 0.12 ? [t, b] : null;
+  };
   let activeUntil = 3.5;
   let introT0 = -1;
 
@@ -688,6 +703,7 @@ export function createGlassScene(canvas, opts = {}) {
     if (sizeDirty) {
       const r = canvas.getBoundingClientRect();
       cssW = Math.max(1, r.width); cssH = Math.max(1, r.height);
+      if (cssW / cssH < 0.7) measureBand(r); else band = null;
       sizeDirty = false;
     } else if (canvas.width === W && W > 0 && !qualityDirty) return;
     qualityDirty = false;
@@ -709,11 +725,16 @@ export function createGlassScene(canvas, opts = {}) {
     const bh = bw * (MASK_H / MASK_W);
     const maxH = aspect < 1 ? 0.3 : 0.50;
     if (bh > maxH) bw = maxH * (MASK_W / MASK_H);
-    const bhh = bw * (MASK_H / MASK_W);
+    let bhh = bw * (MASK_H / MASK_W);
     let cy = 0.51;
     if (aspect < 0.7) {
       // portrait phones: role line sits at the top and the headline at the bottom, so the lettering takes the optical centre between them
       cy = 0.47;
+      if (band) {
+        const pad = 0.02, free = band[1] - band[0] - pad * 2;
+        if (bhh > free) { bw = free * (MASK_W / MASK_H); bhh = bw * (MASK_H / MASK_W); }
+        cy = (band[0] + band[1]) / 2;
+      }
     }
     const cx = 0.495 * aspect;
     return [cx - bw / 2, cy - bhh / 2, bw, bhh];

@@ -612,11 +612,6 @@ export default function Warp({
         )}
       </div>
 
-      <div data-introx className="wp-status pointer-events-none absolute right-[4.4vw] top-[5vh] z-[5] flex items-center gap-2.5 text-[11px] uppercase tracking-[0.18em] text-white/75 max-md:hidden" style={MONO}>
-        <span className="wp-pulse" />
-        Open to AI &amp; ML roles
-      </div>
-
       <div
         data-intro
         className="pointer-events-none absolute left-[5.4vw] right-[8vw] bottom-[17vh] z-[4] max-md:bottom-[20vh]"
