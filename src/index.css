@@ -262,3 +262,12 @@ html.is-mobile .pr {
   border-bottom: var(--gap) solid transparent;
   background-origin: border-box !important;
 }
+
+/* ---- phone tiers (see lib/perf.js) ---------------------------------------------------------------------------------------------
+   Backdrop blur re-samples and blurs everything behind an element on every frame it moves: the single most expensive thing on a budget phone.
+   Tier 1 (budget hardware, or a phone that measured slow) drops it everywhere, tier 2 also drops the blended / blurred decorations. The look
+   on a fast phone (tier 0) is untouched. */
+html.is-tier1 *, html.is-tier1 *::before, html.is-tier1 *::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html.is-tier1 .sm-glow { filter: none; }
+html.is-potato .about-fx .afx-b, html.is-potato .about-fx .afx-dots, html.is-potato .about-fx .afx-spot { display: none; }
+html.is-potato .sm-glow, html.is-potato .fr-halo { display: none; }

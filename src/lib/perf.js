@@ -15,18 +15,37 @@ const cores = nav.hardwareConcurrency || 8;
 const mem = nav.deviceMemory || 8;
 export const IS_LOW_END = IS_MOBILE || cores <= 4 || mem <= 4;
 
+/**
+ * Phone tiers. Phones differ a lot (a flagship and a budget Android run the same page at very different speeds), so one fixed budget is either
+ * too heavy for the weak phone or wasteful on the strong one.
+ *   0 = full look (flagships: nothing changes)
+ *   1 = lite   : no backdrop blur, canvases at a lower resolution, endless CSS loops frozen while scrolling
+ *   2 = potato : also ~20 fps decorative canvases, lower WebGL scale, blend / blur decorations dropped
+ * The tier starts from the hardware (few cores / little memory) and from what an earlier visit measured, and the governor below moves it
+ * up while the visitor scrolls if frames are actually being dropped. Add ?tier=0|1|2 to the URL to force one for testing.
+ */
+const TIER_KEY = "pf-tier", TIER_TTL = 14 * 864e5;
+const forced = /[?&]tier=([012])\b/.exec(typeof location !== "undefined" ? location.search : "");
+const storedTier = (() => {
+  try { const [t, ts] = (localStorage.getItem(TIER_KEY) || "").split(":"); return Date.now() - (+ts || 0) < TIER_TTL ? Math.min(2, +t || 0) : 0; } catch (e) { return 0; }
+})();
+const hwTier = IS_MOBILE && (cores <= 4 || mem <= 3) ? 1 : 0;
+export const TIER = forced ? +forced[1] : IS_MOBILE ? Math.max(hwTier, storedTier) : 0;
+
 /** Highest devicePixelRatio we are willing to render a canvas at. */
 export const capDpr = (desktopMax = 1.5, mobileMax = 1.25) =>
-  Math.min(win.devicePixelRatio || 1, IS_MOBILE ? mobileMax : desktopMax);
+  Math.min(win.devicePixelRatio || 1, IS_MOBILE ? (TIER >= 2 ? Math.min(mobileMax, 1) : TIER === 1 ? Math.min(mobileMax, 1.1) : mobileMax) : desktopMax);
 
 /** Starting render scale for the big WebGL scene (the adaptive code only ever steps down from here). */
-export const START_SCALE = IS_MOBILE ? 0.72 : IS_LOW_END ? 0.85 : 1;
+export const START_SCALE = IS_MOBILE ? (TIER >= 2 ? 0.55 : TIER === 1 ? 0.64 : 0.72) : IS_LOW_END ? 0.85 : 1;
 
 if (typeof document !== "undefined") {
   const c = document.documentElement.classList;
   if (IS_MOBILE) c.add("is-mobile");
   if (IS_SAFARI) c.add("is-safari");
   if (IS_LOW_END) c.add("is-lite");
+  if (TIER >= 1) c.add("is-tier1");
+  if (TIER >= 2) c.add("is-potato");
 }
 
 /**
@@ -34,7 +53,7 @@ if (typeof document !== "undefined") {
  * frameMs = 0 means "run every display frame"; 33 means "cap at ~30 fps".
  * Phones start capped; other devices get capped automatically if they are measured to be struggling.
  */
-export const perf = { frameMs: IS_MOBILE ? 33 : 0, hold: false };   // hold: true while a phone is mid-transition; decorative canvases keep their last frame
+export const perf = { frameMs: IS_MOBILE ? (TIER >= 2 ? 50 : 33) : 0, hold: false, tier: TIER };   // hold: true while a phone is mid-transition; decorative canvases keep their last frame
 /** true when a loop that last ran at `last` should skip this rAF tick */
 export const skipFrame = (now, last) => perf.frameMs > 0 && now - last < perf.frameMs - 2;
 
@@ -121,4 +140,53 @@ if (IS_TOUCH && typeof document !== "undefined" && typeof CSS !== "undefined" &&
     window.addEventListener("resize", remeasure, { passive: true });
     window.addEventListener("orientationchange", () => setTimeout(remeasure, 250), { passive: true });
   } catch (e) { /* keep the native value */ }
+}
+
+
+/**
+ * Phone governor: while the visitor scrolls, count dropped frames; if a good share of them is slow, move the phone one tier down in cost.
+ * The change is immediate for what CSS and the shared frame cap can do, and it is remembered so the next visit starts at that tier
+ * (canvas resolution and WebGL scale are chosen at load). A phone that scrolls well never leaves tier 0, so nothing changes for it.
+ */
+if (IS_MOBILE && typeof window !== "undefined" && window.requestAnimationFrame && !forced) {
+  const root = document.documentElement;
+  let tier = TIER, scrolling = false, stopTimer = 0, paused = [];
+  const pauseLoops = () => {                       // freeze endless CSS loops while the page is moving (finite entrance animations are untouched)
+    if (tier < 1 || !document.getAnimations) return;
+    try {
+      for (const a of document.getAnimations()) {
+        if (a.playState === "running" && typeof CSSAnimation !== "undefined" && a instanceof CSSAnimation && a.effect && a.effect.getComputedTiming().iterations === Infinity) { a.pause(); paused.push(a); }
+      }
+    } catch (e) { /* ignore */ }
+  };
+  const resumeLoops = () => { const p = paused; paused = []; for (const a of p) { try { a.play(); } catch (e) { /* ignore */ } } };
+  window.addEventListener("scroll", () => {
+    if (!scrolling) { scrolling = true; pauseLoops(); }
+    clearTimeout(stopTimer);
+    stopTimer = setTimeout(() => { scrolling = false; resumeLoops(); }, 160);
+  }, { passive: true });
+
+  const raise = () => {
+    tier = Math.min(2, tier + 1);
+    perf.tier = tier;
+    root.classList.add("is-tier1");
+    if (tier >= 2) { root.classList.add("is-potato"); perf.frameMs = Math.max(perf.frameMs, 50); }
+    try { localStorage.setItem(TIER_KEY, tier + ":" + Date.now()); } catch (e) { /* ignore */ }
+  };
+  let last = 0, n = 0, slow = 0, windows = 0;
+  const sample = (t) => {
+    if (document.hidden) { last = 0; requestAnimationFrame(sample); return; }
+    if (last && scrolling && t > 4500) {           // ignore the loader / start-up burst
+      const dt = t - last;
+      if (dt < 250) { n++; if (dt > 26) slow++; }
+      if (n >= 70) {
+        windows++;
+        if (slow / n > 0.25 && tier < 2) raise();
+        n = 0; slow = 0;
+      }
+    }
+    last = t;
+    if (windows < 14 && tier < 2) requestAnimationFrame(sample);
+  };
+  requestAnimationFrame(sample);
 }

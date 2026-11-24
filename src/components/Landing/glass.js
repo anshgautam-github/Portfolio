@@ -9,7 +9,8 @@
  * Everything lives in two tiny programs: `flow` (updates the field) and `scene` (draws to screen).
  */
 import { MASK_W, MASK_H, STROKE, PEN_SPEED, buildHeightField, buildWriteMap } from "./helloPath.js";
-import { capDpr, skipFrame, IS_MOBILE } from "../../lib/perf.js";
+import { capDpr, skipFrame, IS_MOBILE, TIER } from "../../lib/perf.js";
+const MOB_SCALE = TIER >= 2 ? 0.6 : TIER === 1 ? 0.7 : 0.8;   // phone render scale of the glass lettering (see lib/perf.js tiers)
 import { loaderTask, isReleased } from "../../lib/loader.js";
 
 const VERT = `#version 300 es
@@ -654,7 +655,7 @@ export function createGlassScene(canvas, opts = {}) {
   let frameAvg = 16, slowFrames = 0, frameCount = 0;
 
   let qualityDirty = false;
-  let renderScale = IS_MOBILE ? 0.8 : 1, paused = false;
+  let renderScale = IS_MOBILE ? MOB_SCALE : 1, paused = false;
   let sky = null;
   const allocSky = () => {
     const sw = Math.max(96, Math.round(W / 4)), sh = Math.max(64, Math.round(H / 4));
@@ -940,7 +941,7 @@ export function createGlassScene(canvas, opts = {}) {
     setDark(v) { darkTarget = v ? 1 : 0; },
     /** 0 = full quality, 1 = reduced resolution, 2 = frozen (keeps showing the last frame) */
     setLoad(m) {
-      const rs = IS_MOBILE ? 0.8 : m === 1 ? 0.75 : 1;   // never re-allocate the canvas on phones mid-scroll: that was the blank 'flip' as the shrink began
+      const rs = IS_MOBILE ? MOB_SCALE : m === 1 ? 0.75 : 1;   // never re-allocate the canvas on phones mid-scroll: that was the blank 'flip' as the shrink began
       if (rs !== renderScale) { renderScale = rs; qualityDirty = true; }
       paused = m === 2;
     },
