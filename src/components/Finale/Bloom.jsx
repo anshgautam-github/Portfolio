@@ -39,7 +39,25 @@ export default function Bloom() {
             <span>Now let&rsquo;s make the <em>what.</em></span>
           </p>
           <svg className="bl-svg" data-bl-svg focusable="false">
-            <g data-bl-star><path className="bl-big" d={STAR} transform="translate(-50 -50)" /></g>
+            <defs>
+              {/* body: flat brand blue through the solid core (so the hand-off to the Finale stays one colour), lifting to periwinkle and violet toward the tips */}
+              <radialGradient id="bl-grad" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stopColor="#3f72ee" /><stop offset="0.38" stopColor="#3f72ee" /><stop offset="0.66" stopColor="#6a90f7" /><stop offset="1" stopColor="#9d8bff" /></radialGradient>
+              <radialGradient id="bl-sheen" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stopColor="#ffffff" stopOpacity="0.5" /><stop offset="1" stopColor="#ffffff" stopOpacity="0" /></radialGradient>
+              <radialGradient id="bl-shade" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stopColor="#0c1a86" stopOpacity="0.42" /><stop offset="1" stopColor="#0c1a86" stopOpacity="0" /></radialGradient>
+              <clipPath id="bl-clip"><path d={STAR} transform="translate(-50 -50)" /></clipPath>
+            </defs>
+            <g data-bl-star>
+              <path className="bl-glow bl-glow-2" d={STAR} transform="translate(-50 -50)" />
+              <path className="bl-glow bl-glow-1" d={STAR} transform="translate(-50 -50)" />
+              <path className="bl-big" d={STAR} transform="translate(-50 -50)" />
+              <g clipPath="url(#bl-clip)">
+                <circle cx="-16" cy="-22" r="36" fill="url(#bl-sheen)" />
+                <circle cx="20" cy="28" r="36" fill="url(#bl-shade)" />
+                {[8, 16, 25, 35].map((r) => <circle className="bl-ring" cx="0" cy="0" r={r} key={r} />)}
+                <path className="bl-echo" d={STAR} transform="scale(0.76) translate(-50 -50)" />
+                <path className="bl-echo bl-echo-2" d={STAR} transform="scale(0.52) translate(-50 -50)" />
+              </g>
+            </g>
           </svg>
           <div className="bl-fill" data-bl-fill />
         </div>

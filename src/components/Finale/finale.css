@@ -139,3 +139,241 @@
 
 /* phones: the ribbon svg is scaled down hard (slice), so the marquee text is set larger to stay readable (band is 124 thick) */
 @media (max-width: 700px) { .fn-rtext { font-size: 78px; letter-spacing: 0.04em; } }
+
+/* ============================================================
+   SAY HELLO — premium layer (pure paint: no layout, no GSAP targets, no transforms on animated nodes).
+   The flat blue underneath is untouched so the Bloom hands over seamlessly; everything here is an overlay that
+   fades out at the top and bottom edges, so it never leaves a seam against the star or the ribbon.
+   ============================================================ */
+.fn-top { --fn-cx: 74.3%; --fn-cy: 52%; }
+
+/* 1. aurora: luminous periwinkle halo behind the character, violet + mint glints, fine grain */
+.fn-top::before {
+  content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(46% 58% at var(--fn-cx) var(--fn-cy), rgba(170,196,255,.62) 0%, rgba(126,162,255,.30) 42%, transparent 72%),
+    radial-gradient(38% 46% at 4% 62%, rgba(143,123,255,.50) 0%, transparent 70%),
+    radial-gradient(34% 30% at 52% 6%, rgba(78,227,154,.20) 0%, transparent 72%),
+    radial-gradient(40% 40% at 96% 92%, rgba(255,143,158,.22) 0%, transparent 70%),
+    radial-gradient(70% 55% at 30% 105%, rgba(16,30,140,.55) 0%, transparent 70%),
+    var(--fn-grain);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 20%, #000 80%, transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0, #000 20%, #000 80%, transparent 100%);
+  animation: fn-aurora 14s ease-in-out infinite alternate; will-change: opacity;
+}
+@keyframes fn-aurora { from { opacity: .82; } to { opacity: 1; } }
+
+/* 2. orbit rings + soft core light centred on the character (slow breathing) */
+.fn-top::after {
+  content: ""; position: absolute; z-index: -2; pointer-events: none;
+  left: var(--fn-cx); top: var(--fn-cy); width: min(78vw, 130vh); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background:
+    radial-gradient(circle closest-side, rgba(255,255,255,.30) 0%, rgba(255,255,255,.10) 38%, transparent 62%),
+    radial-gradient(circle closest-side, transparent 0 55.6%, rgba(255,255,255,.26) 56%, transparent 56.5%, transparent 73.6%, rgba(255,255,255,.17) 74%, transparent 74.5%, transparent 91.6%, rgba(255,255,255,.10) 92%, transparent 92.5%);
+  animation: fn-orbit 9s ease-in-out infinite alternate; will-change: transform;
+}
+@keyframes fn-orbit { from { transform: scale(.965); } to { transform: scale(1.035); } }
+
+/* 3. headline: a crisp ink extrude (stays inside the line mask's padding) so the white letters sit on the page like print */
+.fn-pew-w { text-shadow: .022em .032em 0 rgba(22,38,150,.5); }
+
+/* 4. note: slightly brighter with a soft shadow for legibility on the glow */
+.fn-hello .fn-hand { color: rgba(244,248,255,.94); text-shadow: 0 1px 18px rgba(14,26,120,.35); }
+
+/* 5. button: white glass pill with an ink arrow disc; inverts on hover. Lift uses the `translate` property so it composes with GSAP's inline transform. */
+.fn-hello .fn-btn {
+  gap: 1.1em; padding: .62em .62em .62em 1.7em; color: var(--fn-ink); font-weight: 700;
+  background: linear-gradient(135deg, #ffffff 0%, #e4ecff 100%);
+  box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 14px 34px -12px rgba(10,20,110,.65), 0 0 0 1px rgba(255,255,255,.55);
+  transition: translate .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease, background .3s ease, color .3s ease;
+}
+.fn-hello .fn-btn::after {
+  content: "\2192"; display: grid; place-items: center; width: 2.5em; height: 2.5em; border-radius: 50%; font-size: 1em; line-height: 1;
+  color: #fff; background: var(--fn-ink); transition: transform .3s ease, background .3s ease, color .3s ease;
+}
+.fn-hello .fn-btn:hover, .fn-hello .fn-btn:focus-visible {
+  translate: 0 -3px; background: var(--fn-ink); color: #fff;
+  box-shadow: 0 20px 42px -12px rgba(6,12,80,.7), 0 0 0 6px rgba(255,255,255,.22);
+}
+.fn-hello .fn-btn:hover::after, .fn-hello .fn-btn:focus-visible::after { background: #fff; color: var(--fn-ink); transform: translateX(3px) rotate(-45deg); }
+
+@media (max-width: 860px) {
+  .fn-top { --fn-cx: 50%; --fn-cy: 74%; }
+  .fn-top::after { width: min(130vw, 80vh); }
+  .fn-top::before { background-position: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) { .fn-top::before, .fn-top::after { animation: none; } }
+
+/* ============================================================
+   CONNECT + WORDMARK — premium layer (paint only; every animated node keeps its own GSAP transform/opacity)
+   ============================================================ */
+
+/* ---- connect: a soft pastel mesh behind the grid, glass tiles, blue accent line ---- */
+.fn-connect {
+  background-color: #edf2fc;
+  background-image:
+    radial-gradient(48% 60% at 88% 12%, rgba(143,123,255,.26) 0%, transparent 70%),
+    radial-gradient(40% 50% at 4% 88%, rgba(78,227,154,.18) 0%, transparent 70%),
+    radial-gradient(42% 42% at 62% 104%, rgba(255,143,158,.16) 0%, transparent 70%),
+    radial-gradient(36% 40% at 40% 30%, rgba(126,162,255,.16) 0%, transparent 70%),
+    linear-gradient(90deg, rgba(40,70,140,.075) 1px, transparent 1px);
+  background-size: auto, auto, auto, auto, 25% 100%;
+  padding-bottom: clamp(86px, 14vh, 150px);
+}
+
+/* eyebrow becomes a glass pill with a live dot */
+.fn-connect .fn-hand-l {
+  display: inline-flex; align-items: center; gap: .8em; padding: .85em 1.2em .85em 1em; margin-bottom: clamp(16px, 3vh, 30px);
+  color: rgba(5,10,40,.78); background: rgba(255,255,255,.72); border: 1px solid rgba(63,114,238,.22); border-radius: 999px;
+  box-shadow: 0 8px 24px -14px rgba(40,60,180,.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.fn-connect .fn-hand-l::before { content: ""; width: .7em; height: .7em; border-radius: 50%; background: var(--fn-mint); box-shadow: 0 0 0 0 rgba(78,227,154,.55); animation: fn-ping 2.4s ease-out infinite; }
+@keyframes fn-ping { 0% { box-shadow: 0 0 0 0 rgba(78,227,154,.55); } 80%, 100% { box-shadow: 0 0 0 .8em rgba(78,227,154,0); } }
+
+/* headline: ink first line, electric blue second line, a lavender print-offset under both */
+.fn-big-l > span { text-shadow: .018em .03em 0 rgba(143,123,255,.32); }
+.fn-big-l:nth-child(2) > span { color: var(--fn-blue); text-shadow: .018em .03em 0 rgba(5,5,5,.16); }
+
+/* tiles: glass cards with a coloured icon disc; lift uses `translate` so it composes with GSAP's inline transform */
+.fn-tile {
+  gap: 1em; padding: .55em 1.7em .55em .55em; background: rgba(255,255,255,.78); border-color: rgba(63,114,238,.2);
+  box-shadow: 0 1px 0 rgba(255,255,255,.95) inset, 0 14px 30px -18px rgba(40,60,180,.55);
+  transition: translate .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1), background .3s ease, color .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+.fn-tile svg { box-sizing: content-box; width: 1.35em; height: 1.35em; padding: .72em; border-radius: 50%; background: var(--fn-ink); fill: #fff; transition: background .3s ease, transform .4s cubic-bezier(.2,.8,.2,1); }
+.fn-tile[href*="linkedin"] svg { background: var(--fn-blue); }
+.fn-tile[href*="github"] svg { background: var(--fn-ink); }
+.fn-tile[href^="mailto"] svg { background: var(--fn-violet); }
+.fn-tile:hover, .fn-tile:focus-visible {
+  translate: 0 -4px; background: linear-gradient(135deg, #4a7bf2 0%, #7a63f0 100%); color: #fff; border-color: transparent;
+  box-shadow: 0 22px 40px -16px rgba(63,90,238,.8);
+}
+.fn-tile:hover svg, .fn-tile:focus-visible svg { background: #fff; fill: var(--fn-blue); transform: rotate(-8deg) scale(1.05); }
+
+.fn-free { color: var(--fn-blue); }
+.fn-free svg { stroke: var(--fn-blue); }
+
+/* ---- wordmark: a deep ink-indigo base that rounds over the light section, with a blue/violet glow ---- */
+.fn-foot {
+  margin-top: -34px; z-index: 1; padding-top: clamp(30px, 5vh, 58px); border-radius: 36px 36px 0 0;
+  background: radial-gradient(70% 60% at 50% 108%, rgba(63,114,238,.55) 0%, transparent 70%), linear-gradient(180deg, #070b22 0%, #0a1033 100%);
+}
+.fn-foot::before {
+  content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(34% 46% at 12% 20%, rgba(143,123,255,.30) 0%, transparent 70%),
+    radial-gradient(30% 40% at 90% 30%, rgba(78,227,154,.14) 0%, transparent 70%),
+    var(--fn-grain);
+}
+.fn-rule path { stroke: rgba(238,243,255,.38); }
+.fn-mark { color: var(--fn-text); }
+.fn-mark-l > span { text-shadow: .02em .03em 0 rgba(63,114,238,.65); }
+.fn-credit { color: rgba(238,243,255,.6); }
+
+@media (max-width: 860px) {
+  .fn-foot { margin-top: -26px; border-radius: 26px 26px 0 0; }
+  .fn-tile { padding-right: 1.4em; }
+}
+@media (prefers-reduced-motion: reduce) { .fn-connect .fn-hand-l::before { animation: none; } }
+
+/* ============================================================
+   BLOOM STAR — depth layer. Everything lives inside the star's own <g>, so GSAP's per-frame transform carries it
+   (scale, glide, turn) and no animation logic changes. Thin lines use non-scaling strokes so they stay crisp at any size.
+   ============================================================ */
+.bl-big { fill: url(#bl-grad); stroke: url(#bl-grad); }
+.bl-glow { fill: none; stroke: #7ea2ff; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
+.bl-glow-1 { stroke-width: 16px; stroke-opacity: .24; }
+.bl-glow-2 { stroke-width: 44px; stroke-opacity: .10; }
+.bl-ring { fill: none; stroke: #fff; stroke-opacity: .17; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.bl-echo { fill: none; stroke: #fff; stroke-opacity: .42; stroke-width: 1.5px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.bl-echo-2 { stroke-opacity: .24; }
+
+/* ============================================================
+   TRAIN. SHIP. — scene upgrade (paint only; letters, peek character and thumb keep their GSAP transforms).
+   The panel's bottom edge is exactly #0a1033 so it joins the ribbon block below with no seam.
+   ============================================================ */
+.fn-foot {
+  background:
+    radial-gradient(58% 46% at 50% 60%, rgba(63,114,238,.46) 0%, rgba(63,114,238,.16) 45%, transparent 72%),
+    radial-gradient(30% 30% at 50% 30%, rgba(143,123,255,.22) 0%, transparent 72%),
+    linear-gradient(180deg, #070b22 0%, #0a1033 100%);
+}
+/* night sky: violet + mint glows, grain and a scatter of twinkling stars */
+.fn-foot::before {
+  background:
+    radial-gradient(circle 2px at 8% 24%, rgba(255,255,255,.9), rgba(255,255,255,0)),
+    radial-gradient(circle 1.6px at 15% 62%, rgba(255,255,255,.7), rgba(255,255,255,0)),
+    radial-gradient(circle 2.2px at 23% 14%, rgba(180,200,255,.9), rgba(180,200,255,0)),
+    radial-gradient(circle 1.6px at 31% 48%, rgba(255,255,255,.6), rgba(255,255,255,0)),
+    radial-gradient(circle 2px at 44% 10%, rgba(255,255,255,.8), rgba(255,255,255,0)),
+    radial-gradient(circle 1.6px at 57% 20%, rgba(180,255,220,.8), rgba(180,255,220,0)),
+    radial-gradient(circle 2.2px at 68% 8%, rgba(255,255,255,.9), rgba(255,255,255,0)),
+    radial-gradient(circle 1.6px at 76% 56%, rgba(255,255,255,.6), rgba(255,255,255,0)),
+    radial-gradient(circle 2px at 84% 18%, rgba(190,175,255,.9), rgba(190,175,255,0)),
+    radial-gradient(circle 1.6px at 92% 44%, rgba(255,255,255,.7), rgba(255,255,255,0)),
+    radial-gradient(circle 1.6px at 5% 80%, rgba(255,255,255,.5), rgba(255,255,255,0)),
+    radial-gradient(circle 2px at 96% 74%, rgba(255,255,255,.6), rgba(255,255,255,0)),
+    radial-gradient(34% 46% at 12% 20%, rgba(143,123,255,.32) 0%, transparent 70%),
+    radial-gradient(30% 40% at 90% 30%, rgba(78,227,154,.16) 0%, transparent 70%),
+    var(--fn-grain);
+  animation: fn-night-twinkle 5s ease-in-out infinite alternate;
+}
+@keyframes fn-night-twinkle { from { opacity: .72; } to { opacity: 1; } }
+
+/* a tilted grid floor under the scene, fading out before every edge */
+.fn-foot::after {
+  content: ""; position: absolute; z-index: -2; pointer-events: none; left: -40%; right: -40%; bottom: 4%; height: 52%;
+  background:
+    linear-gradient(rgba(126,162,255,.30) 1px, transparent 1px) 0 0 / 100% 54px,
+    linear-gradient(90deg, rgba(126,162,255,.30) 1px, transparent 1px) 0 0 / 86px 100%;
+  transform: perspective(540px) rotateX(63deg); transform-origin: 50% 100%;
+  -webkit-mask-image: linear-gradient(0deg, transparent 0, #000 30%, transparent 94%); mask-image: linear-gradient(0deg, transparent 0, #000 30%, transparent 94%);
+}
+
+/* the wavy rule glows */
+.fn-rule { filter: drop-shadow(0 0 7px rgba(126,162,255,.7)); }
+.fn-rule path { stroke: rgba(190,208,255,.7); stroke-width: 2; }
+
+/* wordmark: a stepped blue extrude, so it reads as a solid 3D block (kept inside the letter mask's padding) */
+.fn-mark-l > span {
+  text-shadow: .008em .008em 0 #4f80f7, .016em .016em 0 #4a79ef, .024em .024em 0 #4471e6, .032em .032em 0 #3e69dc, .040em .040em 0 #3860d0, .048em .048em 0 #3256c3, .056em .056em 0 #2b4cb4;
+}
+
+/* the peeking character gets a halo and an orbit ring (they ride up with it) */
+.fn-peek::before, .fn-peek::after { content: ""; position: absolute; left: 50%; top: 62%; border-radius: 50%; pointer-events: none; z-index: -1; translate: -50% -50%; }
+.fn-peek::before { width: 190%; aspect-ratio: 1; background: radial-gradient(circle closest-side, rgba(126,162,255,.5) 0%, rgba(143,123,255,.2) 45%, transparent 72%); animation: fn-halo 6s ease-in-out infinite alternate; }
+.fn-peek::after { width: 150%; aspect-ratio: 1; border: 1px solid rgba(190,208,255,.32); box-shadow: 0 0 0 .9em rgba(190,208,255,.06), 0 0 0 1.9em rgba(190,208,255,.035); }
+@keyframes fn-halo { from { transform: scale(.94); opacity: .8; } to { transform: scale(1.06); opacity: 1; } }
+
+/* credit line: a glass chip with a live dot */
+.fn-credit {
+  display: inline-flex; align-items: center; gap: .9em; padding: .95em 1.5em; color: rgba(226,236,255,.82);
+  background: rgba(255,255,255,.06); border: 1px solid rgba(190,208,255,.22); border-radius: 999px;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: 0 10px 30px -16px rgba(0,0,0,.6);
+}
+.fn-credit::before { content: ""; flex: none; width: .6em; height: .6em; border-radius: 50%; background: var(--fn-mint); box-shadow: 0 0 10px rgba(78,227,154,.9); }
+
+@media (max-width: 860px) {
+  .fn-foot::after { height: 40%; background-size: 100% 42px, 64px 100%; }
+  .fn-credit { text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) { .fn-foot::before, .fn-peek::before { animation: none; } }
+
+
+/* ---- mascot polish: gradients, gloss, sparkles. Purely visual; no layout or animation hooks touched. ---- */
+.fn-defs { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
+.fn .fn-body { fill: url(#fn-g-body); }
+.fn .fn-white { fill: url(#fn-g-eye); }
+.fn .fn-coral { fill: url(#fn-g-coral); }
+.fn .fn-amber { fill: url(#fn-g-mint); }
+.fn .fn-blue { fill: url(#fn-g-blue); }
+.fn-vein { fill: none; stroke: rgba(5,5,5,.2); stroke-width: 5; stroke-linecap: round; }
+.fn-leafhl { fill: none; stroke: rgba(255,255,255,.6); stroke-width: 6; stroke-linecap: round; }
+.fn-gloss { fill: none; stroke: #fff; stroke-width: 10; stroke-linecap: round; opacity: .85; }
+.fn-gloss-d { stroke-width: 10; opacity: .7; }
+.fn-cheek { fill: none; stroke: rgba(255,255,255,.7); stroke-width: 3; stroke-linecap: round; }
+
+/* ---- footer/ribbon join: let the sky layers, wave lines and glows fade out before the bottom edge,
+   so the panel ends on its plain #0a1033 base and meets the ribbon block below with no visible line ---- */
+.fn-foot > canvas { -webkit-mask-image: linear-gradient(180deg, #000 0, #000 72%, transparent 100%); mask-image: linear-gradient(180deg, #000 0, #000 72%, transparent 100%); }
+.fn-foot::before { -webkit-mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 100%); mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 100%); }

@@ -20,7 +20,7 @@ export default function initFinale(root) {
   const hangI = root.querySelector("[data-fn-hang-i]");
   if (reduce) { root.classList.add("is-static"); return () => root.classList.remove("is-static"); }
 
-  const bgOffs = [[".fn-top", "blue"], [".fn-connect", "light"], [".fn-foot", "light"]].map(([sel, theme]) => initWaveBg(root.querySelector(sel), { theme }));
+  const bgOffs = [[".fn-top", "aurora"], [".fn-connect", "light"], [".fn-foot", "light"]].map(([sel, theme]) => initWaveBg(root.querySelector(sel), { theme }));
 
   const ctx = gsap.context(() => {
     gsap.set("[data-fn-pew]", { yPercent: 115 });

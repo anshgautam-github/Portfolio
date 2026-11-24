@@ -236,3 +236,42 @@
 /* once the night is up, nothing pale may sit behind the sticky stage: sub-pixel gaps at its top/bottom edge while scrolling flashed as white lines */
 .dv.dv-dark { background: #000; }
 .dv.dv-dark .dv-stage { background: #000; }
+
+/* ============================================================
+   CHARACTER + STAGE — depth pass (paint only). All new svg lives inside the character's own <g>, so the camera's
+   per-frame transform, the blink lids, the pointer-follow pupils and the portal keep working untouched.
+   ============================================================ */
+/* the stage: pastel light pooled in the paper-blue, under the grid and the canvas */
+.dv-stage::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(40% 50% at 12% 22%, rgba(143,123,255,.30) 0%, transparent 70%),
+    radial-gradient(36% 46% at 90% 66%, rgba(255,143,158,.26) 0%, transparent 70%),
+    radial-gradient(46% 38% at 52% 100%, rgba(78,227,154,.24) 0%, transparent 70%),
+    radial-gradient(50% 36% at 62% 0%, rgba(255,255,255,.62) 0%, transparent 70%);
+}
+.dv.is-static .dv-stage::before { display: none; }
+
+/* leaves: lit gradients with a white vein, so the tuft reads as three real leaves */
+.dv-coral { fill: url(#dv-lv); }
+.dv-amber { fill: url(#dv-lm); }
+.dv-blue  { fill: url(#dv-lb); }
+.dv-vein { fill: none; stroke: #fff; stroke-opacity: .5; stroke-width: 7; stroke-linecap: round; }
+
+/* head: cel-shaded cool crescent on the shadow side + a soft forehead gloss */
+.dv-cel { fill: rgba(105,125,235,.2); }
+.dv-gloss { fill: #fff; opacity: .55; }
+
+/* cheeks: rose freckles (were blue) and a glint on each blush */
+.dv-freckles circle { fill: #e0829f; opacity: .55; }
+.dv-glint { fill: #fff; opacity: .75; }
+
+/* eyes: a soft shadow under the upper lid inside the white */
+.dv-eyeshade { fill: rgba(50,70,170,.16); }
+
+/* sparkles around the tuft: twinkle by opacity only */
+.dv-spark { opacity: .9; animation: dv-spark 2.8s ease-in-out infinite alternate; }
+.dv-spark-m { fill: var(--dv-mint); } .dv-spark-v { fill: var(--dv-violet); } .dv-spark-b { fill: var(--dv-blue2); }
+@keyframes dv-spark { from { opacity: .2; } to { opacity: 1; } }
+.dv:not(.is-live) .dv-spark, .is-scrolling .dv-spark { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .dv-spark { animation: none; } }

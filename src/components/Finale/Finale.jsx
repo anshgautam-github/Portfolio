@@ -39,8 +39,14 @@ function ribbonPath() {
 const TUFT = (
   <>
     <path className="fn-ink fn-coral" d="M60 -326 C18 -430 58 -526 142 -566 C194 -482 172 -376 132 -322 Z" />
+    <path className="fn-leafhl" d="M62 -352 C40 -430 70 -508 128 -552" />
+    <path className="fn-vein" d="M100 -332 C78 -420 96 -498 138 -552" />
     <path className="fn-ink fn-amber" d="M148 -326 C136 -470 180 -604 274 -684 C336 -562 292 -420 230 -322 Z" />
+    <path className="fn-leafhl" d="M160 -352 C152 -470 192 -588 262 -664" />
+    <path className="fn-vein" d="M192 -332 C196 -460 230 -588 270 -672" />
     <path className="fn-ink fn-blue" d="M246 -326 C290 -400 360 -452 436 -442 C424 -380 372 -338 318 -318 Z" />
+    <path className="fn-leafhl" d="M254 -330 C296 -394 356 -434 420 -434" />
+    <path className="fn-vein" d="M276 -322 C326 -380 376 -412 424 -430" />
   </>
 );
 
@@ -68,6 +74,19 @@ export default function Finale() {
 
   return (
     <section ref={root} className="fn" id="finale" aria-label="Say hello">
+      <svg className="fn-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <defs>
+          <radialGradient id="fn-g-body" cx=".34" cy=".26" r=".85"><stop offset="0" stopColor="#ffffff" /><stop offset=".45" stopColor="#f1f4ff" /><stop offset=".8" stopColor="#dbe3ff" /><stop offset="1" stopColor="#c3d0fb" /></radialGradient>
+          <radialGradient id="fn-g-shade" cx=".36" cy=".3" r=".82"><stop offset=".55" stopColor="#3f72ee" stopOpacity="0" /><stop offset="1" stopColor="#3f72ee" stopOpacity=".24" /></radialGradient>
+          <radialGradient id="fn-g-eye" cx=".4" cy=".35" r=".8"><stop offset="0" stopColor="#ffffff" /><stop offset=".7" stopColor="#ffffff" /><stop offset="1" stopColor="#e3eaff" /></radialGradient>
+          <radialGradient id="fn-g-iris" cx=".5" cy=".78" r=".78"><stop offset="0" stopColor="#9db8ff" /><stop offset=".4" stopColor="#3f72ee" /><stop offset="1" stopColor="#0c1233" /></radialGradient>
+          <linearGradient id="fn-g-coral" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ffc0c9" /><stop offset=".55" stopColor="#ff8f9e" /><stop offset="1" stopColor="#ee6479" /></linearGradient>
+          <linearGradient id="fn-g-mint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#b4f8d4" /><stop offset=".5" stopColor="#4ee39a" /><stop offset="1" stopColor="#1fb36f" /></linearGradient>
+          <linearGradient id="fn-g-blue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#9bb8ff" /><stop offset=".5" stopColor="#3f72ee" /><stop offset="1" stopColor="#2848b8" /></linearGradient>
+          <radialGradient id="fn-g-blush"><stop offset="0" stopColor="#ff7f95" stopOpacity=".85" /><stop offset=".6" stopColor="#ff8f9e" stopOpacity=".5" /><stop offset="1" stopColor="#ff8f9e" stopOpacity="0" /></radialGradient>
+          <radialGradient id="fn-g-shadow"><stop offset="0" stopColor="#0a0f24" stopOpacity=".38" /><stop offset=".6" stopColor="#0a0f24" stopOpacity=".16" /><stop offset="1" stopColor="#0a0f24" stopOpacity="0" /></radialGradient>
+        </defs>
+      </svg>
       {/* ---------- say hello ---------- */}
       <div className="fn-top">
         <div className="fn-hello">
@@ -78,22 +97,39 @@ export default function Finale() {
           {PRIMARY && <a className="fn-btn fn-btn-coral" data-fn-rise href={PRIMARY} target="_blank" rel="noopener noreferrer">Find me on {PRIMARY_NAME || "the web"}</a>}
         </div>
         <svg className="fn-char" data-fn-char viewBox="0 0 440 540" aria-hidden="true" focusable="false">
-          <ellipse cx="220" cy="522" rx="130" ry="13" fill="rgba(16,18,17,.18)" />
+          <defs><clipPath id="fn-mouth-clip"><path d="M164 312 Q216 332 270 310 Q266 374 216 376 Q168 374 164 312 Z" /></clipPath></defs>
+          <ellipse cx="220" cy="522" rx="150" ry="15" fill="url(#fn-g-shadow)" />
           <ellipse className="fn-ink fn-body" cx="150" cy="498" rx="46" ry="20" />
           <ellipse className="fn-ink fn-body" cx="274" cy="498" rx="46" ry="20" />
           <g transform="translate(210 40) scale(0.5) translate(-160 330)">{TUFT}</g>
           <path className="fn-ink fn-body" d="M210 40 C320 40 372 200 372 340 C372 450 310 505 210 505 C110 505 48 450 48 340 C48 200 100 40 210 40 Z" />
+          <path d="M210 40 C320 40 372 200 372 340 C372 450 310 505 210 505 C110 505 48 450 48 340 C48 200 100 40 210 40 Z" fill="url(#fn-g-shade)" />
+          <ellipse cx="214" cy="418" rx="86" ry="62" fill="#fff" opacity=".45" />
+          <path className="fn-gloss" d="M96 176 C102 122 136 82 180 62" />
+          <path className="fn-gloss fn-gloss-d" d="M88 212 L90 224" />
           <path className="fn-ink-l" d="M70 340 C36 372 42 424 66 446" />
           <circle className="fn-ink fn-body" cx="68" cy="450" r="16" />
-          <ellipse className="fn-blush" cx="118" cy="268" rx="30" ry="16" />
-          <ellipse className="fn-blush" cx="316" cy="272" rx="30" ry="16" />
+          <ellipse cx="118" cy="272" rx="40" ry="24" fill="url(#fn-g-blush)" />
+          <ellipse cx="316" cy="276" rx="40" ry="24" fill="url(#fn-g-blush)" />
+          <path className="fn-cheek" d="M104 268 l5 -9 M118 270 l5 -9 M132 270 l5 -9" />
+          <path className="fn-cheek" d="M300 272 l5 -9 M314 274 l5 -9 M328 274 l5 -9" />
           <path className="fn-stroke" d="M120 140 Q158 108 196 128" />
           <path className="fn-stroke" d="M236 128 Q276 106 312 142" />
           <ellipse className="fn-ink fn-white" cx="160" cy="205" rx="42" ry="58" />
           <ellipse className="fn-ink fn-white" cx="268" cy="208" rx="42" ry="58" />
-          <g data-fn-pupil><ellipse cx="152" cy="212" rx="24" ry="38" fill="#101211" /><circle cx="145" cy="196" r="7" fill="#fff" /></g>
-          <g data-fn-pupil><ellipse cx="260" cy="215" rx="24" ry="38" fill="#101211" /><circle cx="253" cy="199" r="7" fill="#fff" /></g>
-          <path className="fn-stroke" d="M168 318 Q216 366 266 316" />
+          <g data-fn-pupil>
+            <ellipse cx="152" cy="212" rx="25" ry="39" fill="url(#fn-g-iris)" />
+            <ellipse cx="152" cy="206" rx="15" ry="25" fill="#070a1c" />
+            <circle cx="143" cy="194" r="9" fill="#fff" /><circle cx="162" cy="232" r="4.500" fill="#fff" opacity=".9" />
+          </g>
+          <g data-fn-pupil>
+            <ellipse cx="260" cy="215" rx="25" ry="39" fill="url(#fn-g-iris)" />
+            <ellipse cx="260" cy="209" rx="15" ry="25" fill="#070a1c" />
+            <circle cx="251" cy="197" r="9" fill="#fff" /><circle cx="270" cy="235" r="4.500" fill="#fff" opacity=".9" />
+          </g>
+          <path d="M164 312 Q216 332 270 310 Q266 374 216 376 Q168 374 164 312 Z" fill="#1b0f1c" />
+          <g clipPath="url(#fn-mouth-clip)"><ellipse cx="218" cy="376" rx="30" ry="21" fill="#ff7a90" /><path d="M200 362 Q218 372 236 362" fill="none" stroke="#e04e6c" strokeWidth="3" strokeLinecap="round" /></g>
+          <path className="fn-ink-l" d="M164 312 Q216 332 270 310 Q266 374 216 376 Q168 374 164 312 Z" strokeLinejoin="round" />
           <g className="fn-wave" data-fn-wave>
             <path className="fn-ink-l" d="M366 330 C410 308 420 256 402 214" />
             <g className="fn-ink fn-body">
@@ -164,12 +200,31 @@ export default function Finale() {
         </p>
         <div className="fn-peek" data-fn-peek aria-hidden="true">
           <svg viewBox="0 0 320 200" focusable="false">
+            <defs><clipPath id="fn-pk-mouth"><path d="M136 158 Q160 170 184 158 Q182 190 160 191 Q138 190 136 158 Z" /></clipPath></defs>
             <g transform="translate(160 22) scale(0.34) translate(-160 330)">{TUFT}</g>
             <path className="fn-ink fn-body" d="M10 200 C10 90 80 22 160 22 C240 22 310 90 310 200 Z" />
+            <path d="M10 200 C10 90 80 22 160 22 C240 22 310 90 310 200 Z" fill="url(#fn-g-shade)" />
+            <path className="fn-gloss" d="M52 120 C56 86 78 58 112 44" />
+            <path className="fn-gloss fn-gloss-d" d="M47 140 L48 150" />
+            <ellipse cx="72" cy="150" rx="27" ry="16" fill="url(#fn-g-blush)" />
+            <ellipse cx="248" cy="152" rx="27" ry="16" fill="url(#fn-g-blush)" />
+            <path className="fn-cheek" d="M62 148 l4 -7 M72 150 l4 -7 M82 150 l4 -7" />
+            <path className="fn-cheek" d="M238 150 l4 -7 M248 152 l4 -7 M258 152 l4 -7" />
             <path className="fn-stroke fn-stroke-s" d="M82 70 Q108 52 134 64" /><path className="fn-stroke fn-stroke-s" d="M186 64 Q212 52 238 70" />
             <ellipse className="fn-ink fn-white" cx="112" cy="116" rx="30" ry="42" /><ellipse className="fn-ink fn-white" cx="208" cy="118" rx="30" ry="42" />
-            <g data-fn-pupil><ellipse cx="112" cy="122" rx="17" ry="27" fill="#101211" /><circle cx="107" cy="110" r="5" fill="#fff" /></g>
-            <g data-fn-pupil><ellipse cx="208" cy="124" rx="17" ry="27" fill="#101211" /><circle cx="203" cy="112" r="5" fill="#fff" /></g>
+            <g data-fn-pupil>
+              <ellipse cx="112" cy="122" rx="18" ry="28" fill="url(#fn-g-iris)" />
+              <ellipse cx="112" cy="117" rx="11" ry="18" fill="#070a1c" />
+              <circle cx="105" cy="108" r="6.5" fill="#fff" /><circle cx="119" cy="136" r="3" fill="#fff" opacity=".9" />
+            </g>
+            <g data-fn-pupil>
+              <ellipse cx="208" cy="124" rx="18" ry="28" fill="url(#fn-g-iris)" />
+              <ellipse cx="208" cy="119" rx="11" ry="18" fill="#070a1c" />
+              <circle cx="201" cy="110" r="6.5" fill="#fff" /><circle cx="215" cy="138" r="3" fill="#fff" opacity=".9" />
+            </g>
+            <path d="M136 158 Q160 170 184 158 Q182 190 160 191 Q138 190 136 158 Z" fill="#1b0f1c" />
+            <g clipPath="url(#fn-pk-mouth)"><ellipse cx="161" cy="192" rx="22" ry="15" fill="#ff7a90" /></g>
+            <path className="fn-ink-l" style={{ strokeWidth: 4 }} d="M136 158 Q160 170 184 158 Q182 190 160 191 Q138 190 136 158 Z" strokeLinejoin="round" />
           </svg>
           <svg className="fn-thumb" viewBox="0 0 80 110" focusable="false">
             <g className="fn-ink fn-body"><rect x="30" y="14" width="22" height="64" rx="11" /><rect x="14" y="50" width="22" height="22" rx="11" transform="rotate(-18 25 61)" /></g>

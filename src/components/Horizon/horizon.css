@@ -112,3 +112,81 @@
 
 /* phones: bigger marquee text on the ribbon (band is 150 thick) */
 @media (max-width: 700px) { .hz-rtext { font-size: 94px; letter-spacing: 0.015em; } }
+
+/* ============================================================
+   HORIZON — premium layer (paint only; no layout, no GSAP-owned transforms touched).
+   Overlays sit under the live-wave / contour canvases (z -2) and fade out at their top and bottom edges,
+   so they never leave a seam against the ribbon, the curve or the neighbouring block.
+   ============================================================ */
+
+/* ---------- THE BUILDER (blue scene) ---------- */
+.hz-intro::before {
+  content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(42% 46% at 50% 96%, rgba(170,255,214,.34) 0%, transparent 70%),
+    radial-gradient(46% 50% at 78% 44%, rgba(170,196,255,.50) 0%, transparent 72%),
+    radial-gradient(40% 46% at 6% 52%, rgba(143,123,255,.50) 0%, transparent 70%),
+    radial-gradient(34% 30% at 50% 8%, rgba(255,255,255,.20) 0%, transparent 72%),
+    radial-gradient(34% 36% at 96% 96%, rgba(255,143,158,.26) 0%, transparent 70%),
+    radial-gradient(60% 50% at 20% 104%, rgba(16,30,140,.55) 0%, transparent 70%),
+    var(--fn-grain, none);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 78%, transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 78%, transparent 100%);
+  animation: hz-aurora 14s ease-in-out infinite alternate; will-change: opacity;
+}
+@keyframes hz-aurora { from { opacity: .8; } to { opacity: 1; } }
+
+/* headline: cream letters with a crisp indigo print-offset (stays inside the line mask's padding) */
+.hz-head-l > span { text-shadow: .022em .032em 0 rgba(22,38,150,.5); }
+
+/* chips: frosted glass with a mint status dot in place of the grip */
+.hz-chip {
+  background: linear-gradient(135deg, rgba(255,255,255,.26), rgba(255,255,255,.08)); border-color: rgba(255,255,255,.5);
+  box-shadow: 0 1px 0 rgba(255,255,255,.45) inset, 0 12px 28px -14px rgba(8,14,90,.65); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.hz-chip i { width: .62em; height: .62em; border-radius: 50%; background: var(--hz-mint); box-shadow: 0 0 0 3px rgba(78,227,154,.25), 0 0 14px rgba(78,227,154,.75); }
+.hz-blurb { color: rgba(244,248,255,.95); text-shadow: 0 1px 16px rgba(14,26,120,.4); }
+
+/* cards: deeper, layered lift + a bright rim */
+.hz-card { box-shadow: 0 50px 70px -28px rgba(5,8,40,.65), 0 18px 30px -16px rgba(5,8,40,.4), 0 0 0 1px rgba(255,255,255,.28), 0 0 0 7px rgba(255,255,255,.07); }
+.hz-explore svg { filter: drop-shadow(0 20px 30px rgba(5,8,40,.4)) drop-shadow(0 0 22px rgba(255,255,255,.28)); }
+
+/* ---------- WHY I BUILD + the pinned words (pale ice scene) ---------- */
+.hz-why::before, .hz-stage::before {
+  content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(44% 60% at 90% 18%, rgba(143,123,255,.30) 0%, transparent 70%),
+    radial-gradient(40% 55% at 6% 86%, rgba(78,227,154,.26) 0%, transparent 70%),
+    radial-gradient(36% 46% at 64% 100%, rgba(255,143,158,.22) 0%, transparent 70%),
+    radial-gradient(46% 50% at 34% 28%, rgba(255,255,255,.55) 0%, transparent 70%),
+    radial-gradient(40% 44% at 50% 60%, rgba(126,162,255,.20) 0%, transparent 70%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+}
+.hz-why { overflow: hidden; }
+
+/* the statement: ink first line, electric-blue second, lavender print-offset */
+.hz-whyh .hz-head-l > span { text-shadow: .02em .03em 0 rgba(143,123,255,.32); }
+.hz-whyh .hz-head-l:nth-child(2) > span { color: var(--hz-orange); text-shadow: .02em .03em 0 rgba(5,5,5,.14); }
+
+/* giant words: same offset so the type feels printed, in the panel's accent */
+.hz-word > span { text-shadow: .018em .028em 0 rgba(63,114,238,.30); }
+
+/* step number: a white-filled hand-drawn ring */
+.hz-num ellipse { fill: #fff; }
+.hz-num svg { filter: drop-shadow(0 8px 12px rgba(40,60,180,.28)); }
+
+/* progress: thicker, multi-colour fill */
+.hz-prog i { height: 4px; background: rgba(5,5,5,.14); }
+.hz-prog b { background: linear-gradient(90deg, var(--hz-orange), var(--hz-violet) 60%, var(--hz-mint)); }
+
+/* parallax cards on the pale scene: softer, tinted shadow */
+.hz-pcard { box-shadow: 0 44px 60px -26px rgba(40,60,160,.45), 0 16px 26px -14px rgba(5,8,40,.3), 0 0 0 1px rgba(5,5,5,.06); }
+
+@media (prefers-reduced-motion: reduce) { .hz-intro::before { animation: none; } }
+
+/* ---------- ribbon block: continues the "TRAIN. SHIP." footer's ink-indigo (was pale paper) ----------
+   Starts on exactly the colour the footer ends on (#0a1033), so the join has no seam. */
+.hz-top {
+  background: linear-gradient(180deg, #0a1033 0%, #070b22 100%);
+}

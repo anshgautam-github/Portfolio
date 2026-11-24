@@ -95,6 +95,16 @@ export default function Dive() {
                 <stop offset="0" stopColor="#6f8cff" stopOpacity="0.26" />
                 <stop offset="1" stopColor="#6f8cff" stopOpacity="0" />
               </radialGradient>
+              {/* depth + colour for the character (paint only) */}
+              <clipPath id="dv-headclip"><path d="M-520 1300 C-528 520 -330 -330 160 -332 C650 -330 846 520 840 1300 Z" /></clipPath>
+              <clipPath id="dv-eyeL"><ellipse cx="0" cy="0" rx="106" ry="150" /></clipPath>
+              <clipPath id="dv-eyeR"><ellipse cx="320" cy="10" rx="106" ry="150" /></clipPath>
+              <radialGradient id="dv-irisg" cx="50%" cy="50%" r="50%">
+                <stop offset="0" stopColor="#7a6cff" /><stop offset="0.78" stopColor="#7a6cff" /><stop offset="0.9" stopColor="#4f6ff0" /><stop offset="1" stopColor="#1d2f9a" />
+              </radialGradient>
+              <linearGradient id="dv-lv" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#8f7bff" /><stop offset="1" stopColor="#c9bcff" /></linearGradient>
+              <linearGradient id="dv-lm" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#3fd68c" /><stop offset="1" stopColor="#a6f5cc" /></linearGradient>
+              <linearGradient id="dv-lb" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stopColor="#3f72ee" /><stop offset="1" stopColor="#8fb0ff" /></linearGradient>
             </defs>
             <g data-dv-cam>
               {/* tuft */}
@@ -102,22 +112,34 @@ export default function Dive() {
                 <path className="dv-ink dv-coral" d="M60 -326 C18 -430 58 -526 142 -566 C194 -482 172 -376 132 -322 Z" />
                 <path className="dv-ink dv-amber" d="M148 -326 C136 -470 180 -604 274 -684 C336 -562 292 -420 230 -322 Z" />
                 <path className="dv-ink dv-blue" d="M246 -326 C290 -400 360 -452 436 -442 C424 -380 372 -338 318 -318 Z" />
+                <path className="dv-vein" d="M96 -332 C70 -420 90 -500 138 -552" />
+                <path className="dv-vein" d="M188 -334 C190 -470 224 -590 270 -668" />
+                <path className="dv-vein" d="M262 -334 C310 -394 360 -430 420 -438" />
               </g></g>
+              
               {/* head */}
               <path className="dv-ink dv-head" d="M-520 1300 C-528 520 -330 -330 160 -332 C650 -330 846 520 840 1300 Z" />
               <path className="dv-rim" d="M-462 620 C-470 250 -290 -246 110 -288" />
+              <g clipPath="url(#dv-headclip)">
+                <path className="dv-cel" fillRule="evenodd" d="M-1800 -1200 H2400 V2600 H-1800 Z M-630 1300 C-638 520 -440 -330 50 -332 C540 -330 736 520 730 1300 Z" />
+                <ellipse className="dv-gloss" cx="-250" cy="-10" rx="110" ry="26" transform="rotate(-62 -250 -10)" />
+              </g>
               <ellipse className="dv-blush" cx="-150" cy="215" rx="104" ry="58" />
               <ellipse className="dv-blush" cx="470" cy="225" rx="104" ry="58" />
               <g className="dv-freckles">
                 <circle cx="-190" cy="190" r="7" /><circle cx="-135" cy="178" r="7" /><circle cx="-165" cy="238" r="7" />
                 <circle cx="425" cy="196" r="7" /><circle cx="480" cy="184" r="7" /><circle cx="455" cy="244" r="7" />
               </g>
+              <ellipse className="dv-glint" cx="-190" cy="196" rx="30" ry="9" transform="rotate(-18 -190 196)" />
+              <ellipse className="dv-glint" cx="430" cy="206" rx="30" ry="9" transform="rotate(-18 430 206)" />
               <path className="dv-stroke dv-brow" d="M-115 -196 Q-20 -282 104 -240" />
               <path className="dv-stroke dv-brow" d="M232 -246 Q356 -286 438 -196" />
 
               {/* left eye: starts as an ordinary pupil, scroll turns it into the portal */}
               <ellipse className="dv-ink dv-white" cx="0" cy="0" rx="106" ry="150" />
+              <g clipPath="url(#dv-eyeL)"><ellipse className="dv-eyeshade" cx="0" cy="-168" rx="136" ry="100" /></g>
               <g data-dv-lpupil>
+                <ellipse cx="0" cy="0" rx="80" ry="120" fill="url(#dv-irisg)" />
                 <ellipse cx="0" cy="0" rx="64" ry="100" fill="url(#dv-pup)" />
                 <path className="dv-sheen-b" d="M-30 76 C-8 92 24 88 42 66" />
                 <path className="dv-shine" d="M-34 -50 C-40 -76 -16 -88 2 -80" />
@@ -129,6 +151,9 @@ export default function Dive() {
                 <ellipse cx="-18" cy="-24" rx="70" ry="96" fill="url(#dv-bloom)" />
                 {[[-52, -78, 1.5, 0.9], [26, -92, 1, 0.6], [14, -36, 2, 1], [-60, 18, 1.2, 0.7], [34, 22, 1, 0.55], [26, 56, 1.6, 0.85], [-30, 74, 1.1, 0.6], [-6, 100, 1.4, 0.8], [52, -46, 0.9, 0.5], [-44, -20, 0.9, 0.5]].map(([x, y, r, o], i) => <circle key={i} className="dv-pt" cx={x} cy={y} r={r} opacity={o} />)}
               </g>
+              {/* blue iris ring, same colour as the right eye, framing the portal */}
+              <ellipse cx="0" cy="0" rx="72" ry="112" fill="none" stroke="#6370ee" strokeWidth="16" />
+              <ellipse cx="0" cy="0" rx="78.5" ry="118.5" fill="none" stroke="#1d2f9a" strokeWidth="3" opacity="0.7" />
               <ellipse className="dv-ring" cx="0" cy="0" rx="80" ry="120" />
               <path className="dv-shine" data-dv-shine d="M-46 -64 C-52 -88 -30 -102 -14 -96" />
               </g>
@@ -145,7 +170,9 @@ export default function Dive() {
 
               {/* right eye: follows the pointer */}
               <ellipse className="dv-ink dv-white" cx="320" cy="10" rx="106" ry="150" />
+              <g clipPath="url(#dv-eyeR)"><ellipse className="dv-eyeshade" cx="320" cy="-158" rx="136" ry="100" /></g>
               <g data-dv-pupil>
+                <ellipse cx="320" cy="10" rx="80" ry="120" fill="url(#dv-irisg)" />
                 <ellipse cx="320" cy="10" rx="64" ry="100" fill="url(#dv-pup)" />
                 <path className="dv-sheen-b" d="M290 86 C312 102 344 98 362 76" />
                 <path className="dv-shine" d="M286 -40 C280 -66 304 -78 322 -70" />
