@@ -202,25 +202,31 @@ export const score = {
   touchdown() {
     if (!ctx || !running || !wantOn || ctx.state !== "running") return;
     try {
-      const t = ctx.currentTime + 0.01, g = (v) => { const n = ctx.createGain(); n.gain.value = v; return n; };
-      // 1. sub thump: a sine that drops fast in pitch (the "boom" you feel)
-      const o = ctx.createOscillator(), og = g(0); o.type = "sine"; o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(34, t + 0.55);
-      og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(1.5, t + 0.012); og.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
-      o.connect(og); og.connect(master); o.start(t); o.stop(t + 1.6);
-      // 2. body: a second, slightly higher thud that gives it weight on small speakers
-      const o2 = ctx.createOscillator(), o2g = g(0); o2.type = "triangle"; o2.frequency.setValueAtTime(190, t); o2.frequency.exponentialRampToValueAtTime(62, t + 0.3);
-      o2g.gain.setValueAtTime(0.0001, t); o2g.gain.exponentialRampToValueAtTime(0.55, t + 0.01); o2g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
-      o2.connect(o2g); o2g.connect(master); o2.start(t); o2.stop(t + 0.7);
-      // 3. crunch: filtered noise burst, the ground and metal breaking
-      const n = ctx.createBufferSource(); n.buffer = noiseBuf; n.loop = true;
-      const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.setValueAtTime(3200, t); lp.frequency.exponentialRampToValueAtTime(260, t + 0.7);
-      const ng = g(0); ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(0.9, t + 0.008); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
-      n.connect(lp); lp.connect(ng); ng.connect(master); n.start(t, Math.random() * 2); n.stop(t + 1);
-      // 4. dust and debris settling: a low rumble tail
-      const n2 = ctx.createBufferSource(); n2.buffer = noiseBuf; n2.loop = true;
-      const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 180; bp.Q.value = 0.6;
-      const rg = g(0); rg.gain.setValueAtTime(0.0001, t + 0.05); rg.gain.exponentialRampToValueAtTime(0.5, t + 0.25); rg.gain.exponentialRampToValueAtTime(0.0001, t + 2.6);
-      n2.connect(bp); bp.connect(rg); rg.connect(master); n2.start(t, Math.random() * 2); n2.stop(t + 2.7);
+      const t = ctx.currentTime + 0.005, g = (v) => { const n = ctx.createGain(); n.gain.value = v; return n; };
+      // white noise (the shared buffer is brown / low-passed, which laptop and phone speakers barely reproduce)
+      if (!score._wn) { const L = Math.floor(ctx.sampleRate * 2), b = ctx.createBuffer(1, L, ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < L; i++) d[i] = Math.random() * 2 - 1; score._wn = b; }
+      const noise = (when, dur, type, f0, f1, q, peak) => {
+        const n = ctx.createBufferSource(); n.buffer = score._wn; const f = ctx.createBiquadFilter(); f.type = type; f.Q.value = q;
+        f.frequency.setValueAtTime(f0, when); f.frequency.exponentialRampToValueAtTime(f1, when + dur);
+        const e = g(0); e.gain.setValueAtTime(0.0001, when); e.gain.exponentialRampToValueAtTime(peak, when + 0.004); e.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+        n.connect(f); f.connect(e); e.connect(master); n.start(when, Math.random() * 1.2); n.stop(when + dur + 0.05);
+      };
+      // 1. the hit: a pitched thump, saturated so its harmonics carry on small speakers (a pure 30-60 Hz sine is simply inaudible there)
+      const o = ctx.createOscillator(); o.type = "sine"; o.frequency.setValueAtTime(170, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.4);
+      const sh = ctx.createWaveShaper(), cv = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = (i / 511.5) - 1; cv[i] = Math.tanh(x * 3.2); } sh.curve = cv;
+      const og = g(0); og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(1.6, t + 0.008); og.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+      o.connect(sh); sh.connect(og); og.connect(master); o.start(t); o.stop(t + 1.2);
+      // 2. body: a mid punch you can hear anywhere
+      const o2 = ctx.createOscillator(); o2.type = "triangle"; o2.frequency.setValueAtTime(320, t); o2.frequency.exponentialRampToValueAtTime(95, t + 0.22);
+      const o2g = g(0); o2g.gain.setValueAtTime(0.0001, t); o2g.gain.exponentialRampToValueAtTime(0.9, t + 0.006); o2g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+      o2.connect(o2g); o2g.connect(master); o2.start(t); o2.stop(t + 0.5);
+      // 3. the crack: a bright, very short transient, then the crunch of the ground and metal breaking
+      noise(t, 0.05, "highpass", 2500, 2500, 0.7, 0.9);
+      noise(t, 0.55, "bandpass", 2200, 280, 0.9, 1.2);
+      // 4. debris pattering down, a few late grains
+      for (let i = 0; i < 7; i++) noise(t + 0.12 + Math.random() * 0.8, 0.07 + Math.random() * 0.08, "bandpass", 900 + Math.random() * 2200, 500, 1.4, 0.18 + Math.random() * 0.2);
+      // 5. dust and rumble settling
+      noise(t + 0.04, 2.3, "lowpass", 520, 120, 0.5, 0.55);
     } catch (e) { /* sound is optional */ }
   },
   /** another section is playing its own sound: sit back while it does */
