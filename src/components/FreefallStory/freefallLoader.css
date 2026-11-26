@@ -410,3 +410,9 @@ html.is-mobile .fs--loader .hero { perspective: none; }
   font-weight: 800; font-stretch: 125%; letter-spacing: .01em; transition: opacity .5s ease; }
 .fs-loader.is-clouding .fl-num, .fs-loader.is-clouding .fl-tag { opacity: 0; transition: opacity .35s ease; }
 .fs-loader.is-clouding .fl-brand { opacity: 1; transition-delay: .3s; }
+
+/* the name in the notch must sit exactly where the frame's own brand tab does, or it visibly jumps when the landing page takes over:
+   a grid track grew to the right of the (narrower) readout box and pushed it ~55px off-centre; a centred flex box cannot do that */
+.fs-loader .fl-brand { inset: auto; left: 50%; top: 0; bottom: 0; width: max-content; transform: translateX(-50%); display: flex; align-items: center; justify-content: center;
+  font-size: clamp(13px, 1.5vw, 22px); letter-spacing: .01em; line-height: 1; }
+@media (max-width: 640px) { .fs-loader .fl-brand { font-size: 12px; letter-spacing: .01em; } }
