@@ -199,6 +199,8 @@ export const score = {
   setTension: noop,
   impact: noop, swell: noop,
   /** the capsule touches down on SRM: one heavy, natural ground impact (sub thump + crunch + dust rumble). Respects mute / duck through the master gain. */
+  /** how long audio takes to reach the speakers (ms): the loader fires the impact this much early so it is heard on the frame, not after it */
+  latencyMs() { try { return ctx ? Math.min(450, Math.max(60, ((ctx.outputLatency || 0) + (ctx.baseLatency || 0)) * 1000 + 40)) : 120; } catch (e) { return 120; } },
   touchdown() {
     if (!ctx || !running || !wantOn || ctx.state !== "running") return;
     try {
