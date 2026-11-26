@@ -3,7 +3,7 @@ import { createScene } from "./scene.js";
 import "./collab.css";
 import { skipFrame } from "../../lib/perf.js";
 
-const EMAIL = "hello@yourname.dev"; // <- put your real address here
+const EMAIL = "anshgautam1011@gmail.com";
 
 /**
  * <Collab /> — "press and hold to collaborate". An AI hand and a human hand reach for each other while you hold; at 100% the
