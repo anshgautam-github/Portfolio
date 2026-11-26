@@ -377,3 +377,47 @@
    so the panel ends on its plain #0a1033 base and meets the ribbon block below with no visible line ---- */
 .fn-foot > canvas { -webkit-mask-image: linear-gradient(180deg, #000 0, #000 72%, transparent 100%); mask-image: linear-gradient(180deg, #000 0, #000 72%, transparent 100%); }
 .fn-foot::before { -webkit-mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 100%); mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 100%); }
+
+/* the "I'm Ansh Gautam..." statement (<Manifesto />) on the light "where to find me" page: same layout and motion, ink flipped for a pale background */
+.fn-connect .fn-mf { margin: 0 0 clamp(54px, 10vh, 120px); }
+.fn-connect .mf { --ink: #0b0e14; --dim: rgba(38,54,110,.22); --blue: #3f72ee; --ice: #3f72ee; --cy: #1f9ee0; color: #0b0e14; }
+.fn-connect .mf-grad { background-image: linear-gradient(95deg, #5b8cff 0%, #2f5fe0 45%, #1fa6e6 100%); }
+.fn-connect .mf-chrome { background-image: linear-gradient(180deg, #3a55b8 0%, #7ea2ff 30%, #0e1a45 49%, #5b86f2 52%, #a9c2ff 74%, #2a3f8f 100%); }
+.fn-connect .mf-script { color: color-mix(in srgb, #2b55d6 calc(var(--p, 0) * 100%), var(--dim)); }
+.fn-connect .mf-ext { color: color-mix(in srgb, #0b0e14 calc(var(--p, 0) * 100%), var(--dim)); }
+.fn-connect .mf-select .h { background: #fff; }
+.fn-connect .mf-cta:hover { color: #3f72ee; }
+.fn-connect .mf-logo { box-shadow: 0 0 0 .06em #fff, 0 .16em .3em -.1em rgba(30,40,90,.35); }
+
+/* ---- chips on the pale page: crisp tiles with blue-tinted shadows instead of the black drops they have on the dark pages ---- */
+/* "Available for work": frosted glass, like a native status chip: translucent white, strong blur, a bright rim lit from above, a soft shadow, sentence-case type, a plain green dot */
+.fn-connect .mf-open { height: 2.25em; gap: .7em; padding: 0 1.15em 0 .95em; margin-left: .45em;
+  font: 600 .34em/1 "Inter Tight", "Inter", system-ui, sans-serif; letter-spacing: -.005em; text-transform: none; color: #17233d;
+  background: linear-gradient(180deg, rgba(255,255,255,.62) 0%, rgba(255,255,255,.28) 100%);
+  border: 1px solid rgba(255,255,255,.75);
+  box-shadow: 0 .55em 1.6em -.5em rgba(40,60,150,.28), 0 .08em .2em rgba(40,60,150,.1), inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(120,140,220,.14);
+  -webkit-backdrop-filter: blur(14px) saturate(170%); backdrop-filter: blur(14px) saturate(170%); }
+.fn-connect .mf-open .mf-dot { background: #22c55e; box-shadow: none; width: .62em; height: .62em; }
+.fn-connect .mf-open .mf-dot::after { background: rgba(34,197,94,.45); }
+/* people: white rims, a solid navy count pill */
+.fn-connect .mf-av { box-shadow: 0 0 0 .06em #fff, 0 .2em .4em -.1em rgba(30,50,140,.4); }
+.fn-connect .mf-av-n { background: linear-gradient(150deg, #22378a, #0e1840); box-shadow: 0 0 0 .06em #fff, 0 .2em .4em -.1em rgba(30,50,140,.45), inset 0 0 0 .03em rgba(141,180,255,.45); }
+.fn-connect .mf-av-n b { color: #e4eeff; }
+/* atom: deep blue orbits and a cyan core, sitting on a white glass tile */
+.fn-connect .mf-atom { width: 1.1em; height: 1.1em; margin: 0 .1em; vertical-align: -.2em; border-radius: .32em; filter: none;
+  background: linear-gradient(160deg, #ffffff, #e6eeff);
+  box-shadow: 0 0 0 .035em rgba(63,114,238,.28), 0 .3em .6em -.2em rgba(40,80,200,.45), inset 0 .05em .05em #fff; }
+.fn-connect .mf-atom svg { inset: .12em; width: calc(100% - .24em); height: calc(100% - .24em); }
+.fn-connect .mf-atom-o ellipse { stroke: #3566e8; stroke-width: 2.6; }
+.fn-connect .mf-atom svg circle { fill: #1fa6e6; }
+/* spark, chat bubble, go arrow, app icon: richer blue shadows */
+.fn-connect .mf-spark { filter: drop-shadow(0 .12em .22em rgba(50,90,230,.5)); }
+.fn-connect .mf-chat-b { box-shadow: 0 .28em .55em -.16em rgba(40,80,220,.6), inset 0 .05em .05em rgba(255,255,255,.55); }
+.fn-connect .mf-go { box-shadow: 0 .22em .45em -.12em rgba(40,80,220,.6), inset 0 .04em .04em rgba(255,255,255,.55); }
+.fn-connect .mf-app { box-shadow: 0 .32em .6em -.18em rgba(40,60,160,.5), 0 0 0 .03em rgba(63,114,238,.25); }
+/* dark glass tiles (neural, code, project peeks, phone, ring): hairline blue rim and a soft blue drop */
+.fn-connect .mf-neural { box-shadow: 0 0 0 .035em rgba(63,114,238,.4), inset 0 .05em .06em rgba(255,255,255,.14), 0 .34em .7em -.2em rgba(30,50,150,.5); }
+.fn-connect .mf-code { box-shadow: 0 0 0 .035em rgba(63,114,238,.4), inset 0 .05em .06em rgba(255,255,255,.12), 0 .34em .7em -.2em rgba(30,50,150,.5); }
+.fn-connect .mf-shot { box-shadow: 0 0 0 .035em rgba(63,114,238,.35), 0 .34em .7em -.2em rgba(30,50,150,.5); }
+.fn-connect .mf-phone { box-shadow: 0 0 0 .05em #1b2336, 0 .34em .6em -.15em rgba(30,50,150,.5); }
+.fn-connect .mf-ring { box-shadow: 0 .26em .55em -.18em rgba(30,60,200,.55); background: conic-gradient(from -90deg, #1fa6e6 var(--mf-a), rgba(63,114,238,.18) 0); }

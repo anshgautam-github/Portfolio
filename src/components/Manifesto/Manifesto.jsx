@@ -176,7 +176,8 @@ function Fx({ fx, t }) {
   return <span className={`mf-w mf-fx mf-${fx}`} data-w data-fx data-t={t} key={k}>{t}</span>;
 }
 
-export default function Manifesto({ embedded = false, native = false }) {
+export default function Manifesto({ embedded = false, native = false, chips: chipKinds = null }) {
+  const allow = (k) => !chipKinds || chipKinds.includes(k);
   const sec = useRef(null);
   const pillRef = useRef(null);
 
@@ -282,15 +283,15 @@ export default function Manifesto({ embedded = false, native = false }) {
           <p key={pi} className={`mf-p${pi === COPY.length - 1 ? " mf-last" : ""}`}>
             {para.map((tok, ti) => (
               <Fragment key={ti}>
-                {typeof tok === "string" ? <Words text={tok} /> : tok.chip ? <Chip kind={tok.chip} /> : <Fx fx={tok.fx} t={tok.t} />}
+                {typeof tok === "string" ? <Words text={tok} /> : tok.chip ? (allow(tok.chip) ? <Chip kind={tok.chip} /> : null) : <Fx fx={tok.fx} t={tok.t} />}
                 {" "}
               </Fragment>
             ))}
             {pi === COPY.length - 1 && (
               <>
                 <a className="mf-w mf-cta" data-w href="#contact" onClick={goHello}>Say hello</a>
-                <span className="mf-chip mf-go" data-chip aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M8 7h9v9" /></svg></span>
-                <span className="mf-chip mf-chat" data-chip aria-hidden="true"><span className="mf-chat-b"><i /><i /><i /></span></span>
+                {allow("go") && <span className="mf-chip mf-go" data-chip aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M8 7h9v9" /></svg></span>}
+                {allow("chat") && <span className="mf-chip mf-chat" data-chip aria-hidden="true"><span className="mf-chat-b"><i /><i /><i /></span></span>}
               </>
             )}
           </p>

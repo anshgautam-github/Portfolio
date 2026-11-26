@@ -3,6 +3,13 @@
 const TAU = Math.PI * 2;
 const D2R = Math.PI / 180;
 
+import { IS_MOBILE, IS_LOW_END, TIER } from "../../lib/perf.js";
+// The hands are the expensive part (sphere-traced capsule rigs + soft shadow + AO). Same picture, fewer march steps on weaker GPUs.
+const tuneFS = () => {
+  const march = IS_MOBILE ? (TIER >= 1 ? 56 : 66) : IS_LOW_END ? 80 : 96, shadow = IS_MOBILE ? 14 : IS_LOW_END ? 20 : 26;
+  return FS.replace("for (int i = 0; i < 110; i++)", `for (int i = 0; i < ${march}; i++)`).replace("for (int i = 0; i < 32; i++) { float h = map(ro + rd * t).x; s = min(s, 7", `for (int i = 0; i < ${shadow}; i++) { float h = map(ro + rd * t).x; s = min(s, 7`);
+};
+
 const VS = `#version 300 es
 void main(){ vec2 p = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2); gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0); }`;
 
@@ -128,17 +135,7 @@ vec3 liveScene(vec2 uv, float a){
   col += vec3(1.0, 0.95, 0.84) * rays * 0.20 * (1.0 - 0.3 * (1.0 - sky)) * pulse;
   float ghost = exp(-length(sv * 2.0 + (SUNP - vec2(0.5)) * vec2(1.445, 1.0) * -1.2) * 14.0);
   col += vec3(0.9, 0.95, 1.0) * ghost * 0.06 * pulse;
-  // NIGHT GRADE: the same live scene by moonlight. Colour drains to cool silver, mids sink toward black, the sun flare reads as the moon,
-  // while the mirror facets, dew glints and the flare keep their sparkle. A thin lift keeps the sky from going flat black, and stars twinkle in it.
-  float L = dot(col, vec3(0.3, 0.59, 0.11));
-  vec3 nt = mix(vec3(L), col, 0.14) * vec3(0.86, 0.90, 1.0);
-  nt = pow(max(nt, vec3(0.0)), vec3(2.5)) * 1.1;
-  nt += vec3(0.010, 0.012, 0.020) * (0.4 + 0.6 * sky);
-  vec2 stq = floor(iuv * vec2(460.0, 320.0));
-  float sth = h21(stq + 5.0);
-  float star = step(0.9965, sth) * (0.35 + 0.65 * pow(max(sin(t * (0.9 + sth * 2.6) + sth * 70.0), 0.0), 2.0));
-  nt += vec3(0.82, 0.88, 1.0) * star * sky * (1.0 - cld * 0.9) * smoothstep(0.0, 0.35, 1.0 - iuv.y * 0.0 - 0.0) * 1.1;
-  return nt;
+  return col;
 }
 
 vec3 landscape(vec2 uv, float a){
@@ -440,7 +437,7 @@ export function createGL3D(canvas) {
   const gl = canvas.getContext("webgl2", { antialias: false, alpha: false, powerPreference: "high-performance" });
   if (!gl) return null;
   const pr = gl.createProgram();
-  gl.attachShader(pr, shader(gl, gl.VERTEX_SHADER, VS)); gl.attachShader(pr, shader(gl, gl.FRAGMENT_SHADER, FS));
+  gl.attachShader(pr, shader(gl, gl.VERTEX_SHADER, VS)); gl.attachShader(pr, shader(gl, gl.FRAGMENT_SHADER, tuneFS()));
   gl.linkProgram(pr);
   // Compile/link is the one big stall on phones (huge raymarching shader). With KHR_parallel_shader_compile it runs on a driver thread
   // and we only touch the program once it reports done, so scrolling never blocks on it.

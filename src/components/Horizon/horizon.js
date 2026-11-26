@@ -1,6 +1,7 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import initLiveBg from "../../lib/liveBg.js";
+import initWaveBg from "../../lib/waveBg.js";
 import initContourBg from "../../lib/contourBg.js";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -30,6 +31,7 @@ export default function initHorizon(root) {
   }
 
   const bgOff = initLiveBg(q("[data-hz-intro]"), { theme: "blue" });
+  const topBgOff = initWaveBg(topEl, { theme: "light" });   // the ribbon block shares the pale silk-wave page above it, so the two read as one
 
   /* ---------- one-off reveals ---------- */
   const ctx = gsap.context(() => {
@@ -179,7 +181,7 @@ export default function initHorizon(root) {
   return () => {
     window.removeEventListener("resize", onResize);
     explore && explore.removeEventListener("click", onExplore);
-    gsap.ticker.remove(tick); io.disconnect(); st.kill(); ctx.revert(); bgOff(); mapOffs.forEach((f) => f());
+    gsap.ticker.remove(tick); io.disconnect(); st.kill(); ctx.revert(); bgOff(); topBgOff(); mapOffs.forEach((f) => f());
     void fontsReady;
   };
 }

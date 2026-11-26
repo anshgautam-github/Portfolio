@@ -20,7 +20,7 @@ export default function Collab() {
   useEffect(() => {
     const canvas = cv.current;
     let sc = null, ro = null;
-    let vis = false, raf = 0, last = performance.now(), alive = true;
+    let rect = null, rectAt = 0, morphTick = false, vis = false, raf = 0, last = performance.now(), alive = true;
     // Build the (heavy) WebGL scene only when the section is about to come into view, not at page load.
     const boot = () => {
       if (sc || !alive) return;
@@ -43,7 +43,8 @@ export default function Collab() {
       raf = requestAnimationFrame(loop);
       if (!vis || !sc) return;
       if (skipFrame(now, last)) return;
-      if (ptr.current && sec.current) { const r = sec.current.getBoundingClientRect(); sc.st.mouseT = [((ptr.current[0] - r.left) / r.width - 0.5) * 2, -((ptr.current[1] - r.top) / r.height - 0.5) * 2]; ptr.current = null; }
+      { const st = sec.current && sec.current.closest(".sr-stage"); if (st && !st.classList.contains("is-full")) { morphTick = !morphTick; if (morphTick) return; } }
+      if (ptr.current && sec.current) { if (!rect || now - rectAt > 400) { rect = sec.current.getBoundingClientRect(); rectAt = now; } const r = rect; sc.st.mouseT = [((ptr.current[0] - r.left) / r.width - 0.5) * 2, -((ptr.current[1] - r.top) / r.height - 0.5) * 2]; ptr.current = null; }
       const dt = (now - last) / 1000; last = now;
       sc.frame(dt, holding.current);
       const p = Math.min(1, sc.st.shown), pct = Math.round(p * 100);
@@ -60,7 +61,7 @@ export default function Collab() {
       const st = sc.st, label = st.done ? "Connected" : p > 0.85 ? "Almost there" : p > 0.02 ? "Syncing minds" : "Ready when you are";
       if (label !== lastS.current && stat.current) { lastS.current = label; stat.current.textContent = label; }
       const T = st.t, amp = 0.16 + 0.84 * p;
-      if ((fr = (fr + 1) & 1) === 0) for (let i = 0; i < 40; i++) { const el = bars.current[i]; if (!el) continue; const k = i % 20, env = Math.sin((k / 19) * Math.PI) * 0.8 + 0.2; el.style.transform = `scaleY(${(0.10 + amp * env * (0.5 + 0.5 * Math.sin(T * (3 + p * 6) + i * 0.8)) * (0.6 + 0.4 * Math.sin(T * 1.7 + i * 2.1))).toFixed(3)})`; }
+      if ((fr = (fr + 1) % 3) === 0) for (let i = 0; i < 40; i++) { const el = bars.current[i]; if (!el) continue; const k = i % 20, env = Math.sin((k / 19) * Math.PI) * 0.8 + 0.2; el.style.transform = `scaleY(${(0.10 + amp * env * (0.5 + 0.5 * Math.sin(T * (3 + p * 6) + i * 0.8)) * (0.6 + 0.4 * Math.sin(T * 1.7 + i * 2.1))).toFixed(3)})`; }
       if (crd.current && fr === 0) { const s = `X ${(st.mouse[0] >= 0 ? "+" : "") + st.mouse[0].toFixed(2)}  Y ${(st.mouse[1] >= 0 ? "+" : "") + st.mouse[1].toFixed(2)}`; if (s !== lastC.current) { lastC.current = s; crd.current.textContent = s; } }
     };
     raf = requestAnimationFrame(loop);
@@ -89,7 +90,7 @@ export default function Collab() {
       <span className="cb-vert cb-vert--r" aria-hidden="true">AI &times; Human &mdash; Handshake protocol</span>
 
       <div className="cb-top">
-        <div className="cb-chip"><i /> COLLAB&nbsp;/&nbsp;07</div>
+        <div className="cb-chip cb-chip--ghost" aria-hidden="true" />
         <div className="cb-meter" aria-hidden="true">
           <div className="cb-ruler"><span ref={tick} className="cb-tick" /></div>
           <div className="cb-sync">SYNC <b ref={num}>000</b>%</div>

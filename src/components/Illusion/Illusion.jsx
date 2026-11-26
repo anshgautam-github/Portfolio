@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Manifesto from "../Manifesto/Manifesto.jsx";
 import { VERT, FRAG } from "./shader.js";
 import "./illusion.css";
 
@@ -207,11 +206,8 @@ export default function Illusion() {
           </div>
         </div>
 
-        {!flowMode && <div className="ill-mf" ref={mfEl}><Manifesto embedded /></div>}
-
         <p className="ill-cue" aria-hidden="true"><i />Scroll to fall in</p>
       </div>
-      {flowMode && <div className="ill-mf ill-mf-flow" ref={mfEl}><Manifesto embedded native /></div>}
     </section>
   );
 }

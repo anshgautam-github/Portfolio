@@ -1,7 +1,7 @@
 // "Hold to collaborate" — state machine + effects. The 3D world (landscape + hands) is drawn by gl3d.js on one canvas; sparks, petals,
 // shock rings and the flash are drawn here on a transparent 2D canvas on top.
 import { createGL3D } from "./gl3d.js";
-import { capDpr } from "../../lib/perf.js";
+import { capDpr, perf, IS_MOBILE, IS_LOW_END } from "../../lib/perf.js";
 const TAU = Math.PI * 2;
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -11,13 +11,13 @@ export function createScene(glCanvas, fxCanvas) {
   let gl3 = null;
   try { gl3 = createGL3D(glCanvas); } catch (e) { console.warn("[collab] WebGL scene unavailable", e); }
   const ctx = fxCanvas.getContext("2d");
-  let W = 0, H = 0, gw = 2, gh = 2, dpr = 1, S = 1, scale = 0.6, last = 0, acc = 0, nfr = 0, cool = 0;
+  let W = 0, H = 0, gw = 2, gh = 2, dpr = 1, S = 1, scale = IS_MOBILE ? 0.46 : IS_LOW_END ? 0.52 : 0.6, maxScale = IS_MOBILE ? 0.56 : 0.7, raisedAt = 0, last = 0, acc = 0, nfr = 0, cool = 0;
   const st = { p: 0, shown: 0, done: false, hs: 0, flash: 0, shake: 0, t: 0, since: 0, onDone: null, onReset: null, mouse: [0, 0], mouseT: [0, 0] };
   const rings = [], parts = [], petals = [];
   let seed = 5; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  for (let i = 0; i < 16; i++) petals.push(newPetal(true));
-  const birds = Array.from({ length: 7 }, (_, i) => ({ x: rnd() * 1.2 - 0.1, y: 0.10 + rnd() * 0.30, s: 0.6 + rnd() * 0.9, v: 0.012 + rnd() * 0.018, ph: rnd() * TAU, fl: 5 + rnd() * 3, dy: rnd() * TAU }));
-  const seeds = Array.from({ length: 26 }, () => ({ x: rnd(), y: 0.35 + rnd() * 0.65, z: 0.3 + rnd() * 1.1, ph: rnd() * TAU, r: rnd() * TAU }));
+  for (let i = 0; i < (IS_MOBILE ? 8 : 16); i++) petals.push(newPetal(true));
+  const birds = Array.from({ length: IS_MOBILE ? 4 : 7 }, (_, i) => ({ x: rnd() * 1.2 - 0.1, y: 0.10 + rnd() * 0.30, s: 0.6 + rnd() * 0.9, v: 0.012 + rnd() * 0.018, ph: rnd() * TAU, fl: 5 + rnd() * 3, dy: rnd() * TAU }));
+  const seeds = Array.from({ length: IS_MOBILE ? 12 : 26 }, () => ({ x: rnd(), y: 0.35 + rnd() * 0.65, z: 0.3 + rnd() * 1.1, ph: rnd() * TAU, r: rnd() * TAU }));
   function newPetal(init) { return { x: rnd(), y: init ? rnd() : -0.1, z: 0.35 + rnd() * 1.0, r: rnd() * TAU, vr: (rnd() - 0.5) * 1.6, ph: rnd() * TAU, c: rnd() }; }
 
   function resize() {
@@ -78,12 +78,15 @@ export function createScene(glCanvas, fxCanvas) {
     // ---- adaptive resolution of the 3D pass (steady: ignores gaps/hitches, slow to change, never thrashes)
     const now = performance.now();
     const gap = last ? now - last : 0; last = now;
-    if (gap > 0 && gap < 60 && now > cool) {
+    if (gap > 0 && gap < 90 && now > cool) {
       acc += gap; nfr++;
-      if (nfr >= 24) {
-        const ms = acc / nfr; acc = 0; nfr = 0;
-        if (ms > 20 && scale > 0.38) { scale = Math.max(0.38, scale - 0.1); sizeGL(); cool = now + 1500; }
-        else if (ms < 10 && scale < 0.7) { scale = Math.min(0.7, scale + 0.1); sizeGL(); cool = now + 4000; }
+      if (nfr >= 16) {
+        // judge against the frame budget we are actually running at (the loop may be capped to 30 fps on phones)
+        const ms = acc / nfr, budget = Math.max(16.7, perf.frameMs || 0); acc = 0; nfr = 0;
+        if (ms > budget * 1.22 && scale > 0.32) {
+          if (raisedAt && now - raisedAt < 6000) maxScale = Math.max(0.32, scale);   // the last step up did not hold: stop going back there
+          scale = Math.max(0.32, scale - 0.07); sizeGL(); cool = now + 900;
+        } else if (ms < budget * 1.08 && scale < maxScale - 0.001) { scale = Math.min(maxScale, scale + 0.05); raisedAt = now; sizeGL(); cool = now + 3500; }
       }
     } else { acc = 0; nfr = 0; }
 

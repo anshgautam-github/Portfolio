@@ -366,3 +366,6 @@ html.is-mobile .wp-text h3 .acc { color: var(--a); animation: none; }
 .wp-aur, .wa, .wa-sheen, .wa-ring, .wa-vig, .wp-orb, .wp-ring { display: none !important; }
 .wp-glow, .wp-plate { background: none !important; box-shadow: none !important; border-color: transparent !important; }
 .wp-spot { background: none !important; }
+
+/* no card transition any more: keep the wrap dark so no light gradient shows around the pinned section while it scrolls in */
+[data-warp-wrap] { background: #05070d !important; }

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import initFinale from "./finale.js";
+import Manifesto from "../Manifesto/Manifesto.jsx";
 import { content } from "../../content.js";
 import "./finale.css";
 
@@ -10,12 +11,12 @@ const COPY = {
   hello: ["SAY", "HELLO!"],
   helloNote: "Got a role, a collab or a strange problem? Say hi, I'm easy to find.",
   ribbon: "FANCY A CHAT?   FANCY EVEN MORE OF MY WORK?   ",
-  connectNote: "I also help startups come online. Almost 3 so far.",
-  connectTitle: ["LET'S PUT YOUR", "STARTUP ONLINE"],
   freeNote: "say hi, it's free",
   mark: "TRAIN. SHIP.",
   credit: "Language models, research and the interfaces built around them.",
 };
+
+const NATIVE_SCROLL = typeof window !== "undefined" && !!window.matchMedia && (window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(max-width: 820px)").matches);
 
 const FOOT = content.garden.footer;
 const SOCIALS = FOOT.socials.filter((s) => s.href);
@@ -173,10 +174,7 @@ export default function Finale() {
 
       {/* ---------- where to find me ---------- */}
       <div className="fn-connect">
-        <p className="fn-hand fn-hand-l" data-fn-c>{COPY.connectNote}</p>
-        <h3 className="fn-big" aria-label={COPY.connectTitle.join(" ")}>
-          {COPY.connectTitle.map((l) => <span className="fn-big-l" key={l} aria-hidden="true"><span data-fn-big>{l}</span></span>)}
-        </h3>
+        <div className="fn-mf"><Manifesto embedded native={NATIVE_SCROLL} chips={["app", "ring", "gpt", "neural", "logos", "people", "atom", "open", "go"]} /></div>
         <div className="fn-socials">
           {SOCIALS.map((s) => (
             <a className="fn-tile" data-fn-tile key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}>
@@ -189,49 +187,6 @@ export default function Finale() {
           <span>{COPY.freeNote}</span>
         </p>
       </div>
-
-      {/* ---------- the wordmark ---------- */}
-      <footer className="fn-foot">
-        <svg className="fn-rule" viewBox="0 0 1600 14" preserveAspectRatio="none" aria-hidden="true"><path d="M0 8 C200 3 380 12 640 7 S1100 4 1300 9 S1500 5 1600 7" /></svg>
-        <p className="fn-mark" aria-label={COPY.mark}>
-          {COPY.mark.toUpperCase().split("").map((ch, i) => (
-            ch === " " ? <span className="fn-gap" key={i} aria-hidden="true" /> : <span className="fn-mark-l" key={i} aria-hidden="true"><span data-fn-letter>{ch}</span></span>
-          ))}
-        </p>
-        <div className="fn-peek" data-fn-peek aria-hidden="true">
-          <svg viewBox="0 0 320 200" focusable="false">
-            <defs><clipPath id="fn-pk-mouth"><path d="M136 158 Q160 170 184 158 Q182 190 160 191 Q138 190 136 158 Z" /></clipPath></defs>
-            <g transform="translate(160 22) scale(0.34) translate(-160 330)">{TUFT}</g>
-            <path className="fn-ink fn-body" d="M10 200 C10 90 80 22 160 22 C240 22 310 90 310 200 Z" />
-            <path d="M10 200 C10 90 80 22 160 22 C240 22 310 90 310 200 Z" fill="url(#fn-g-shade)" />
-            <path className="fn-gloss" d="M52 120 C56 86 78 58 112 44" />
-            <path className="fn-gloss fn-gloss-d" d="M47 140 L48 150" />
-            <ellipse cx="72" cy="150" rx="27" ry="16" fill="url(#fn-g-blush)" />
-            <ellipse cx="248" cy="152" rx="27" ry="16" fill="url(#fn-g-blush)" />
-            <path className="fn-cheek" d="M62 148 l4 -7 M72 150 l4 -7 M82 150 l4 -7" />
-            <path className="fn-cheek" d="M238 150 l4 -7 M248 152 l4 -7 M258 152 l4 -7" />
-            <path className="fn-stroke fn-stroke-s" d="M82 70 Q108 52 134 64" /><path className="fn-stroke fn-stroke-s" d="M186 64 Q212 52 238 70" />
-            <ellipse className="fn-ink fn-white" cx="112" cy="116" rx="30" ry="42" /><ellipse className="fn-ink fn-white" cx="208" cy="118" rx="30" ry="42" />
-            <g data-fn-pupil>
-              <ellipse cx="112" cy="122" rx="18" ry="28" fill="url(#fn-g-iris)" />
-              <ellipse cx="112" cy="117" rx="11" ry="18" fill="#070a1c" />
-              <circle cx="105" cy="108" r="6.5" fill="#fff" /><circle cx="119" cy="136" r="3" fill="#fff" opacity=".9" />
-            </g>
-            <g data-fn-pupil>
-              <ellipse cx="208" cy="124" rx="18" ry="28" fill="url(#fn-g-iris)" />
-              <ellipse cx="208" cy="119" rx="11" ry="18" fill="#070a1c" />
-              <circle cx="201" cy="110" r="6.5" fill="#fff" /><circle cx="215" cy="138" r="3" fill="#fff" opacity=".9" />
-            </g>
-            <path d="M136 158 Q160 170 184 158 Q182 190 160 191 Q138 190 136 158 Z" fill="#1b0f1c" />
-            <g clipPath="url(#fn-pk-mouth)"><ellipse cx="161" cy="192" rx="22" ry="15" fill="#ff7a90" /></g>
-            <path className="fn-ink-l" style={{ strokeWidth: 4 }} d="M136 158 Q160 170 184 158 Q182 190 160 191 Q138 190 136 158 Z" strokeLinejoin="round" />
-          </svg>
-          <svg className="fn-thumb" viewBox="0 0 80 110" focusable="false">
-            <g className="fn-ink fn-body"><rect x="30" y="14" width="22" height="64" rx="11" /><rect x="14" y="50" width="22" height="22" rx="11" transform="rotate(-18 25 61)" /></g>
-          </svg>
-        </div>
-        <p className="fn-credit">{COPY.credit}</p>
-      </footer>
     </section>
   );
 }

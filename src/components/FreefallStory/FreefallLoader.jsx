@@ -252,7 +252,7 @@ export default function FreefallLoader() {
       <canvas className="fl-fx" aria-hidden="true" />
       {/* the site's own curvy window: beige ring + the notch, with a loader readout where the brand tab sits on the real page */}
       <svg className="fl-svg" width="100%" height="100%" aria-hidden="true"><path className="fl-ringp" fillRule="evenodd" /><path className="fl-edge" /></svg>
-      <div className="fl-tab" aria-hidden="true"><span className="fl-num">000</span><span className="fl-tag">% FALLING</span></div>
+      <div className="fl-tab" aria-hidden="true"><span className="fl-num">000</span><span className="fl-tag">% FALLING</span><span className="fl-brand">ANSH GAUTAM</span></div>
       <button className="fl-skip" type="button">Skip intro</button>
       <div className="fl-bar" aria-hidden="true"><i /></div>
 

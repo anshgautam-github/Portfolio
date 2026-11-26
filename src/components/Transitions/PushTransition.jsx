@@ -23,12 +23,13 @@ const hashUnused = (x, y) => { let h = Math.imul(x, 374761393) + Math.imul(y, 66
 
 const ACCENT = "#6f95f2";
 
-export default function PushTransition({ from = ".kimi .last-layer", to = "[data-warp-wrap]" }) {
+export default function PushTransition({ from = ".kimi .last-layer", to = "[data-warp-wrap]", card = false }) {
   useLayoutEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
     /* phones: no card rise at all. The projects section simply scrolls in after the "Let's build" screen, like any other section: nothing is pinned,
        scaled, clipped or re-masked while the visitor scrolls across this join, so there is nothing left to lag. (Desktop keeps the card.) */
-    if (IS_MOBILE) return undefined;
+    /* the rounded card rise is retired on desktop too: the projects section just scrolls in with the page (pass card to bring it back) */
+    if (IS_MOBILE || !card) return undefined;
     let iris = null, st = null, hst = null, A = null, B = null, cv = null, cx = null, last = 0, hlast = 0, sec = null, ringKey = "", lastRad = -1;
 
     /* Minimal hand-off: the projects section is revealed by a single clean vertical edge travelling right -> left, with a hairline
@@ -238,7 +239,7 @@ export default function PushTransition({ from = ".kimi .last-layer", to = "[data
       if (iris) iris.destroy();
       if (cv) cv.remove();
     };
-  }, [from, to]);
+  }, [from, to, card]);
 
   return null;
 }

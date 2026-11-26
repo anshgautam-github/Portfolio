@@ -20,7 +20,7 @@ export default function initFinale(root) {
   const hangI = root.querySelector("[data-fn-hang-i]");
   if (reduce) { root.classList.add("is-static"); return () => root.classList.remove("is-static"); }
 
-  const bgOffs = [[".fn-top", "aurora"], [".fn-connect", "light"], [".fn-foot", "light"]].map(([sel, theme]) => initWaveBg(root.querySelector(sel), { theme }));
+  const bgOffs = [[".fn-top", "aurora"], [".fn-connect", "light"], [".fn-foot", "light"]].map(([sel, theme]) => { const el = root.querySelector(sel); return el ? initWaveBg(el, { theme }) : () => {}; });
 
   const ctx = gsap.context(() => {
     gsap.set("[data-fn-pew]", { yPercent: 115 });
@@ -49,7 +49,7 @@ export default function initFinale(root) {
         .to("[data-fn-tile]", { y: 0, opacity: 1, duration: 0.7, stagger: 0.1 }, "-=0.5");
       all("[data-fn-arrow]").forEach((p, i) => gsap.to(p, { strokeDashoffset: 0, duration: 0.8, delay: 1 + i * 0.5, ease: "power2.inOut" }));
     });
-    once(root.querySelector(".fn-foot"), () => {
+    if (root.querySelector(".fn-foot")) once(root.querySelector(".fn-foot"), () => {
       gsap.to("[data-fn-letter]", { yPercent: 0, duration: 1, stagger: 0.05, ease: "power4.out" });
       gsap.to("[data-fn-peek]", { yPercent: 0, duration: 1.2, delay: 0.6, ease: "back.out(1.5)" });
     });

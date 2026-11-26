@@ -1,6 +1,9 @@
-import { useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import initShowreel from "./showreel.js";
 import "./showreel.css";
+
+/* what the pills fill with: the interactive handshake (press and hold, two hands, the "Let's build something together" call to action). Lazy: it carries its own WebGL scene. */
+const Handshake = lazy(() => import("../Collab/Collab.jsx"));
 
 /* Right after the landing: three disciplines wipe to colour, then the SHOWREEL title and seven pills that fill with the film and open to full screen.
    The film is a dummy picture for now: drop an mp4/webm into /public/showreel and set VIDEO below, the rest follows (muted autoplay, click for sound). */
@@ -22,13 +25,9 @@ export default function Showreel() {
     <section ref={root} className="sr" id="showreel" aria-label="Capabilities and showreel">
       <div className="sr-wrap" data-sr-wrap>
         <div className="sr-stage" data-sr-stage>
-          {/* the film, revealed through the pills */}
-          <div className="sr-media" data-sr-media aria-hidden="true">
-            {VIDEO ? (
-              <video src={VIDEO} poster={POSTER} muted loop playsInline autoPlay preload="auto" />
-            ) : (
-              <img src={POSTER} alt="" width="1780" height="1232" decoding="async" draggable="false" />
-            )}
+          {/* the handshake scene (see Handshake above), revealed through the pills */}
+          <div className="sr-media" data-sr-media>
+            <Suspense fallback={null}><Handshake /></Suspense>
           </div>
           <div className="sr-tint" data-sr-tint aria-hidden="true" />
           {[0, 1, 2, 3, 4, 5].map((i) => <i className="sr-bridge" data-sr-bridge key={i} aria-hidden="true" />)}
@@ -50,7 +49,7 @@ export default function Showreel() {
               Three disciplines, one standard.<br />
               Every detail is a lever. Only when research, engineering and design work in concert does a product come alive.
             </p>
-            <h2 className="sr-title" data-sr-title>SHOWREEL</h2>
+            <h2 className="sr-title" data-sr-title>HANDSHAKE</h2>
           </div>
 
           <a className="sr-btn" data-sr-btn href="#selected-work" aria-label="Scroll to the selected work">Watch the reel</a>

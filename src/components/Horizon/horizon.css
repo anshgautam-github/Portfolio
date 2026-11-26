@@ -185,8 +185,14 @@
 
 @media (prefers-reduced-motion: reduce) { .hz-intro::before { animation: none; } }
 
-/* ---------- ribbon block: continues the "TRAIN. SHIP." footer's ink-indigo (was pale paper) ----------
-   Starts on exactly the colour the footer ends on (#0a1033), so the join has no seam. */
+/* ---------- ribbon block: the same pale, silk-wave page as "where to find me" above it, so the two join with no seam ----------
+   (the live wave lines are added in horizon.js; the mesh and the column hairlines match the page above) */
 .hz-top {
-  background: linear-gradient(180deg, #0a1033 0%, #070b22 100%);
+  background-color: #edf2fc;
+  background-image:
+    radial-gradient(48% 60% at 12% -6%, rgba(255,143,158,.14) 0%, transparent 70%),
+    radial-gradient(44% 60% at 90% 8%, rgba(143,123,255,.2) 0%, transparent 70%),
+    radial-gradient(40% 50% at 30% 60%, rgba(126,162,255,.14) 0%, transparent 70%),
+    linear-gradient(90deg, rgba(40,70,140,.075) 1px, transparent 1px);
+  background-size: auto, auto, auto, 25% 100%;
 }
