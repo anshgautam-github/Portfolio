@@ -492,10 +492,10 @@ export function mountFreefallStory(root, { base, mode }) {
 
   // ---------- services preview ----------
   const svcPreview = $('.svc-preview');
-  const svcImg = $('img', svcPreview);
+  const svcIcos = $$('.svc-ico', svcPreview);
   const pv = { x: S.W / 2, y: S.H / 2, on: false, s: 0.6 };
   $$('.svc').forEach((li) => {
-    li.addEventListener('mouseenter', () => { svcImg.src = li.dataset.img; pv.on = true; svcPreview.classList.add('is-on'); Sound.tick(); });
+    li.addEventListener('mouseenter', () => { svcIcos.forEach((ic) => ic.classList.toggle('on', ic.dataset.i === li.dataset.ico)); pv.on = true; svcPreview.classList.add('is-on'); Sound.tick(); });
   });
   $('.svc-list').addEventListener('mouseleave', () => { pv.on = false; svcPreview.classList.remove('is-on'); });
 

@@ -352,13 +352,18 @@
 .fs .svc a::after { content: "\2197"; position: absolute; right: 1.4vw; top: 50%; transform: translate(-10px, -50%); font-family: var(--mono); font-size: clamp(16px, 1.5vw, 26px); color: #fff; opacity: 0; transition: opacity .35s, transform .45s cubic-bezier(.2,.8,.2,1); }
 .fs .svc:hover a::after { opacity: 1; transform: translate(0, -50%); }
 .fs .svc-preview {
-  position: fixed; left: 0; top: 0; z-index: 40; width: min(22vw, 300px); aspect-ratio: 3/4; pointer-events: none;
-  overflow: hidden; border-radius: 4px; opacity: 0; transform: scale(.6); transition: opacity .35s;
-  box-shadow: 0 0 0 1px rgba(141,180,255,.55), 0 24px 60px -12px rgba(40,78,232,.55), 0 0 50px rgba(110,150,255,.25);
+  position: fixed; left: 0; top: 0; z-index: 40; width: 92px; aspect-ratio: 1; pointer-events: none;
+  display: grid; place-items: center; border-radius: 50%; color: #fff; opacity: 0; transform: scale(.6); transition: opacity .35s;
+  background: radial-gradient(circle at 35% 30%, #7fa8ff, #2f5fe0 55%, #1d38c9);
+  box-shadow: 0 0 0 1px rgba(200,220,255,.7), 0 0 40px rgba(110,150,255,.65), 0 10px 40px -8px rgba(40,78,232,.8);
   will-change: transform, opacity;
 }
 .fs .svc-preview.is-on { opacity: 1; }
-.fs .svc-preview img { width: 100%; height: 100%; object-fit: cover; }
+.fs .svc-ring { position: absolute; inset: -9px; border-radius: 50%; border: 1.5px dashed rgba(200,220,255,.75); animation: svcSpin 7s linear infinite; }
+@keyframes svcSpin { to { transform: rotate(360deg); } }
+.fs .svc-ico { position: absolute; width: 46%; height: 46%; opacity: 0; transform: scale(.4) rotate(-40deg); transition: opacity .25s, transform .45s cubic-bezier(.2,.9,.2,1.3); }
+.fs .svc-ico.on { opacity: 1; transform: none; }
+.fs .svc-ico svg { width: 100%; height: 100%; display: block; }
 .fs .portal { position: relative; height: 640vh; }
 .fs .portal[hidden] { display: none; }
 .fs .portal-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
