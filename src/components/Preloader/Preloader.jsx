@@ -136,7 +136,7 @@ export default function Preloader({ onReady }) {
         <div className="pl-name">Ansh Gautam</div>
         <div className="pl-role"><i aria-hidden="true" /><span>[ AI engineer ]</span></div>
       </div>
-      <div className="pl-top pl-top--r" aria-hidden="true"><span>Portfolio &rsquo;26</span><span ref={clockRef}>--:-- IST</span></div>
+      <div className="pl-top pl-top--r" aria-hidden="true"><span>Portfolio</span><span ref={clockRef}>--:-- IST</span></div>
 
       <div className="pl-ruler" aria-hidden="true">
         {Array.from({ length: TICKS }, (_, i) => <i key={i} ref={(el) => (tickRefs.current[i] = el)} className={i % 5 === 0 ? "major" : undefined} />)}
