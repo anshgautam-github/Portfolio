@@ -198,6 +198,31 @@ export const score = {
   /** kept for the loader (it used to tighten the music as the count climbed): silent now */
   setTension: noop,
   impact: noop, swell: noop,
+  /** the capsule touches down on SRM: one heavy, natural ground impact (sub thump + crunch + dust rumble). Respects mute / duck through the master gain. */
+  touchdown() {
+    if (!ctx || !running || !wantOn || ctx.state !== "running") return;
+    try {
+      const t = ctx.currentTime + 0.01, g = (v) => { const n = ctx.createGain(); n.gain.value = v; return n; };
+      // 1. sub thump: a sine that drops fast in pitch (the "boom" you feel)
+      const o = ctx.createOscillator(), og = g(0); o.type = "sine"; o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(34, t + 0.55);
+      og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(1.5, t + 0.012); og.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
+      o.connect(og); og.connect(master); o.start(t); o.stop(t + 1.6);
+      // 2. body: a second, slightly higher thud that gives it weight on small speakers
+      const o2 = ctx.createOscillator(), o2g = g(0); o2.type = "triangle"; o2.frequency.setValueAtTime(190, t); o2.frequency.exponentialRampToValueAtTime(62, t + 0.3);
+      o2g.gain.setValueAtTime(0.0001, t); o2g.gain.exponentialRampToValueAtTime(0.55, t + 0.01); o2g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+      o2.connect(o2g); o2g.connect(master); o2.start(t); o2.stop(t + 0.7);
+      // 3. crunch: filtered noise burst, the ground and metal breaking
+      const n = ctx.createBufferSource(); n.buffer = noiseBuf; n.loop = true;
+      const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.setValueAtTime(3200, t); lp.frequency.exponentialRampToValueAtTime(260, t + 0.7);
+      const ng = g(0); ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(0.9, t + 0.008); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+      n.connect(lp); lp.connect(ng); ng.connect(master); n.start(t, Math.random() * 2); n.stop(t + 1);
+      // 4. dust and debris settling: a low rumble tail
+      const n2 = ctx.createBufferSource(); n2.buffer = noiseBuf; n2.loop = true;
+      const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 180; bp.Q.value = 0.6;
+      const rg = g(0); rg.gain.setValueAtTime(0.0001, t + 0.05); rg.gain.exponentialRampToValueAtTime(0.5, t + 0.25); rg.gain.exponentialRampToValueAtTime(0.0001, t + 2.6);
+      n2.connect(bp); bp.connect(rg); rg.connect(master); n2.start(t, Math.random() * 2); n2.stop(t + 2.7);
+    } catch (e) { /* sound is optional */ }
+  },
   /** another section is playing its own sound: sit back while it does */
   duck(on) { ducked = !!on; },
   /** the visitor said yes (called from the consent card's click, which is the gesture the browser wants) */

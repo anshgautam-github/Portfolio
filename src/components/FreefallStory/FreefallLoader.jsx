@@ -204,6 +204,8 @@ export default function FreefallLoader() {
       destroy.render(now);                                              // the scene is drawn in this very frame, so it, the HUD and the bar always show the same progress
       hud(T.p);
       score.setFall(T.p);                                               // the wind follows the fall and is gone at touchdown
+      if (T.p >= 0.47 && !T.hit) { T.hit = true; score.touchdown(); }   // touchdown on SRM: the ground impact (fires again if the visitor scrolls back and lands again)
+      else if (T.p < 0.44) T.hit = false;
       bar.style.transform = `scaleX(${(T.p / END).toFixed(4)})`;
       // the readout is written at most every other frame on phones (a changing digit is a repaint over the live scene); it never lags by more than 33 ms
       if (!IS_MOBILE || (tabN = (tabN + 1) % 2) === 0 || T.p >= END) {
