@@ -65,3 +65,12 @@ html, body { background: var(--fr-bg); }
 }
 @media (max-width: 640px) { .fr-halo { width: calc(var(--fr-nw) + var(--fr-nh) * 2 + 120px); } }
 @media (prefers-reduced-transparency: reduce) { .fr-halo i { display: none; } }
+
+/* phones: the brand notch keeps its frosted halo by default. The global phone / low-tier rules switch every backdrop blur off (one reason the
+   notch looked flat); this is one small fixed strip, so it is cheap: two blur layers plus the cream glow, promoted to its own layer. */
+@media (max-width: 1024px), (pointer: coarse) {
+  html .fr-halo, html.is-potato .fr-halo { display: block !important; will-change: transform; transform: translate3d(-50%, 0, 0); contain: layout paint; }
+  html .fr-halo i:nth-child(1) { -webkit-backdrop-filter: blur(4px) saturate(1.1) !important; backdrop-filter: blur(4px) saturate(1.1) !important; }
+  html .fr-halo i:nth-child(2) { display: none; }
+  html .fr-halo i:nth-child(3) { -webkit-backdrop-filter: blur(14px) saturate(1.2) !important; backdrop-filter: blur(14px) saturate(1.2) !important; }
+}

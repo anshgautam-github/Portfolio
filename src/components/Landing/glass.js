@@ -9,8 +9,8 @@
  * Everything lives in two tiny programs: `flow` (updates the field) and `scene` (draws to screen).
  */
 import { MASK_W, MASK_H, STROKE, PEN_SPEED, buildHeightField, buildWriteMap } from "./helloPath.js";
-import { capDpr, skipFrame, IS_MOBILE, TIER } from "../../lib/perf.js";
-const MOB_SCALE = TIER >= 2 ? 0.6 : TIER === 1 ? 0.7 : 0.8;   // phone render scale of the glass lettering (see lib/perf.js tiers)
+import { capDpr, skipFrame, perf, IS_MOBILE, TIER } from "../../lib/perf.js";
+const MOB_SCALE = TIER >= 2 ? 0.6 : TIER === 1 ? 0.85 : 0.92;   // phone render scale of the glass lettering (see lib/perf.js tiers)
 import { loaderTask, isReleased } from "../../lib/loader.js";
 
 const VERT = `#version 300 es
@@ -644,7 +644,7 @@ export function createGlassScene(canvas, opts = {}) {
 
   /* ---- state ---- */
   const MAXD = 0.16;
-  let W = 0, H = 0, aspect = 1, dpr = 1, quality = capDpr(2, 1.25);
+  let W = 0, H = 0, aspect = 1, dpr = 1, quality = capDpr(2, 1.4);
   let flowA = null, flowB = null, encoded = false;
   let dark = 0, darkTarget = 0;
   let mouse = { x: 0, y: 0, tx: 0, ty: 0, has: false, inside: false, act: 0 };
@@ -781,7 +781,7 @@ export function createGlassScene(canvas, opts = {}) {
 
     // adaptive resolution: step down once if we are consistently slow
     frameAvg = frameAvg * 0.95 + dt * 1000 * 0.05;
-    if (frameAvg > 21 && quality > 1) { if (++slowFrames > 12) { quality = quality > 1.4 ? Math.max(1, quality * 0.75) : 1; slowFrames = 0; qualityDirty = true; } } else slowFrames = 0;
+    if (frameAvg > Math.max(21, (perf.frameMs || 0) * 1.3) && quality > 1) { if (++slowFrames > 12) { quality = quality > 1.4 ? Math.max(1, quality * 0.75) : 1; slowFrames = 0; qualityDirty = true; } } else slowFrames = 0;
 
     resize();
 
