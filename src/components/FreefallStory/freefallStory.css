@@ -961,3 +961,22 @@ html.is-mobile.is-scrolling .fs .screen .logo-orbit, html.is-mobile.is-scrolling
 /* the intro's own "Sound on/off" button is hidden: the site-wide sound switch (components/SoundToggle) replaces it.
    The element stays in the markup because engine.js binds to it. */
 .fs-sound { display: none !important; }
+
+
+/* =====================================================================================================
+   CHROME FLICKER FIX ("Where I've worked" cards)
+   The giant word was a `white-space: nowrap` absolutely-positioned box as wide as its repeated text (3,700-9,000 CSS px, i.e. up to ~18,000
+   device px at 2x), and it carries a mask-image, a group opacity and a child that moves every frame, inside a card that is tilted in 3D.
+   Chrome has to build that masked surface on the GPU each frame, and it is wider than the 16,384 px texture limit, so tiles drop out and the
+   card flickers (Safari composites masks differently, so it never showed there). The box is now exactly the card's width and clips its own
+   overflow (the card already clipped it), so the mask surface is card-sized. The mask is positioned from the box's left edge and vertical
+   centre, which have not moved, so the picture is identical. The 4% group opacity became a 4% colour alpha (no extra surface to composite).
+   ===================================================================================================== */
+.fs .screen-title {
+  right: 0; overflow: hidden; padding-block: .2em;
+  opacity: 1; color: color-mix(in srgb, var(--c) 96%, transparent);
+}
+/* the word's scroll travel is a % of the span's own width: keep it the width of the text, not of the (now card-sized) box */
+.fs .screen-title span { width: max-content; }
+/* the rest of the card's compositing: one stable, isolated layer per card (phones already had this) */
+html:not(.is-safari) .fs .screen { backface-visibility: hidden; contain: layout paint; }
