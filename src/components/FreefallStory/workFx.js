@@ -39,6 +39,7 @@ export function mountWorkFx(stage) {
 
     // 1) reads
     const shown = cards.filter((c) => c.el.style.visibility !== "hidden");
+    const act = (c) => c.el.classList.contains("is-act");   // the pointer glow only runs on the card in focus (the others are dimmed and have no glow layers)
     const r = stage.getBoundingClientRect();
     const rects = shown.map((c) => c.el.getBoundingClientRect());
 
@@ -53,7 +54,7 @@ export function mountWorkFx(stage) {
     for (let i = 0; i < shown.length; i++) {
       const c = shown[i], cr = rects[i];
       const sx = (cx - cr.left).toFixed(0) + "px", sy = (cy - cr.top).toFixed(0) + "px";
-      if (sx !== c.sx || sy !== c.sy) {
+      if (act(c) && (sx !== c.sx || sy !== c.sy)) {
         c.sx = sx; c.sy = sy;
         const X = parseInt(sx, 10), Y = parseInt(sy, 10);   // inline translates: no custom property restyling the whole card
         if (c.gw) c.gw.style.translate = `${X - 340}px ${Y - 340}px`;

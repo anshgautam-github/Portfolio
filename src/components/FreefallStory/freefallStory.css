@@ -980,3 +980,16 @@ html.is-mobile.is-scrolling .fs .screen .logo-orbit, html.is-mobile.is-scrolling
 .fs .screen-title span { width: max-content; }
 /* the rest of the card's compositing: one stable, isolated layer per card (phones already had this) */
 html:not(.is-safari) .fs .screen { backface-visibility: hidden; contain: layout paint; }
+
+/* =====================================================================================================
+   GPU BUDGET for the work stack (the real cause of the Chrome flicker)
+   Each card is ~30 composited layers and ~65 MB of GPU memory at 2x (blobs, glow, spot, 16 embers, beam, giant word, ring, logo...), and three or
+   four cards were alive at once on top of the page's canvases. Chrome's tile budget ran out and it dropped the biggest layers (the giant word,
+   the logo disc, the paragraph) for a few frames: "flicker". Safari budgets differently, so it never showed there.
+   Only the card in focus keeps its live decoration; the others (dimmed, receding behind it) lose those layers entirely. Nothing visible changes:
+   embers and the beam fade / sweep in when a card takes focus, and the glow layers are static soft gradients on dimmed cards.
+   ===================================================================================================== */
+.fs .screen:not(.is-act) .sb-sparks,
+.fs .screen:not(.is-act) .screen-beam { display: none; }
+.fs .screen:not(.is-act) .sb-gw,
+.fs .screen:not(.is-act) .sb-spot { will-change: auto; }

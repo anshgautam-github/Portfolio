@@ -854,7 +854,9 @@ export function mountFreefallStory(root, { base, mode }) {
     const flat = IS_MOBILE || flatMQ.matches;   // phones / tablets: a flat slide, no 3D flip
     screens.forEach((sc, i) => {
       const d = k - i;
-      if (d < -1 || d > (flat ? 1.05 : 2.4)) {
+      // a card further back than ~1.75 steps is fully dimmed (see `dim` below) and black on black: not drawing it frees its whole GPU layer tree.
+      // (It used to stay alive until 2.4, so three or four 3D cards with ~30 layers each were on the GPU at once and Chrome started dropping tiles.)
+      if (d < -1 || d > (flat ? 1.05 : 1.75)) {
         if (sc.vis) { sc.el.style.visibility = 'hidden'; sc.vis = false; }
         return;
       }
@@ -872,7 +874,7 @@ export function mountFreefallStory(root, { base, mode }) {
         } else {
           const r = d;
           tz = -r * 420; ty = -r * 6; rz = -r * 2.6 * side; rx = r * 5;
-          dim = Math.min(r, 1.4) * 0.6;
+          dim = Math.min(r * 0.6, 1);   // same slope as before up to r = 1.4, then carries on to fully black at r = 1.67 so the card can be dropped
         }
         tf = `translate3d(0,${f2(ty)}%,${f1(tz)}px) rotateX(${f2(rx)}deg) rotateZ(${f2(rz)}deg)`;
       }
