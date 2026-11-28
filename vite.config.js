@@ -51,7 +51,9 @@ export default defineConfig({
   },
   build: {
     target: "es2020",
-    cssMinify: "lightningcss",
+    // NOT lightningcss: it folds `font-stretch: 112%` into the `font:` shorthand (-> `font:800 112% 62px ...`), which browsers reject as a whole,
+    // so every `font: ...; font-stretch: N%` rule fell back to 16px in production (ribbon text, giant words, headings) while dev looked right.
+    cssMinify: "esbuild",
     chunkSizeWarningLimit: 700,
     rollupOptions: {
       output: {

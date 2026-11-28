@@ -38,7 +38,7 @@ export function createScene(glCanvas, fxCanvas) {
       const a = rnd() * TAU, v = (80 + rnd() * 1000) * S;
       parts.push({ x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0, max: 0.9 + rnd() * 1.6, s: (1 + rnd() * 2.6) * dpr, c: rnd(), petal: rnd() < 0.12, r: rnd() * TAU });
     }
-    for (let k = 0; k < 3; k++) rings.push({ x: cx, y: cy, t: -k * 0.12 });
+    rings.push({ x: cx, y: cy, t: 0, k: 1 }, { x: cx, y: cy, t: -0.16, k: 0.45 });   // one clean shockwave + a faint echo
   }
   const col = (c, a) => (c > 0.66 ? `rgba(255,200,130,${a})` : c > 0.33 ? `rgba(255,255,255,${a})` : `rgba(255,150,190,${a})`);
 
@@ -143,12 +143,19 @@ export function createScene(glCanvas, fxCanvas) {
       ctx.fillStyle = col(q.c, (a * a).toFixed(3));
       ctx.beginPath(); ctx.arc(q.x, q.y, q.s * (0.6 + a), 0, TAU); ctx.fill();
     }
+    // shockwave: a soft pressure halo that trails a crisp hairline front; it decelerates and fades like a real blast ripple
     for (let i = rings.length - 1; i >= 0; i--) {
-      const r = rings[i]; r.t += dt * 0.9;
+      const r = rings[i]; r.t += dt * 0.55;
       if (r.t > 1) { rings.splice(i, 1); continue; }
       if (r.t < 0) continue;
-      const rr = easeOut(r.t) * Math.hypot(W, H) * 0.55, a = (1 - r.t) * 0.8;
-      ctx.strokeStyle = `rgba(255,224,176,${a.toFixed(3)})`; ctx.lineWidth = (3 + 10 * (1 - r.t)) * dpr;
+      const e = 1 - Math.pow(1 - r.t, 4), rr = Math.max(4, e * Math.hypot(W, H) * 0.36);
+      const fade = Math.pow(1 - r.t, 1.6) * r.k, band = rr * 0.22 + 10 * dpr;
+      const g = ctx.createRadialGradient(r.x, r.y, Math.max(0, rr - band), r.x, r.y, rr + band * 0.18);
+      g.addColorStop(0, "rgba(255,214,160,0)");
+      g.addColorStop(0.8, `rgba(255,226,186,${(fade * 0.16).toFixed(3)})`);
+      g.addColorStop(1, "rgba(255,238,210,0)");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(r.x, r.y, rr + band * 0.18, 0, TAU); ctx.fill();
+      ctx.strokeStyle = `rgba(255,244,226,${(fade * 0.55).toFixed(3)})`; ctx.lineWidth = Math.max(1, (1.6 - r.t) * dpr);
       ctx.beginPath(); ctx.arc(r.x, r.y, rr, 0, TAU); ctx.stroke();
     }
     if (st.flash > 0.001) {

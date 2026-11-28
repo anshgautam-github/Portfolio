@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createScene } from "./scene.js";
 import "./collab.css";
 import { skipFrame } from "../../lib/perf.js";
+import { holdStart, holdLevel, holdStop, clasp } from "./handshakeSound.js";
 
 const EMAIL = "anshgautam1011@gmail.com";
 
@@ -20,14 +21,14 @@ export default function Collab() {
   useEffect(() => {
     const canvas = cv.current;
     let sc = null, ro = null;
-    let rect = null, rectAt = 0, morphTick = false, vis = false, raf = 0, last = performance.now(), alive = true;
+    let shaking = false, rect = null, rectAt = 0, morphTick = false, vis = false, raf = 0, last = performance.now(), alive = true;
     // Build the (heavy) WebGL scene only when the section is about to come into view, not at page load.
     const boot = () => {
       if (sc || !alive) return;
       sc = createScene(glc.current, canvas);
       api.current = sc;
       sc.resize();
-      sc.st.onDone = () => { setDone(true); try { navigator.vibrate && navigator.vibrate([30, 40, 90]); } catch (e) { /* ignore */ } };
+      sc.st.onDone = () => { setDone(true); clasp(); try { navigator.vibrate && navigator.vibrate([40, 30, 60, 30, 110, 40, 30]); } catch (e) { /* ignore */ } };
       sc.st.onReset = () => setDone(false);
       ro = new ResizeObserver(() => sc.resize());
       ro.observe(canvas);
@@ -48,6 +49,12 @@ export default function Collab() {
       const dt = (now - last) / 1000; last = now;
       sc.frame(dt, holding.current);
       const p = Math.min(1, sc.st.shown), pct = Math.round(p * 100);
+      // screen vibration: a fine tremor that grows while the hands close in, then a damped jolt when they lock
+      { const s2 = sc.st, T2 = s2.t, amp = (s2.done ? 0 : Math.pow(p, 2.4) * 2.4) + s2.shake * s2.shake * 14;
+        const el1 = glc.current, el2 = cv.current;
+        if (amp > 0.05) { const tx = (Math.sin(T2 * 71) + Math.sin(T2 * 113 + 1.3)) * 0.5 * amp, ty = (Math.sin(T2 * 83 + 2) + Math.sin(T2 * 127)) * 0.5 * amp * 0.8, tf = `translate3d(${tx.toFixed(2)}px,${ty.toFixed(2)}px,0) scale(1.035)`; el1.style.transform = tf; el2.style.transform = tf; shaking = true; }
+        else if (shaking) { el1.style.transform = ""; el2.style.transform = ""; shaking = false; }
+        if (holding.current && !s2.done) holdLevel(p); }
       if (pct !== lastP.current) {
         lastP.current = pct;
         if (ring.current) ring.current.style.strokeDashoffset = String(C * (1 - p));
@@ -65,18 +72,20 @@ export default function Collab() {
       if (crd.current && fr === 0) { const s = `X ${(st.mouse[0] >= 0 ? "+" : "") + st.mouse[0].toFixed(2)}  Y ${(st.mouse[1] >= 0 ? "+" : "") + st.mouse[1].toFixed(2)}`; if (s !== lastC.current) { lastC.current = s; crd.current.textContent = s; } }
     };
     raf = requestAnimationFrame(loop);
-    return () => { alive = false; cancelAnimationFrame(raf); io.disconnect(); pre.disconnect(); ro && ro.disconnect(); };
+    return () => { alive = false; holdStop(true); cancelAnimationFrame(raf); io.disconnect(); pre.disconnect(); ro && ro.disconnect(); };
   }, []);
 
   const down = (e) => {
     if (e.target.closest && e.target.closest("a, .cb-again")) return;
     holding.current = true;
     sec.current.classList.add("is-holding");
+    holdStart();
+    try { navigator.vibrate && navigator.vibrate(12); } catch (err) { /* ignore */ }
   };
   const move = (e) => { ptr.current = [e.clientX, e.clientY]; };
-  const up = () => { holding.current = false; sec.current && sec.current.classList.remove("is-holding"); };
+  const up = () => { holding.current = false; holdStop(); sec.current && sec.current.classList.remove("is-holding"); };
   const key = (v) => (e) => {
-    if (e.key === " " || e.key === "Enter") { e.preventDefault(); if (v && e.repeat) return; holding.current = v; sec.current.classList.toggle("is-holding", v); }
+    if (e.key === " " || e.key === "Enter") { e.preventDefault(); if (v && e.repeat) return; holding.current = v; sec.current.classList.toggle("is-holding", v); if (v) holdStart(); else holdStop(); }
   };
 
   return (
